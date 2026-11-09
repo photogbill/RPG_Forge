@@ -41,6 +41,9 @@ def classify(tensors: dict, meta: dict, size_bytes: int) -> dict:
         out["kind"] = "checkpoint"
     elif has_unet_full:
         out["kind"] = "unet"
+    elif any(k.startswith(("txtfusion.", "model.diffusion_model.txtfusion.", "diffusion_model.txtfusion.")) for k in keys):
+        out["kind"] = "unet"          # Krea 2 (ComfyUI: model_detection keys on txtfusion.projector.weight)
+        out["base"] = "krea2"
     elif any(k.startswith(("double_blocks.", "single_blocks.")) for k in keys):
         out["kind"] = "unet"          # a FLUX.1 diffusion model saved without the model.diffusion_model. prefix (ComfyUI split files)
     elif any(k.startswith("text_model.") or k.startswith("transformer.") for k in keys):
@@ -52,7 +55,11 @@ def classify(tensors: dict, meta: dict, size_bytes: int) -> dict:
 
     # ---- base architecture
     base = str(meta.get("ss_base_model_version", "") or meta.get("modelspec.architecture", "") or "").lower()
-    if "sdxl" in base or "stable-diffusion-xl" in base:
+    if "krea2" in base or "krea-2" in base:
+        out["base"] = "krea2"
+    elif out["base"] == "krea2":
+        pass
+    elif "sdxl" in base or "stable-diffusion-xl" in base:
         out["base"] = "sdxl"
     elif "sd_v1" in base or "sd-v1" in base or "stable-diffusion-v1" in base or "sd1" in base:
         out["base"] = "sd15"
@@ -65,6 +72,12 @@ def classify(tensors: dict, meta: dict, size_bytes: int) -> dict:
     if any(("single_transformer_blocks" in k or "double_blocks" in k or "single_blocks" in k
             or k.startswith("lora_transformer_") or k.startswith("transformer.")) for k in keys[:400]):
         out["base"] = "flux1"
+    # FLUX.2 / FLUX.3 share FLUX.1's block names; ComfyUI tells them apart by these keys (comfy/model_detection.py)
+    if any(k.endswith("double_stream_modulation_img.lin.weight") for k in keys):
+        out["base"] = "flux2"
+    if any(k.endswith("content_mode_blocks.image.0.attn_out.weight") for k in keys) and any(
+            k.endswith("single_stream_modulations.txt.lin.weight") for k in keys):
+        out["base"] = "flux3"
     if out["base"] == "unknown":
         if out["kind"] == "checkpoint" or out["kind"] == "unet":
             if any("conditioner.embedders.1" in k for k in keys) or any("label_emb" in k for k in keys):

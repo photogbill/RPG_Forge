@@ -65,7 +65,13 @@
     "fp8_cast_over_gb": 14.0,
     "upscale_model": "RealESRGAN_x4plus.pth",
     "controlnet_union": "xinsir-union-sdxl-promax.safetensors",
-    "face_detector": "bbox/face_yolov8m.pt"
+    "face_detector": "bbox/face_yolov8m.pt",
+    "krea2": {
+      "text_encoder": "qwen3vl_4b_int8_convrot.safetensors",
+      "vae": "qwen_image_vae.safetensors",
+      "sampler": "er_sde",
+      "scheduler": "simple"
+    }
   },
   "worker": {
     "poll_sec": 2.0,

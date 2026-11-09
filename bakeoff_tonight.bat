@@ -30,7 +30,7 @@ if not exist "engines\ComfyUI\custom_nodes\comfyui-impact-pack" set "MISSING=1"
 if defined MISSING goto notools
 echo.
 echo [1/6] The tools test (runs first)
-python -m forge submit games\turing_accords\batches\tools_v1.json
+python -m forge submit games\turing_accords\batches\tools_v1.json --skip-done
 echo.
 echo [2/6] The finishing bake-off
 python -m forge bakeoff submit games\turing_accords\bakeoff\finish_v1.json
@@ -53,6 +53,10 @@ echo.
 echo [6/6] FLUX.1 models + FLUX.1 LoRAs (whatever FLUX.1 files are in flux_models\, flux_lora\, lora models\)
 python -m forge bakeoff submit games\turing_accords\bakeoff\flux1_v1.json
 echo.
-echo Queued. About 1,130 SDXL renders (~7 h), the tools test and finishing bake-off (~2 h, first) if they were not skipped, plus the FLUX renders listed above. Start run_worker.bat now if it is not running.
+echo Anything already finished or already queued was skipped (run this twice and the second run adds nothing).
+echo.
+python -m forge eta
+echo.
+echo Start run_worker.bat now if it is not running.
 echo Progress any time: doctor.bat
 pause

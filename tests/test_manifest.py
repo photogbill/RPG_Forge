@@ -35,6 +35,10 @@ def make_world(tmp_path):
     cfg = dict(cfg)
     cfg["paths"] = dict(cfg["paths"], jobs=str(tmp_path / "jobs"), out=str(tmp_path / "out"), games=str(games))
     cfg["allow_external_paths"] = True
+    # Isolate from William's real model folders: once a model is pulled on his PC, the "missing" checks would pass.
+    (tmp_path / "models_empty").mkdir(exist_ok=True)
+    cfg["model_dirs"] = {k: [str(tmp_path / "models_empty")] for k in (cfg.get("model_dirs") or {})}
+    cfg["paths"]["comfy_root"] = str(tmp_path / "comfy_empty")
     for s in ("pending", "running", "done", "failed"):
         (tmp_path / "jobs" / s).mkdir(parents=True, exist_ok=True)
     return cfg, game_root, assets
@@ -58,7 +62,10 @@ def test_wanted_export_and_status(tmp_path):
     cfg, root, assets = make_world(tmp_path)
     d = manifest.refresh_wanted(cfg, "tg")
     items = d["items"]
-    assert set(items) == {"placeholder/hero_sarah", "vignettes/gate_law/01_ribbon", "scenes/bills_house", "sleeves/song_a"}
+    main = {k for k, v in items.items() if not v.get("set_of")}
+    assert main == {"placeholder/hero_sarah", "vignettes/gate_law/01_ribbon", "scenes/bills_house", "sleeves/song_a"}
+    assert {k for k, v in items.items() if v.get("set_of") == "scenes/bills_house"} == {
+        f"scenes/bills_house{s}" for s in ("_n", "_e", "_back", "_over", "_depth")}
     assert items["scenes/bills_house"]["target_size"] == [2304, 1536] and items["scenes/bills_house"]["exists"] is False
     assert items["placeholder/hero_sarah"]["kind"] == "sprite_sheet" and items["placeholder/hero_sarah"]["target_size"] == [1152, 216]
     assert items["sleeves/song_a"]["path"] == "project/assets/sleeves/song_a.png"
@@ -142,12 +149,12 @@ def test_brief_drafts(tmp_path):
     cfg, root, assets = make_world(tmp_path)
     m = brief.maps(cfg, "tg")
     j = m["jobs"][0]
-    assert m["_draft"] and j["type"] == "scene_paint" and j["target"] == [2304, 1536]
+    assert m["_draft"] and j["type"] == "scene_kit" and j["target"] == [2304, 1536]
     assert j["prompt"].startswith("Bill's house, suburban home") and "05.7" not in j["prompt"]
     (assets / "scenes").mkdir()
     Image.new("RGB", (2304, 1536)).save(assets / "scenes" / "bills_house_greybox.png")
     j2 = brief.maps(cfg, "tg")["jobs"][0]
-    assert j2["type"] == "repaint" and j2["control"]["type"] == "canny"
+    assert j2["type"] == "scene_kit" and j2["init"].endswith("bills_house_greybox.png") and j2["control"]["type"] == "canny"
     s = brief.sleeves(cfg, "tg")
     assert s["jobs"][0]["title"] == "Song A" and s["defaults"]["type"] == "sleeve"
     assert brief.icons(cfg, "tg")["jobs"][0]["prompt"] == "Coolant, Cools a core"

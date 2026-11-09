@@ -123,3 +123,32 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   back with `rate <name> --import ratings.json`. Drafts: `brief maps|sleeves|icons` writes a `_draft` batch from the game
   data — the prompts are the game's notes, not art direction; write them properly before submitting (submit refuses drafts).
 - **Before a long run:** `doctor` checks ComfyUI's nodes per graph/stage and every model file the pending queue names.
+
+## Scene sets, Krea 2, the dashboard (2026-11-09, session 2)
+
+- **A scene is six files.** `scene_kit` (one job) = paint (`scene_paint`, or `repaint` when `init` is given) →
+  `depth_map` → `normal_map` (`source: "depth"`, `detail` blends brush texture back in) → `emissive_mask` →
+  `scene_layers`. The six slot files land at the top of `out/<id>/`: `scene.png`, `scene_n.png`, `scene_e.png`,
+  `scene_back.png`, `scene_over.png`, `scene_depth.png` (+ `scene_mid_alpha.png`, an extra outside the contract),
+  `layers.json`, `contact.png`. Contract: OpenGL normals; depth 16-bit, white = near; all at the painting's size except
+  `_back` (wider by `overscan` px per side). The painting itself is never altered after painting.
+- **Depth is Depth Anything V2 Small only** (Apache-2.0). The aux node's own default is Large (CC-BY-NC):
+  `forge/jobs/scene.py depth_graph` always names Small and refuses to build without it. Never change that.
+- **Approve a set:** `approve <id> --as scenes/<map> --set [--dry-run]` — one licence check over every model in the
+  chain (the depth model included), all-or-nothing, one provenance file per slot. `wanted.json` lists the five
+  companions as `scenes/<map>_n` … with `optional: true` (`wanted --missing` hides them; `--all` shows them).
+- **Do not queue twice:** `bakeoff submit` skips cells already done/pending/running/paused (failed ones re-queue);
+  `--force` overrides. `submit <batch> --skip-done` for plain batches (by batch + name + type).
+- **Krea 2:** `"graph": "krea2"` (`forge/engines/krea2_graph.py`, read from ComfyUI 0.44's own Krea 2 code). Turbo
+  8 steps / cfg 1; Raw ~50 / cfg 3.5; er_sde / simple; text encoder via `forge.json → comfy.krea2`; VAE
+  `qwen_image_vae.safetensors`. A model with `licence_condition` in models.json (Krea 2: revenue under US$1M/year)
+  is printed by `approve` and `licences`. **The Stable Yogi Krea 2 fine-tune's own file says "commercial use by
+  permission only"** — never record a licence for it on William's behalf.
+- **Dashboard** `python -m forge ui` (`ui.bat`), `forge/ui.py`: read-only except Retry / Pause / Resume / Approve
+  (POSTs need the `X-Forge: 1` header). **ETA**: `forge/eta.py`, `eta.bat`.
+- **Detail crops:** `bakeoff report <suite> --detail-at <prompt>=x,y[,size]` / `--detail-auto` → saved in
+  `out/bakeoff/<suite>/detail_at.json`; `report` and `review` both read it (`forge/detail.py`).
+- **Models:** `models unusable` (report only, never delete); the scanner now tells krea2 / flux2 / flux3 apart from
+  FLUX.1 (ComfyUI's own detection keys). `licence.bat` with no arguments asks one question at a time.
+- **Writing files into D:\RPG_Forge from a cloud session:** a commit over an existing file sometimes does not land.
+  Commit to a new path (`_incoming/`, git-ignored) and `mv` it into place from `device_bash`, then check `md5sum`.

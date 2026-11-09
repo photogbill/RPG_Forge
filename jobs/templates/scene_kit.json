@@ -1,0 +1,23 @@
+{
+ "type": "scene_kit",
+ "name": "example_scene_kit",
+ "game": "turing_accords",
+ "prompt": "a roadside gas station at dusk, wet asphalt, the canopy lights on, mountains behind",
+ "target": [
+  1920,
+  1080
+ ],
+ "normals": {
+  "strength": 2.0,
+  "detail": 0.35
+ },
+ "glow": {
+  "threshold": 0.85
+ },
+ "layers": {
+  "cuts": "auto",
+  "overscan": 48,
+  "feather": 3
+ },
+ "_help": "One job -> the game's six-file scene set at the top of out/<id>/: scene.png, scene_n.png (normals from depth), scene_e.png (glow), scene_back.png (far plane, wider by the overscan), scene_over.png (walk-behind plane), scene_depth.png (16-bit, white = near), plus layers.json and contact.png. Add \"init\" (a greybox) + \"denoise\" + \"control\": {\"type\": \"canny\"} to repaint a layout instead. Approve with: approve.bat <job-id> scenes/<map> --set"
+}

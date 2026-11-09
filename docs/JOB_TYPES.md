@@ -156,11 +156,11 @@ Optional (default): `low` (0.08), `high` (0.2), `sigma` (1.2)
 
 ## `normal_map`  (CPU)
 
-A tangent-space normal map from each painting's luminance (roadmap F11) for the game's `<id>_n.png` slot; OpenGL convention (Godot). Output: <name>_n.png.
+A tangent-space normal map for the game's `<id>_n.png` slot, OpenGL convention (Godot). `source` 'luminance' (F11: height = brightness) or 'depth' (N1: from a depth map — `depth` is one path per input; `detail` 0..1 blends the luminance normals back in for brush texture; `smooth` (default 1.0) blurs the height first; Output: <name>_n.png, <name>_lit.png (a lit-from-the-left preview), contact.png (with source 'depth', both kinds side by side unless `compare` is false).
 
 Required: `inputs`
 
-Optional (default): `strength` (2.0), `smooth` (1.0), `invert_y` (False)
+Optional (default): `source` ('luminance'), `depth` (None), `strength` (2.0), `smooth` (1.0), `detail` (0.0), `invert_y` (False), `preview` (True), `compare` (None)
 
 ## `emissive_mask`  (CPU)
 
@@ -169,6 +169,30 @@ The glowing parts of each painting — bright AND saturated pixels (screens, neo
 Required: `inputs`
 
 Optional (default): `threshold` (0.85), `min_saturation` (0.25), `colors` ([]), `tolerance` (40), `feather` (1.5)
+
+## `depth_map`  (GPU)
+
+A depth map per input (roadmap N1): Depth Anything V2 **Small** (Apache-2.0 — the forge always names it; the node's own default, Large, is CC-BY-NC) through comfyui_controlnet_aux (install_comfy_aux.bat). Output: <name>_depth.png, 16-bit grey, white = near, at the input's exact size. `resolution` is the model's working size (default 1024); `invert` flips near/far.
+
+Required: `inputs`
+
+Optional (default): `resolution` (1024), `invert` (False)
+
+## `scene_layers`  (CPU)
+
+Parallax planes from a painting and its depth map (roadmap N2). `depth`: one path per input. `cuts` [a, b] (0 < a < b < 1) or 'auto' (Otsu valleys of the depth histogram). Output per input: <name>_back.png (opaque, holes filled by edge extension, wider by `overscan` px each side), <name>_over.png (RGBA, soft edge `feather` px), <name>_mid_alpha.png (extra: the mid plane's own pixels), <name>_slide.png (the planes sliding ±`preview_shift` px; magenta would be a hole), layers.json (cuts, parallax 0.94/1.0/1.06, coverage). The painting itself is the mid plane and is never changed; a plane under 2% of the frame is dropped with a note.
+
+Required: `inputs`, `depth`
+
+Optional (default): `cuts` ('auto'), `feather` (3.0), `overscan` (48), `fill` ('extend'), `preview_shift` (40)
+
+## `scene_kit`  (GPU)
+
+A whole painted scene as the game's six-file set, in one job (roadmap N3): scene_paint (or repaint when `init` is given) → depth_map → normal_map (source depth) → emissive_mask → scene_layers. Takes every scene_paint / repaint field, plus `normals` {strength, smooth, detail}, `glow` {threshold, colors, …}, `layers` {cuts, overscan, feather}, `depth_resolution`, `slot_name` (default 'scene'). Output at the top of out/<id>/: scene.png, scene_n.png, scene_e.png, scene_back.png, scene_over.png, scene_depth.png, layers.json, contact.png (painting · depth · lit · glow · planes); each step's files in NN_<type>/. One prov.json whose licence chain covers every model, the depth model included. Approve with `approve <id> --as scenes/<map> --set`.
+
+Required: `prompt`
+
+Optional (default): `init` (None), `denoise` (None), `target` (None), `size` (None), `seed` (-1), `control` (None), `normals` (None), `glow` (None), `layers` (None), `depth_resolution` (None), `slot_name` ('scene'), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `game` (None)
 
 ## `overworld`  (CPU)
 

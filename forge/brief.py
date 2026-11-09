@@ -7,7 +7,8 @@
 Drafts are written to games/<game>/batches/draft_<what>.json and are marked `"_draft": true` — the prompts are the
 game's own notes put into words, not art direction. Edit them (and delete `_draft`) before submitting. A map
 whose greybox render exists (assets/scenes/<id>_greybox.png, from the game's greybox_to_painted.py) becomes a
-`repaint` with a canny ControlNet so the layout holds; otherwise a `scene_paint` at the map's ×3 size.
+`scene_kit` repainting it with a canny ControlNet so the layout holds; otherwise a `scene_kit` painted from the prompt at the
+map's ×3 size. Either way the job makes the six-file scene set (painting, _n, _e, _back, _over, _depth).
 """
 from __future__ import annotations
 import json, re
@@ -54,17 +55,19 @@ def maps(cfg: dict, game: str) -> dict:
         greybox = root / "project" / "assets" / "scenes" / f"{mid}_greybox.png"
         job = {"name": mid, "prompt": prompt, "target": target, "camera": "high top-down view matching the map layout",
                "_source": f"data/maps/{m.name}", "_wanted": f"scenes/{mid}"}
+        # N3: a map is painted as a scene_kit — the painting plus normals, glow, parallax planes and depth, one job
         if greybox.exists():
-            job.update({"type": "repaint", "init": str(greybox), "denoise": [0.5, 0.6],
-                        "control": {"type": "canny", "strength": 0.6}})
+            job.update({"type": "scene_kit", "init": str(greybox), "denoise": 0.55,
+                        "control": {"type": "canny", "strength": 0.6},
+                        "_note": "sweep denoise with a plain repaint first if the layout drifts; a scene_kit makes one set"})
         else:
-            job.update({"type": "scene_paint",
-                        "_note": "no greybox yet — run the game's tools/greybox_to_painted.py, then re-run brief to get a layout-locked repaint"})
+            job.update({"type": "scene_kit",
+                        "_note": "no greybox yet — run the game's tools/greybox_to_painted.py, then re-run brief to get a layout-locked kit"})
         job["prompt"] = f"{job['prompt']}, {job.pop('camera')}"
         jobs.append(job)
     return {"batch": "draft_maps", "_draft": True, "_made": datetime.now().isoformat(timespec="seconds"),
             "_review": "prompts are the map notes put into words — edit each before submitting; delete _draft when done",
-            "defaults": {"game": game, "variants": 2}, "approved": [], "jobs": jobs}
+            "defaults": {"game": game}, "approved": [], "jobs": jobs}
 
 
 def sleeves(cfg: dict, game: str) -> dict:

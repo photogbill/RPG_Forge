@@ -1,6 +1,6 @@
 # environments
 venv/
-engines/
+/engines/
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -36,3 +36,7 @@ Bills Actual Art/
 # the licence record a person checked IS tracked (approve depends on it)
 !models/licences.json
 jobs/paused/*
+
+# hand-over folder for files written by an assistant session
+_incoming/
+out/_ui_thumbs/

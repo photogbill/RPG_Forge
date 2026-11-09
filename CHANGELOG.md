@@ -218,3 +218,37 @@ look on top - lights on normal maps, glow, parallax layers, a focus shader (game
 Co-Authored-By: Claude <noreply@anthropic.com>
 
 
+## 2026-11-09
+
+Forge session 2: painted scenes as six-file sets (N1-N9), dashboard, Krea 2
+
+Tools test (tools_v1) ran first on the real GPU: 13/13 done, 0 failed. Tests 64 -> 98, all green.
+
+- N1 depth_map job (Depth Anything V2 Small only - the node's default is the non-commercial Large; the graph
+  refuses to run without naming Small), 16-bit depth, white = near; normal_map source luminance|depth with a
+  detail blend and a lit-from-the-left preview (forge/ops/depth.py, forge/jobs/scene.py)
+- N2 scene_layers: auto depth cuts, soft walk-behind plane, push-pull hole fill, overscan, layers.json, slide
+  preview (forge/ops/layers.py)
+- N3 scene_kit: one job -> scene.png, _n, _e, _back, _over, _depth + contact sheet + one licence chain;
+  brief maps drafts scene_kit jobs
+- N4 approve --set: one licence check for the whole set, all-or-nothing, provenance per file; wanted.json lists
+  the five optional companions per map
+- N5 bakeoff submit skips finished/queued cells (--force), submit --skip-done, eta (forge/dedupe.py, eta.py)
+- N6 bakeoff report --detail-at / --detail-auto (largest face) without re-rendering (forge/detail.py)
+- N7 the dashboard: ui.bat -> http://127.0.0.1:8765 (queue, ETA, progress, newest pictures, Retry, Pause/Resume,
+  Approve with dry run) (forge/ui.py)
+- N8 Krea 2 graph from ComfyUI 0.44's own source (forge/engines/krea2_graph.py); registry entries with the
+  Krea 2 Community License revenue condition, printed by approve/licences; doctor krea2 check; krea2_v1 suite
+  (not submitted). The Stable Yogi fine-tune says "commercial use by permission only" - not recorded.
+- N9 licence.bat asks its questions; doctor lists unknown-licence models jobs used; models unusable report;
+  review shows detail crops; bakeoff_tonight prints an ETA
+- .gitignore: "engines/" (meant for the ComfyUI install) also matched forge/engines/, so the ComfyUI driver and
+  every graph builder (comfy.py, graph_ops.py, sdxl/flux1/flux2/krea2 graphs, workflows) were never in the public
+  repo - a fresh clone could not render. Now "/engines/"; this push adds them.
+- Fixes: a doctor test used the real model folders; the scanner now tells FLUX.2/FLUX.3/Krea 2 apart from FLUX.1
+
+Hand-off: docs/HANDOFF_FORGE_2026-11-09b.md
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+

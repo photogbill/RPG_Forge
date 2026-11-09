@@ -9,6 +9,8 @@ What counts as "wanted" (every file the game loads by path, so real art can repl
   * project/assets/vignettes/**.png    — Set_Piece cards (Gate Law …)
   * project/assets/scenes/<map>.png    — one painted background per map in project/data/maps (10.1b; 1920×1080 or
                                           the map's own ×3 size; a <map>.painted.json, if present, names the file)
+                                          + its five optional set companions <map>_n/_e/_back/_over/_depth.png
+                                          (kind "scene_slot", `set_of` the painting; approve them with --set)
   * sleeves from project/data/records.json (`sleeve` res:// paths)
   * icons named by items.json `icon` fields, if any
 Names are the path under project/assets/ without the extension: "placeholder/hero_sarah", "scenes/bills_house".
@@ -21,6 +23,13 @@ from pathlib import Path
 
 SCALE = 3          # 10.1b: Night 1 pixels → painted pixels
 TILE = 32
+# The painted scene is a set of six files (21_Build_Plan_Night_2.md §3b): the painting plus these five companions,
+# all at the painting's size except _back (wider by the overscan on each side). They are optional — a room without
+# them still works — so `wanted --missing` hides them unless asked.
+SCENE_SLOTS = (("_n", "normals, OpenGL convention (green = up)"), ("_e", "additive glow, emissive colours on black"),
+               ("_back", "far parallax plane, opaque, wider by its overscan each side"),
+               ("_over", "walk-behind plane, RGBA"), ("_depth", "16-bit grey depth, white = near"))
+BACK_OVERSCAN = 48   # scene_layers' default, px per side
 
 
 def png_size(p: Path) -> list[int] | None:
@@ -105,6 +114,14 @@ def export(game_root: str | Path) -> dict:
         put(f"scenes/{mid}", bg, "scene", note, target=target, source=f"data/maps/{m.name}")
         items[f"scenes/{mid}"]["greybox"] = greybox if (root / greybox).exists() else None
         items[f"scenes/{mid}"]["name_in_game"] = d.get("name")
+        items[f"scenes/{mid}"]["slots"] = [f"scenes/{mid}{sfx}" for sfx, _ in SCENE_SLOTS]
+        stem = bg[:-4] if bg.lower().endswith(".png") else bg
+        for sfx, what in SCENE_SLOTS:
+            st = None
+            if target:
+                st = [target[0] + 2 * BACK_OVERSCAN, target[1]] if sfx == "_back" else list(target)
+            put(f"scenes/{mid}{sfx}", f"{stem}{sfx}.png", "scene_slot", what, target=st, source=f"data/maps/{m.name}")
+            items[f"scenes/{mid}{sfx}"].update({"set_of": f"scenes/{mid}", "slot": sfx, "optional": True})
     rec_path = proj / "data" / "records.json"
     if rec_path.exists():
         recs = json.loads(rec_path.read_text(encoding="utf-8"))

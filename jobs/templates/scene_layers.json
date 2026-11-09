@@ -1,0 +1,14 @@
+{
+ "type": "scene_layers",
+ "name": "example_layers",
+ "inputs": [
+  "out/<job-id>/scene.png"
+ ],
+ "depth": [
+  "out/<job-id>/scene_depth.png"
+ ],
+ "cuts": "auto",
+ "overscan": 48,
+ "feather": 3,
+ "_help": "Painting + depth -> _back.png (far plane, holes filled), _over.png (walk-behind), _slide.png preview (magenta = a hole), layers.json."
+}

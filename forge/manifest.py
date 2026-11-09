@@ -254,6 +254,154 @@ def approve(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, f
     return plan
 
 
+# ------------------------------------------------------------------ approve a set (N4)
+SET_SLOTS = ("", "_n", "_e", "_back", "_over", "_depth")
+
+
+def _licence_gate(cfg: dict, job_id: str, out_dir: Path) -> tuple[list[dict], list[str]]:
+    ctx = Context(cfg=cfg, root=cfgmod.ROOT)
+    parts, read = collect_models(cfg, out_dir)
+    if not parts:
+        raise ApproveError(f"job {job_id}: no model is recorded in its provenance ({', '.join(read) or 'no prov.json'}) — "
+                           "the forge cannot tell what made this picture, so it will not ship it")
+    chain, ok = licence_chain(ctx, parts)
+    # one line per distinct file: a set's steps name the same checkpoint more than once
+    uniq, seen = [], set()
+    for c in chain:
+        if c["file"] not in seen:
+            seen.add(c["file"])
+            uniq.append(c)
+    if not ok:
+        bad = [c for c in uniq if c.get("commercial_ok") is not True]
+        lines = [f"  {c['file']}: {c.get('license')} (commercial_ok={c.get('commercial_ok')})" for c in bad]
+        raise ApproveError("refused — not every model behind this set is known commercial-OK; NOTHING was copied:\n"
+                           + "\n".join(lines) + "\nIf you have checked a licence yourself (e.g. the Civitai page), record it:\n"
+                           "  licence.bat \"<file>\" \"<licence name>\" yes \"<where you checked>\"\nNon-commercial models can never ship.")
+    return uniq, read
+
+
+def approve_set(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, dry_run: bool = False) -> dict:
+    """Approve every slot file of a scene_kit job (painting, _n, _e, _back, _over, _depth) as one set:
+    one licence check for the whole chain (the depth model included), all-or-nothing — if any file is refused,
+    nothing is copied. One provenance record per file."""
+    jobs = cfgmod.path_of(cfg, "jobs")
+    jp = jobs / "done" / f"{job_id}.json"
+    if not jp.exists():
+        if (jobs / "failed" / f"{job_id}.json").exists():
+            raise ApproveError(f"job {job_id} failed — nothing to approve")
+        raise ApproveError(f"no finished job {job_id} in jobs/done/")
+    job = json.loads(jp.read_text(encoding="utf-8"))
+    game = game or job.get("game") or "turing_accords"
+    gcfg = cfgmod.game_config(cfg, game)
+    wanted = load_wanted(cfg, game)
+    items = wanted["items"]
+    if wanted_name not in items:
+        close = [n for n in items if wanted_name.split("/")[-1] in n and not items[n].get("set_of")][:6]
+        raise ApproveError(f"'{wanted_name}' is not in games/{game}/wanted.json" + (f" — did you mean: {', '.join(close)}" if close else ""))
+    if items[wanted_name].get("set_of"):
+        raise ApproveError(f"'{wanted_name}' is one slot of {items[wanted_name]['set_of']} — approve the set by the painting's name")
+    out_dir = _job_dir(cfg, job_id)
+    top = out_dir / "prov.json"
+    prov = json.loads(top.read_text(encoding="utf-8")) if top.exists() else {}
+    slots = prov.get("slots") or (job.get("result") or {}).get("slots")
+    if not prov.get("set") or not slots:
+        raise ApproveError(f"job {job_id} is not a scene set (made by {job.get('type')}); use approve without --set, "
+                           "or make the set with a scene_kit job")
+    chain, read = _licence_gate(cfg, job_id, out_dir)
+    root = Path(gcfg.get("game_root") or wanted.get("game_root", ""))
+    asset_root = Path(gcfg.get("asset_root") or (root / "project" / "assets"))
+    prov_dir = Path(gcfg.get("provenance_dir") or (asset_root / "_provenance"))
+    main_path = items[wanted_name]["path"]
+    stem = main_path[:-4] if main_path.lower().endswith(".png") else main_path
+    from PIL import Image
+    rows, problems = [], []
+    main_size = None
+    for sfx in SET_SLOTS:
+        fname = slots.get(sfx or "_main")
+        if not fname:
+            continue
+        src = out_dir / fname
+        name = wanted_name + sfx
+        w = items.get(name) or {"path": f"{stem}{sfx}.png", "target_size": None}     # an older wanted.json: derive the path
+        dest = root / w["path"]
+        pdest = prov_dir / (name.replace("/", "__") + ".json")
+        if not src.exists():
+            problems.append(f"{fname}: not in out/{job_id}/")
+            continue
+        if not _inside(dest, asset_root) or not _inside(pdest, asset_root):
+            problems.append(f"{name}: {dest} is outside the game's asset folder {asset_root}")
+            continue
+        with Image.open(src) as im:
+            size = list(im.size)
+        if sfx == "":
+            main_size = size
+        rows.append({"slot": sfx or "(painting)", "wanted": name, "file": str(src), "dest": str(dest), "provenance": str(pdest),
+                     "size": size, "target_size": w.get("target_size"), "replaces": dest.exists()})
+    if "" not in [r["wanted"][len(wanted_name):] for r in rows]:
+        problems.append("the set has no painting (slot '')")
+    for r in rows:
+        sfx = r["wanted"][len(wanted_name):]
+        if main_size and sfx not in ("", "_back") and r["size"] != main_size:
+            problems.append(f"{Path(r['file']).name} is {r['size'][0]}×{r['size'][1]}, the painting is {main_size[0]}×{main_size[1]} — the contract wants them equal")
+        if main_size and sfx == "_back" and (r["size"][1] != main_size[1] or r["size"][0] < main_size[0]):
+            problems.append(f"{Path(r['file']).name} is {r['size'][0]}×{r['size'][1]} — _back must be the painting's height and at least its width")
+    missing = [s for s in SET_SLOTS if (s or "_main") not in slots]
+    if problems:
+        raise ApproveError("refused — NOTHING was copied:\n  " + "\n  ".join(problems))
+    plan = {"job": job_id, "wanted": wanted_name, "set": True, "rows": rows, "licences": chain,
+            "missing_slots": [wanted_name + s for s in missing], "conditions": licence_conditions(cfg, chain),
+            "size_note": None if not items[wanted_name].get("target_size") or main_size == items[wanted_name]["target_size"] else
+            f"painting {main_size[0]}×{main_size[1]} differs from the target {items[wanted_name]['target_size'][0]}×{items[wanted_name]['target_size'][1]} — the game scales it"}
+    if dry_run:
+        plan["dry_run"] = True
+        return plan
+    stamp = f"{datetime.now():%Y%m%d-%H%M%S}"
+    approved = load_approved(cfg, game)
+    prov_dir.mkdir(parents=True, exist_ok=True)
+    provs = [json.loads(Path(p).read_text(encoding="utf-8")) for p in read]
+    for r in rows:
+        dest, src = Path(r["dest"]), Path(r["file"])
+        if dest.exists():
+            bdir = _out_root(cfg) / "_approved_backup" / r["wanted"].replace("/", "__")
+            bdir.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(dest, bdir / f"{stamp}_{dest.name}")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
+        digest = sha256(dest)
+        rel = str(dest.relative_to(root)).replace("\\", "/") if _inside(dest, root) else str(dest)
+        record = {"asset": rel, "wanted": r["wanted"], "set": wanted_name, "slot": r["slot"],
+                  "approved": datetime.now().isoformat(timespec="seconds"), "job_id": job_id, "file": src.name,
+                  "sha256": digest, "licences": chain, "commercial_ok": True,
+                  "made_by": "RPG_Forge (AI-generated with the models listed; see licences)", "prov": provs}
+        Path(r["provenance"]).write_text(json.dumps(record, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
+        approved[r["wanted"]] = {"job_id": job_id, "file": src.name, "sha256": digest, "dest": rel, "set": wanted_name,
+                                 "provenance": r["provenance"], "date": record["approved"], "licences": chain}
+        r["sha256"] = digest
+    (game_dir(cfg, game) / "approved.json").write_text(json.dumps(approved, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
+    _note_in_batch(cfg, game, job, wanted_name, "(set) " + ", ".join(Path(r["file"]).name for r in rows))
+    return plan
+
+
+def licence_conditions(cfg: dict, chain: list[dict]) -> list[str]:
+    """Conditions attached to commercial use (e.g. Krea 2's revenue cap), from models/models.json
+    `licence_condition` — printed wherever such a model is in a chain."""
+    reg = cfgmod.ROOT / "models" / "models.json"
+    if not reg.exists():
+        return []
+    data = json.loads(reg.read_text(encoding="utf-8")).get("models", {})
+    out = []
+    files = {c.get("file") for c in chain}
+    for mname, m in data.items():
+        cond = m.get("licence_condition")
+        if not cond:
+            continue
+        names = {Path(x).name for x in m.get("files", [])} | set((m.get("save_as") or {}).values()) | set(m.get("aliases") or [])
+        hit = sorted(files & names)
+        if hit:
+            out.append(f"{hit[0]} ({mname}): {cond}")
+    return out
+
+
 def _note_in_batch(cfg: dict, game: str, job: dict, wanted_name: str, file: str) -> None:
     b = job.get("batch")
     if not b or not re.fullmatch(r"[\w.\-]+", str(b)):
@@ -289,5 +437,7 @@ def licence_report(cfg: dict, game: str) -> str:
         lines.append(f"`{a['dest']}` — job `{a['job_id']}` / {a['file']} — approved {a['date']}")
         for c in a.get("licences") or []:
             lines.append(f"- {c.get('role')}: `{c.get('file')}` — {c.get('license')} — commercial OK: {c.get('commercial_ok')}")
+        for cond in licence_conditions(cfg, a.get("licences") or []):
+            lines.append(f"- ⚠ **condition:** {cond}")
         lines.append("")
     return "\n".join(lines) + "\n"

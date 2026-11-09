@@ -396,9 +396,14 @@ def rate(suite_name: str, job_id: str, score: int, note: str = "") -> None:
     json.dump(data, open(p, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
 
 
+DETAIL_OVERRIDES = True       # report() reads out/bakeoff/<suite>/detail_at.json (forge/detail.py, roadmap N6)
+
+
 def report(suite_name: str, q: Queue, thumb: int = 256) -> Path:
     organize(suite_name, q)
     rows = _collect(suite_name, q)
+    from . import detail as _detail
+    _detail.apply(suite_name, rows)          # crops moved with --detail-at / --detail-auto, no re-render
     out_dir = cfgmod.ROOT / "out" / "bakeoff" / suite_name
     out_dir.mkdir(parents=True, exist_ok=True)
     ratings = json.load(open(ratings_path(suite_name), encoding="utf-8")) if ratings_path(suite_name).exists() else {}

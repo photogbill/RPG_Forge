@@ -126,6 +126,24 @@ exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipelin
 - **Drafts from the game data:** `brief.bat maps|sleeves|icons` (drafts cannot be submitted until their prompts are written).
 - **Queue control:** `"priority": 10` in a job runs it first; `pause.bat` / `resume.bat` park and restore waiting jobs.
 
+## Scene sets, the dashboard and Krea 2 (added 2026-11-09, session 2)
+
+- **A painted scene is a set of six files** (the game's HD-2D-feel pass): `scene.png` + `_n` (normals from a depth map) +
+  `_e` (glow) + `_back` (far parallax plane) + `_over` (walk-behind plane) + `_depth` (16-bit, white = near). One
+  `scene_kit` job makes all six (`jobs/templates/scene_kit.json`); `approve.bat <job-id> scenes/<map> --set` copies them
+  into the game together, with one licence check, all or nothing. The pieces also run alone: `depth_map`,
+  `normal_map` with `"source": "depth"`, `scene_layers`.
+- **Dashboard:** `ui.bat` opens http://127.0.0.1:8765 — the queue with an ETA, what is rendering, batch progress,
+  the newest pictures, failed jobs with Retry, Pause/Resume, and Approve (dry run first). Only this PC can see it.
+- **No double runs:** `bakeoff submit` skips cells already queued or finished (`--force` to redo); `submit --skip-done`
+  does the same for a plain batch. `eta.bat` says how long the queue will take.
+- **Krea 2:** `graph: "krea2"` (core ComfyUI, no custom node; INT8-ConvRot files load natively). Needs
+  `pull_model.bat qwen-image-vae`. Suite `krea2_v1` (not submitted). Krea 2 base models are commercial-OK under
+  US$1M/year revenue — `approve` and `licences` print that condition.
+- **Models:** `python -m forge models unusable` → `out/unusable_models.md` (what no graph can run, what is
+  non-commercial, what still needs a licence check — report only). `licence.bat` with no arguments asks its questions.
+- **Bake-off detail crops:** `bakeoff report <suite> --detail-at <prompt>=x,y[,size]` or `--detail-auto` (largest face).
+
 ## Licence
 
 MIT (code). Models and palettes carry their own licences — `docs/LICENSING.md` and `models/models.json`.

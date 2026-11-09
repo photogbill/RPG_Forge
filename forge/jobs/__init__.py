@@ -8,7 +8,7 @@ worker that is already running — no restart while a batch is in flight.
 """
 from __future__ import annotations
 import importlib
-from . import common, cpu, gpu, paint, assets
+from . import common, cpu, gpu, paint, assets, scene
 
 HANDLERS = {}
 
@@ -23,9 +23,10 @@ def get_handlers(reload: bool = False) -> dict:
     if reload:
         from .. import bakeoff as _bakeoff, pipeline as _pipeline
         from ..engines import sdxl_graph as _graph, comfy as _comfy, flux1_graph as _f1, flux2_graph as _f2, graph_ops as _go
-        from ..ops import edges as _ed, lighting as _lt
+        from ..engines import krea2_graph as _k2
+        from ..ops import edges as _ed, lighting as _lt, depth as _dp, layers as _ly
         # dependencies first, then the handler modules that import them
-        for mod in (_graph, _f1, _f2, _go, _comfy, _ed, _lt, _bakeoff, common, cpu, gpu, paint, assets, _pipeline):
+        for mod in (_graph, _f1, _f2, _k2, _go, _comfy, _ed, _lt, _dp, _ly, _bakeoff, common, cpu, gpu, paint, assets, scene, _pipeline):
             try:
                 importlib.reload(mod)
             except Exception:  # a half-saved file: keep the last good version
@@ -44,6 +45,8 @@ def get_handlers(reload: bool = False) -> dict:
         "icon": assets.icon,
         "sleeve": assets.sleeve,
         "pipeline": _pipeline_handler,
+        "depth_map": scene.depth_map,
+        "scene_kit": scene.scene_kit,
         # CPU
         "palette_snap": cpu.palette_snap,
         "pixelize": cpu.pixelize,
@@ -52,7 +55,8 @@ def get_handlers(reload: bool = False) -> dict:
         "pack_sheet": cpu.pack_sheet,
         "godot_tileset": cpu.godot_tileset,
         "canny": cpu.canny,
-        "normal_map": cpu.normal_map,
+        "normal_map": scene.normal_map,          # N1: source luminance (F11, unchanged) or depth
+        "scene_layers": scene.scene_layers,
         "emissive_mask": cpu.emissive_mask,
         "overworld": cpu.overworld,
     }

@@ -76,10 +76,21 @@ def ratings_file(cfg: dict, target: str) -> Path:
     return cfgmod.path_of(cfg, "out") / "review" / safe(target) / "ratings.json"
 
 
+def _detail_thumb(src: Path, det: dict, dest: Path, thumb: int) -> None:
+    """The 1:1 detail crop (N9d) — the same crop the bake-off report's detail sheets use."""
+    from .bakeoff import detail_crop
+    with Image.open(src) as im:
+        c = detail_crop(im.convert("RGB"), det)
+    c.thumbnail((thumb * 2, thumb * 2))
+    c.save(dest, "JPEG", quality=88)
+
+
 def build(cfg: dict, target: str, by: str = "category", thumb: int = 256) -> Path:
     rows = collect(cfg, target)
     if not rows:
         raise ValueError(f"no finished jobs in batch '{target}' or 'bakeoff/{target}'")
+    from . import detail as dt
+    dt.apply(target, rows)          # crops moved with `bakeoff report --detail-at/--detail-auto`
     out_dir = cfgmod.path_of(cfg, "out") / "review" / safe(target)
     tdir = out_dir / "thumbs"
     tdir.mkdir(parents=True, exist_ok=True)
@@ -120,6 +131,15 @@ def build(cfg: dict, target: str, by: str = "category", thumb: int = 256) -> Pat
                 for v in range(1, 6))
             img = (f'<a href="../../{r["id"]}/{html.escape(r["images"][0].name)}" target="_blank"><img src="{tname}" loading="lazy"></a>'
                    if tname else f'<div class="fail">{html.escape((r["error"] or "failed")[:200])}</div>')
+            det = (r.get("meta") or {}).get("detail")
+            if tname and isinstance(det, dict):
+                dname = f"thumbs/{r['id']}_detail.jpg"
+                try:
+                    _detail_thumb(r["images"][0], det, out_dir / dname, thumb)
+                    img += (f'<div class="det"><img src="{dname}" loading="lazy" title="1:1 detail crop at {det.get("at")}">'
+                            f'<span>1:1 detail {int(det.get("size") or 512)} px</span></div>')
+                except Exception:  # noqa: BLE001 — a missing crop must not stop the review page
+                    pass
             cards.append(f'<div class="card {lic} t-{html.escape(str(r["type"]))}" data-id="{r["id"]}">{img}'
                          f'<div class="lab">{html.escape(label(r, by))}</div><div class="id">{r["id"]}</div>'
                          f'<div class="rate">{radios}</div><input class="note" placeholder="note" value="{html.escape(cur.get("note", ""))}"></div>')
@@ -159,6 +179,7 @@ background:#111;color:#ddd;border:1px solid #333;border-radius:4px;padding:3px;m
 #bar{position:fixed;left:0;right:0;bottom:0;background:#0d0d10;border-top:1px solid #333;padding:10px 20px;display:flex;gap:16px;align-items:center}
 button{background:#f0c674;color:#111;border:0;border-radius:6px;padding:8px 14px;font-weight:700;cursor:pointer}
 .key span{display:inline-block;width:12px;height:12px;border-radius:3px;margin:0 4px 0 12px;vertical-align:middle}
+.det{position:relative;margin-top:4px}.det span{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.65);color:#f0c674;font-size:11px;padding:1px 5px;border-radius:3px}
 </style></head><body>
 <h1>{{TITLE}}</h1><div class="key">built {{WHEN}} · border = licence:<span style="background:#3fb950"></span>all commercial-OK
 <span style="background:#f85149"></span>non-commercial model<span style="background:#6e7681"></span>unknown</div>

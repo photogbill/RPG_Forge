@@ -1,0 +1,62 @@
+{
+ "batch": "night3_checks",
+ "_comment": "Real-GPU proof of N1-N3 (Opus, 2026-11-09). Reuses the tools_v1 pictures and prompt text - no new art choices. Test output only: nothing here is approved into the game.",
+ "defaults": {
+  "game": "turing_accords",
+  "seed": 1001,
+  "priority": 10
+ },
+ "jobs": [
+  {
+   "type": "pipeline",
+   "name": "c1_n1_normals_gas_station",
+   "steps": [
+    {
+     "type": "depth_map",
+     "inputs": [
+      "out/20261109-150851-t06_upscale_gas_station-cab9/render.png"
+     ]
+    },
+    {
+     "type": "normal_map",
+     "inputs": [
+      "out/20261109-150851-t06_upscale_gas_station-cab9/render.png"
+     ],
+     "source": "depth",
+     "depth": [
+      "$steps[1].outputs[0]"
+     ],
+     "detail": 0.35,
+     "compare": true
+    }
+   ]
+  },
+  {
+   "type": "pipeline",
+   "name": "c2_n2_layers_street",
+   "steps": [
+    {
+     "type": "depth_map",
+     "inputs": [
+      "out/20261109-150851-t02_street_2560-7e3e/scene.png"
+     ]
+    },
+    {
+     "type": "scene_layers",
+     "inputs": [
+      "out/20261109-150851-t02_street_2560-7e3e/scene.png"
+     ],
+     "depth": [
+      "$steps[1].outputs[0]"
+     ],
+     "cuts": "auto"
+    }
+   ]
+  },
+  {
+   "type": "scene_kit",
+   "name": "c3_n3_kit_gas_station",
+   "prompt": "a roadside gas station in the desert at dusk, two pumps under a humming canopy light, wet asphalt after rain, a dusty sedan at the pump, mountains behind"
+  }
+ ]
+}

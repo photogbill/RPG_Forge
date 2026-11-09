@@ -17,7 +17,7 @@
 ## Status after the Night 2 forge session (Opus, 2026-11-09)
 
 **Next to build: §2b (N1–N9), added 2026-11-09 afternoon.** **Built and tested:** F1–F11, F18, F19, plus the quality stages (refine / FaceDetailer / FreeU) — see
-`docs/HANDOFF_FORGE_2026-11-09.md`. **Not started:** F12–F17. GPU paths are proven only against a fake ComfyUI until
+`docs/HANDOFF_FORGE_2026-11-09.md`; **N1–N9 built and wired 2026-11-09 session 2** — `docs/HANDOFF_FORGE_2026-11-09b.md`. **Not started:** F12–F14. GPU paths are proven only against a fake ComfyUI until
 the first real run (`docs/FOR_FABLE_FORGE_2026-11-09.md` is the test checklist).
 
 ## 2. What it should do and does not yet — in build order

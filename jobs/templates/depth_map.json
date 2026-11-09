@@ -1,0 +1,9 @@
+{
+ "type": "depth_map",
+ "name": "example_depth",
+ "inputs": [
+  "out/<job-id>/scene.png"
+ ],
+ "resolution": 1024,
+ "_help": "Depth Anything V2 Small (Apache-2.0) -> <name>_depth.png, 16-bit, white = near. Needs install_comfy_aux.bat."
+}

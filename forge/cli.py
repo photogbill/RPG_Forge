@@ -1,6 +1,9 @@
 """Command line: python -m forge <command>
 
-  submit <job.json | batch.json> [...]   validate and queue jobs (a batch file holds many)
+  submit <job.json | batch.json> [...] [--skip-done]   validate and queue jobs (a batch file holds many);
+                                         --skip-done leaves out jobs of the same batch+name already queued or done
+  eta                                    what is queued and how long it should take
+  ui [--port 8765]                       the dashboard in your browser (http://127.0.0.1:8765) — ui.bat
   worker [--gpu] [--once]                run jobs from the queue (GPU worker needs ComfyUI up)
   status                                 queue counts
   requeue                                move crashed running/ jobs back to pending/
@@ -21,6 +24,7 @@
   models licence <file> "<licence>" yes|no [note]   record a licence you checked yourself (models/licences.json)
   wanted [--refresh] [--kind K] [--missing] [--all]  what the game wants vs. what is approved (games/<game>/wanted.json)
   approve <job-id> --as <wanted-name> [--file F | --pick N] [--dry-run]   copy an output into the game, with provenance
+  approve <job-id> --as scenes/<map> --set [--dry-run]   a scene_kit's six files as one set (all or nothing)
   licences                               the licence chain of every approved asset → out/licences_<game>.md
   review <suite-or-batch> [--by category|model|type] [--thumb N]   labelled sheets + index.html with ratings export
   rate <suite-or-batch> --import <ratings.json>                    merge the ratings the review page exported
@@ -45,18 +49,26 @@ def _queue(cfg: dict) -> Queue:
 
 def cmd_submit(cfg: dict, args: list[str]) -> int:
     if not args:
-        print("usage: submit <job.json | batch.json> [...]"); return 2
+        print("usage: submit <job.json | batch.json> [...] [--skip-done]"); return 2
     q = _queue(cfg)
     total = 0
-    for a in args:
+    for a in [x for x in args if not x.startswith("--")]:
         p = Path(a)
         with open(p, "r", encoding="utf-8") as f:
             data = json.load(f)
         if isinstance(data, dict) and data.get("_draft"):
             print(f"{p.name}: is a DRAFT (made by `brief`) — edit the prompts, delete the \"_draft\" line, then submit"); return 2
         if isinstance(data, dict) and "jobs" in data:
+            note = ""
+            if "--skip-done" in args:
+                from . import dedupe
+                defaults = data.get("defaults", {})
+                full = [{**defaults, **j, **({"batch": j.get("batch") or data["batch"]} if data.get("batch") else {})} for j in data["jobs"]]
+                keep, skipped = dedupe.filter_new(cfg, full)
+                data = {**data, "jobs": keep, "defaults": {}}
+                note = ("  " + dedupe.describe(skipped)) if skipped else ""
             ids = q.submit_batch(data)
-            print(f"{p.name}: queued {len(ids)} jobs" + (f" (batch '{data.get('batch')}')" if data.get("batch") else ""))
+            print(f"{p.name}: queued {len(ids)} jobs" + (f" (batch '{data.get('batch')}')" if data.get("batch") else "") + note)
             total += len(ids)
         else:
             jid = q.submit(data)
@@ -187,6 +199,43 @@ def cmd_palette(cfg: dict, args: list[str]) -> int:
     print(__doc__); return 2
 
 
+def _licence_ask(cfg: dict, ask=input) -> int:
+    """N9a: licence.bat with no arguments — the questions one at a time, the file offered from the list of models
+    whose licence is unknown."""
+    from . import manifest, model_report
+    try:
+        _, groups = model_report.report(cfg)
+        unknown = sorted(f for f, *_ in groups["licence unknown"])
+    except FileNotFoundError:
+        unknown = []
+    print("Record a licence you have checked yourself (for example on the model's Civitai or Hugging Face page).")
+    print("The forge never guesses a licence. Press Enter on an empty line to stop.\n")
+    if unknown:
+        print("Models with no licence on record:")
+        for i, f in enumerate(unknown, 1):
+            print(f"  {i:2d}. {f}")
+    ans = ask("\n1) Which model? (its number above, or the file name): ").strip().strip('"')
+    if not ans:
+        print("Nothing recorded."); return 0
+    if ans.isdigit() and unknown and 1 <= int(ans) <= len(unknown):
+        file = unknown[int(ans) - 1]
+    else:
+        file = ans
+    name = ask(f"2) Licence name as the page shows it (e.g. CreativeML Open RAIL++-M) for {file}: ").strip().strip('"')
+    if not name or "<" in name or ">" in name:
+        print("No licence name — nothing recorded."); return 2
+    yn = ""
+    while yn not in ("yes", "no"):
+        yn = ask("3) Does it allow commercial use of the pictures it makes? (yes/no): ").strip().lower()
+        yn = {"y": "yes", "n": "no"}.get(yn, yn)
+        if not yn:
+            print("Nothing recorded."); return 0
+    where = ask("4) Where did you check? (e.g. 'Civitai page v8, permissions icons'): ").strip()
+    p = manifest.record_licence(cfg, file, name, yn == "yes", where)
+    print(f"\nrecorded {Path(file).name}: {name} — commercial OK: {yn} → {p}")
+    return 0
+
+
 def cmd_models(cfg: dict, args: list[str]) -> int:
     reg_path = cfgmod.ROOT / "models" / "models.json"
     with open(reg_path, "r", encoding="utf-8") as f:
@@ -204,6 +253,19 @@ def cmd_models(cfg: dict, args: list[str]) -> int:
         print(sm.render_markdown(recs))
         print(f"{len(recs)} files → models/inventory.json + models/INVENTORY.md")
         return 0
+    if args[0] == "unusable":
+        from . import model_report
+        try:
+            text, groups = model_report.report(cfg)
+        except FileNotFoundError as e:
+            print(e); return 1
+        out = cfgmod.path_of(cfg, "out") / "unusable_models.md"
+        out.write_text(text, encoding="utf-8", newline="\n")
+        print(text)
+        print(f"→ {out}   (report only — nothing was deleted)")
+        return 0
+    if args[0] == "licence" and (len(args) == 1 or args[1] == "--ask"):
+        return _licence_ask(cfg)
     if args[0] == "licence":
         if len(args) < 4 or args[3].lower() not in ("yes", "no"):
             print('usage: models licence <file> "<licence name>" yes|no [where you checked]'); return 2
@@ -352,6 +414,11 @@ def cmd_wanted(cfg: dict, args: list[str]) -> int:
     kind = _opt(args, "--kind")
     if kind:
         rows = [r for r in rows if r["kind"] == kind]
+    elif "--all" not in args:
+        hidden = sum(1 for r in rows if r.get("optional"))
+        rows = [r for r in rows if not r.get("optional")]
+        if hidden:
+            print(f"({hidden} optional scene-set companions hidden — _n/_e/_back/_over/_depth; --all or --kind scene_slot shows them)")
     from collections import Counter
     by = Counter((r["kind"], r["state"]) for r in rows)
     kinds = sorted({k for k, _ in by})
@@ -375,8 +442,29 @@ def cmd_approve(cfg: dict, args: list[str]) -> int:
     pos = _positional(args, ("--as", "--file", "--pick", "--game"))
     name = _opt(args, "--as")
     if not pos or not name:
-        print("usage: approve <job-id> --as <wanted-name> [--file F | --pick N] [--dry-run] [--game G]"); return 2
+        print("usage: approve <job-id> --as <wanted-name> [--file F | --pick N | --set] [--dry-run] [--game G]"); return 2
     pick = _opt(args, "--pick")
+    if "--set" in args:
+        try:
+            r = manifest.approve_set(cfg, pos[0], name, game=_opt(args, "--game"), dry_run="--dry-run" in args)
+        except (manifest.ApproveError, FileNotFoundError) as e:
+            print(f"✗ {e}"); return 1
+        print(("DRY RUN — would copy this set of " if r.get("dry_run") else "✓ approved the set of ") + f"{len(r['rows'])} file(s) for {name}:")
+        for row in r["rows"]:
+            ts = row.get("target_size")
+            note = "" if not ts or row["size"] == ts else f"  (target {ts[0]}x{ts[1]})"
+            print(f"  {row['slot']:11s} {Path(row['file']).name:22s} {row['size'][0]}x{row['size'][1]:<5d} → {row['dest']}"
+                  + ("  [replaces]" if row["replaces"] else "") + note)
+        print("  licence chain (checked once for the whole set):")
+        for c in r["licences"]:
+            print(f"    {c['role']:16s} {c['file']:48s} {c.get('license')}")
+        for cond in r.get("conditions") or []:
+            print(f"  ⚠ condition: {cond}")
+        if r.get("missing_slots"):
+            print("  not in this job (optional): " + ", ".join(r["missing_slots"]))
+        if r.get("size_note"):
+            print(f"  note: {r['size_note']}")
+        return 0
     try:
         r = manifest.approve(cfg, pos[0], name, game=_opt(args, "--game"), file=_opt(args, "--file"),
                              pick=int(pick) if pick else None, dry_run="--dry-run" in args)
@@ -386,6 +474,8 @@ def cmd_approve(cfg: dict, args: list[str]) -> int:
     print(f"  provenance → {r['provenance']}")
     for c in r["licences"]:
         print(f"  {c['role']:16s} {c['file']:48s} {c.get('license')}")
+    for cond in manifest.licence_conditions(cfg, r["licences"]):
+        print(f"  ⚠ condition: {cond}")
     if r.get("size_note"):
         print(f"  note: {r['size_note']}")
     return 0
@@ -452,6 +542,20 @@ def cmd_comfy_paths(cfg: dict, args: list[str]) -> int:
     return 0
 
 
+def cmd_ui(cfg: dict, args: list[str]) -> int:
+    from . import ui
+    port = int(_opt(args, "--port", str(ui.PORT)))
+    ui.serve(cfg, port)
+    return 0
+
+
+def cmd_eta(cfg: dict, args: list[str]) -> int:
+    from . import eta
+    for line in eta.lines(cfg):
+        print(line)
+    return 0
+
+
 def cmd_bakeoff(cfg: dict, args: list[str]) -> int:
     from . import bakeoff
     if not args or args[0] not in ("plan", "submit", "report", "rate"):
@@ -459,7 +563,7 @@ def cmd_bakeoff(cfg: dict, args: list[str]) -> int:
     sub = args[0]
     if sub in ("plan", "submit"):
         if len(args) < 2:
-            print("usage: bakeoff plan|submit <suite.json> [--quick]"); return 2
+            print("usage: bakeoff plan|submit <suite.json> [--quick] [--force]"); return 2
         with open(args[1], "r", encoding="utf-8") as f:
             suite = json.load(f)
         if "--quick" in args:
@@ -484,13 +588,39 @@ def cmd_bakeoff(cfg: dict, args: list[str]) -> int:
                     continue
                 seen.add(sk["lora"])
                 print(f"  SKIP {sk['lora']}: {sk['reason']}")
+        new_jobs, skipped = p["jobs"], {}
+        if "--force" not in args:
+            from . import dedupe
+            new_jobs, skipped = dedupe.filter_new(cfg, p["jobs"], f"bakeoff/{p['suite']}")
+            per = p["estimate_min"] / max(1, len(p["jobs"]))
+            print(f"  {len(new_jobs)} new, ~{round(per * len(new_jobs), 1)} min" + (f"; {dedupe.describe(skipped)}" if skipped else ""))
         if sub == "submit":
-            ids = bakeoff.submit(p, _queue(cfg))
+            if not new_jobs:
+                print(f"0 new — every cell of {p['suite']} is already queued or finished (bakeoff report {p['suite']} to look; --force to run again)")
+                return 0
+            ids = bakeoff.submit({**p, "jobs": new_jobs, "skipped_existing": skipped}, _queue(cfg))
             print(f"queued {len(ids)} renders under batch bakeoff/{p['suite']} — start run_worker.bat; then: python -m forge bakeoff report {p['suite']}")
         return 0
     if sub == "report":
-        if len(args) < 2:
-            print("usage: bakeoff report <suite-name>"); return 2
+        if len(args) < 2 or args[1].startswith("--"):
+            print("usage: bakeoff report <suite-name> [--detail-at <prompt>=x,y[,size]]... [--detail-auto]"); return 2
+        from . import detail
+        for i, a in enumerate(args):
+            if a == "--detail-at" and i + 1 < len(args):
+                try:
+                    pid, rec = detail.set_at(args[1], args[i + 1])
+                except ValueError as e:
+                    print(f"✗ {e}"); return 2
+                print(f"detail crop for {pid}: centred at {rec['at']}" + (f", {rec['size']} px" if rec.get("size") else "") + f" (saved to {detail.path(args[1])})")
+        if "--detail-auto" in args:
+            from .engines.comfy import ComfyClient
+            q = _queue(cfg)
+            rows = bakeoff._collect(args[1], q)
+            for line in detail.auto(args[1], rows, ComfyClient(cfg["comfy"]["url"])):
+                print(line)
+        if not getattr(bakeoff, "DETAIL_OVERRIDES", False):
+            print("note: this forge's bakeoff.report does not read detail_at.json yet (wired after the queue empties) — "
+                  "the review page (review.bat) already uses it")
         out = bakeoff.report(args[1], _queue(cfg))
         print(f"report: {out}")
         return 0
@@ -506,7 +636,7 @@ def cmd_bakeoff(cfg: dict, args: list[str]) -> int:
 COMMANDS = {
     "submit": cmd_submit, "worker": cmd_worker, "status": cmd_status, "requeue": cmd_requeue,
     "validate": cmd_validate, "validate-workflow": cmd_validate_workflow, "palette": cmd_palette,
-    "models": cmd_models, "docs": cmd_docs, "doctor": cmd_doctor, "comfy-paths": cmd_comfy_paths, "bakeoff": cmd_bakeoff,
+    "models": cmd_models, "docs": cmd_docs, "doctor": cmd_doctor, "comfy-paths": cmd_comfy_paths, "bakeoff": cmd_bakeoff, "eta": cmd_eta, "ui": cmd_ui,
     "retry": cmd_retry, "comfy-up": cmd_comfy_up,
     "wanted": cmd_wanted, "approve": cmd_approve, "licences": cmd_licences, "review": cmd_review, "rate": cmd_rate,
     "brief": cmd_brief, "pause": cmd_pause, "resume": cmd_resume,
