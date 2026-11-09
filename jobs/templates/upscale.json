@@ -1,0 +1,12 @@
+{
+ "type": "upscale",
+ "name": "example_upscale",
+ "inputs": [
+  "out/<job-id>/raw.png"
+ ],
+ "fit": [
+  1920,
+  1080
+ ],
+ "crop": "center"
+}

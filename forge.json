@@ -1,5 +1,5 @@
 {
-  "_comment": "RPG_Forge configuration. Every path is relative to this folder; nothing is written anywhere else. See docs/PROTOCOL.md.",
+  "_comment": "RPG_Forge configuration. Every path is relative to this folder; nothing is written anywhere else. model_dirs lists every folder ComfyUI should see per kind of weight (your own collections beside models/). See docs/PROTOCOL.md.",
   "paths": {
     "jobs": "jobs",
     "out": "out",
@@ -9,17 +9,74 @@
     "games": "games",
     "comfy_root": "engines/ComfyUI"
   },
+  "model_dirs": {
+    "checkpoints": [
+      "models/checkpoints",
+      "sdmodels",
+      "flux_models"
+    ],
+    "loras": [
+      "models/loras",
+      "lora models",
+      "flux_lora"
+    ],
+    "diffusion_models": [
+      "models/diffusion_models",
+      "flux_models"
+    ],
+    "text_encoders": [
+      "models/text_encoders",
+      "flux_models"
+    ],
+    "vae": [
+      "models/vae",
+      "flux_models"
+    ],
+    "controlnet": [
+      "models/controlnet"
+    ],
+    "upscale_models": [
+      "models/upscale_models"
+    ],
+    "embeddings": [
+      "models/embeddings"
+    ],
+    "ultralytics_bbox": [
+      "models/ultralytics/bbox"
+    ]
+  },
   "comfy": {
     "url": "http://127.0.0.1:8188",
     "timeout_sec": 1800,
     "poll_sec": 1.0,
     "default_workflow": "txt2img_sdxl",
-    "default_checkpoint": "sd_xl_base_1.0.safetensors"
+    "default_checkpoint": "sd_xl_base_1.0.safetensors",
+    "flux2": {
+      "text_encoder": "qwen_3_4b.safetensors",
+      "vae": "flux2-vae.safetensors",
+      "text_encoder_9b": "qwen_3_8b_fp8mixed.safetensors"
+    },
+    "flux1": {
+      "clip_l": "clip_l.safetensors",
+      "t5": "t5xxl_fp8_e4m3fn.safetensors",
+      "vae": "ae.safetensors",
+      "guidance": 3.5
+    },
+    "fp8_cast_over_gb": 14.0,
+    "upscale_model": "RealESRGAN_x4plus.pth",
+    "controlnet_union": "xinsir-union-sdxl-promax.safetensors",
+    "face_detector": "bbox/face_yolov8m.pt"
   },
-  "worker": {"poll_sec": 2.0, "gpu": false},
+  "worker": {
+    "poll_sec": 2.0,
+    "gpu": false
+  },
   "defaults": {
     "palette": "resurrect-64",
-    "card_size": [288, 162],
+    "card_size": [
+      288,
+      162
+    ],
     "render_scale": 4,
     "negative": "text, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality"
   },

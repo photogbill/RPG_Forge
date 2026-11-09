@@ -25,7 +25,7 @@ class Queue:
     def __init__(self, jobs_dir: Path, out_dir: Path):
         self.jobs = Path(jobs_dir)
         self.out = Path(out_dir)
-        for sub in ("pending", "running", "done", "failed"):
+        for sub in ("pending", "running", "done", "failed", "paused"):
             (self.jobs / sub).mkdir(parents=True, exist_ok=True)
         self.out.mkdir(parents=True, exist_ok=True)
 
@@ -64,7 +64,9 @@ class Queue:
         return sorted(p for p in (self.jobs / "pending").glob("*.json"))
 
     def claim(self, accept: Callable[[dict], bool] | None = None) -> tuple[str, dict] | None:
-        """Move the oldest acceptable pending job to running/. Returns (id, job) or None."""
+        """Move the acceptable pending job with the highest `priority` (default 0), oldest first among equals,
+        to running/. Returns (id, job) or None."""
+        cands = []
         for p in self.pending():
             try:
                 job = self._read(p)
@@ -73,6 +75,12 @@ class Queue:
                 continue
             if accept is not None and not accept(job):
                 continue
+            try:
+                pr = float(job.get("priority", 0) or 0)
+            except (TypeError, ValueError):
+                pr = 0.0
+            cands.append((-pr, p.name, p, job))
+        for _, _, p, job in sorted(cands, key=lambda c: (c[0], c[1])):
             target = self.jobs / "running" / p.name
             try:
                 os.replace(p, target)
@@ -116,9 +124,29 @@ class Queue:
         # the job file is the receipt; a copy lives with the outputs
         self._write_atomic(self.out_dir(job_id) / "job.json", job)
 
+    def pause(self, prefix: str | None = None) -> int:
+        """Move pending jobs (optionally only a batch prefix) to jobs/paused/ — nothing runs them until resume."""
+        return self._move("pending", "paused", prefix)
+
+    def resume(self, prefix: str | None = None) -> int:
+        return self._move("paused", "pending", prefix)
+
+    def _move(self, src: str, dst: str, prefix: str | None) -> int:
+        n = 0
+        for p in sorted((self.jobs / src).glob("*.json")):
+            try:
+                job = self._read(p)
+            except Exception:
+                continue
+            if prefix and not str(job.get("batch", "")).startswith(prefix) and not p.stem.startswith(prefix):
+                continue
+            os.replace(p, self.jobs / dst / p.name)
+            n += 1
+        return n
+
     def status(self) -> dict:
         out = {}
-        for sub in ("pending", "running", "done", "failed"):
+        for sub in ("pending", "running", "done", "failed", "paused"):
             n = 0
             for p in (self.jobs / sub).glob("*.json"):
                 try:
@@ -127,8 +155,27 @@ class Queue:
                 except Exception:
                     pass
                 n += 1
-            out[sub] = n
+            if sub != "paused" or n:
+                out[sub] = n          # "paused" only shows up when something is parked
         return out
+
+    def retry_failed(self, prefix: str | None = None) -> int:
+        """Move failed jobs back to pending (optionally only those whose `batch` starts with prefix),
+        dropping the old error so they run again with the current code. Returns how many."""
+        n = 0
+        for p in sorted((self.jobs / "failed").glob("*.json")):
+            job = self._read(p)
+            if job.get("tombstone"):
+                continue
+            if prefix and not str(job.get("batch", "")).startswith(prefix):
+                continue
+            for k in ("error", "traceback", "started_at", "finished_at", "result"):
+                job.pop(k, None)
+            job["retries"] = int(job.get("retries", 0)) + 1
+            self._write_atomic(p, job)
+            os.replace(p, self.jobs / "pending" / p.name)
+            n += 1
+        return n
 
     def requeue_running(self) -> int:
         """After a crash: move running/ jobs back to pending/. Returns how many."""
@@ -157,16 +204,19 @@ class Queue:
         os.replace(tmp, p)
 
 
-def run_worker(queue: Queue, handlers: dict[str, Callable], ctx, gpu: bool, once: bool = False,
-               poll_sec: float = 2.0) -> int:
+def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_sec: float = 2.0) -> int:
     """Claim and run jobs until the queue is empty (`once`) or forever. Returns jobs run.
 
-    `handlers` maps job type → callable(job, ctx, out_dir) -> result dict. A handler's exception
-    becomes a failed job with the traceback saved, and the worker keeps going.
+    `handlers` maps job type → callable(job, ctx, out_dir) -> result dict, or is a callable returning
+    that map (called before every job, so handler code can be reloaded while the worker runs).
+    A handler's exception becomes a failed job with the traceback saved, and the worker keeps going.
     """
+    def current() -> dict:
+        return handlers() if callable(handlers) else handlers
+
     def accept(job: dict) -> bool:
         t = job.get("type")
-        if t not in handlers:
+        if t not in current():
             return False
         if schema.needs_gpu(job) and not gpu:
             return False
@@ -192,7 +242,7 @@ def run_worker(queue: Queue, handlers: dict[str, Callable], ctx, gpu: bool, once
         out_dir = queue.out_dir(job_id)
         t0 = time.time()
         try:
-            result = handlers[job["type"]](job, ctx, out_dir) or {}
+            result = current()[job["type"]](job, ctx, out_dir) or {}
             result["seconds"] = round(time.time() - t0, 1)
             queue.finish(job_id, result=result)
         except Exception as e:  # noqa: BLE001 — every failure is recorded, never swallowed

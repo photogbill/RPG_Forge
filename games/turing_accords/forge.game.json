@@ -1,22 +1,59 @@
 {
- "_comment": "The Turing Accords JRPG — forge settings. Bible: D:\\Turing Accords Game (18_Visual_Pipeline_Free_Options.md for the laws). Palette is provisional until the three-palette test is judged.",
+ "_comment": "The Turing Accords JRPG — forge settings. Bible: D:\\Turing Accords Game (10_Art_Direction_and_Production.md §10.1b/10.8). 2026-11-09: the game is high-resolution painted art at 1920x1080 (tile 96, hero cell 144x216); checkpoint picks per job type below come from bake-off 1 (docs/BAKEOFF_1_VERDICT.md); style_prefix is PROVISIONAL until the style bake-off (style_v1) is judged.",
  "palette": "resurrect-64",
  "card_size": [
-  288,
-  162
+  864,
+  486
  ],
  "render_scale": 4,
- "tile_size": 32,
+ "tile_size": 96,
  "hero_cell": [
-  48,
-  72
+  144,
+  216
  ],
- "style_prefix": "painterly concept art for a 16-bit style JRPG cutscene, muted cinematic palette, soft edges, clear silhouettes, 16:9 scene card, no text",
+ "style_prefix": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, 16:9 scene, no text",
  "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, photo-realistic skin pores",
  "workflow": "txt2img_sdxl",
- "checkpoint": "sd_xl_base_1.0.safetensors",
+ "checkpoint": "ArtUniverseSDXL_v8.safetensors",
  "assets": {
   "vignettes": "D:\\Turing Accords Game\\project\\assets\\vignettes",
   "provenance": "D:\\Turing Accords Game\\project\\assets\\_provenance"
- }
+ },
+ "checkpoints_by_job": {
+  "scene_card": "ArtUniverseSDXL_v8.safetensors",
+  "concept": "ArtUniverseSDXL_v8.safetensors",
+  "prop": "ArtUniverseSDXL_v8.safetensors",
+  "portrait": "sd_xl_base_1.0.safetensors",
+  "portrait_sarah": "RealVisXL_V5.0_fp16.safetensors",
+  "icon": "ArtUniverseSDXL_v8.safetensors",
+  "tile_texture": "SDVN6-RealXL-Detailface.safetensors"
+ },
+ "loras_by_job": {
+  "portrait": [
+   {
+    "name": "rpg_portrait.safetensors",
+    "strength": 0.7
+   }
+  ],
+  "icon": [
+   {
+    "name": "game_icon_v1.0.safetensors",
+    "strength": 0.8
+   }
+  ],
+  "tile_texture": [
+   {
+    "name": "Pixel_Xl_V1.safetensors",
+    "strength": 0.7
+   }
+  ]
+ },
+ "_note_checkpoints_by_job": "scene_paint, repaint, icon and sleeve read checkpoints_by_job / loras_by_job for their own type (job fields win); the older job types still read `checkpoint`/`loras` per job. game_root / asset_root / provenance_dir are where `forge approve` may write — nowhere else.",
+ "game_root": "D:\\Turing Accords Game",
+ "asset_root": "D:\\Turing Accords Game\\project\\assets",
+ "provenance_dir": "D:\\Turing Accords Game\\project\\assets\\_provenance",
+ "scene_size": [
+  1920,
+  1080
+ ]
 }

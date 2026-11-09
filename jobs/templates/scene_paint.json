@@ -1,0 +1,14 @@
+{
+ "type": "scene_paint",
+ "name": "example_scene",
+ "game": "turing_accords",
+ "prompt": "a roadside gas station at dusk, wet asphalt, the canopy lights on, mountains behind",
+ "target": [
+  1920,
+  1080
+ ],
+ "refine": true,
+ "face_fix": false,
+ "variants": 2,
+ "_help": "render 1344x768 -> RealESRGAN -> cover-fit to target -> refine (hires fix). Add \"init\" + \"denoise\" to start from a picture, \"control\": {\"type\": \"canny\", \"strength\": 0.6} to lock its layout, \"face_fix\": true when people are in frame, \"target\": [2560, 1080] for a scrolling street."
+}

@@ -38,14 +38,42 @@ jobs/pending/*.json  ──►  worker (GPU: ComfyUI · CPU: Pillow/numpy)  ─�
 | `remove_bg` · `contact_sheet` · `pack_sheet` · `godot_tileset` | the finishing and packing tools | CPU |
 | `overworld` | *planned*: public-domain map layers → a compressed game overworld | CPU |
 
+| `render` | a raw render (SDXL, FLUX.1 or FLUX.2 klein) with any checkpoint + LoRA chain — the bake-off's unit | GPU |
+| `scene_paint` | a **painted background at game resolution**: render → RealESRGAN → cover-fit 1920×1080 (or any size) → refine (hires fix) → optional FaceDetailer; optional img2img start and ControlNet layout lock | GPU |
+| `repaint` | **greybox → painting**: img2img from the map's greybox at its exact pixel size so walk polygons stay valid; a denoise sweep on one contact sheet; canny ControlNet | GPU |
+| `upscale` | any images through an upscale model to an exact size | GPU |
+| `icon` · `sleeve` | inventory icons on a transparent square canvas; record sleeves with PIL typography (no model spelling) | GPU |
+| `pipeline` | a chain of jobs as one (`$prev.outputs[0]` feeds the next step) | GPU or CPU |
+| `canny` · `normal_map` · `emissive_mask` | ControlNet edges; `_n.png` normal maps and `_e.png` glow layers for painted maps | CPU |
+
 Full field reference: `docs/JOB_TYPES.md` (generated from the code).
+
+## Your own model collection
+
+`forge.json → model_dirs` lists every folder of weights per kind — the forge's own `models\…` plus your
+collections (`sdmodels\`, `lora models\` by default). `scan_models.bat` reads every file's header (no
+weights loaded) and writes `models\INVENTORY.md`: checkpoint or LoRA, **SD1.5 / SDXL / FLUX**, and the
+trigger words the trainer left behind. `install_comfy.bat` points ComfyUI at all of them.
+
+## The bake-off — which model for which kind of picture?
+
+Fine-tunes and LoRAs are unpredictable and sometimes perfect, so instead of guessing: `bakeoff.bat` queues
+**every checkpoint × every compatible LoRA (+ none) × a suite of test prompts** — portraits, scene cards,
+sprite sheets, tiles, maps, icons, props, concepts (`games/turing_accords/bakeoff/sdxl_v1.json`) — with one
+seed and identical sampler settings, grouped by checkpoint so ComfyUI reloads less. Incompatible pairs (an
+SD1.5 or FLUX LoRA on an SDXL checkpoint, which ComfyUI would silently ignore) are skipped and listed; a
+render that fails is a red cell, and the run moves on. Every render is also filed twice — `out\bakeoff\<suite>\by_model\<checkpoint>\<lora>\` and
+`by_category\<kind>\<prompt>\` (one folder per picture, one file per model) — so comparing is a matter of
+opening a folder. `bakeoff_report.bat` builds one grid per prompt
+(rows = checkpoints, columns = LoRAs) and an `index.html`; `python -m forge bakeoff rate <suite> <job-id> <1-5>`
+records verdicts that show up as badges. `bakeoff.bat --quick` is a ten-minute smoke run first.
 
 ## Quick start (Windows)
 
 1. `install.bat` — Python venv + the CPU tools. Run `run_cpu_worker.bat` and you can already snap,
    pixelize and pack.
 2. `install_comfy.bat` — clones ComfyUI into `engines\ComfyUI` with CUDA PyTorch (one big download).
-3. `python -m forge models pull sdxl-base-1.0` (inside the venv) or drop any checkpoint into `models\checkpoints\`.
+3. `pull_model.bat` — downloads the default checkpoint (SDXL base, ~6.9 GB) into `models\checkpoints\`; or drop any checkpoint there yourself.
 4. `run_worker.bat` — starts ComfyUI minimised and the GPU worker.
 5. `submit.bat jobs\templates\scene_card.json` — or drag a job/batch file onto `submit.bat`.
 6. Look in `out\<job-id>\` — `card.png`, `raw.png`, `contact.png`, `prov.json`, `job.json`.
@@ -66,7 +94,7 @@ A game's palette, style prefix and sizes live in `games/<game>/forge.game.json`,
 ## Repository map
 
 ```
-forge/            the package: queue, schema, cli, ops/ (image maths), engines/ (ComfyUI), jobs/ (handlers)
+forge/            the package: queue, schema, cli, bakeoff, ops/ (image maths, safetensors headers), engines/ (ComfyUI, SDXL graph), jobs/
 forge.json        configuration (paths, ComfyUI url, defaults)
 jobs/             pending/ running/ done/ failed/ — the queue; templates/ — one example per job type
 out/              results, one folder per job id
@@ -74,16 +102,37 @@ models/           weights (ignored) + models.json registry with licences
 palettes/         master palettes (.hex, Lospec format)
 games/            per-game config and job batches (turing_accords is the first)
 docs/             PROTOCOL.md · JOB_TYPES.md · CLAUDE.md · LICENSING.md · ROADMAP.md
-tests/            pytest (CPU side; 20 tests)
+tests/            pytest (CPU side; 24 tests)
 ```
 
 ## Status
 
-v0.1 — the queue, the CLI, the CPU tools and the ComfyUI driver are real and tested; the GPU handlers
+v0.2 (2026-11-09) — painted-background pipeline, game manifest + approve, pipelines, review pages, pre-flight
+doctor (see `docs/HANDOFF_FORGE_2026-11-09.md`). v0.1 — the queue, the CLI, the CPU tools and the ComfyUI driver are real and tested; the GPU handlers
 run against an SDXL workflow out of the box. FLUX.2 klein and Qwen-Image-Edit workflows are added by
 exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipeline (image → 3D proxy →
 8 facings → pixelize) and the overworld job are designed in `docs/ROADMAP.md` and not built yet.
 
+## Painted backgrounds and the game manifest (added 2026-11-09, Night 2)
+
+- **Setup once:** `pull_quality.bat` (RealESRGAN upscaler, face finder, SDXL union ControlNet — all commercial-OK),
+  `install_comfy_faces.bat` (FaceDetailer add-on), optional `install_comfy_aux.bat` (depth control). Then `doctor.bat`
+  lists which graphs and stages this ComfyUI can run and whether every model the queue names is on disk.
+- **What the game still needs:** `wanted.bat --refresh` then `wanted.bat --missing`.
+- **Put a finished picture in the game:** `approve.bat <job-id> <wanted-name> [pick]` — copies it to the game path with a
+  provenance record, after checking every model behind it is commercial-OK (refuses otherwise). `licence.bat` records a
+  licence you checked yourself (e.g. a Civitai checkpoint's page); `licences.bat` prints the licence record of everything approved.
+- **Judge a batch:** `review.bat <batch-or-suite>` → a page with 1–5 buttons → "Export ratings.json" → `rate.bat <same name>`.
+- **Drafts from the game data:** `brief.bat maps|sleeves|icons` (drafts cannot be submitted until their prompts are written).
+- **Queue control:** `"priority": 10` in a job runs it first; `pause.bat` / `resume.bat` park and restore waiting jobs.
+
 ## Licence
 
 MIT (code). Models and palettes carry their own licences — `docs/LICENSING.md` and `models/models.json`.
+
+## Bake-off scripts added 2026-11-09
+- `bakeoff_tonight.bat` — queues the whole evening in order: new SDXL LoRAs → house styles → FLUX.2 klein → FLUX.1 + LoRAs; then `run_worker.bat`.
+- `bakeoff_new_models.bat` / `bakeoff_styles.bat` / `bakeoff_flux.bat` — the same runs one at a time.
+- `pull_flux.bat [dev]` — fetches FLUX.2 klein 4B + FLUX.1 schnell and their encoders/VAEs into `models\` (dev is non-commercial; opt in).
+- Verdicts and what each model is for: `docs/BAKEOFF_1_VERDICT.md`, `docs/NEXT_MODELS.md`.
+

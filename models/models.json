@@ -3,7 +3,9 @@
   "models": {
     "sdxl-base-1.0": {
       "repo": "stabilityai/stable-diffusion-xl-base-1.0",
-      "files": ["sd_xl_base_1.0.safetensors"],
+      "files": [
+        "sd_xl_base_1.0.safetensors"
+      ],
       "dest": "checkpoints",
       "license": "CreativeML Open RAIL++-M",
       "commercial_ok": true,
@@ -11,13 +13,16 @@
       "notes": "The baseline. Use-based restrictions apply (no illegal/harmful content) but commercial use of weights and outputs is permitted."
     },
     "flux2-klein-4b": {
-      "repo": "black-forest-labs/FLUX.2-klein-4B",
-      "files": [],
-      "dest": "diffusion_models/flux2-klein-4b",
+      "repo": "Comfy-Org/flux2-klein-4B",
+      "files": [
+        "split_files/diffusion_models/flux-2-klein-base-4b-fp8.safetensors",
+        "split_files/diffusion_models/flux-2-klein-4b-fp8.safetensors"
+      ],
+      "dest": "diffusion_models",
       "license": "Apache-2.0",
       "commercial_ok": true,
-      "workflow": "txt2img_flux2_klein",
-      "notes": "The only FLUX.2 model under Apache 2.0. File list depends on the ComfyUI packaging (unet + text encoder + VAE) — fill `files` from the model card, or download in ComfyUI's manager and point the workflow at it."
+      "workflow": "flux2_klein",
+      "notes": "FLUX.2 [klein] 4B, ComfyUI repackage, fp8: the base model (20 steps, cfg 5 — takes LoRAs and negatives) and the distilled one (4 steps, cfg 1). Needs flux2-klein-text-encoder and flux2-vae. Graph: forge/engines/flux2_graph.py."
     },
     "flux2-klein-9b": {
       "repo": "black-forest-labs/FLUX.2-klein-9B",
@@ -36,6 +41,146 @@
       "commercial_ok": true,
       "workflow": "edit_qwen_image",
       "notes": "Reference-image editing (pose sheets with the Spritely LoRAs). ~20B params: fp8/GGUF + CPU offload on 16 GB VRAM."
+    },
+    "flux2-klein-text-encoder": {
+      "repo": "Comfy-Org/flux2-klein-4B",
+      "files": [
+        "split_files/text_encoders/qwen_3_4b.safetensors"
+      ],
+      "dest": "text_encoders",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "flux2_klein",
+      "notes": "Qwen3 4B text encoder for the klein 4B models (~8 GB)."
+    },
+    "flux2-vae": {
+      "repo": "Comfy-Org/flux2-klein-9B",
+      "files": [
+        "split_files/vae/flux2-vae.safetensors"
+      ],
+      "dest": "vae",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "flux2_klein",
+      "notes": "The FLUX.2 VAE (shared by all FLUX.2 models; also at Comfy-Org/flux2-dev/split_files/vae/). Pulled from the klein-9B repo only because that repo is open; the 9B *model* is non-commercial and is not registered here."
+    },
+    "flux1-schnell-fp8": {
+      "repo": "Kijai/flux-fp8",
+      "files": [
+        "flux1-schnell-fp8.safetensors"
+      ],
+      "dest": "diffusion_models",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "flux1",
+      "notes": "FLUX.1 [schnell] unet, fp8 (~12 GB). 4 steps. Needs flux1-text-encoders and flux1-vae. Runs William's FLUX.1 LoRAs (RPGmaps_v5, RPGv6, bbeam_comic). Graph: forge/engines/flux1_graph.py."
+    },
+    "flux1-dev-fp8": {
+      "repo": "Kijai/flux-fp8",
+      "files": [
+        "flux1-dev-fp8.safetensors"
+      ],
+      "dest": "diffusion_models",
+      "license": "FLUX.1 Non-Commercial License",
+      "commercial_ok": false,
+      "workflow": "flux1",
+      "notes": "FLUX.1 [dev] unet, fp8 (~12 GB). 20 steps, guidance 3.5. Most Civitai FLUX fine-tunes and LoRAs are trained on dev and look best here — but the licence is non-commercial: experiments and comparisons only, never a shipped asset."
+    },
+    "flux1-text-encoders": {
+      "repo": "comfyanonymous/flux_text_encoders",
+      "files": [
+        "clip_l.safetensors",
+        "t5xxl_fp8_e4m3fn.safetensors"
+      ],
+      "dest": "text_encoders",
+      "license": "Apache-2.0 (T5 / CLIP)",
+      "commercial_ok": true,
+      "workflow": "flux1",
+      "notes": "CLIP-L and T5-XXL (fp8) for every FLUX.1 model and fine-tune."
+    },
+    "flux1-vae": {
+      "repo": "black-forest-labs/FLUX.1-schnell",
+      "files": [
+        "ae.safetensors"
+      ],
+      "dest": "vae",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "flux1",
+      "notes": "The FLUX.1 VAE (identical for dev and schnell)."
+    },
+    "flux2-klein-9b-text-encoder": {
+      "repo": "Comfy-Org/flux2-klein-9B",
+      "files": [
+        "split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors"
+      ],
+      "dest": "text_encoders",
+      "license": "Apache-2.0 (Qwen3 8B encoder); the klein 9B MODEL it serves is FLUX Non-Commercial",
+      "commercial_ok": true,
+      "workflow": "flux2_klein",
+      "notes": "Only needed for the klein 9B base/distilled models (bake-off comparisons; those models cannot ship)."
+    },
+    "realesrgan-x4plus": {
+      "repo": "lllyasviel/Annotators",
+      "files": [
+        "RealESRGAN_x4plus.pth"
+      ],
+      "urls": [
+        "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+      ],
+      "sha256": "4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1",
+      "dest": "upscale_models",
+      "license": "BSD-3-Clause",
+      "commercial_ok": true,
+      "workflow": "upscale",
+      "notes": "Real-ESRGAN x4plus (xinntao) — the forge's default upscaler (forge.json comfy.upscale_model). Official GitHub release weights; HF mirror in lllyasviel/Annotators. 4x-UltraSharp is deliberately NOT registered: CC BY-NC-SA 4.0 (non-commercial)."
+    },
+    "controlnet-union-sdxl-promax": {
+      "repo": "xinsir/controlnet-union-sdxl-1.0",
+      "files": [
+        "diffusion_pytorch_model_promax.safetensors"
+      ],
+      "save_as": {
+        "diffusion_pytorch_model_promax.safetensors": "xinsir-union-sdxl-promax.safetensors"
+      },
+      "dest": "controlnet",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "scene_paint control",
+      "notes": "SDXL ControlNet++ union (canny/lineart/mlsd, depth, normal, tile, openpose, scribble, segment) in one file, ~2.5 GB; ComfyUI picks the mode with SetUnionControlNetType. Saved under a unique name (the repo's file name is generic). Licence per the model card at registration time (Apache-2.0) — re-check the card before shipping."
+    },
+    "face-yolov8m": {
+      "repo": "Bingsu/adetailer",
+      "files": [
+        "face_yolov8m.pt"
+      ],
+      "dest": "ultralytics/bbox",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "face_fix",
+      "notes": "Face detector for FaceDetailer (Impact Pack + Subpack, install_comfy_faces.bat). It only finds faces — the repainting is done by the job's own checkpoint. ComfyUI lists it as bbox/face_yolov8m.pt."
+    },
+    "depth-anything-v2-small": {
+      "repo": "depth-anything/Depth-Anything-V2-Small",
+      "files": [
+        "depth_anything_v2_vits.pth"
+      ],
+      "dest": "",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "scene_paint control depth",
+      "notes": "Depth for the depth ControlNet, via comfyui_controlnet_aux (install_comfy_aux.bat), which downloads it itself on first use — no pull needed. Only the Small model: Depth Anything V2 Base/Large/Giant are CC-BY-NC-4.0 and the forge never asks for them."
+    },
+    "midas-dpt-hybrid": {
+      "repo": "lllyasviel/Annotators",
+      "files": [
+        "dpt_hybrid-midas-501f0c75.pt"
+      ],
+      "dest": "",
+      "license": "MIT",
+      "commercial_ok": true,
+      "workflow": "scene_paint control depth",
+      "notes": "MiDaS depth (fallback when the Depth Anything V2 node is absent); downloaded by comfyui_controlnet_aux on first use."
     }
   }
 }

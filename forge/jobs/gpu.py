@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from ..engines import comfy
+from ..engines import comfy, sdxl_graph, flux2_graph, flux1_graph
 from ..ops import palette as pal, pixelize as pix, alpha as al, sheet as sh, tiles as tl
 from .common import Context, write_prov, save_png, full_prompt, negative, model_licence
 
@@ -13,6 +13,10 @@ from .common import Context, write_prov, save_png, full_prompt, negative, model_
 def _client(ctx: Context):
     if ctx.comfy is None:
         raise RuntimeError("this job needs the GPU worker (run_worker.bat), not the CPU worker")
+    if not hasattr(ctx.comfy, "run_by_node"):
+        # a worker started before an update holds an old client object; give it the current class (no restart needed)
+        old = ctx.comfy
+        ctx.comfy = comfy.ComfyClient(old.url, old.timeout, old.poll)
     if not ctx.comfy.is_up():
         raise RuntimeError(f"ComfyUI is not reachable at {ctx.comfy.url} — start it (run_worker.bat does) and retry")
     return ctx.comfy
@@ -162,3 +166,107 @@ def _color_word(hex_color: str) -> str:
     if r > 230 and g > 230 and b > 230:
         return "white"
     return "grey"
+
+
+def _model_gb(ctx: Context, name: str) -> float:
+    """Size in GB of a checkpoint/diffusion-model file found in any configured model folder (0 if not found)."""
+    from .. import config as cfgmod
+    for kind in ("diffusion_models", "checkpoints"):
+        for d in cfgmod.model_dirs(ctx.cfg, kind):
+            p = Path(d) / name
+            if p.exists():
+                return p.stat().st_size / 1e9
+    return 0.0
+
+
+def _weight_dtype(ctx: Context, name: str) -> str:
+    gb = _model_gb(ctx, name)
+    limit = float(ctx.cfg.get("comfy", {}).get("fp8_cast_over_gb", 14.0))
+    return "fp8_e4m3fn" if gb > limit else "default"
+
+
+def build_graph(ctx: Context, job: dict, w: int, h: int, seed: int, count: int | None = None) -> tuple[dict, dict]:
+    """The engine graph for a job (`graph`: sdxl · flux2_klein · flux1) and its provenance fields.
+    Shared by `render` and the paint jobs (scene_paint, repaint, icon, sleeve) so every engine works everywhere."""
+    job = dict(job)
+    job["size"] = [int(w), int(h)]
+    job["seed"] = int(seed)
+    if count is not None:
+        job["count"] = int(count)
+    graph_kind = str(job.get("graph") or "sdxl").lower()
+    ckpt = job.get("checkpoint") or ctx.setting(job, "checkpoint") or ctx.cfg["comfy"]["default_checkpoint"]
+    loras = [dict(l) for l in (job.get("loras") or [])]
+    prompt = full_prompt(ctx, job)
+    neg = job.get("negative") if job.get("negative") is not None else negative(ctx, job)
+    comfy_cfg = ctx.cfg.get("comfy", {})
+    if graph_kind == "flux2_klein":
+        fx = comfy_cfg.get("flux2", {})
+        distilled = job.get("distilled")
+        if distilled is None:
+            distilled = flux2_graph.is_distilled(ckpt)
+        steps = int(job["steps"]) if job.get("steps") is not None else (4 if distilled else 20)
+        cfg = float(job["cfg"]) if job.get("cfg") is not None else (1.0 if distilled else 5.0)
+        default_te = fx.get("text_encoder_9b", "qwen_3_8b_fp8mixed.safetensors") if "9b" in ckpt.lower() else fx.get("text_encoder", "qwen_3_4b.safetensors")
+        text_encoder = job.get("text_encoder") or default_te
+        vae = job.get("vae") or fx.get("vae", "flux2-vae.safetensors")
+        wdt = job.get("weight_dtype") or _weight_dtype(ctx, ckpt)
+        graph = flux2_graph.build(ckpt, prompt, neg, seed, int(w), int(h), text_encoder=text_encoder, vae=vae, steps=steps, cfg=cfg,
+                                  loras=loras, batch=int(job.get("count") or 1), sampler=str(job.get("sampler") or "euler"),
+                                  distilled=bool(distilled), weight_dtype=wdt)
+        graph_name, extra = "flux2_graph", {"text_encoder": text_encoder, "vae": vae, "distilled": bool(distilled), "weight_dtype": wdt}
+        sampler, scheduler = str(job.get("sampler") or "euler"), "flux2"
+    elif graph_kind == "flux1":
+        fx = comfy_cfg.get("flux1", {})
+        steps = int(job["steps"]) if job.get("steps") is not None else (4 if flux1_graph.is_schnell(ckpt) else 20)
+        guidance = float(job["guidance"]) if job.get("guidance") is not None else float(fx.get("guidance", 3.5))
+        clip_l = job.get("clip_l") or fx.get("clip_l", "clip_l.safetensors")
+        t5 = job.get("t5") or fx.get("t5", "t5xxl_fp8_e4m3fn.safetensors")
+        vae = job.get("vae") or fx.get("vae", "ae.safetensors")
+        all_in_one = bool(job.get("all_in_one", False))
+        cfg = float(job["cfg"]) if job.get("cfg") is not None else 1.0   # >1 only for de-distilled fine-tunes
+        wdt = job.get("weight_dtype") or _weight_dtype(ctx, ckpt)
+        graph = flux1_graph.build(ckpt, prompt, seed, int(w), int(h), clip_l=clip_l, t5=t5, vae=vae, steps=steps, guidance=guidance,
+                                  loras=loras, batch=int(job.get("count") or 1), sampler=str(job.get("sampler") or "euler"),
+                                  scheduler=str(job.get("scheduler") or "simple"), all_in_one=all_in_one, negative=neg,
+                                  cfg=cfg, weight_dtype=wdt)
+        graph_name, extra = "flux1_graph", {"clip_l": clip_l, "t5": t5, "vae": vae, "guidance": guidance, "all_in_one": all_in_one, "weight_dtype": wdt}
+        sampler, scheduler = str(job.get("sampler") or "euler"), str(job.get("scheduler") or "simple")
+    else:
+        # None = "use the default" (schema.with_defaults fills unset optional fields with None)
+        steps = int(job["steps"]) if job.get("steps") is not None else 25
+        cfg = float(job["cfg"]) if job.get("cfg") is not None else 6.0
+        sampler, scheduler = str(job.get("sampler") or "dpmpp_2m"), str(job.get("scheduler") or "karras")
+        graph = sdxl_graph.build(ckpt, prompt, neg, seed, int(w), int(h), steps, cfg,
+                                 loras=loras, batch=int(job.get("count") or 1), sampler=sampler,
+                                 scheduler=scheduler, clip_skip=int(job.get("clip_skip") or 0))
+        graph_name, extra = "sdxl_graph", {}
+    prov = {"engine": "comfyui", "graph": graph_name, "checkpoint": ckpt, "loras": loras, "seed": seed, "width": int(w),
+            "height": int(h), "steps": int(steps), "cfg": float(cfg), "sampler": sampler, "scheduler": scheduler,
+            "full_prompt": prompt, "negative": neg, **extra}
+    prov.update(model_licence(ctx, ckpt))
+    return graph, prov
+
+
+def render(job: dict, ctx: Context, out: Path) -> dict:
+    """Raw render through a code-built graph: checkpoint + LoRA chain, nothing after.
+    `graph`: "sdxl" (default) · "flux2_klein" (FLUX.2 [klein] 4B) · "flux1" (FLUX.1 dev/schnell and fine-tunes)."""
+    client = _client(ctx)
+    seed = int(job.get("seed", -1))
+    if seed < 0:
+        seed = random.randint(0, 2**31 - 1)
+    w, h = job.get("size") or [1024, 1024]
+    graph, prov = build_graph(ctx, job, int(w), int(h), seed)
+    ckpt, loras = prov["checkpoint"], prov["loras"]
+    imgs = [Image.open(io.BytesIO(b)).convert("RGB") for b in client.run(graph)]
+    outputs = []
+    for i, im in enumerate(imgs):
+        name = "render.png" if i == 0 else f"render_{i + 1}.png"
+        save_png(im, out / name)
+        outputs.append(name)
+    write_prov(out, job, **prov, outputs=outputs, meta=job.get("meta", {}))
+    filed = []
+    meta = job.get("meta") or {}
+    if meta.get("suite"):
+        from .. import bakeoff
+        filed = [str(p) for p in bakeoff.file_render(str(meta["suite"]), meta, out / "render.png")]
+    return {"outputs": outputs, "seed": seed, "checkpoint": ckpt, "loras": [l["name"] for l in loras], "filed": filed}

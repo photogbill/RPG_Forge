@@ -1,0 +1,8 @@
+{
+ "type": "icon",
+ "name": "coolant",
+ "game": "turing_accords",
+ "prompt": "a dented steel coolant canister with a blue cap",
+ "canvas": 256,
+ "variants": 3
+}

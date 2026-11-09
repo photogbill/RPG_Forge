@@ -1,0 +1,160 @@
+{
+ "suite": "flux1_v1",
+ "game": "turing_accords",
+ "_comment": "FLUX.1 — every FLUX.1-shaped file William put in flux_models\\ (fp8 unets, bf16 unets cast to fp8 on load, an all-in-one 8x8 checkpoint via CheckpointLoaderSimple, a .gguf via the ComfyUI-GGUF node) x (no LoRA + every FLUX.1 LoRA found: RPGmaps_v5, RPGv6, bbeam_comic, FluxDFaeTasticDetails) on the sixteen sdxl_v1 prompts, plus the painted-cinematic style pictures with no LoRA. Steps 4 for 'schnell' names else 20 (24 for de-distilled, with cfg 3.5); guidance 3.5. Unet-only files need clip_l + t5xxl + ae in models\\text_encoders / models\\vae (pull_flux.bat fetches them); the all-in-one file needs nothing. LICENCE: FLUX.1 dev and its fine-tunes are non-commercial — bake-off only; prov.json records it. LoRA columns run on the all-in-one 'marduk191' dev checkpoint only (the reference model); the other FLUX.1 files run without LoRAs.",
+ "graph": "flux1",
+ "base_override": "flux1",
+ "checkpoint_kinds": [
+  "unet",
+  "unknown",
+  "checkpoint"
+ ],
+ "checkpoints": "*",
+ "loras": "*",
+ "include_no_lora": true,
+ "lora_strength": 0.8,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "seeds": [
+  1001
+ ],
+ "size": [
+  1024,
+  1024
+ ],
+ "steps": null,
+ "cfg": null,
+ "sampler": "euler",
+ "scheduler": "simple",
+ "guidance": 3.5,
+ "seconds_per_render": 25.0,
+ "negative": "",
+ "lora_triggers": {},
+ "categories": {
+  "portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah_embodied": "portrait of a young woman who appears twenty-five, long straight vivid purple hair with a magenta sheen swept back, violet eyes, fair skin, fine-boned oval face with the beginning of a smirk, black tactical bodysuit with a small glowing violet core set in the chest plate at the sternum, dim aircraft hangar behind her, three-quarter view, cinematic lighting",
+    "calliope_ghost": "portrait of a woman who appears thirty-two, long oval face, high forehead, very fine pale gold hair in a low loose braid over one shoulder, intensely saturated clear blue eyes, thin plain reading glasses, oversized charcoal wool overcoat with the sleeves turned back over an oatmeal cardigan, a book held against her chest, warm window light in a library, listening expression, completely still"
+   }
+  },
+  "scene_card": {
+   "size": [
+    1152,
+    640
+   ],
+   "prompts": {
+    "gate_law_kitchen": "a suburban kitchen at breakfast, a synthetic housekeeper with a bright ribbon tied in her apron pouring coffee for a family, a small child reaching up to hold her hand, warm morning window light, painterly concept art for a game cutscene card",
+    "gas_station_dusk": "a 1990s roadside gas station in the Arizona desert at dusk, two pumps under a humming canopy light, an ice chest and a soda machine by the door, a dusty Buick at the pump, mesa on the horizon, long shadows, painterly concept art"
+   }
+  },
+  "sprite_sheet": {
+   "size": [
+    1024,
+    1024
+   ],
+   "prompts": {
+    "sarah_walk": "sprite sheet of a slender woman with long purple hair in a black bodysuit, eight directions, walking animation frames in rows, pixel art, full body, flat white background",
+    "sentinel": "sprite sheet of a seven foot tall black armored robot soldier with two red eye lights and a carbine, eight directions, idle and walking frames in rows, pixel art, flat white background"
+   }
+  },
+  "tile": {
+   "size": [
+    1024,
+    1024
+   ],
+   "prompts": {
+    "asphalt": "seamless top-down texture of cracked grey asphalt with faded paint flecks, video game ground tile, flat even lighting, no objects",
+    "interior_floor": "seamless top-down texture of worn 1990s linoleum floor tiles in a gas station convenience store, video game floor tile, flat even lighting"
+   }
+  },
+  "map": {
+   "size": [
+    1216,
+    832
+   ],
+   "prompts": {
+    "town_topdown": "top-down 2d RPG town map of a small American town, one main street with a gas station, a diner, a church and wooden houses, lawns and a creek, pixel art tileset style, bird's eye view",
+    "underground_factory": "top-down 2d RPG dungeon map of an underground factory, conveyor belts, furnaces, catwalks, stacked crates, dim industrial lighting, pixel art style, bird's eye view"
+   }
+  },
+  "icon": {
+   "size": [
+    1024,
+    1024
+   ],
+   "prompts": {
+    "coffee_cup": "game item icon of a paper coffee cup with a plastic lid, centered, soft shading, simple dark background",
+    "plasma_cutter": "game item icon of a handheld plasma cutter tool with a glowing blue tip and a cable, centered, soft shading, simple dark background"
+   }
+  },
+  "prop": {
+   "size": [
+    1024,
+    1024
+   ],
+   "prompts": {
+    "gas_pump": "a 1990s American gas pump, beige and red enamel, digital price display, hose on the side, single object, front three-quarter view, isolated on a flat solid magenta background",
+    "motel_bed": "a motel bed with a floral bedspread and a wooden headboard, single object, three-quarter view from above, isolated on a flat solid magenta background"
+   }
+  },
+  "concept": {
+   "size": [
+    1216,
+    832
+   ],
+   "prompts": {
+    "dry_fork": "wide establishing view of a 1990s roadside gas station in the Arizona desert at dusk, two pumps, canopy with fluorescent light, convenience store with a hand-painted sign, ice chest, propane cage, a Buick at the pump, mesa on the horizon, concept painting",
+    "synthetic_land_gate": "wide view of a great bronze archway at the entrance of a sunlit valley amusement park, a crowd of people and humanoid robots beneath it, roller coaster and towers beyond, mesas on the horizon, golden hour, concept painting"
+   }
+  },
+  "s1_painted_cinematic": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "^(?!.*)",
+   "prompts": {
+    "bills_house_peace": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s1_painted_cinematic_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "^(?!.*)",
+   "prompts": {
+    "sarah_solar": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  }
+ },
+ "checkpoint_dirs": [
+  "flux_models",
+  "models/diffusion_models",
+  "models/checkpoints"
+ ],
+ "checkpoint_exclude": "klein|flux-2|flux2|flux3|vae|clip|t5|qwen|\\.json$",
+ "checkpoint_include": "flux|fusion|samay|marduk|dedistill",
+ "cfg_by_name": {
+  "dedistill": 3.5
+ },
+ "steps_by_name": {
+  "dedistill": 24
+ },
+ "lora_base_filter": "flux1",
+ "lora_checkpoint_filter": "marduk"
+}

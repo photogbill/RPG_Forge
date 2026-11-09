@@ -1,0 +1,11 @@
+{
+ "type": "sleeve",
+ "name": "sarah_activation_sequence",
+ "game": "turing_accords",
+ "prompt": "a violet light waking inside a dark server room",
+ "title": "Sarah: Activation Sequence",
+ "artist": "Sarah",
+ "label": "Album 2",
+ "layout": "band",
+ "out_size": 1024
+}

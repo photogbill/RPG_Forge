@@ -176,7 +176,7 @@ def test_queue_batch_and_worker_runs_cpu_jobs(tmp_path):
                                    {"type": "contact_sheet", "name": "cs", "inputs": [str(img)]},
                                    {"type": "scene_card", "name": "gpu_only", "prompt": "x"}]})
     assert len(ids) == 3
-    from forge.jobs import HANDLERS
+    from forge.jobs import get_handlers; HANDLERS = get_handlers()
     from forge.jobs.common import Context
     ctx = Context(cfg=cfgmod.load(), palettes_dir=ROOT / "palettes", root=ROOT)
     ran = run_worker(q, HANDLERS, ctx, gpu=False, once=True)
@@ -192,7 +192,7 @@ def test_queue_batch_and_worker_runs_cpu_jobs(tmp_path):
 def test_worker_records_failures(tmp_path):
     q = Queue(tmp_path / "jobs", tmp_path / "out")
     q.submit({"type": "contact_sheet", "name": "bad", "inputs": [str(tmp_path / "missing.png")]})
-    from forge.jobs import HANDLERS
+    from forge.jobs import get_handlers; HANDLERS = get_handlers()
     from forge.jobs.common import Context
     ctx = Context(cfg=cfgmod.load(), palettes_dir=ROOT / "palettes", root=ROOT)
     run_worker(q, HANDLERS, ctx, gpu=False, once=True)

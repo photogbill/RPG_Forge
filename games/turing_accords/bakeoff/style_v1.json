@@ -1,0 +1,183 @@
+{
+ "suite": "style_v1",
+ "game": "turing_accords",
+ "_comment": "House-style bake-off (2026-11-09): five candidate styles, written in our own words (no named artists), × the five SDXL checkpoints × (no LoRA + Retro_Illustration + Animated_Concept; Pixel_Xl_V1 only for the HD-pixel style) × ten Game I pictures (8 scenes at 16:9, 2 portraits). Same seed and sampler as sdxl_v1. Categories are the styles (s1..s5, with a _portrait twin); by_category/<style>/<picture>/ puts every model's take on one picture in one style side by side. William's direction: high resolution, vivid, beautiful where appropriate, horrific where appropriate, good composition. The non-SDXL checkpoints (Krea 2, MOSS-Image) need their own graphs and are not in this suite — docs/NEXT_MODELS.md.",
+ "checkpoints": [
+  "ArtUniverseSDXL_v8.safetensors",
+  "RealVisXL_V5.0_fp16.safetensors",
+  "SDVN6-RealXL-Detailface.safetensors",
+  "gmic icon_V5-000180.safetensors",
+  "sd_xl_base_1.0.safetensors"
+ ],
+ "loras": [
+  "Retro_Illustration.safetensors",
+  "Animated_Concept.safetensors",
+  "Pixel_Xl_V1.safetensors"
+ ],
+ "include_no_lora": true,
+ "lora_strength": 0.7,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "seeds": [
+  1001
+ ],
+ "size": [
+  1344,
+  768
+ ],
+ "steps": 28,
+ "cfg": 6.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "karras",
+ "seconds_per_render": 24.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, jpeg artifacts, oversaturated neon, plastic skin, extra heads, duplicated figures",
+ "lora_triggers": {
+  "Retro_Illustration.safetensors": "",
+  "Animated_Concept.safetensors": "",
+  "Pixel_Xl_V1.safetensors": "pixel art"
+ },
+ "categories": {
+  "s1_painted_cinematic": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "bills_house_peace": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s1_painted_cinematic_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "sarah_solar": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  },
+  "s2_inked_chiaroscuro": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "bills_house_peace": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s2_inked_chiaroscuro_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "sarah_solar": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "hand-painted illustration with inked edges, bold shapes, dramatic chiaroscuro, deep shadow with one vivid light source, graphic composition, matte finish, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  },
+  "s3_hd_pixel_painted": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept|Pixel_Xl",
+   "prompts": {
+    "bills_house_peace": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s3_hd_pixel_painted_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept|Pixel_Xl",
+   "prompts": {
+    "sarah_solar": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "high-resolution pixel art, fine pixel density, clean dithering, painted lighting and colour, detailed, vivid palette, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  },
+  "s4_gouache_poster": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "bills_house_peace": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s4_gouache_poster_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "sarah_solar": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "gouache and marker poster illustration, flat vivid colour fields, hard-edged light, strong silhouettes, textured paper, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  },
+  "s5_lowkey_photographic": {
+   "size": [
+    1344,
+    768
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "bills_house_peace": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, a suburban living room at night, a server rack glowing cyan against the wall, a ten-year-old boy asleep on the couch under a blanket, a translucent woman made of pale blue light standing over him, the only light in the room",
+    "augusta_ruin": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "level_seven": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "dockerys_juke": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "darpa_lab": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, a government research lab: two identical server cathedrals facing each other across a glass-walled briefing room, cold institutional light, cables, a single empty chair",
+    "tucson_boneyard": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, an aircraft boneyard at golden hour, rows of mothballed jets stretching to the mountains, one figure with a rifle standing on a wing, long shadows",
+    "new_orleans_opera": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+    "mile_212": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, a biker bar in the desert at dusk, a dozen motorcycles in a row, sodium-orange lights, a thunderstorm building over the mesa"
+   }
+  },
+  "s5_lowkey_photographic_portrait": {
+   "size": [
+    832,
+    1216
+   ],
+   "lora_filter": "Retro_Illustration|Animated_Concept",
+   "prompts": {
+    "sarah_solar": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, portrait of a woman of twenty-five, fair skin, violet eyes, long straight iridescent hair that shifts between magenta-violet and cobalt blue like the surface of a solar panel with a fine cell-grid sheen and glints of light, black tactical suit with a softly glowing violet core at the sternum, a quiet steady gaze, inside an aircraft hangar",
+    "valkyrie_war_body": "photographic realism, low-key lighting, a single warm light source, deep black shadows, film grain, 35mm, no text, portrait of a machine built like a man: grey synthetic skin, short dark hair, the right eye a red-orange glowing lens, the left eye cold blue, black tactical armoured frame with cables at the joints, calm and terrible, standing before a burning farmhouse at night"
+   }
+  }
+ }
+}

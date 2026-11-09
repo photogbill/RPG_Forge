@@ -1,0 +1,8 @@
+{
+ "type": "normal_map",
+ "name": "example_normals",
+ "inputs": [
+  "out/<job-id>/scene.png"
+ ],
+ "strength": 2.0
+}

@@ -6,7 +6,7 @@ Built in the order the game needs it. Each module is useful alone the day it lan
 Queue · CLI · schema · logging · CPU ops (OKLab palette snap with hysteresis, grid detection + cell
 downscale, flood-fill alpha, contact/sprite sheets, seamless tiles, Godot TileSet writer) · ComfyUI
 driver with a template workflow · GPU handlers (scene_card, concept, portrait, prop, tile_texture) ·
-model registry with licences · Windows .bat install/run · 20 tests.
+model registry with licences · Windows .bat install/run · safetensors header inspection (SD1.5/SDXL/FLUX, triggers) · SDXL graph builder with LoRA chains · the **bake-off** (checkpoint × LoRA × prompt suite → grids + html + ratings) · 24 tests.
 
 ## v0.2 — environments end to end (next)
 The first location from concept to lit map, so the whole pipeline is seen once before scaling:

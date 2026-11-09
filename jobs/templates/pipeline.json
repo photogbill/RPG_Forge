@@ -1,0 +1,32 @@
+{
+ "type": "pipeline",
+ "name": "example_chain",
+ "game": "turing_accords",
+ "steps": [
+  {
+   "type": "render",
+   "prompt": "a roadside gas station at dusk",
+   "size": [
+    1344,
+    768
+   ]
+  },
+  {
+   "type": "upscale",
+   "inputs": [
+    "$prev.outputs[0]"
+   ],
+   "fit": [
+    1920,
+    1080
+   ]
+  },
+  {
+   "type": "palette_snap",
+   "inputs": [
+    "$prev.outputs[0]"
+   ]
+  }
+ ],
+ "_help": "$prev.outputs[0] = the first output of the step before; $prev.outputs = all of them; $steps[1].outputs[0] = step 1's first."
+}

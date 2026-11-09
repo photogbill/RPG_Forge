@@ -1,0 +1,9 @@
+{
+ "type": "canny",
+ "name": "example_canny",
+ "inputs": [
+  "path/to/greybox.png"
+ ],
+ "low": 0.08,
+ "high": 0.2
+}

@@ -80,17 +80,39 @@ def write_prov(out_dir: Path, job: dict, **extra) -> Path:
 
 
 def model_licence(ctx: Context, checkpoint: str) -> dict:
-    """Look the checkpoint up in models/models.json (by file name) for its licence record."""
+    """The licence record for a model file, by file name: models/models.json (the registry, including any
+    `save_as` renames), then models/licences.json (licences a person checked and recorded with
+    `python -m forge models licence …` — e.g. a Civitai checkpoint). Unknown → commercial_ok None."""
+    name = Path(str(checkpoint)).name
     reg = ctx.root / "models" / "models.json"
-    if not reg.exists():
-        return {}
-    with open(reg, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    for name, m in data.get("models", {}).items():
-        for fname in m.get("files", []):
-            if Path(fname).name == Path(checkpoint).name:
-                return {"model": name, "license": m.get("license"), "commercial_ok": m.get("commercial_ok")}
-    return {"model": checkpoint, "license": "unknown — add it to models/models.json"}
+    if reg.exists():
+        with open(reg, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        for mname, m in data.get("models", {}).items():
+            names = {Path(x).name for x in m.get("files", [])} | set((m.get("save_as") or {}).values())
+            if name in names:
+                return {"model": mname, "license": m.get("license"), "commercial_ok": m.get("commercial_ok")}
+    local = ctx.root / "models" / "licences.json"
+    if local.exists():
+        with open(local, "r", encoding="utf-8") as f:
+            rec = json.load(f).get(name)
+        if rec:
+            return {"model": name, "license": rec.get("license"), "commercial_ok": rec.get("commercial_ok"),
+                    "licence_checked": rec.get("checked")}
+    return {"model": checkpoint, "license": "unknown — add it to models/models.json", "commercial_ok": None}
+
+
+def licence_chain(ctx: Context, parts: dict) -> tuple[list[dict], bool]:
+    """parts: {role: file} for every model that touched the pixels (checkpoint, LoRAs, upscaler, controlnet, face
+    detector …). Returns ([{role, file, model, license, commercial_ok}], all_commercial_ok). Unknown counts as NO —
+    a shipped asset needs every link known and permitted."""
+    recs = []
+    for role, f in parts.items():
+        if not f:
+            continue
+        r = model_licence(ctx, f)
+        recs.append({"role": role, "file": Path(str(f)).name, **{k: r.get(k) for k in ("model", "license", "commercial_ok")}})
+    return recs, bool(recs) and all(r.get("commercial_ok") is True for r in recs)
 
 
 def save_png(img: Image.Image, path: Path) -> Path:

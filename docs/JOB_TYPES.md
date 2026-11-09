@@ -42,6 +42,62 @@ Required: `prompt`
 
 Optional (default): `negative` (None), `seed` (-1), `size` ([512, 512]), `tile_size` (32), `palette` (None), `snap` (True), `style_prefix` (None), `workflow` (None), `checkpoint` (None), `steps` (28), `cfg` (6.0), `game` (None), `variants` (4)
 
+## `render`  (GPU)
+
+A raw render with any checkpoint + LoRA chain, no post-processing — the bake-off's unit and the thing to reach for when you want to see what a model does. `graph` picks the engine graph: 'sdxl' (default; checkpoint + LoraLoader chain), 'flux2_klein' (FLUX.2 [klein] 4B: `checkpoint` is the diffusion-model file, `text_encoder`/`vae` default from forge.json comfy.flux2, `distilled` auto from the name, `cfg`/`steps` default 5/20 base or 1/4 distilled) or 'flux1' (FLUX.1 dev/schnell + fine-tunes: `clip_l`/`t5`/`vae`/`guidance` from comfy.flux1; `all_in_one` for a checkpoint with CLIP+VAE baked in; cfg is always 1). Output: render.png (+ _2…), prov.json.
+
+Required: `prompt`
+
+Optional (default): `negative` (None), `seed` (-1), `size` ([1024, 1024]), `steps` (25), `cfg` (6.0), `sampler` ('dpmpp_2m'), `scheduler` ('karras'), `checkpoint` (None), `loras` ([]), `clip_skip` (0), `count` (1), `style_prefix` (''), `game` (None), `meta` ({}), `graph` ('sdxl'), `text_encoder` (None), `vae` (None), `clip_l` (None), `t5` (None), `guidance` (None), `distilled` (None), `all_in_one` (False)
+
+## `scene_paint`  (GPU)
+
+A painted scene background at game resolution (roadmap F1): render at `size` (default 1344×768) → upscale model (`upscale`, default forge.json comfy.upscale_model = RealESRGAN_x4plus, BSD-3) → cover-fit to `target` (default the game's `scene_size` or 1920×1080; 2560×1080 for a scrolling street) → `refine` (hires-fix repaint at the final size, denoise 0.3; false to skip) → `face_fix` (Impact Pack FaceDetailer; true or {denoise, threshold, guide_size}). Optional `init` + `denoise` start from a picture (img2img), `control` {type: canny|depth|lineart|tile…, image, strength 0.6, start, end} pins the layout with the SDXL union ControlNet (canny is computed on the CPU), `freeu` true adds FreeU_V2 (SDXL). Any `graph` (sdxl · flux1 · flux2_klein). Output: scene.png, raw.png, prov.json (+ control.png, control_overlay.png, contact.png for variants). prov.json lists every model that touched the pixels and `commercial_ok`.
+
+Required: `prompt`
+
+Optional (default): `negative` (None), `seed` (-1), `size` ([1344, 768]), `target` (None), `crop` ('center'), `init` (None), `denoise` (None), `control` (None), `upscale` (True), `refine` (True), `face_fix` (False), `freeu` (False), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `style_prefix` (None), `game` (None), `variants` (1)
+
+## `repaint`  (GPU)
+
+Image-to-image from a greybox (roadmap F2): `init` is required and the painting comes back at the init's exact pixel size (stretched, never cropped) so walk polygons, doors and spawns stay valid. `denoise` (default 0.55) may be a list, e.g. [0.45, 0.55, 0.65] — one painting per value, same seed, on one contact sheet labelled with denoise and a layout-agreement score. Takes `control`, `refine`, `face_fix`, `freeu`, `upscale` like scene_paint. Output: scene[_dNNN].png, raw*.png, contact.png, prov.json.
+
+Required: `prompt`, `init`
+
+Optional (default): `negative` (None), `seed` (-1), `denoise` (0.55), `size` (None), `megapixels` (1.0), `target` (None), `control` (None), `upscale` (True), `refine` (True), `face_fix` (False), `freeu` (False), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `style_prefix` (None), `game` (None)
+
+## `upscale`  (GPU)
+
+Upscale images with an upscale model (default comfy.upscale_model) to an exact `fit` [w, h] (crop 'center' = cover-fit, 'disabled' = stretch) or by `factor` (default 2). Output: <name>.png per input. The inputs' own provenance still decides whether they can ship.
+
+Required: `inputs`
+
+Optional (default): `model` (None), `fit` (None), `factor` (2), `crop` ('center')
+
+## `icon`  (GPU)
+
+An inventory icon (roadmap F6): `prop` on a square canvas — render on a key colour → background removed → trimmed → centred on a transparent `canvas` (256 default; 512 for hi-res) with `padding` → optional palette snap. Default checkpoint/LoRA from the game's checkpoints_by_job.icon / loras_by_job.icon. Output: icon.png (+ icon_N.png, contact.png), raw*.png, prov.json.
+
+Required: `prompt`
+
+Optional (default): `negative` (None), `seed` (-1), `size` ([1024, 1024]), `canvas` (256), `padding` (0.08), `key_color` ('#ff00ff'), `snap` (False), `palette` (None), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `steps` (None), `cfg` (None), `style_prefix` (None), `game` (None), `variants` (1)
+
+## `sleeve`  (GPU)
+
+A record sleeve (roadmap F7): square art by the model (no lettering asked of it) + typography set by PIL — `title`, `artist`, optional `label` — in `layout` 'band' (a title band across the bottom) or 'corner' (stacked type in the top-left). Fonts: `font` / `font_bold` paths, else the game's assets/fonts, else a built-in fallback. Output: sleeve.png (`out_size`, default 1024), art.png, prov.json.
+
+Required: `prompt`, `title`
+
+Optional (default): `artist` (''), `label` (''), `layout` ('band'), `out_size` (1024), `size` ([1024, 1024]), `font` (None), `font_bold` (None), `negative` (None), `seed` (-1), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `steps` (None), `cfg` (None), `style_prefix` (None), `game` (None), `refine` (False)
+
+## `pipeline`  (GPU)
+
+A chain of jobs run as one (roadmap F5): `steps` is a list of job objects ({type, …}); a string '$prev.outputs[0]' (or '$prev.outputs', '$steps[N].outputs[K]') is replaced with the matching output path of an earlier step. Each step writes to out/<id>/NN_<type>/; the chain stops at the first failing step and the error names it. `game`, `batch` and `name` are passed down to every step. Needs the GPU worker only when a step does.
+
+Required: `steps`
+
+Optional (default): `game` (None), `contact` (True)
+
 ## `palette_snap`  (CPU)
 
 Snap one or more images to a palette in OKLab (nearest perceptual colour), alpha preserved. Output: <name>.png per input + report.json (colour counts).
@@ -89,6 +145,30 @@ Write a Godot 4 TileSet .tres for a tile strip PNG (which tiles collide). Output
 Required: `png`, `tile_size`, `blocking`
 
 Optional (default): `res_path` (None)
+
+## `canny`  (CPU)
+
+Canny edges (white on black) of each input — the ControlNet canny image, computed in numpy. `low`/`high` are fractions of the strongest gradient. Output: <name>.png.
+
+Required: `inputs`
+
+Optional (default): `low` (0.08), `high` (0.2), `sigma` (1.2)
+
+## `normal_map`  (CPU)
+
+A tangent-space normal map from each painting's luminance (roadmap F11) for the game's `<id>_n.png` slot; OpenGL convention (Godot). Output: <name>_n.png.
+
+Required: `inputs`
+
+Optional (default): `strength` (2.0), `smooth` (1.0), `invert_y` (False)
+
+## `emissive_mask`  (CPU)
+
+The glowing parts of each painting — bright AND saturated pixels (screens, neon, cores) plus any near `colors` — on black, for the game's additive `<id>_e.png` slot (roadmap F11). Output: <name>_e.png + report.json (fraction lit).
+
+Required: `inputs`
+
+Optional (default): `threshold` (0.85), `min_saturation` (0.25), `colors` ([]), `tolerance` (40), `feather` (1.5)
 
 ## `overworld`  (CPU)
 

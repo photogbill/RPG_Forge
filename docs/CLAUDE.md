@@ -44,6 +44,18 @@ with that file as the message, pushes, appends it to `CHANGELOG.md` and keeps it
 `COMMIT_MESSAGE.txt` already exists when you start, the last change has not been pushed yet: append to
 it rather than overwrite it.
 
+## Running a bake-off (choosing models)
+
+The person's model collection is in the folders listed by `forge.json → model_dirs`. Before proposing a
+checkpoint or LoRA for anything, read `models/INVENTORY.md` (regenerate with `python -m forge models scan`):
+it says which files are SDXL, which are SD1.5 or FLUX (unusable on SDXL), and the trigger words.
+To compare them, edit or copy `games/<game>/bakeoff/*.json` (test prompts per asset kind; keep the house
+`style_prefix` *out* — a bake-off tests the model, not the style), run `python -m forge bakeoff plan` to see
+the counts and skips, `submit` to queue, and after the GPU worker has run, `report` and look at
+`out/bakeoff/<suite>/grid_*.png` — rows are checkpoints, columns LoRAs — or open `by_category/<kind>/<prompt>/` (every model's take on one picture, side by side) and `by_model/<checkpoint>/<lora>/` (everything one model made). Rate what you see with
+`bakeoff rate` and write the conclusions into the game config (`checkpoint`, per-job-type `loras`) so later
+jobs inherit the winners. Prompt in your own words; never prompt a named artist's style.
+
 ## Writing prompts that work
 
 - Say what is *in* the picture and where the light comes from; one sentence, concrete nouns. The
@@ -71,3 +83,32 @@ CPU jobs), `job.json` (receipt with timings). `jobs/failed/<id>.json` — `error
   `D:\Turing Accords Game\Set_Pieces\IV-T3_Gate_Law.md`; approved cards go to
   `D:\Turing Accords Game\project\assets\vignettes\gate_law\NN_slug.png` (same names as the placeholders,
   so the storyboard sheet picks them up with no edit).
+
+## Engines beyond SDXL (2026-11-09)
+
+A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (default), `flux2_klein` (FLUX.2 [klein] 4B — `forge/engines/flux2_graph.py`) or `flux1` (FLUX.1 dev/schnell and fine-tunes — `forge/engines/flux1_graph.py`). For FLUX the job's `checkpoint` is the diffusion-model file; text encoder and VAE default from `forge.json → comfy.flux2 / comfy.flux1`. A FLUX suite may **discover** its checkpoints instead of listing them: `checkpoint_dirs` (folders), `base_filter` (`flux1`), `checkpoint_include` / `checkpoint_exclude` (regexes on the name), `base_override` (pin the architecture when the header scan cannot tell). LoRA compatibility is checked by detected base (SDXL LoRAs never go on FLUX, FLUX.1 LoRAs never on klein); `lora_base_override` pins a LoRA with no metadata. Model folders: `forge.json → model_dirs` (William's collections: `sdmodels`, `lora models`, `flux_models`, `flux_lora`); after adding a folder run `python -m forge comfy-paths` and restart ComfyUI. Licences: klein 4B and FLUX.1 schnell are Apache-2.0; FLUX.1 dev and most Civitai FLUX fine-tunes are **non-commercial** — `models/models.json` flags them and `prov.json` records the flag; never put one in a shipped-asset job. Reading: `docs/NEXT_MODELS.md`, `docs/BAKEOFF_1_VERDICT.md`.
+
+
+## Painted backgrounds, the manifest and approval (2026-11-09, Night 2)
+
+- **Paint:** `scene_paint` (prompt → 1344×768 render → RealESRGAN → cover-fit to `target`, default 1920×1080 → `refine`
+  hires-fix at the final size → optional `face_fix`) and `repaint` (img2img from a greybox at its exact pixel size, `denoise`
+  list for a sweep, `control: {"type": "canny"}` to lock the walls). Both take any `graph`. Checkpoint/LoRAs default from
+  the game's `checkpoints_by_job` / `loras_by_job` for that type. Big targets (a scrolling street) refine at ≤4 MP and are
+  upscaled after (`refine_max_mp`). Templates: `jobs/templates/scene_paint.json`, `repaint.json`, `pipeline.json`.
+- **Know what the game wants:** `python -m forge wanted --refresh` reads the game folder (read-only) into
+  `games/turing_accords/wanted.json`: every placeholder, vignette, per-map scene background (×3 size), and the 159 sleeves.
+  Names are paths under `project/assets/` without the extension (`scenes/bills_house`, `vignettes/gate_law/01_ribbon`).
+- **Approve by path:** `python -m forge approve <job-id> --as <wanted-name> [--pick N] [--dry-run]`. This replaces the manual
+  copy in step 6 above: it checks the licence of **every** model that touched the pixels (the job, its pipeline steps, and
+  any forge job it was made from), refuses unknown or non-commercial ones, backs up what it replaces to
+  `out/_approved_backup/`, writes `_provenance/<name>.json` in the game and records the approval. A Civitai model is
+  "unknown" until a person checks its page and runs `python -m forge models licence <file> "<licence>" yes|no "<where>"` —
+  never record one on their behalf.
+- **Non-commercial models are a no-go for this game (William, 2026-11-09)** — none is registered as a default anywhere in
+  the paint path (the upscaler is RealESRGAN BSD-3, not 4x-UltraSharp; depth is Depth Anything V2 *Small*; there is no
+  CodeFormer/GFPGAN). Face repair is FaceDetailer only: it repaints faces with the job's own checkpoint.
+- **Judge:** `python -m forge review <batch|suite> --by category|model` → `out/review/<name>/index.html`; ratings come
+  back with `rate <name> --import ratings.json`. Drafts: `brief maps|sleeves|icons` writes a `_draft` batch from the game
+  data — the prompts are the game's notes, not art direction; write them properly before submitting (submit refuses drafts).
+- **Before a long run:** `doctor` checks ComfyUI's nodes per graph/stage and every model file the pending queue names.

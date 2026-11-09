@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from ..ops import palette as pal, pixelize as pix, alpha as al, sheet as sh, godot
+from ..ops import palette as pal, pixelize as pix, alpha as al, sheet as sh, godot, edges as ed, lighting as lt
 from .common import Context, write_prov, save_png
 
 
@@ -112,6 +112,39 @@ def godot_tileset(job: dict, ctx: Context, out: Path) -> dict:
     name = job.get("name") or png.stem
     godot.write(out / f"{name}.tres", text)
     return {"tiles": count, "tres": f"{name}.tres"}
+
+
+def canny(job: dict, ctx: Context, out: Path) -> dict:
+    outputs = []
+    for p in _inputs(ctx, job):
+        e = ed.canny(Image.open(p), float(job.get("low", 0.08)), float(job.get("high", 0.2)), float(job.get("sigma", 1.2)))
+        save_png(e, out / f"{p.stem}.png")
+        outputs.append(f"{p.stem}.png")
+    write_prov(out, job, op="canny", low=job.get("low"), high=job.get("high"), inputs=[str(p) for p in _inputs(ctx, job)])
+    return {"outputs": outputs}
+
+
+def normal_map(job: dict, ctx: Context, out: Path) -> dict:
+    outputs = []
+    for p in _inputs(ctx, job):
+        n = lt.normal_map(Image.open(p), float(job.get("strength", 2.0)), float(job.get("smooth", 1.0)), bool(job.get("invert_y")))
+        save_png(n, out / f"{p.stem}_n.png")
+        outputs.append(f"{p.stem}_n.png")
+    write_prov(out, job, op="normal_map", strength=job.get("strength"), inputs=[str(p) for p in _inputs(ctx, job)])
+    return {"outputs": outputs}
+
+
+def emissive_mask(job: dict, ctx: Context, out: Path) -> dict:
+    outputs, report = [], {}
+    for p in _inputs(ctx, job):
+        e, lit = lt.emissive_mask(Image.open(p), float(job.get("threshold", 0.85)), float(job.get("min_saturation", 0.25)),
+                                  list(job.get("colors") or []), int(job.get("tolerance", 40)), float(job.get("feather", 1.5)))
+        save_png(e, out / f"{p.stem}_e.png")
+        outputs.append(f"{p.stem}_e.png")
+        report[p.name] = {"lit_fraction": round(lit, 4)}
+    (out / "report.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
+    write_prov(out, job, op="emissive_mask", threshold=job.get("threshold"), colors=job.get("colors"))
+    return {"outputs": outputs, "report": report}
 
 
 def overworld(job: dict, ctx: Context, out: Path) -> dict:

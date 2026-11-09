@@ -24,3 +24,15 @@ jobs/failed/*
 # the commit-message inbox (push.bat): written per change, consumed by the push
 COMMIT_MESSAGE.txt
 COMMIT_MESSAGE.last.txt
+
+# William's own model collections and photographs: local only, never pushed (2026-11-09).
+# push.bat runs `git add -A`; without these lines a push would try to upload ~100 GB of weights and his photos.
+sdmodels/
+lora models/
+flux_models/
+flux_lora/
+flux_workflow/
+Bills Actual Art/
+# the licence record a person checked IS tracked (approve depends on it)
+!models/licences.json
+jobs/paused/*

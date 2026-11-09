@@ -1,0 +1,18 @@
+{
+ "type": "repaint",
+ "name": "example_repaint",
+ "game": "turing_accords",
+ "prompt": "a suburban living room with a server rack in the corner, warm lamp light, high top-down view",
+ "init": "D:\\Turing Accords Game\\project\\assets\\scenes\\bills_house_greybox.png",
+ "denoise": [
+  0.45,
+  0.55,
+  0.65
+ ],
+ "control": {
+  "type": "canny",
+  "strength": 0.6
+ },
+ "refine": true,
+ "_help": "keeps the init's exact pixel size so walk polygons stay valid; a denoise list gives one painting per value on one contact sheet with a layout-agreement score."
+}

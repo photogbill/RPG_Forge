@@ -1,0 +1,11 @@
+{
+ "type": "emissive_mask",
+ "name": "example_glow",
+ "inputs": [
+  "out/<job-id>/scene.png"
+ ],
+ "threshold": 0.85,
+ "colors": [
+  "#b06cff"
+ ]
+}

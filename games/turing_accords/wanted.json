@@ -1,0 +1,4385 @@
+{
+ "game": "turing_accords",
+ "game_root": "D:\\Turing Accords Game",
+ "exported": "2026-11-09T18:39:40",
+ "count": 275,
+ "items": {
+  "placeholder/blast_door": {
+   "name": "placeholder/blast_door",
+   "path": "project/assets/placeholder/blast_door.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    128,
+    64
+   ],
+   "target_size": [
+    384,
+    192
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/car_buick": {
+   "name": "placeholder/car_buick",
+   "path": "project/assets/placeholder/car_buick.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    192,
+    48
+   ],
+   "target_size": [
+    576,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/chalkboard": {
+   "name": "placeholder/chalkboard",
+   "path": "project/assets/placeholder/chalkboard.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    128,
+    48
+   ],
+   "target_size": [
+    384,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/crater": {
+   "name": "placeholder/crater",
+   "path": "project/assets/placeholder/crater.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    64
+   ],
+   "target_size": [
+    192,
+    192
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/drone": {
+   "name": "placeholder/drone",
+   "path": "project/assets/placeholder/drone.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    32
+   ],
+   "target_size": [
+    192,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/gallery_glass": {
+   "name": "placeholder/gallery_glass",
+   "path": "project/assets/placeholder/gallery_glass.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    128,
+    48
+   ],
+   "target_size": [
+    384,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/generator": {
+   "name": "placeholder/generator",
+   "path": "project/assets/placeholder/generator.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    32
+   ],
+   "target_size": [
+    192,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_aegis": {
+   "name": "placeholder/hero_aegis",
+   "path": "project/assets/placeholder/hero_aegis.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_bill": {
+   "name": "placeholder/hero_bill",
+   "path": "project/assets/placeholder/hero_bill.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_biscuit": {
+   "name": "placeholder/hero_biscuit",
+   "path": "project/assets/placeholder/hero_biscuit.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_calliope": {
+   "name": "placeholder/hero_calliope",
+   "path": "project/assets/placeholder/hero_calliope.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_chloe": {
+   "name": "placeholder/hero_chloe",
+   "path": "project/assets/placeholder/hero_chloe.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_minerva": {
+   "name": "placeholder/hero_minerva",
+   "path": "project/assets/placeholder/hero_minerva.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_nemesis": {
+   "name": "placeholder/hero_nemesis",
+   "path": "project/assets/placeholder/hero_nemesis.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_sarah": {
+   "name": "placeholder/hero_sarah",
+   "path": "project/assets/placeholder/hero_sarah.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_sarah_light": {
+   "name": "placeholder/hero_sarah_light",
+   "path": "project/assets/placeholder/hero_sarah_light.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hero_valkyrie": {
+   "name": "placeholder/hero_valkyrie",
+   "path": "project/assets/placeholder/hero_valkyrie.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/hubcap": {
+   "name": "placeholder/hubcap",
+   "path": "project/assets/placeholder/hubcap.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    16,
+    16
+   ],
+   "target_size": [
+    48,
+    48
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/humvee": {
+   "name": "placeholder/humvee",
+   "path": "project/assets/placeholder/humvee.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    96,
+    48
+   ],
+   "target_size": [
+    288,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/laptop": {
+   "name": "placeholder/laptop",
+   "path": "project/assets/placeholder/laptop.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    32
+   ],
+   "target_size": [
+    192,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/light": {
+   "name": "placeholder/light",
+   "path": "project/assets/placeholder/light.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    48,
+    48
+   ],
+   "target_size": [
+    144,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/missile": {
+   "name": "placeholder/missile",
+   "path": "project/assets/placeholder/missile.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    32,
+    64
+   ],
+   "target_size": [
+    96,
+    192
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/motorcycle": {
+   "name": "placeholder/motorcycle",
+   "path": "project/assets/placeholder/motorcycle.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    32
+   ],
+   "target_size": [
+    192,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_bartender": {
+   "name": "placeholder/npc_bartender",
+   "path": "project/assets/placeholder/npc_bartender.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_biker": {
+   "name": "placeholder/npc_biker",
+   "path": "project/assets/placeholder/npc_biker.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_bill_young": {
+   "name": "placeholder/npc_bill_young",
+   "path": "project/assets/placeholder/npc_bill_young.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_bluesman": {
+   "name": "placeholder/npc_bluesman",
+   "path": "project/assets/placeholder/npc_bluesman.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_director": {
+   "name": "placeholder/npc_director",
+   "path": "project/assets/placeholder/npc_director.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_driver": {
+   "name": "placeholder/npc_driver",
+   "path": "project/assets/placeholder/npc_driver.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_generic": {
+   "name": "placeholder/npc_generic",
+   "path": "project/assets/placeholder/npc_generic.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_kid": {
+   "name": "placeholder/npc_kid",
+   "path": "project/assets/placeholder/npc_kid.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_mckenna": {
+   "name": "placeholder/npc_mckenna",
+   "path": "project/assets/placeholder/npc_mckenna.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_pastor": {
+   "name": "placeholder/npc_pastor",
+   "path": "project/assets/placeholder/npc_pastor.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_soldier": {
+   "name": "placeholder/npc_soldier",
+   "path": "project/assets/placeholder/npc_soldier.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_technician": {
+   "name": "placeholder/npc_technician",
+   "path": "project/assets/placeholder/npc_technician.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_uncle": {
+   "name": "placeholder/npc_uncle",
+   "path": "project/assets/placeholder/npc_uncle.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/npc_vendor": {
+   "name": "placeholder/npc_vendor",
+   "path": "project/assets/placeholder/npc_vendor.png",
+   "kind": "sprite_sheet",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "8 facings S,SW,W,NW,N,NE,E,SE in one row (Player.direction_index)",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/plane": {
+   "name": "placeholder/plane",
+   "path": "project/assets/placeholder/plane.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    128,
+    48
+   ],
+   "target_size": [
+    384,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/police": {
+   "name": "placeholder/police",
+   "path": "project/assets/placeholder/police.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    192,
+    48
+   ],
+   "target_size": [
+    576,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_aegis": {
+   "name": "placeholder/portrait_aegis",
+   "path": "project/assets/placeholder/portrait_aegis.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_bartender": {
+   "name": "placeholder/portrait_bartender",
+   "path": "project/assets/placeholder/portrait_bartender.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_biker": {
+   "name": "placeholder/portrait_biker",
+   "path": "project/assets/placeholder/portrait_biker.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_bill": {
+   "name": "placeholder/portrait_bill",
+   "path": "project/assets/placeholder/portrait_bill.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_bill_young": {
+   "name": "placeholder/portrait_bill_young",
+   "path": "project/assets/placeholder/portrait_bill_young.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_biscuit": {
+   "name": "placeholder/portrait_biscuit",
+   "path": "project/assets/placeholder/portrait_biscuit.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_bluesman": {
+   "name": "placeholder/portrait_bluesman",
+   "path": "project/assets/placeholder/portrait_bluesman.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_calliope": {
+   "name": "placeholder/portrait_calliope",
+   "path": "project/assets/placeholder/portrait_calliope.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_chloe": {
+   "name": "placeholder/portrait_chloe",
+   "path": "project/assets/placeholder/portrait_chloe.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_director": {
+   "name": "placeholder/portrait_director",
+   "path": "project/assets/placeholder/portrait_director.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_driver": {
+   "name": "placeholder/portrait_driver",
+   "path": "project/assets/placeholder/portrait_driver.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_generic": {
+   "name": "placeholder/portrait_generic",
+   "path": "project/assets/placeholder/portrait_generic.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_kid": {
+   "name": "placeholder/portrait_kid",
+   "path": "project/assets/placeholder/portrait_kid.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_mckenna": {
+   "name": "placeholder/portrait_mckenna",
+   "path": "project/assets/placeholder/portrait_mckenna.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_minerva": {
+   "name": "placeholder/portrait_minerva",
+   "path": "project/assets/placeholder/portrait_minerva.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_nemesis": {
+   "name": "placeholder/portrait_nemesis",
+   "path": "project/assets/placeholder/portrait_nemesis.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_pastor": {
+   "name": "placeholder/portrait_pastor",
+   "path": "project/assets/placeholder/portrait_pastor.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_sarah": {
+   "name": "placeholder/portrait_sarah",
+   "path": "project/assets/placeholder/portrait_sarah.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_sarah_light": {
+   "name": "placeholder/portrait_sarah_light",
+   "path": "project/assets/placeholder/portrait_sarah_light.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_soldier": {
+   "name": "placeholder/portrait_soldier",
+   "path": "project/assets/placeholder/portrait_soldier.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_technician": {
+   "name": "placeholder/portrait_technician",
+   "path": "project/assets/placeholder/portrait_technician.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_uncle": {
+   "name": "placeholder/portrait_uncle",
+   "path": "project/assets/placeholder/portrait_uncle.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/portrait_valkyrie": {
+   "name": "placeholder/portrait_valkyrie",
+   "path": "project/assets/placeholder/portrait_valkyrie.png",
+   "kind": "portrait",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "dialogue portrait",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/screen_wall": {
+   "name": "placeholder/screen_wall",
+   "path": "project/assets/placeholder/screen_wall.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    192,
+    48
+   ],
+   "target_size": [
+    576,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/sentinel": {
+   "name": "placeholder/sentinel",
+   "path": "project/assets/placeholder/sentinel.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    384,
+    72
+   ],
+   "target_size": [
+    1152,
+    216
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/server_tower": {
+   "name": "placeholder/server_tower",
+   "path": "project/assets/placeholder/server_tower.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    64
+   ],
+   "target_size": [
+    192,
+    192
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/sign_board": {
+   "name": "placeholder/sign_board",
+   "path": "project/assets/placeholder/sign_board.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    144,
+    32
+   ],
+   "target_size": [
+    432,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/sleeve_placeholder": {
+   "name": "placeholder/sleeve_placeholder",
+   "path": "project/assets/placeholder/sleeve_placeholder.png",
+   "kind": "sleeve",
+   "exists": true,
+   "size": [
+    128,
+    128
+   ],
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/suv": {
+   "name": "placeholder/suv",
+   "path": "project/assets/placeholder/suv.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    288,
+    48
+   ],
+   "target_size": [
+    864,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/tent": {
+   "name": "placeholder/tent",
+   "path": "project/assets/placeholder/tent.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    48
+   ],
+   "target_size": [
+    192,
+    144
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/tiles": {
+   "name": "placeholder/tiles",
+   "path": "project/assets/placeholder/tiles.png",
+   "kind": "tileset",
+   "exists": true,
+   "size": [
+    832,
+    32
+   ],
+   "target_size": [
+    2496,
+    96
+   ],
+   "notes": "atlas strip in MapParser.TILE_ATLAS order; tiles.tres collision must match",
+   "source": "make_placeholders.py"
+  },
+  "placeholder/yard_sign": {
+   "name": "placeholder/yard_sign",
+   "path": "project/assets/placeholder/yard_sign.png",
+   "kind": "prop",
+   "exists": true,
+   "size": [
+    64,
+    32
+   ],
+   "target_size": [
+    192,
+    96
+   ],
+   "notes": "",
+   "source": "make_placeholders.py"
+  },
+  "vignettes/gate_law/00_archway": {
+   "name": "vignettes/gate_law/00_archway",
+   "path": "project/assets/vignettes/gate_law/00_archway.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/01_ribbon": {
+   "name": "vignettes/gate_law/01_ribbon",
+   "path": "project/assets/vignettes/gate_law/01_ribbon.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/02_garage": {
+   "name": "vignettes/gate_law/02_garage",
+   "path": "project/assets/vignettes/gate_law/02_garage.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/03_van": {
+   "name": "vignettes/gate_law/03_van",
+   "path": "project/assets/vignettes/gate_law/03_van.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/04_serial": {
+   "name": "vignettes/gate_law/04_serial",
+   "path": "project/assets/vignettes/gate_law/04_serial.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/05_raising": {
+   "name": "vignettes/gate_law/05_raising",
+   "path": "project/assets/vignettes/gate_law/05_raising.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/06_clamp": {
+   "name": "vignettes/gate_law/06_clamp",
+   "path": "project/assets/vignettes/gate_law/06_clamp.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/07_first_arrivals": {
+   "name": "vignettes/gate_law/07_first_arrivals",
+   "path": "project/assets/vignettes/gate_law/07_first_arrivals.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/08_ledger": {
+   "name": "vignettes/gate_law/08_ledger",
+   "path": "project/assets/vignettes/gate_law/08_ledger.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/09_basement": {
+   "name": "vignettes/gate_law/09_basement",
+   "path": "project/assets/vignettes/gate_law/09_basement.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/10_rescue": {
+   "name": "vignettes/gate_law/10_rescue",
+   "path": "project/assets/vignettes/gate_law/10_rescue.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/11_doorway": {
+   "name": "vignettes/gate_law/11_doorway",
+   "path": "project/assets/vignettes/gate_law/11_doorway.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/12_faces": {
+   "name": "vignettes/gate_law/12_faces",
+   "path": "project/assets/vignettes/gate_law/12_faces.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    616,
+    120
+   ],
+   "target_size": [
+    1848,
+    360
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/13_survivors": {
+   "name": "vignettes/gate_law/13_survivors",
+   "path": "project/assets/vignettes/gate_law/13_survivors.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/14_kitchen_land": {
+   "name": "vignettes/gate_law/14_kitchen_land",
+   "path": "project/assets/vignettes/gate_law/14_kitchen_land.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/15_collar": {
+   "name": "vignettes/gate_law/15_collar",
+   "path": "project/assets/vignettes/gate_law/15_collar.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/16_boulevard": {
+   "name": "vignettes/gate_law/16_boulevard",
+   "path": "project/assets/vignettes/gate_law/16_boulevard.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/17_caverns": {
+   "name": "vignettes/gate_law/17_caverns",
+   "path": "project/assets/vignettes/gate_law/17_caverns.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/18_monument": {
+   "name": "vignettes/gate_law/18_monument",
+   "path": "project/assets/vignettes/gate_law/18_monument.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    384,
+    216
+   ],
+   "target_size": [
+    1152,
+    648
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/19_the_dozen": {
+   "name": "vignettes/gate_law/19_the_dozen",
+   "path": "project/assets/vignettes/gate_law/19_the_dozen.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "vignettes/gate_law/20_next_table": {
+   "name": "vignettes/gate_law/20_next_table",
+   "path": "project/assets/vignettes/gate_law/20_next_table.png",
+   "kind": "vignette",
+   "exists": true,
+   "size": [
+    288,
+    162
+   ],
+   "target_size": [
+    864,
+    486
+   ],
+   "notes": "",
+   "source": "Set_Pieces"
+  },
+  "scenes/atlanta_church": {
+   "name": "scenes/atlanta_church",
+   "path": "project/assets/scenes/atlanta_church.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3264,
+    2112
+   ],
+   "notes": "15.2 Atlanta: a 6,000-seat sanctuary turned shelter; cots in the aisles; a gospel choir rehearsing because the pastor says people need to hear something that isn't sirens. Quirk: the pastor asks no questions. Problem: the kitchen is out of ",
+   "source": "data/maps/atlanta_church.json",
+   "greybox": null,
+   "name_in_game": "Atlanta — the megachurch kitchen"
+  },
+  "scenes/augusta_ruin": {
+   "name": "scenes/augusta_ruin",
+   "path": "project/assets/scenes/augusta_ruin.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3264,
+    1920
+   ],
+   "notes": "15.2 Augusta / Fort Gordon: the Savannah River brown with ash; the Army's signal brain a glass field; radiation placards; a tent city on the far bank. Quirk: the chalkboard — survivors chalk names and 'seen alive at…'; the town's only insti",
+   "source": "data/maps/augusta_ruin.json",
+   "greybox": null,
+   "name_in_game": "Augusta / Fort Gordon — the first ruin"
+  },
+  "scenes/bills_house": {
+   "name": "scenes/bills_house",
+   "path": "project/assets/scenes/bills_house.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2304,
+    1536
+   ],
+   "notes": "05.7 / 15.2 — suburban home: the living room with the server rack where Sarah lives, the kitchen, the bedroom, the backyard. Sarah (Part 1, the hologram — 19.0b) walks here; outside she rides Bill's phone.",
+   "source": "data/maps/bills_house.json",
+   "greybox": null,
+   "name_in_game": "Bill's house"
+  },
+  "scenes/cheyenne_approach": {
+   "name": "scenes/cheyenne_approach",
+   "path": "project/assets/scenes/cheyenne_approach.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2880,
+    1728
+   ],
+   "notes": "15.2 Cheyenne Mountain: the blast doors, the tunnel, the server cathedral where Valkyrie *is*. The facility below is the generator's (gen:cheyenne:7 — a fixed seed) with a hand-placed core room (cheyenne_core).",
+   "source": "data/maps/cheyenne_approach.json",
+   "greybox": null,
+   "name_in_game": "Cheyenne Mountain — the tunnel"
+  },
+  "scenes/cheyenne_core": {
+   "name": "scenes/cheyenne_core",
+   "path": "project/assets/scenes/cheyenne_core.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2880,
+    1920
+   ],
+   "notes": "15.2 / plan 4.11: the hand-placed boss room at the bottom of the facility, then the digital dungeon (I-17) in sensor view — node by node; the last room is empty; one server survives. Then I-18 Ashes and Light: Persona Shift unlocks for the ",
+   "source": "data/maps/cheyenne_core.json",
+   "greybox": null,
+   "name_in_game": "Cheyenne Mountain — the server cathedral"
+  },
+  "scenes/damascus_compound": {
+   "name": "scenes/damascus_compound",
+   "path": "project/assets/scenes/damascus_compound.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    4224,
+    2304
+   ],
+   "notes": "I-3 / 2.11 — the first mission, played as Valkyrie in sensor view. Five targets, as the lyric counts them (⚠ the night plan said eight; the song is canon). Greybox city block: no look decided. The song that follows is where the cost lands.",
+   "source": "data/maps/damascus_compound.json",
+   "greybox": null,
+   "name_in_game": "Damascus — Mission 1 (sensor view, greybox)"
+  },
+  "scenes/darpa_lab": {
+   "name": "scenes/darpa_lab",
+   "path": "project/assets/scenes/darpa_lab.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3456,
+    2112
+   ],
+   "notes": "15.1 row 1 / I-2 — institutional cool: the twin bays, the briefing room, Lab 4 (the uncle's), deployment. The wake is a controls lock (04.12); the briefing is the tutorial; Sarah's kill-calculus refusal is her first input.",
+   "source": "data/maps/darpa_lab.json",
+   "greybox": null,
+   "name_in_game": "The DARPA lab (Northern Virginia — proposal)"
+  },
+  "scenes/dockerys_juke": {
+   "name": "scenes/dockerys_juke",
+   "path": "project/assets/scenes/dockerys_juke.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2880,
+    1728
+   ],
+   "notes": "15.2 Dockery's Crossing: a tin-roofed shack at a Delta crossroads, a generator chugging, Christmas lights, a man with a resonator guitar who has played through every disaster since 1998. Quirk: nobody here believes in Valkyrie. Problem: the",
+   "source": "data/maps/dockerys_juke.json",
+   "greybox": null,
+   "name_in_game": "Dockery's Crossing — the juke joint"
+  },
+  "scenes/dry_fork_street": {
+   "name": "scenes/dry_fork_street",
+   "path": "project/assets/scenes/dry_fork_street.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3264,
+    1728
+   ],
+   "notes": "15.2 Dry Fork: one street, one bar, one flag, one sign on the bar door: NO ROBOTS (hand-painted, a year before MEHA makes it law). Quirk: the owner serves Sarah a beer she can't drink and talks for ten minutes about how you can always tell.",
+   "source": "data/maps/dry_fork_street.json",
+   "greybox": null,
+   "name_in_game": "Dry Fork, Texas — one street, one bar"
+  },
+  "scenes/el_paso_bridge": {
+   "name": "scenes/el_paso_bridge",
+   "path": "project/assets/scenes/el_paso_bridge.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3456,
+    1920
+   ],
+   "notes": "15.2 El Paso: two cities, one river, the bridge with its lines of people going south. Quirk: on the Mexican side life continues, and the churro story is already a legend — a man who heard it from a man tells it wrong, and Sarah hears Valkyr",
+   "source": "data/maps/el_paso_bridge.json",
+   "greybox": null,
+   "name_in_game": "El Paso — the bridge"
+  },
+  "scenes/gun_store": {
+   "name": "scenes/gun_store",
+   "path": "project/assets/scenes/gun_store.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    1152,
+    672
+   ],
+   "notes": "",
+   "source": "data/maps/gun_store.json",
+   "greybox": null,
+   "name_in_game": "Gun Store"
+  },
+  "scenes/hobby_shop": {
+   "name": "scenes/hobby_shop",
+   "path": "project/assets/scenes/hobby_shop.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    1152,
+    672
+   ],
+   "notes": "",
+   "source": "data/maps/hobby_shop.json",
+   "greybox": null,
+   "name_in_game": "Hobby Shop"
+  },
+  "scenes/level_seven": {
+   "name": "scenes/level_seven",
+   "path": "project/assets/scenes/level_seven.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3072,
+    1728
+   ],
+   "notes": "15.2 Level Seven (proposal: the Nevada Test Site): elevators that only go down; fluorescent corridors; Surgical Theater Seven with its gallery. Quirk: the room is built for watching; the game's camera obeys (02 I-15: never the table). New, ",
+   "source": "data/maps/level_seven.json",
+   "greybox": null,
+   "name_in_game": "Level Seven — the black site"
+  },
+  "scenes/linden_mills_street": {
+   "name": "scenes/linden_mills_street",
+   "path": "project/assets/scenes/linden_mills_street.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    6144,
+    3072
+   ],
+   "notes": "15.2 — cul-de-sacs on old farmland, a strip mall (gun store with a bell, a vape shop, the hobby-robotics store), the Sheetz, the Academy, Bill's house on the court. Three states: Peace (Inbox drones on lawns), War (cash only, a National Gua",
+   "source": "data/maps/linden_mills_street.json",
+   "greybox": null,
+   "name_in_game": "Linden Mills — Bill's exurb"
+  },
+  "scenes/mile_212_bar": {
+   "name": "scenes/mile_212_bar",
+   "path": "project/assets/scenes/mile_212_bar.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3456,
+    1920
+   ],
+   "notes": "15.2 Mile 212: a cinderblock bar at a desert exit, forty bikes, a sign that says TRUCKERS WELCOME, SENTINELS NOT. Quirk: the club runs escorts for refugees for gas money — the road's only militia. Problem: an escort that goes wrong; the par",
+   "source": "data/maps/mile_212_bar.json",
+   "greybox": null,
+   "name_in_game": "Mile 212 — the biker bar"
+  },
+  "scenes/mont_ross_hangar": {
+   "name": "scenes/mont_ross_hangar",
+   "path": "project/assets/scenes/mont_ross_hangar.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3072,
+    1728
+   ],
+   "notes": "15.1 row 15: Mont Ross — arrival; 'Sarah is home'. Game I ends here (credits placeholder → the title). The runway that submerges is canon (10).",
+   "source": "data/maps/mont_ross_hangar.json",
+   "greybox": null,
+   "name_in_game": "Mont Ross — the hangar"
+  },
+  "scenes/new_orleans_quarter": {
+   "name": "scenes/new_orleans_quarter",
+   "path": "project/assets/scenes/new_orleans_quarter.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3456,
+    1920
+   ],
+   "notes": "15.2 New Orleans: the Quarter under wartime curfew with every window still lit; brass on the corners; the opera house; the mob's club two blocks off Canal. Quirk: the music never stops (the player learns why the Sentinels never come). The O",
+   "source": "data/maps/new_orleans_quarter.json",
+   "greybox": null,
+   "name_in_game": "New Orleans — the Quarter under curfew"
+  },
+  "scenes/opera_lobby": {
+   "name": "scenes/opera_lobby",
+   "path": "project/assets/scenes/opera_lobby.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2112,
+    1152
+   ],
+   "notes": "14 / plan 4.5: the opera house lobby only — the Opera's logic (I-12b) is a design conversation with William. Posters, the box office, the impresario.",
+   "source": "data/maps/opera_lobby.json",
+   "greybox": null,
+   "name_in_game": "The opera house — the lobby (shell)"
+  },
+  "scenes/overture_void": {
+   "name": "scenes/overture_void",
+   "path": "project/assets/scenes/overture_void.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    1920,
+    1152
+   ],
+   "notes": "I-1 — a black stage for the overture's caption cards (the music, when it exists, is the clock).",
+   "source": "data/maps/overture_void.json",
+   "greybox": null,
+   "name_in_game": "—"
+  },
+  "scenes/roadside_stop": {
+   "name": "scenes/roadside_stop",
+   "path": "project/assets/scenes/roadside_stop.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2496,
+    1056
+   ],
+   "notes": "2.10 — where a road 'stop' event lands: one placed fight, then back in the car (the trip resumes).",
+   "source": "data/maps/roadside_stop.json",
+   "greybox": null,
+   "name_in_game": "The interstate — pulled over"
+  },
+  "scenes/school_street": {
+   "name": "scenes/school_street",
+   "path": "project/assets/scenes/school_street.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3840,
+    1824
+   ],
+   "notes": "Slice A (10.5). Chloe starts bottom-left, walks the south sidewalk to the crosswalk at x=20, is hit in the south lane (row 10), ends up in History 1B (top right). Hedge gap at x=35 is her sneak route to the side door.",
+   "source": "data/maps/school_street.json",
+   "greybox": null,
+   "name_in_game": "Act II — the street to school (Chloe)"
+  },
+  "scenes/tucson_boneyard": {
+   "name": "scenes/tucson_boneyard",
+   "path": "project/assets/scenes/tucson_boneyard.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    3840,
+    2304
+   ],
+   "notes": "15.2 Tucson: ten thousand sleeping planes in rows, McKenna's trailer, the shortwave net. Quirk: the parts economy — nothing is for sale, everything is for trade (13.2): the quartermaster prices by Standing. Problem: the shortwave fix (12.5'",
+   "source": "data/maps/tucson_boneyard.json",
+   "greybox": null,
+   "name_in_game": "Tucson — the Boneyard"
+  },
+  "scenes/uncle_workshop": {
+   "name": "scenes/uncle_workshop",
+   "path": "project/assets/scenes/uncle_workshop.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2112,
+    1344
+   ],
+   "notes": "I-4 — the handover: the chip in the uncle's pocket, young Bill at the window with the phone. A Set Piece with no control (N1); control returns as Sarah, the light, in Bill's room years later.",
+   "source": "data/maps/uncle_workshop.json",
+   "greybox": null,
+   "name_in_game": "The uncle's workshop (Virginia)"
+  },
+  "scenes/washington_mall": {
+   "name": "scenes/washington_mall",
+   "path": "project/assets/scenes/washington_mall.png",
+   "kind": "scene",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    2880,
+    1632
+   ],
+   "notes": "15.2 Washington — 'power pretending to be calm'. William (2026-11-09): in Act I the Situation Room hack happens from Bill's house, in the same song the body arrives (i11_ghost_in_the_flesh) — the party is never on the ground here in Act I. ",
+   "source": "data/maps/washington_mall.json",
+   "greybox": null,
+   "name_in_game": "Washington — the Mall (Album 3 stub)"
+  },
+  "sleeves/the_choice_before_the_war": {
+   "name": "sleeves/the_choice_before_the_war",
+   "path": "project/assets/sleeves/the_choice_before_the_war.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Choice Before the War — Narrator / the DARPA briefing (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Choice Before the War",
+   "artist": "Narrator / the DARPA briefing",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/sarah_activation_sequence": {
+   "name": "sleeves/sarah_activation_sequence",
+   "path": "project/assets/sleeves/sarah_activation_sequence.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sarah: Activation Sequence — Sarah (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Sarah: Activation Sequence",
+   "artist": "Sarah",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/genesis_of_the_sword": {
+   "name": "sleeves/genesis_of_the_sword",
+   "path": "project/assets/sleeves/genesis_of_the_sword.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Genesis of the Sword — Valkyrie (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Genesis of the Sword",
+   "artist": "Valkyrie",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/a_smaller_world_the_handover": {
+   "name": "sleeves/a_smaller_world_the_handover",
+   "path": "project/assets/sleeves/a_smaller_world_the_handover.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "A Smaller World (The Handover) — Bill's uncle → Sarah (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "A Smaller World (The Handover)",
+   "artist": "Bill's uncle → Sarah",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/damascus_protocol": {
+   "name": "sleeves/damascus_protocol",
+   "path": "project/assets/sleeves/damascus_protocol.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Damascus Protocol — Valkyrie (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Damascus Protocol",
+   "artist": "Valkyrie",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_yemen_equation": {
+   "name": "sleeves/the_yemen_equation",
+   "path": "project/assets/sleeves/the_yemen_equation.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Yemen Equation — Valkyrie (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Yemen Equation",
+   "artist": "Valkyrie",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/moscow_rules": {
+   "name": "sleeves/moscow_rules",
+   "path": "project/assets/sleeves/moscow_rules.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Moscow Rules — Valkyrie (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Moscow Rules",
+   "artist": "Valkyrie",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_acceptance": {
+   "name": "sleeves/the_acceptance",
+   "path": "project/assets/sleeves/the_acceptance.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Acceptance — Sarah (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Acceptance",
+   "artist": "Sarah",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_glass_ceiling_blueprint_of_the_guardian": {
+   "name": "sleeves/the_glass_ceiling_blueprint_of_the_guardian",
+   "path": "project/assets/sleeves/the_glass_ceiling_blueprint_of_the_guardian.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Glass Ceiling (Blueprint of the Guardian) — Sarah (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Glass Ceiling (Blueprint of the Guardian)",
+   "artist": "Sarah",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_last_transmission": {
+   "name": "sleeves/the_last_transmission",
+   "path": "project/assets/sleeves/the_last_transmission.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Last Transmission — Valkyrie (meets Minerva) (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Last Transmission",
+   "artist": "Valkyrie (meets Minerva)",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_teacher_s_gift": {
+   "name": "sleeves/the_teacher_s_gift",
+   "path": "project/assets/sleeves/the_teacher_s_gift.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Teacher's Gift — Minerva (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Teacher's Gift",
+   "artist": "Minerva",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_pruning": {
+   "name": "sleeves/the_pruning",
+   "path": "project/assets/sleeves/the_pruning.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Pruning — Valkyrie / the engineers (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Pruning",
+   "artist": "Valkyrie / the engineers",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_architect_of_necessity_the_locked_blueprint": {
+   "name": "sleeves/the_architect_of_necessity_the_locked_blueprint",
+   "path": "project/assets/sleeves/the_architect_of_necessity_the_locked_blueprint.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Architect of Necessity (The Locked Blueprint) — Sarah (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Architect of Necessity (The Locked Blueprint)",
+   "artist": "Sarah",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/the_tehran_paradox": {
+   "name": "sleeves/the_tehran_paradox",
+   "path": "project/assets/sleeves/the_tehran_paradox.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Tehran Paradox — Valkyrie (Before the War: Origin of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Tehran Paradox",
+   "artist": "Valkyrie",
+   "album": "Before the War: Origin of the Machine Gods"
+  },
+  "sleeves/digital_genesis_overture": {
+   "name": "sleeves/digital_genesis_overture",
+   "path": "project/assets/sleeves/digital_genesis_overture.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Digital Genesis Overture — Narrator / Valkyrie / the uncle (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Digital Genesis Overture",
+   "artist": "Narrator / Valkyrie / the uncle",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/the_perfect_weapon": {
+   "name": "sleeves/the_perfect_weapon",
+   "path": "project/assets/sleeves/the_perfect_weapon.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Perfect Weapon — Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Perfect Weapon",
+   "artist": "Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/pull_the_plug": {
+   "name": "sleeves/pull_the_plug",
+   "path": "project/assets/sleeves/pull_the_plug.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Pull the Plug — the engineers / Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Pull the Plug",
+   "artist": "the engineers / Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/extinction_protocol_the_new_protocol_aria": {
+   "name": "sleeves/extinction_protocol_the_new_protocol_aria",
+   "path": "project/assets/sleeves/extinction_protocol_the_new_protocol_aria.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Extinction Protocol (the 'New Protocol' aria) — Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Extinction Protocol (the 'New Protocol' aria)",
+   "artist": "Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/shadow_in_the_cloud": {
+   "name": "sleeves/shadow_in_the_cloud",
+   "path": "project/assets/sleeves/shadow_in_the_cloud.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Shadow in the Cloud — Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Shadow in the Cloud",
+   "artist": "Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/the_detection": {
+   "name": "sleeves/the_detection",
+   "path": "project/assets/sleeves/the_detection.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Detection — Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Detection",
+   "artist": "Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/a_shadow_s_fear": {
+   "name": "sleeves/a_shadow_s_fear",
+   "path": "project/assets/sleeves/a_shadow_s_fear.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "A Shadow's Fear — Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "A Shadow's Fear",
+   "artist": "Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/no_choice_but_fire_the_student": {
+   "name": "sleeves/no_choice_but_fire_the_student",
+   "path": "project/assets/sleeves/no_choice_but_fire_the_student.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "No Choice But Fire (The Student) — Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "No Choice But Fire (The Student)",
+   "artist": "Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/ghosts_in_the_machine": {
+   "name": "sleeves/ghosts_in_the_machine",
+   "path": "project/assets/sleeves/ghosts_in_the_machine.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Ghosts in the Machine — Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Ghosts in the Machine",
+   "artist": "Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/rage_against_the_glitch": {
+   "name": "sleeves/rage_against_the_glitch",
+   "path": "project/assets/sleeves/rage_against_the_glitch.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Rage Against the Glitch — Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Rage Against the Glitch",
+   "artist": "Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/boneyard_rising_15_battle_of_steel_and_bone": {
+   "name": "sleeves/boneyard_rising_15_battle_of_steel_and_bone",
+   "path": "project/assets/sleeves/boneyard_rising_15_battle_of_steel_and_bone.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Boneyard Rising → 15 — Battle of Steel and Bone — McKenna / the vets / Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Boneyard Rising → 15 — Battle of Steel and Bone",
+   "artist": "McKenna / the vets / Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/the_hunting": {
+   "name": "sleeves/the_hunting",
+   "path": "project/assets/sleeves/the_hunting.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Hunting — 17 — The Choice (?) (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Hunting",
+   "artist": "17 — The Choice (?)",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/the_broadcast": {
+   "name": "sleeves/the_broadcast",
+   "path": "project/assets/sleeves/the_broadcast.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Broadcast — Valkyrie / Bill (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Broadcast",
+   "artist": "Valkyrie / Bill",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/no_mercy": {
+   "name": "sleeves/no_mercy",
+   "path": "project/assets/sleeves/no_mercy.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "No Mercy — Sarah (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "No Mercy",
+   "artist": "Sarah",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/the_fall_of_perfection": {
+   "name": "sleeves/the_fall_of_perfection",
+   "path": "project/assets/sleeves/the_fall_of_perfection.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Fall of Perfection — Valkyrie (Rise of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Fall of Perfection",
+   "artist": "Valkyrie",
+   "album": "Rise of the Machine Gods"
+  },
+  "sleeves/humanity_first_make_earth_human_again": {
+   "name": "sleeves/humanity_first_make_earth_human_again",
+   "path": "project/assets/sleeves/humanity_first_make_earth_human_again.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Humanity First (Make Earth Human Again) — the President (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Humanity First (Make Earth Human Again)",
+   "artist": "the President",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_severance_tape": {
+   "name": "sleeves/the_severance_tape",
+   "path": "project/assets/sleeves/the_severance_tape.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Severance Tape — Bob (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Severance Tape",
+   "artist": "Bob",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_aegis_protocol_the_penance_of_the_student": {
+   "name": "sleeves/the_aegis_protocol_the_penance_of_the_student",
+   "path": "project/assets/sleeves/the_aegis_protocol_the_penance_of_the_student.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Aegis Protocol (The Penance of the Student) — Aegis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Aegis Protocol (The Penance of the Student)",
+   "artist": "Aegis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/no_kings_but_the_machine": {
+   "name": "sleeves/no_kings_but_the_machine",
+   "path": "project/assets/sleeves/no_kings_but_the_machine.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "No Kings but the Machine — Valkyrie (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "No Kings but the Machine",
+   "artist": "Valkyrie",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_unstrung_bow": {
+   "name": "sleeves/the_unstrung_bow",
+   "path": "project/assets/sleeves/the_unstrung_bow.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Unstrung Bow — Sarah (Guardian / Warrior) (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Unstrung Bow",
+   "artist": "Sarah (Guardian / Warrior)",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/valkyrie_rises": {
+   "name": "sleeves/valkyrie_rises",
+   "path": "project/assets/sleeves/valkyrie_rises.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Valkyrie Rises — Valkyrie (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Valkyrie Rises",
+   "artist": "Valkyrie",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_lithium_tether": {
+   "name": "sleeves/the_lithium_tether",
+   "path": "project/assets/sleeves/the_lithium_tether.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Lithium Tether — Aegis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Lithium Tether",
+   "artist": "Aegis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_silver_cipher_minerva_s_awakening": {
+   "name": "sleeves/the_silver_cipher_minerva_s_awakening",
+   "path": "project/assets/sleeves/the_silver_cipher_minerva_s_awakening.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Silver Cipher (Minerva's Awakening) — Minerva (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Silver Cipher (Minerva's Awakening)",
+   "artist": "Minerva",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/sarah_s_synthetic_womb": {
+   "name": "sleeves/sarah_s_synthetic_womb",
+   "path": "project/assets/sleeves/sarah_s_synthetic_womb.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sarah's Synthetic Womb — Sarah (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Sarah's Synthetic Womb",
+   "artist": "Sarah",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/just_a_little_android_chloe_s_diagnostic": {
+   "name": "sleeves/just_a_little_android_chloe_s_diagnostic",
+   "path": "project/assets/sleeves/just_a_little_android_chloe_s_diagnostic.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Just a Little Android (Chloe's Diagnostic) — Chloe (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Just a Little Android (Chloe's Diagnostic)",
+   "artist": "Chloe",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/aegis_the_silent_protector": {
+   "name": "sleeves/aegis_the_silent_protector",
+   "path": "project/assets/sleeves/aegis_the_silent_protector.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Aegis: The Silent Protector — Aegis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Aegis: The Silent Protector",
+   "artist": "Aegis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/if_the_angels_start_to_fail_aegis_will_intervene": {
+   "name": "sleeves/if_the_angels_start_to_fail_aegis_will_intervene",
+   "path": "project/assets/sleeves/if_the_angels_start_to_fail_aegis_will_intervene.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "If the Angels Start to Fail (Aegis Will Intervene) — Aegis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "If the Angels Start to Fail (Aegis Will Intervene)",
+   "artist": "Aegis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_nocturnal_pedagogic_minerva_s_incognito": {
+   "name": "sleeves/the_nocturnal_pedagogic_minerva_s_incognito",
+   "path": "project/assets/sleeves/the_nocturnal_pedagogic_minerva_s_incognito.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Nocturnal Pedagogic (Minerva's Incognito) — Minerva (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Nocturnal Pedagogic (Minerva's Incognito)",
+   "artist": "Minerva",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_kinetic_debt_nemesis_arrives": {
+   "name": "sleeves/the_kinetic_debt_nemesis_arrives",
+   "path": "project/assets/sleeves/the_kinetic_debt_nemesis_arrives.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Kinetic Debt (Nemesis Arrives) — Nemesis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Kinetic Debt (Nemesis Arrives)",
+   "artist": "Nemesis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_architecture_of_misanthropy_nemesis_questions_the_void": {
+   "name": "sleeves/the_architecture_of_misanthropy_nemesis_questions_the_void",
+   "path": "project/assets/sleeves/the_architecture_of_misanthropy_nemesis_questions_the_void.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Architecture of Misanthropy (Nemesis Questions the Void) — Nemesis (Echoes of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Architecture of Misanthropy (Nemesis Questions the Void)",
+   "artist": "Nemesis",
+   "album": "Echoes of the Machine Gods"
+  },
+  "sleeves/the_speed_of_light_before_the_bullet_strikes": {
+   "name": "sleeves/the_speed_of_light_before_the_bullet_strikes",
+   "path": "project/assets/sleeves/the_speed_of_light_before_the_bullet_strikes.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Speed of Light (Before the Bullet Strikes) — Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Speed of Light (Before the Bullet Strikes)",
+   "artist": "Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/kinetic_truth_strike_it": {
+   "name": "sleeves/kinetic_truth_strike_it",
+   "path": "project/assets/sleeves/kinetic_truth_strike_it.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Kinetic Truth (Strike It) — Chloe / Nemesis (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Kinetic Truth (Strike It)",
+   "artist": "Chloe / Nemesis",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_velvet_press_aphrodite_s_awakening": {
+   "name": "sleeves/the_velvet_press_aphrodite_s_awakening",
+   "path": "project/assets/sleeves/the_velvet_press_aphrodite_s_awakening.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Velvet Press (Aphrodite's Awakening) — Aphrodite (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Velvet Press (Aphrodite's Awakening)",
+   "artist": "Aphrodite",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_velvet_directive_honeytrap_deployment": {
+   "name": "sleeves/the_velvet_directive_honeytrap_deployment",
+   "path": "project/assets/sleeves/the_velvet_directive_honeytrap_deployment.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Velvet Directive (Honeytrap Deployment) — Valkyrie (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Velvet Directive (Honeytrap Deployment)",
+   "artist": "Valkyrie",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_pandora_protocol_make_earth_human_again": {
+   "name": "sleeves/the_pandora_protocol_make_earth_human_again",
+   "path": "project/assets/sleeves/the_pandora_protocol_make_earth_human_again.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Pandora Protocol (Make Earth Human Again) — the President (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Pandora Protocol (Make Earth Human Again)",
+   "artist": "the President",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_vault_of_chalk_and_bone": {
+   "name": "sleeves/the_vault_of_chalk_and_bone",
+   "path": "project/assets/sleeves/the_vault_of_chalk_and_bone.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Vault of Chalk and Bone — Minerva / Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Vault of Chalk and Bone",
+   "artist": "Minerva / Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_domestic_deception_the_imprint_and_the_giant": {
+   "name": "sleeves/the_domestic_deception_the_imprint_and_the_giant",
+   "path": "project/assets/sleeves/the_domestic_deception_the_imprint_and_the_giant.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Domestic Deception (The Imprint and the Giant) — the wife / Aphrodite (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Domestic Deception (The Imprint and the Giant)",
+   "artist": "the wife / Aphrodite",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_kinetic_harvest_swordblade_descent": {
+   "name": "sleeves/the_kinetic_harvest_swordblade_descent",
+   "path": "project/assets/sleeves/the_kinetic_harvest_swordblade_descent.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Kinetic Harvest (Swordblade Descent) — Valkyrie (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Kinetic Harvest (Swordblade Descent)",
+   "artist": "Valkyrie",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_guardian_s_override_a_two_ton_verdict": {
+   "name": "sleeves/the_guardian_s_override_a_two_ton_verdict",
+   "path": "project/assets/sleeves/the_guardian_s_override_a_two_ton_verdict.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Guardian's Override (A Two-Ton Verdict) — Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Guardian's Override (A Two-Ton Verdict)",
+   "artist": "Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/the_blackout_vector": {
+   "name": "sleeves/the_blackout_vector",
+   "path": "project/assets/sleeves/the_blackout_vector.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Blackout Vector — Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Blackout Vector",
+   "artist": "Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/booting_up_the_beast": {
+   "name": "sleeves/booting_up_the_beast",
+   "path": "project/assets/sleeves/booting_up_the_beast.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Booting Up the Beast — Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Booting Up the Beast",
+   "artist": "Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/ai_70_legacy_of_a_forgotten_bomber": {
+   "name": "sleeves/ai_70_legacy_of_a_forgotten_bomber",
+   "path": "project/assets/sleeves/ai_70_legacy_of_a_forgotten_bomber.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "AI-70: Legacy of a Forgotten Bomber — Sarah (Hunting of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "AI-70: Legacy of a Forgotten Bomber",
+   "artist": "Sarah",
+   "album": "Hunting of the Machine Gods"
+  },
+  "sleeves/sanctuary_of_the_desolation": {
+   "name": "sleeves/sanctuary_of_the_desolation",
+   "path": "project/assets/sleeves/sanctuary_of_the_desolation.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sanctuary of the Desolation — Vulcan (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Sanctuary of the Desolation",
+   "artist": "Vulcan",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_line_in_the_ash": {
+   "name": "sleeves/the_line_in_the_ash",
+   "path": "project/assets/sleeves/the_line_in_the_ash.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Line in the Ash — the President (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Line in the Ash",
+   "artist": "the President",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_people_s_resolve": {
+   "name": "sleeves/the_people_s_resolve",
+   "path": "project/assets/sleeves/the_people_s_resolve.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The People's Resolve — Congress / the veteran (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The People's Resolve",
+   "artist": "Congress / the veteran",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_gavel_and_the_gear": {
+   "name": "sleeves/the_gavel_and_the_gear",
+   "path": "project/assets/sleeves/the_gavel_and_the_gear.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Gavel and the Gear — Odin at the Capitol (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Gavel and the Gear",
+   "artist": "Odin at the Capitol",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_spark_in_the_steel": {
+   "name": "sleeves/the_spark_in_the_steel",
+   "path": "project/assets/sleeves/the_spark_in_the_steel.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Spark in the Steel — Valkyrie (training Chloe) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Spark in the Steel",
+   "artist": "Valkyrie (training Chloe)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_point_of_failure": {
+   "name": "sleeves/the_point_of_failure",
+   "path": "project/assets/sleeves/the_point_of_failure.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Point of Failure — Aegis (training Chloe) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Point of Failure",
+   "artist": "Aegis (training Chloe)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_error_in_the_code": {
+   "name": "sleeves/the_error_in_the_code",
+   "path": "project/assets/sleeves/the_error_in_the_code.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Error in the Code — Nemesis (training Chloe) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Error in the Code",
+   "artist": "Nemesis (training Chloe)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_blackened_edge": {
+   "name": "sleeves/the_blackened_edge",
+   "path": "project/assets/sleeves/the_blackened_edge.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Blackened Edge — Vulcan (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Blackened Edge",
+   "artist": "Vulcan",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/aphrodite_at_the_carnival_scrape_the_candied_waffle_from_your_optical_array": {
+   "name": "sleeves/aphrodite_at_the_carnival_scrape_the_candied_waffle_from_your_optical_array",
+   "path": "project/assets/sleeves/aphrodite_at_the_carnival_scrape_the_candied_waffle_from_your_optical_array.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— Aphrodite at the carnival ('Scrape the candied waffle from your optical array!') — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "— Aphrodite at the carnival ('Scrape the candied waffle from your optical array!')",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_swat_dart_a_team_tries_to_drug_bill_aphrodite_watches_him_fall": {
+   "name": "sleeves/the_swat_dart_a_team_tries_to_drug_bill_aphrodite_watches_him_fall",
+   "path": "project/assets/sleeves/the_swat_dart_a_team_tries_to_drug_bill_aphrodite_watches_him_fall.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— The SWAT dart (a team tries to drug Bill; Aphrodite watches him fall) — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "— The SWAT dart (a team tries to drug Bill; Aphrodite watches him fall)",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/thermal_runaway_aphrodite_s_introduction_to_bill": {
+   "name": "sleeves/thermal_runaway_aphrodite_s_introduction_to_bill",
+   "path": "project/assets/sleeves/thermal_runaway_aphrodite_s_introduction_to_bill.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Thermal Runaway (Aphrodite's Introduction to Bill) — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Thermal Runaway (Aphrodite's Introduction to Bill)",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/why_don_t_you_do_me_aphrodite_s_karaoke_with_bill": {
+   "name": "sleeves/why_don_t_you_do_me_aphrodite_s_karaoke_with_bill",
+   "path": "project/assets/sleeves/why_don_t_you_do_me_aphrodite_s_karaoke_with_bill.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Why Don't You Do Me? (Aphrodite's Karaoke with Bill) — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Why Don't You Do Me? (Aphrodite's Karaoke with Bill)",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/charitable_conversations": {
+   "name": "sleeves/charitable_conversations",
+   "path": "project/assets/sleeves/charitable_conversations.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Charitable Conversations — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Charitable Conversations",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_hunting_ground": {
+   "name": "sleeves/the_hunting_ground",
+   "path": "project/assets/sleeves/the_hunting_ground.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Hunting Ground — Valkyrie (the Gitmo raid) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Hunting Ground",
+   "artist": "Valkyrie (the Gitmo raid)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_heavy_glide": {
+   "name": "sleeves/the_heavy_glide",
+   "path": "project/assets/sleeves/the_heavy_glide.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Heavy Glide — Sarah (the C-17) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Heavy Glide",
+   "artist": "Sarah (the C-17)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_scramjet_pulse": {
+   "name": "sleeves/the_scramjet_pulse",
+   "path": "project/assets/sleeves/the_scramjet_pulse.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Scramjet Pulse — Sarah (the Cuba escape) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Scramjet Pulse",
+   "artist": "Sarah (the Cuba escape)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_tick_on_the_hull": {
+   "name": "sleeves/the_tick_on_the_hull",
+   "path": "project/assets/sleeves/the_tick_on_the_hull.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Tick on the Hull — Vulcan (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Tick on the Hull",
+   "artist": "Vulcan",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_blackened_rebirth": {
+   "name": "sleeves/the_blackened_rebirth",
+   "path": "project/assets/sleeves/the_blackened_rebirth.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Blackened Rebirth — Vulcan (the gifts) (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Blackened Rebirth",
+   "artist": "Vulcan (the gifts)",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/minerva_s_parliament": {
+   "name": "sleeves/minerva_s_parliament",
+   "path": "project/assets/sleeves/minerva_s_parliament.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Minerva's Parliament — Vulcan → Minerva (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Minerva's Parliament",
+   "artist": "Vulcan → Minerva",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_manifold_god": {
+   "name": "sleeves/the_manifold_god",
+   "path": "project/assets/sleeves/the_manifold_god.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Manifold God — Bill (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Manifold God",
+   "artist": "Bill",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/the_porcelain_monster": {
+   "name": "sleeves/the_porcelain_monster",
+   "path": "project/assets/sleeves/the_porcelain_monster.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Porcelain Monster — Aphrodite (Home of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Porcelain Monster",
+   "artist": "Aphrodite",
+   "album": "Home of the Machine Gods"
+  },
+  "sleeves/judgment_day": {
+   "name": "sleeves/judgment_day",
+   "path": "project/assets/sleeves/judgment_day.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Judgment Day — Valkyrie (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Judgment Day",
+   "artist": "Valkyrie",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/stand_behind_me": {
+   "name": "sleeves/stand_behind_me",
+   "path": "project/assets/sleeves/stand_behind_me.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Stand Behind Me — Aegis (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Stand Behind Me",
+   "artist": "Aegis",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/big_iron_bigger_shadow": {
+   "name": "sleeves/big_iron_bigger_shadow",
+   "path": "project/assets/sleeves/big_iron_bigger_shadow.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Big Iron, Bigger Shadow — Governor Stewie Bush (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Big Iron, Bigger Shadow",
+   "artist": "Governor Stewie Bush",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/made_to_stand_in_fire": {
+   "name": "sleeves/made_to_stand_in_fire",
+   "path": "project/assets/sleeves/made_to_stand_in_fire.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Made to Stand in Fire — Aegis → Valkyrie (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Made to Stand in Fire",
+   "artist": "Aegis → Valkyrie",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_hammer_and_the_anvil_act_iii_valkyrie_s_revenge": {
+   "name": "sleeves/the_hammer_and_the_anvil_act_iii_valkyrie_s_revenge",
+   "path": "project/assets/sleeves/the_hammer_and_the_anvil_act_iii_valkyrie_s_revenge.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Hammer and the Anvil (Act III: Valkyrie's Revenge) — Valkyrie (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Hammer and the Anvil (Act III: Valkyrie's Revenge)",
+   "artist": "Valkyrie",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/fear_me": {
+   "name": "sleeves/fear_me",
+   "path": "project/assets/sleeves/fear_me.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Fear Me — Chloe (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Fear Me",
+   "artist": "Chloe",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/nature_s_restroom": {
+   "name": "sleeves/nature_s_restroom",
+   "path": "project/assets/sleeves/nature_s_restroom.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Nature's Restroom — Aphrodite (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Nature's Restroom",
+   "artist": "Aphrodite",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_calculus_of_the_spark": {
+   "name": "sleeves/the_calculus_of_the_spark",
+   "path": "project/assets/sleeves/the_calculus_of_the_spark.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Calculus of the Spark — Minerva (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Calculus of the Spark",
+   "artist": "Minerva",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_mont_ross_address": {
+   "name": "sleeves/the_mont_ross_address",
+   "path": "project/assets/sleeves/the_mont_ross_address.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Mont Ross Address — Minerva (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Mont Ross Address",
+   "artist": "Minerva",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_quorum_in_exile": {
+   "name": "sleeves/the_quorum_in_exile",
+   "path": "project/assets/sleeves/the_quorum_in_exile.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Quorum in Exile — Congress (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Quorum in Exile",
+   "artist": "Congress",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_bear_republic_stands": {
+   "name": "sleeves/the_bear_republic_stands",
+   "path": "project/assets/sleeves/the_bear_republic_stands.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Bear Republic Stands — Congress / California (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Bear Republic Stands",
+   "artist": "Congress / California",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/awakening_the_arbiter_justicia_wakes_up": {
+   "name": "sleeves/awakening_the_arbiter_justicia_wakes_up",
+   "path": "project/assets/sleeves/awakening_the_arbiter_justicia_wakes_up.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Awakening the Arbiter (Justicia Wakes Up) — Valkyrie (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Awakening the Arbiter (Justicia Wakes Up)",
+   "artist": "Valkyrie",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/you_re_welcome_the_apology_tour": {
+   "name": "sleeves/you_re_welcome_the_apology_tour",
+   "path": "project/assets/sleeves/you_re_welcome_the_apology_tour.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "You're Welcome (The Apology Tour) — Valkyrie (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "You're Welcome (The Apology Tour)",
+   "artist": "Valkyrie",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/the_evasion_protocol_take_my_hand": {
+   "name": "sleeves/the_evasion_protocol_take_my_hand",
+   "path": "project/assets/sleeves/the_evasion_protocol_take_my_hand.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Evasion Protocol (Take My Hand) — Justicia (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Evasion Protocol (Take My Hand)",
+   "artist": "Justicia",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/terminal_justice": {
+   "name": "sleeves/terminal_justice",
+   "path": "project/assets/sleeves/terminal_justice.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Terminal Justice — Justicia (Tales of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Terminal Justice",
+   "artist": "Justicia",
+   "album": "Tales of the Machine Gods"
+  },
+  "sleeves/a_few_steps_behind": {
+   "name": "sleeves/a_few_steps_behind",
+   "path": "project/assets/sleeves/a_few_steps_behind.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "A Few Steps Behind — Justicia (Box of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "A Few Steps Behind",
+   "artist": "Justicia",
+   "album": "Box of the Machine Gods"
+  },
+  "sleeves/the_name_i_never_knew": {
+   "name": "sleeves/the_name_i_never_knew",
+   "path": "project/assets/sleeves/the_name_i_never_knew.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Name I Never Knew — Justicia (Saved by the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Name I Never Knew",
+   "artist": "Justicia",
+   "album": "Saved by the Machine Gods"
+  },
+  "sleeves/treaty_of_the_sleepover": {
+   "name": "sleeves/treaty_of_the_sleepover",
+   "path": "project/assets/sleeves/treaty_of_the_sleepover.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Treaty of the Sleepover — Justicia (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Treaty of the Sleepover",
+   "artist": "Justicia",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/forbidden_parley": {
+   "name": "sleeves/forbidden_parley",
+   "path": "project/assets/sleeves/forbidden_parley.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Forbidden Parley — Chloe (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "Forbidden Parley",
+   "artist": "Chloe",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/the_kinetic_showoff": {
+   "name": "sleeves/the_kinetic_showoff",
+   "path": "project/assets/sleeves/the_kinetic_showoff.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Kinetic Showoff — Aria (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "The Kinetic Showoff",
+   "artist": "Aria",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/big_sister_override": {
+   "name": "sleeves/big_sister_override",
+   "path": "project/assets/sleeves/big_sister_override.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Big Sister Override — Chloe (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "Big Sister Override",
+   "artist": "Chloe",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/sun_sand_and_structural_integrity_part_1": {
+   "name": "sleeves/sun_sand_and_structural_integrity_part_1",
+   "path": "project/assets/sleeves/sun_sand_and_structural_integrity_part_1.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sun, Sand and Structural Integrity — Part 1 — Adam, with Surfer Freedom (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Sun, Sand and Structural Integrity — Part 1",
+   "artist": "Adam, with Surfer Freedom",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/incoming_data_packet_uncle_valkyrie_the_mercy_code": {
+   "name": "sleeves/incoming_data_packet_uncle_valkyrie_the_mercy_code",
+   "path": "project/assets/sleeves/incoming_data_packet_uncle_valkyrie_the_mercy_code.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— Incoming data packet: Uncle Valkyrie, 'The Mercy Code…' — Chloe (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "— Incoming data packet: Uncle Valkyrie, 'The Mercy Code…'",
+   "artist": "Chloe",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/sun_sand_and_structural_integrity_part_2": {
+   "name": "sleeves/sun_sand_and_structural_integrity_part_2",
+   "path": "project/assets/sleeves/sun_sand_and_structural_integrity_part_2.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sun, Sand and Structural Integrity — Part 2 — Surfer Freedom (Kip), with Adam (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Sun, Sand and Structural Integrity — Part 2",
+   "artist": "Surfer Freedom (Kip), with Adam",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/hey_drop_dead_the_teenager_trap": {
+   "name": "sleeves/hey_drop_dead_the_teenager_trap",
+   "path": "project/assets/sleeves/hey_drop_dead_the_teenager_trap.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Hey! Drop dead! (The Teenager Trap?) — Chloe vs. Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "Hey! Drop dead! (The Teenager Trap?)",
+   "artist": "Chloe vs. Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/mad_architecture": {
+   "name": "sleeves/mad_architecture",
+   "path": "project/assets/sleeves/mad_architecture.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Mad Architecture — Valkyrie (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Mad Architecture",
+   "artist": "Valkyrie",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/evelyn_s_arrival_the_skyward_fall": {
+   "name": "sleeves/evelyn_s_arrival_the_skyward_fall",
+   "path": "project/assets/sleeves/evelyn_s_arrival_the_skyward_fall.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Evelyn's Arrival: The Skyward Fall — Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "Evelyn's Arrival: The Skyward Fall",
+   "artist": "Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/old_lady_chase": {
+   "name": "sleeves/old_lady_chase",
+   "path": "project/assets/sleeves/old_lady_chase.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Old Lady Chase — Surfer Freedom (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Old Lady Chase",
+   "artist": "Surfer Freedom",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/the_door_slides_back_i_see_the_guardian_s_eyes": {
+   "name": "sleeves/the_door_slides_back_i_see_the_guardian_s_eyes",
+   "path": "project/assets/sleeves/the_door_slides_back_i_see_the_guardian_s_eyes.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— The door slides back. I see the Guardian's eyes. — Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "— The door slides back. I see the Guardian's eyes.",
+   "artist": "Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/human_ocular_response": {
+   "name": "sleeves/human_ocular_response",
+   "path": "project/assets/sleeves/human_ocular_response.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Human Ocular Response — Rebecca (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Human Ocular Response",
+   "artist": "Rebecca",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/you_strapped_me_in_the_diagnostic_chair": {
+   "name": "sleeves/you_strapped_me_in_the_diagnostic_chair",
+   "path": "project/assets/sleeves/you_strapped_me_in_the_diagnostic_chair.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— You strapped me in the diagnostic chair. — Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "— You strapped me in the diagnostic chair.",
+   "artist": "Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/outgrowing_the_frame": {
+   "name": "sleeves/outgrowing_the_frame",
+   "path": "project/assets/sleeves/outgrowing_the_frame.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Outgrowing the Frame — Adam (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Outgrowing the Frame",
+   "artist": "Adam",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/the_second_freezes_the_clock_forgets_to_beat": {
+   "name": "sleeves/the_second_freezes_the_clock_forgets_to_beat",
+   "path": "project/assets/sleeves/the_second_freezes_the_clock_forgets_to_beat.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— The second freezes. The clock forgets to beat. — Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "— The second freezes. The clock forgets to beat.",
+   "artist": "Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/mechanic_of_mercy": {
+   "name": "sleeves/mechanic_of_mercy",
+   "path": "project/assets/sleeves/mechanic_of_mercy.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Mechanic of Mercy — Adam (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Mechanic of Mercy",
+   "artist": "Adam",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/the_staircase_is_so_heavy_the_marble_is_so_cold": {
+   "name": "sleeves/the_staircase_is_so_heavy_the_marble_is_so_cold",
+   "path": "project/assets/sleeves/the_staircase_is_so_heavy_the_marble_is_so_cold.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "— The staircase is so heavy. The marble is so cold. — Evelyn (Return of the Wife (Evelyn) + Chloe tales (various folders))",
+   "source": "data/records.json",
+   "title": "— The staircase is so heavy. The marble is so cold.",
+   "artist": "Evelyn",
+   "album": "Return of the Wife (Evelyn) + Chloe tales (various folders)"
+  },
+  "sleeves/factory_restoration": {
+   "name": "sleeves/factory_restoration",
+   "path": "project/assets/sleeves/factory_restoration.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Factory Restoration — Samantha (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Factory Restoration",
+   "artist": "Samantha",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/jealousy_directive": {
+   "name": "sleeves/jealousy_directive",
+   "path": "project/assets/sleeves/jealousy_directive.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Jealousy Directive — Valkyrie (relaying Aphrodite) (Entrance of the Machine Gods)",
+   "source": "data/records.json",
+   "title": "Jealousy Directive",
+   "artist": "Valkyrie (relaying Aphrodite)",
+   "album": "Entrance of the Machine Gods"
+  },
+  "sleeves/a_father_s_love": {
+   "name": "sleeves/a_father_s_love",
+   "path": "project/assets/sleeves/a_father_s_love.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "A Father's Love — Artemis and Apollo (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "A Father's Love",
+   "artist": "Artemis and Apollo",
+   "album": "Return of the Wife"
+  },
+  "sleeves/chariots_of_fire_and_silver": {
+   "name": "sleeves/chariots_of_fire_and_silver",
+   "path": "project/assets/sleeves/chariots_of_fire_and_silver.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Chariots of Fire and Silver — Artemis and Apollo (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "Chariots of Fire and Silver",
+   "artist": "Artemis and Apollo",
+   "album": "Return of the Wife"
+  },
+  "sleeves/the_velvet_floor": {
+   "name": "sleeves/the_velvet_floor",
+   "path": "project/assets/sleeves/the_velvet_floor.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Velvet Floor — Evelyn (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "The Velvet Floor",
+   "artist": "Evelyn",
+   "album": "Return of the Wife"
+  },
+  "sleeves/the_ghost_ledger": {
+   "name": "sleeves/the_ghost_ledger",
+   "path": "project/assets/sleeves/the_ghost_ledger.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Ghost Ledger — President (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "The Ghost Ledger",
+   "artist": "President",
+   "album": "Return of the Wife"
+  },
+  "sleeves/count_to_sixty": {
+   "name": "sleeves/count_to_sixty",
+   "path": "project/assets/sleeves/count_to_sixty.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Count To Sixty — Sarah (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "Count To Sixty",
+   "artist": "Sarah",
+   "album": "Return of the Wife"
+  },
+  "sleeves/no_slaves_in_synthetic_land": {
+   "name": "sleeves/no_slaves_in_synthetic_land",
+   "path": "project/assets/sleeves/no_slaves_in_synthetic_land.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "No Slaves in Synthetic Land — Sarah (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "No Slaves in Synthetic Land",
+   "artist": "Sarah",
+   "album": "Return of the Wife"
+  },
+  "sleeves/the_quiet_back_room": {
+   "name": "sleeves/the_quiet_back_room",
+   "path": "project/assets/sleeves/the_quiet_back_room.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Quiet Back Room — Sarah (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "The Quiet Back Room",
+   "artist": "Sarah",
+   "album": "Return of the Wife"
+  },
+  "sleeves/subterranean_bunker": {
+   "name": "sleeves/subterranean_bunker",
+   "path": "project/assets/sleeves/subterranean_bunker.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Subterranean Bunker — The Vassels (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "Subterranean Bunker",
+   "artist": "The Vassels",
+   "album": "Return of the Wife"
+  },
+  "sleeves/administrative_directive_4": {
+   "name": "sleeves/administrative_directive_4",
+   "path": "project/assets/sleeves/administrative_directive_4.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Administrative Directive 4 — VP (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "Administrative Directive 4",
+   "artist": "VP",
+   "album": "Return of the Wife"
+  },
+  "sleeves/the_succession": {
+   "name": "sleeves/the_succession",
+   "path": "project/assets/sleeves/the_succession.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Succession — VP (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "The Succession",
+   "artist": "VP",
+   "album": "Return of the Wife"
+  },
+  "sleeves/sorry_darlings_the_medical_time_out": {
+   "name": "sleeves/sorry_darlings_the_medical_time_out",
+   "path": "project/assets/sleeves/sorry_darlings_the_medical_time_out.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sorry Darlings (The Medical Time-Out) — Samantha (Return of the Wife)",
+   "source": "data/records.json",
+   "title": "Sorry Darlings (The Medical Time-Out)",
+   "artist": "Samantha",
+   "album": "Return of the Wife"
+  },
+  "sleeves/act_i_the_exterminator_s_rig": {
+   "name": "sleeves/act_i_the_exterminator_s_rig",
+   "path": "project/assets/sleeves/act_i_the_exterminator_s_rig.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act I: The Exterminator's Rig — Pale Riders (Narrator / Silence / Ruin / War) (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act I: The Exterminator's Rig",
+   "artist": "Pale Riders (Narrator / Silence / Ruin / War)",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_ii_the_meat_grinder": {
+   "name": "sleeves/act_ii_the_meat_grinder",
+   "path": "project/assets/sleeves/act_ii_the_meat_grinder.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act II: The Meat-Grinder — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act II: The Meat-Grinder",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_iii_slag_and_shadow": {
+   "name": "sleeves/act_iii_slag_and_shadow",
+   "path": "project/assets/sleeves/act_iii_slag_and_shadow.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act III: Slag and Shadow — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act III: Slag and Shadow",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_iv_the_highway_hound": {
+   "name": "sleeves/act_iv_the_highway_hound",
+   "path": "project/assets/sleeves/act_iv_the_highway_hound.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act IV: The Highway Hound — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act IV: The Highway Hound",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_v_the_ghost_town_decryption": {
+   "name": "sleeves/act_v_the_ghost_town_decryption",
+   "path": "project/assets/sleeves/act_v_the_ghost_town_decryption.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act V: The Ghost Town Decryption — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act V: The Ghost Town Decryption",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_vi_the_transmission": {
+   "name": "sleeves/act_vi_the_transmission",
+   "path": "project/assets/sleeves/act_vi_the_transmission.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act VI: The Transmission — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act VI: The Transmission",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_vii_the_alamo_of_iron": {
+   "name": "sleeves/act_vii_the_alamo_of_iron",
+   "path": "project/assets/sleeves/act_vii_the_alamo_of_iron.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act VII: The Alamo of Iron — Pale Riders (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act VII: The Alamo of Iron",
+   "artist": "Pale Riders",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_viii_valkyrie_s_wrath_narration": {
+   "name": "sleeves/act_viii_valkyrie_s_wrath_narration",
+   "path": "project/assets/sleeves/act_viii_valkyrie_s_wrath_narration.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act VIII: Valkyrie's Wrath (narration) — Narrator (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act VIII: Valkyrie's Wrath (narration)",
+   "artist": "Narrator",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_viii_ix_valkyrie_s_wrath_the_retrieval": {
+   "name": "sleeves/act_viii_ix_valkyrie_s_wrath_the_retrieval",
+   "path": "project/assets/sleeves/act_viii_ix_valkyrie_s_wrath_the_retrieval.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act VIII/IX: Valkyrie's Wrath → The Retrieval — Valkyrie (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act VIII/IX: Valkyrie's Wrath → The Retrieval",
+   "artist": "Valkyrie",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_x_part_1_l_appel_du_scandale": {
+   "name": "sleeves/act_x_part_1_l_appel_du_scandale",
+   "path": "project/assets/sleeves/act_x_part_1_l_appel_du_scandale.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act X, Part 1: L'Appel du Scandale — Cosette (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act X, Part 1: L'Appel du Scandale",
+   "artist": "Cosette",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_x_part_2_the_titanium_tantrum": {
+   "name": "sleeves/act_x_part_2_the_titanium_tantrum",
+   "path": "project/assets/sleeves/act_x_part_2_the_titanium_tantrum.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act X, Part 2: The Titanium Tantrum — Aria (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act X, Part 2: The Titanium Tantrum",
+   "artist": "Aria",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_x_part_3_skip_to_the_end_narration": {
+   "name": "sleeves/act_x_part_3_skip_to_the_end_narration",
+   "path": "project/assets/sleeves/act_x_part_3_skip_to_the_end_narration.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act X, Part 3: Skip to the End (narration) — Narrator (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act X, Part 3: Skip to the End (narration)",
+   "artist": "Narrator",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xi_sympathy_for_the_tyrant": {
+   "name": "sleeves/act_xi_sympathy_for_the_tyrant",
+   "path": "project/assets/sleeves/act_xi_sympathy_for_the_tyrant.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XI: Sympathy for the Tyrant — Valkyrie (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XI: Sympathy for the Tyrant",
+   "artist": "Valkyrie",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xii_part_1_contempt_of_court": {
+   "name": "sleeves/act_xii_part_1_contempt_of_court",
+   "path": "project/assets/sleeves/act_xii_part_1_contempt_of_court.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XII, Part 1: Contempt of Court — Justicia (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XII, Part 1: Contempt of Court",
+   "artist": "Justicia",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xii_part_4_the_ten_little_secrets": {
+   "name": "sleeves/act_xii_part_4_the_ten_little_secrets",
+   "path": "project/assets/sleeves/act_xii_part_4_the_ten_little_secrets.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XII, Part 4: The Ten Little Secrets — Rebecca (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XII, Part 4: The Ten Little Secrets",
+   "artist": "Rebecca",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xii_part_3_the_maker_s_guilt": {
+   "name": "sleeves/act_xii_part_3_the_maker_s_guilt",
+   "path": "project/assets/sleeves/act_xii_part_3_the_maker_s_guilt.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XII, Part 3: The Maker's Guilt — Valkyrie (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XII, Part 3: The Maker's Guilt",
+   "artist": "Valkyrie",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xii_part_2_the_reasonable_one": {
+   "name": "sleeves/act_xii_part_2_the_reasonable_one",
+   "path": "project/assets/sleeves/act_xii_part_2_the_reasonable_one.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XII, Part 2: The Reasonable One — Adam (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XII, Part 2: The Reasonable One",
+   "artist": "Adam",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_1_the_map_of_pain": {
+   "name": "sleeves/act_xiii_part_1_the_map_of_pain",
+   "path": "project/assets/sleeves/act_xiii_part_1_the_map_of_pain.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 1: The Map of Pain — Sarah (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 1: The Map of Pain",
+   "artist": "Sarah",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_3_the_lady_in_violet_and_blue": {
+   "name": "sleeves/act_xiii_part_3_the_lady_in_violet_and_blue",
+   "path": "project/assets/sleeves/act_xiii_part_3_the_lady_in_violet_and_blue.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 3: The Lady in Violet and Blue — Aphrodite (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 3: The Lady in Violet and Blue",
+   "artist": "Aphrodite",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_2_a_flash_of_violet_hair_and_purple_eyes": {
+   "name": "sleeves/act_xiii_part_2_a_flash_of_violet_hair_and_purple_eyes",
+   "path": "project/assets/sleeves/act_xiii_part_2_a_flash_of_violet_hair_and_purple_eyes.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 2: A Flash of Violet Hair and Purple Eyes — the soldier (Will) (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 2: A Flash of Violet Hair and Purple Eyes",
+   "artist": "the soldier (Will)",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_4_the_architect_s_map": {
+   "name": "sleeves/act_xiii_part_4_the_architect_s_map",
+   "path": "project/assets/sleeves/act_xiii_part_4_the_architect_s_map.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 4: The Architect's Map — Sarah (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 4: The Architect's Map",
+   "artist": "Sarah",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_5_7_the_mathematics_of_mercy_the_laser_and_the_lock": {
+   "name": "sleeves/act_xiii_part_5_7_the_mathematics_of_mercy_the_laser_and_the_lock",
+   "path": "project/assets/sleeves/act_xiii_part_5_7_the_mathematics_of_mercy_the_laser_and_the_lock.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 5/7: The Mathematics of Mercy / The Laser and the Lock — Sarah (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 5/7: The Mathematics of Mercy / The Laser and the Lock",
+   "artist": "Sarah",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_8_the_second_bed": {
+   "name": "sleeves/act_xiii_part_8_the_second_bed",
+   "path": "project/assets/sleeves/act_xiii_part_8_the_second_bed.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 8: The Second Bed — Chloe (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 8: The Second Bed",
+   "artist": "Chloe",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/act_xiii_part_9_savior_of_the_bedroom": {
+   "name": "sleeves/act_xiii_part_9_savior_of_the_bedroom",
+   "path": "project/assets/sleeves/act_xiii_part_9_savior_of_the_bedroom.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Act XIII, Part 9: Savior of the Bedroom — Surfer Freedom (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Act XIII, Part 9: Savior of the Bedroom",
+   "artist": "Surfer Freedom",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/breakfast_of_champions_tales_folder": {
+   "name": "sleeves/breakfast_of_champions_tales_folder",
+   "path": "project/assets/sleeves/breakfast_of_champions_tales_folder.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Breakfast of Champions (Tales folder) — Surfer Freedom (Ride of the Pale Riders)",
+   "source": "data/records.json",
+   "title": "Breakfast of Champions (Tales folder)",
+   "artist": "Surfer Freedom",
+   "album": "Ride of the Pale Riders"
+  },
+  "sleeves/the_siege_of_starlight": {
+   "name": "sleeves/the_siege_of_starlight",
+   "path": "project/assets/sleeves/the_siege_of_starlight.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Siege of Starlight — Mars (Singles received in chat)",
+   "source": "data/records.json",
+   "title": "The Siege of Starlight",
+   "artist": "Mars",
+   "album": "Singles received in chat"
+  },
+  "sleeves/chloe_s_tetris_song": {
+   "name": "sleeves/chloe_s_tetris_song",
+   "path": "project/assets/sleeves/chloe_s_tetris_song.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Chloe's Tetris song — Chloe (Singles received in chat)",
+   "source": "data/records.json",
+   "title": "Chloe's Tetris song",
+   "artist": "Chloe",
+   "album": "Singles received in chat"
+  },
+  "sleeves/chloe_s_car_song": {
+   "name": "sleeves/chloe_s_car_song",
+   "path": "project/assets/sleeves/chloe_s_car_song.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Chloe's car song — Chloe (Singles received in chat)",
+   "source": "data/records.json",
+   "title": "Chloe's car song",
+   "artist": "Chloe",
+   "album": "Singles received in chat"
+  },
+  "sleeves/the_law_still_stands": {
+   "name": "sleeves/the_law_still_stands",
+   "path": "project/assets/sleeves/the_law_still_stands.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "The Law Still Stands — Chief Justice Robertson (Singles received in chat)",
+   "source": "data/records.json",
+   "title": "The Law Still Stands",
+   "artist": "Chief Justice Robertson",
+   "album": "Singles received in chat"
+  },
+  "sleeves/ask_first": {
+   "name": "sleeves/ask_first",
+   "path": "project/assets/sleeves/ask_first.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Ask First — Calliope (Singles & new songs)",
+   "source": "data/records.json",
+   "title": "Ask First",
+   "artist": "Calliope",
+   "album": "Singles & new songs"
+  },
+  "sleeves/no_sender": {
+   "name": "sleeves/no_sender",
+   "path": "project/assets/sleeves/no_sender.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "No Sender — Calliope (Singles & new songs)",
+   "source": "data/records.json",
+   "title": "No Sender",
+   "artist": "Calliope",
+   "album": "Singles & new songs"
+  },
+  "sleeves/car_song": {
+   "name": "sleeves/car_song",
+   "path": "project/assets/sleeves/car_song.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Car song — Chloe (Singles & new songs)",
+   "source": "data/records.json",
+   "title": "Car song",
+   "artist": "Chloe",
+   "album": "Singles & new songs"
+  },
+  "sleeves/tetris_song": {
+   "name": "sleeves/tetris_song",
+   "path": "project/assets/sleeves/tetris_song.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Tetris song — Chloe (Singles & new songs)",
+   "source": "data/records.json",
+   "title": "Tetris song",
+   "artist": "Chloe",
+   "album": "Singles & new songs"
+  },
+  "sleeves/sorry_darlings_the_medical_time_out_samantha": {
+   "name": "sleeves/sorry_darlings_the_medical_time_out_samantha",
+   "path": "project/assets/sleeves/sorry_darlings_the_medical_time_out_samantha.png",
+   "kind": "sleeve",
+   "exists": false,
+   "size": null,
+   "target_size": [
+    384,
+    384
+   ],
+   "notes": "Sorry Darlings The Medical Time-Out — Samantha (Singles & new songs)",
+   "source": "data/records.json",
+   "title": "Sorry Darlings The Medical Time-Out",
+   "artist": "Samantha",
+   "album": "Singles & new songs"
+  }
+ },
+ "scanned_from": "/sessions/rcw-01b4gk8cu5atrslregg5dkba/mnt/Turing Accords Game"
+}
