@@ -1,0 +1,7 @@
+{
+ "type": "scene_card",
+ "name": "example_card",
+ "game": "turing_accords",
+ "variants": 2,
+ "prompt": "a small-town gas station at dusk, two pumps under a humming canopy light, an ice chest and a soda machine by the door, a dusty sedan at the pump, long shadows"
+}

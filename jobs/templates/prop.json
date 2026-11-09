@@ -1,0 +1,8 @@
+{
+ "type": "prop",
+ "name": "gas_pump_1990s",
+ "game": "turing_accords",
+ "target_h": 64,
+ "variants": 3,
+ "prompt": "a 1990s American gas pump, single object, beige and red enamel, digital price display, hose on the side, front three-quarter view"
+}

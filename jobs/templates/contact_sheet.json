@@ -1,0 +1,13 @@
+{
+ "type": "contact_sheet",
+ "name": "review_example",
+ "cols": 4,
+ "cell": [
+  288,
+  162
+ ],
+ "title": "review",
+ "inputs": [
+  "out/EXAMPLE/card.png"
+ ]
+}

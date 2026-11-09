@@ -1,0 +1,13 @@
+{
+ "type": "overworld",
+ "name": "usa_game1",
+ "region": "conus",
+ "scale": "fe6",
+ "layers": [
+  "naturalearth",
+  "tiger",
+  "gnis",
+  "3dep",
+  "nlcd"
+ ]
+}

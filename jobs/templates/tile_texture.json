@@ -1,0 +1,8 @@
+{
+ "type": "tile_texture",
+ "name": "asphalt_cracked",
+ "game": "turing_accords",
+ "tile_size": 32,
+ "variants": 4,
+ "prompt": "cracked grey asphalt with faded paint flecks, one square metre"
+}

@@ -1,0 +1,26 @@
+# environments
+venv/
+engines/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# weights and outputs stay local (big; and outputs belong to the game repo once approved)
+models/*
+!models/models.json
+!models/.gitkeep
+out/*
+!out/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# queue state is local to a machine; templates and game batches are tracked
+jobs/pending/*
+jobs/running/*
+jobs/done/*
+jobs/failed/*
+!jobs/*/.gitkeep
+
+# the commit-message inbox (push.bat): written per change, consumed by the push
+COMMIT_MESSAGE.txt
+COMMIT_MESSAGE.last.txt

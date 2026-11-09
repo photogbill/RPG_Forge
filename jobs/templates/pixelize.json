@@ -1,0 +1,10 @@
+{
+ "type": "pixelize",
+ "name": "pixelize_example",
+ "method": "mode",
+ "snap": true,
+ "palette": "resurrect-64",
+ "inputs": [
+  "out/EXAMPLE/raw.png"
+ ]
+}

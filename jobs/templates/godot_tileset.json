@@ -1,0 +1,15 @@
+{
+ "type": "godot_tileset",
+ "name": "tiles",
+ "png": "out/EXAMPLE/tiles.png",
+ "tile_size": 32,
+ "blocking": [
+  false,
+  false,
+  false,
+  true,
+  false,
+  true
+ ],
+ "res_path": "res://assets/tiles/tiles.png"
+}

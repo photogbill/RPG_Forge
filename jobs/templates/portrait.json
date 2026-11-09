@@ -1,0 +1,14 @@
+{
+ "type": "portrait",
+ "name": "example_portrait",
+ "game": "turing_accords",
+ "seed": 424242,
+ "prompt": "portrait of a woman who appears thirty-two, long oval face, pale gold hair in a low braid, intensely saturated blue eyes, thin reading glasses, oversized charcoal wool overcoat, library window light",
+ "expressions": [
+  "listening, faint half-smile",
+  "real smile, left side higher",
+  "eyes steady, mouth closed, chin lifted",
+  "fear held, shoulders in, eyes wide, perfectly still",
+  "head up, lips parted to sing, warm gold light on the left side of the face"
+ ]
+}

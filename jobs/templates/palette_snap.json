@@ -1,0 +1,8 @@
+{
+ "type": "palette_snap",
+ "name": "snap_example",
+ "palette": "resurrect-64",
+ "inputs": [
+  "out/EXAMPLE/raw.png"
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "type": "pack_sheet",
+ "name": "hero_sheet",
+ "cols": 8,
+ "cell": [
+  48,
+  72
+ ],
+ "anchor": "bottom",
+ "inputs": [
+  "out/EXAMPLE/s.png",
+  "out/EXAMPLE/sw.png",
+  "out/EXAMPLE/w.png",
+  "out/EXAMPLE/nw.png",
+  "out/EXAMPLE/n.png",
+  "out/EXAMPLE/ne.png",
+  "out/EXAMPLE/e.png",
+  "out/EXAMPLE/se.png"
+ ]
+}

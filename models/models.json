@@ -1,0 +1,41 @@
+{
+  "_comment": "Model registry. `python -m forge models pull <name>` downloads into models/<dest>. commercial_ok is read from the model's licence; shipped game assets come only from commercial_ok models (docs/LICENSING.md). Verify a licence yourself before you ship — this table is a convenience, not legal advice.",
+  "models": {
+    "sdxl-base-1.0": {
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+      "files": ["sd_xl_base_1.0.safetensors"],
+      "dest": "checkpoints",
+      "license": "CreativeML Open RAIL++-M",
+      "commercial_ok": true,
+      "workflow": "txt2img_sdxl",
+      "notes": "The baseline. Use-based restrictions apply (no illegal/harmful content) but commercial use of weights and outputs is permitted."
+    },
+    "flux2-klein-4b": {
+      "repo": "black-forest-labs/FLUX.2-klein-4B",
+      "files": [],
+      "dest": "diffusion_models/flux2-klein-4b",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "txt2img_flux2_klein",
+      "notes": "The only FLUX.2 model under Apache 2.0. File list depends on the ComfyUI packaging (unet + text encoder + VAE) — fill `files` from the model card, or download in ComfyUI's manager and point the workflow at it."
+    },
+    "flux2-klein-9b": {
+      "repo": "black-forest-labs/FLUX.2-klein-9B",
+      "files": [],
+      "dest": "diffusion_models/flux2-klein-9b",
+      "license": "FLUX Non-Commercial License",
+      "commercial_ok": false,
+      "workflow": "txt2img_flux2_klein",
+      "notes": "Experiments only. Not for shipped assets."
+    },
+    "qwen-image-edit-2509": {
+      "repo": "Qwen/Qwen-Image-Edit-2509",
+      "files": [],
+      "dest": "diffusion_models/qwen-image-edit",
+      "license": "Apache-2.0",
+      "commercial_ok": true,
+      "workflow": "edit_qwen_image",
+      "notes": "Reference-image editing (pose sheets with the Spritely LoRAs). ~20B params: fp8/GGUF + CPU offload on 16 GB VRAM."
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+ "type": "remove_bg",
+ "name": "cut_example",
+ "key_color": "#ff00ff",
+ "tolerance": 40,
+ "pad_to": [
+  48,
+  72
+ ],
+ "anchor": "bottom",
+ "inputs": [
+  "out/EXAMPLE/raw.png"
+ ]
+}

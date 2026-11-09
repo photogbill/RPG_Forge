@@ -1,0 +1,27 @@
+{
+  "_comment": "RPG_Forge configuration. Every path is relative to this folder; nothing is written anywhere else. See docs/PROTOCOL.md.",
+  "paths": {
+    "jobs": "jobs",
+    "out": "out",
+    "models": "models",
+    "logs": "logs",
+    "palettes": "palettes",
+    "games": "games",
+    "comfy_root": "engines/ComfyUI"
+  },
+  "comfy": {
+    "url": "http://127.0.0.1:8188",
+    "timeout_sec": 1800,
+    "poll_sec": 1.0,
+    "default_workflow": "txt2img_sdxl",
+    "default_checkpoint": "sd_xl_base_1.0.safetensors"
+  },
+  "worker": {"poll_sec": 2.0, "gpu": false},
+  "defaults": {
+    "palette": "resurrect-64",
+    "card_size": [288, 162],
+    "render_scale": 4,
+    "negative": "text, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality"
+  },
+  "allow_external_paths": false
+}

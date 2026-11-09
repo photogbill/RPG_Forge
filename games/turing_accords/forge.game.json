@@ -1,0 +1,22 @@
+{
+ "_comment": "The Turing Accords JRPG — forge settings. Bible: D:\\Turing Accords Game (18_Visual_Pipeline_Free_Options.md for the laws). Palette is provisional until the three-palette test is judged.",
+ "palette": "resurrect-64",
+ "card_size": [
+  288,
+  162
+ ],
+ "render_scale": 4,
+ "tile_size": 32,
+ "hero_cell": [
+  48,
+  72
+ ],
+ "style_prefix": "painterly concept art for a 16-bit style JRPG cutscene, muted cinematic palette, soft edges, clear silhouettes, 16:9 scene card, no text",
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, photo-realistic skin pores",
+ "workflow": "txt2img_sdxl",
+ "checkpoint": "sd_xl_base_1.0.safetensors",
+ "assets": {
+  "vignettes": "D:\\Turing Accords Game\\project\\assets\\vignettes",
+  "provenance": "D:\\Turing Accords Game\\project\\assets\\_provenance"
+ }
+}

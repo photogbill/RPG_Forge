@@ -1,0 +1,5 @@
+# CPU side of RPG_Forge. ComfyUI has its own environment (install_comfy.bat).
+Pillow>=10.0
+numpy>=1.26
+huggingface_hub>=0.24
+pytest>=8.0
