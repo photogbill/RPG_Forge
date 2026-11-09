@@ -201,3 +201,20 @@ The model bake-offs (sdxl_v1, style_v1, FLUX) are unchanged and stay raw on purp
 Co-Authored-By: Claude <noreply@anthropic.com>
 
 
+## 2026-11-09
+
+Roadmap: the next forge session (N1-N9) - painted scenes become six-file sets
+
+Decision behind it (William, 2026-11-09): no true HD-2D. The game keeps painted 2D scenes and gets the
+look on top - lights on normal maps, glow, parallax layers, a focus shader (game plan 21, section 3b).
+
+- docs/ROADMAP_NIGHT_2.md section 2b: N1 depth maps and normals from depth, N2 scene_layers, N3 scene_kit
+  (painting, normals, glow, layers and depth as one job), N4 approve --set, N5 bake-off skips finished
+  cells, N6 re-crop detail sheets, N7 the dashboard, N8 the Krea 2 graph, N9 small fixes.
+- KICKOFF_PROMPT_FOR_OPUS_FORGE.md rewritten for that session.
+- models/licences.json: ArtUniverseSDXL_v8 note - William checked the Civitai v8 page, no additional
+  restrictions.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+
