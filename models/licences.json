@@ -1,7 +1,7 @@
 {
  "ArtUniverseSDXL_v8.safetensors": {
-  "license": "<licence>",
+  "license": "CreativeML Open RAIL++-M (SDXL 1.0)",
   "commercial_ok": true,
-  "checked": "2026-11-09"
+  "checked": "2026-11-09 — William supplied the licence file from the model page 2026-11-09 (docs/model_licences/CreativeML_Open_RAIL++-M_SDXL_1.0.txt); Civitai creator permission icons not recorded"
  }
 }

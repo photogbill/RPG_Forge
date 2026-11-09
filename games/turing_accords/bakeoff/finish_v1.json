@@ -1,0 +1,134 @@
+{
+ "suite": "finish_v1",
+ "game": "turing_accords",
+ "_comment": "Finishing bake-off (2026-11-09): what the forge's new paint chain does to a picture, per checkpoint. The categories are TREATMENTS, not styles: the same four style_v1 'painted cinematic' pictures, same seed/sampler/steps as style_v1 (so the 1344x768 raw inside each job is the style_v1 render), pushed to 1920x1080 six ways through scene_paint: t0 RealESRGAN only · t1 + refine 0.30 (the forge default) · t2 + refine 0.45 · t3 FreeU_V2 + refine 0.30 · t4/t5 refine 0.30 + FaceDetailer at 0.30 / 0.50 (only the three pictures with people). 4 checkpoints x 22 = 88 paintings, ~1h45m. The question it answers: does refine add detail or drift, at what denoise, is FreeU worth having, how hard should face repair push — and does the answer differ by checkpoint. Read out/bakeoff/finish_v1/across_<picture>_nolora_1001.png (whole) and detail_<picture>_nolora_1001.png (1:1 crop): rows checkpoints, columns treatments. gmic_icon is left out (bake-off 1: wrong for scenes). Needs pull_quality.bat + install_comfy_faces.bat first.",
+ "checkpoints": [
+  "ArtUniverseSDXL_v8.safetensors",
+  "RealVisXL_V5.0_fp16.safetensors",
+  "SDVN6-RealXL-Detailface.safetensors",
+  "sd_xl_base_1.0.safetensors"
+ ],
+ "loras": [],
+ "include_no_lora": true,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "seeds": [
+  1001
+ ],
+ "size": [
+  1344,
+  768
+ ],
+ "steps": 28,
+ "cfg": 6.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "karras",
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, jpeg artifacts, oversaturated neon, plastic skin, extra heads, duplicated figures",
+ "job_type": "scene_paint",
+ "detail_crop": 640,
+ "job": {
+  "target": [
+   1920,
+   1080
+  ],
+  "variants": 1,
+  "priority": 5
+ },
+ "categories": {
+  "t0_upscale_only": {
+   "type": "scene_paint",
+   "job": {
+    "refine": false
+   },
+   "seconds_per_render": 45,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  },
+  "t1_refine_030": {
+   "type": "scene_paint",
+   "job": {
+    "refine": {
+     "denoise": 0.3
+    }
+   },
+   "seconds_per_render": 70,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  },
+  "t2_refine_045": {
+   "type": "scene_paint",
+   "job": {
+    "refine": {
+     "denoise": 0.45
+    }
+   },
+   "seconds_per_render": 75,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  },
+  "t3_freeu_refine_030": {
+   "type": "scene_paint",
+   "job": {
+    "refine": {
+     "denoise": 0.3
+    },
+    "freeu": true
+   },
+   "seconds_per_render": 70,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "augusta_ruin": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, the first ruin at dawn: a field of fused glass where a military base stood, an ash-brown river, a school chalkboard standing upright in the rubble with chalk writing on it, no people",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  },
+  "t4_face_030": {
+   "type": "scene_paint",
+   "job": {
+    "refine": {
+     "denoise": 0.3
+    },
+    "face_fix": {
+     "denoise": 0.3
+    }
+   },
+   "seconds_per_render": 90,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  },
+  "t5_face_050": {
+   "type": "scene_paint",
+   "job": {
+    "refine": {
+     "denoise": 0.3
+    },
+    "face_fix": {
+     "denoise": 0.5
+    }
+   },
+   "seconds_per_render": 90,
+   "prompts": {
+    "dockerys_juke": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+    "level_seven": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+    "new_orleans_opera": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air"
+   }
+  }
+ }
+}

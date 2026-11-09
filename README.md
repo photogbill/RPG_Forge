@@ -131,7 +131,8 @@ exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipelin
 MIT (code). Models and palettes carry their own licences — `docs/LICENSING.md` and `models/models.json`.
 
 ## Bake-off scripts added 2026-11-09
-- `bakeoff_tonight.bat` — queues the whole evening in order: new SDXL LoRAs → house styles → FLUX.2 klein → FLUX.1 + LoRAs; then `run_worker.bat`.
+- `bakeoff_tonight.bat` — queues the whole evening in order: the tools test → the finishing bake-off → new SDXL LoRAs → house styles → FLUX.2 klein → FLUX.1 + LoRAs; then `run_worker.bat`.
+- `test_tools.bat` — 13 small jobs, one per paint tool (about 20 minutes); run it before any long run. `bakeoff_finish.bat` — the finishing bake-off (refine, FreeU, face repair per checkpoint, with 1:1 detail sheets).
 - `bakeoff_new_models.bat` / `bakeoff_styles.bat` / `bakeoff_flux.bat` — the same runs one at a time.
 - `pull_flux.bat [dev]` — fetches FLUX.2 klein 4B + FLUX.1 schnell and their encoders/VAEs into `models\` (dev is non-commercial; opt in).
 - Verdicts and what each model is for: `docs/BAKEOFF_1_VERDICT.md`, `docs/NEXT_MODELS.md`.

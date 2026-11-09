@@ -145,3 +145,67 @@ def test_retry_failed_moves_back_to_pending(tmp_path):
     assert st["pending"] == 1 and st["failed"] == 1
     jid, job = q.claim()
     assert jid == a and "error" not in job and job["retries"] == 1
+
+
+def _tool_suite():
+    pics = {"juke": "a juke joint at night", "ruin": "a ruin at dawn"}
+    return {"suite": "fin", "game": None, "checkpoints": "*", "loras": [], "include_no_lora": True, "seeds": [7],
+            "size": [1344, 768], "steps": 28, "job_type": "scene_paint", "detail_crop": 32, "seconds_per_render": 10,
+            "job": {"target": [1920, 1080], "priority": 5},
+            "categories": {"t0_plain": {"job": {"refine": False}, "prompts": pics},
+                           "t1_refine": {"job": {"refine": {"denoise": 0.3}}, "seconds_per_render": 70, "prompts": pics,
+                                         "detail_at": {"juke": [0.9, 0.9]}},
+                           "raw": {"type": "render", "prompts": {"juke": pics["juke"]}}}}
+
+
+def test_bakeoff_plan_tool_categories_carry_job_type_and_fields():
+    from forge import schema
+    p = bakeoff.plan(_tool_suite(), _inventory(), cfgmod.load())
+    assert len(p["jobs"]) == 2 * 5                       # 2 checkpoints × (2 + 2 + 1) pictures, no LoRAs
+    assert all(not schema.validate(j) for j in p["jobs"])
+    t0 = [j for j in p["jobs"] if j["meta"]["category"] == "t0_plain"][0]
+    t1 = [j for j in p["jobs"] if j["meta"]["category"] == "t1_refine" and j["meta"]["prompt_id"] == "juke"][0]
+    raw = [j for j in p["jobs"] if j["meta"]["category"] == "raw"][0]
+    assert t0["type"] == "scene_paint" and t0["refine"] is False and t0["target"] == [1920, 1080] and t0["priority"] == 5
+    assert t0["style_prefix"] == "" and t0["seed"] == 7 and t0["size"] == [1344, 768] and t0["loras"] == []
+    assert t1["refine"] == {"denoise": 0.3} and t1["meta"]["detail"] == {"size": 32, "at": [0.9, 0.9]}
+    assert t0["meta"]["detail"]["at"] == [0.5, 0.5] and t0["meta"]["job_type"] == "scene_paint"
+    assert raw["type"] == "render" and "job_type" not in raw["meta"]
+    # the estimate adds up per category: 2 ckpts × (2×10 + 2×70 + 1×10) s
+    assert p["estimate_min"] == round(2 * (20 + 140 + 10) / 60.0, 1)
+
+
+def test_bakeoff_report_tool_jobs_across_and_detail_grids(tmp_path, monkeypatch):
+    monkeypatch.setattr(cfgmod, "ROOT", tmp_path)
+    q = Queue(tmp_path / "jobs", tmp_path / "out")
+    p = bakeoff.plan(_tool_suite(), _inventory(), cfgmod.load())
+    bakeoff.submit(p, q)
+    while True:                                              # the worker "paints" everything; one job fails
+        c = q.claim()
+        if c is None:
+            break
+        jid, job = c
+        if job["meta"]["category"] == "t1_refine" and job["meta"]["prompt_id"] == "ruin" and job["checkpoint"].startswith("CK_A"):
+            q.finish(jid, error="RuntimeError: node FaceDetailer missing")
+            continue
+        name = "render.png" if job["type"] == "render" else "scene.png"
+        Image.new("RGB", (192, 108), (40, 90, 200)).save(q.out_dir(jid) / name)
+        q.finish(jid, result={"outputs": [name]})
+    index = bakeoff.report("fin", q)
+    out = tmp_path / "out" / "bakeoff" / "fin"
+    html = index.read_text(encoding="utf-8")
+    assert "/scene.png" in html and "/render.png" in html and "One picture across the categories" in html
+    assert (out / "across_juke_nolora_7.png").exists() and (out / "detail_juke_nolora_7.png").exists()
+    assert (out / "across_ruin_nolora_7.png").exists()
+    a, d = Image.open(out / "across_juke_nolora_7.png"), Image.open(out / "detail_juke_nolora_7.png")
+    assert a.width == 170 + 3 * (384 + 6) and d.width == 170 + 3 * (32 + 6)     # raw · t0 · t1 columns
+    # scene.png is filed in both trees like a render
+    assert len(list((out / "by_category" / "t0_plain" / "juke").glob("*.png"))) == 2
+    summary = json.loads((out / "summary.json").read_text())
+    assert summary["failed"] == 1 and summary["rendered"] == 9 and len(summary["across"]) == 4
+
+
+def test_detail_crop_is_clamped_to_the_picture():
+    im = Image.new("RGB", (100, 60))
+    assert bakeoff.detail_crop(im, {"size": 32, "at": [0.99, 0.01]}).size == (32, 32)
+    assert bakeoff.detail_crop(im, {"size": 512}).size == (100, 60)

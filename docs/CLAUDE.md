@@ -53,8 +53,19 @@ To compare them, edit or copy `games/<game>/bakeoff/*.json` (test prompts per as
 `style_prefix` *out* — a bake-off tests the model, not the style), run `python -m forge bakeoff plan` to see
 the counts and skips, `submit` to queue, and after the GPU worker has run, `report` and look at
 `out/bakeoff/<suite>/grid_*.png` — rows are checkpoints, columns LoRAs — or open `by_category/<kind>/<prompt>/` (every model's take on one picture, side by side) and `by_model/<checkpoint>/<lora>/` (everything one model made). Rate what you see with
-`bakeoff rate` and write the conclusions into the game config (`checkpoint`, per-job-type `loras`) so later
+`bakeoff rate` (or `review <suite>` → the page → `rate --import`) and write the conclusions into the game config (`checkpoint`, per-job-type `loras`) so later
 jobs inherit the winners. Prompt in your own words; never prompt a named artist's style.
+
+A category can queue one of the forge's **tools** instead of a raw render — `"type": "scene_paint"` (or icon, sleeve,
+repaint …) plus `"job": {…extra fields…}` — so a suite compares *treatments* on the same picture and seed. The report
+then also builds `across_<picture>_…png` (rows checkpoints, columns categories — this works for style suites too) and,
+with `"detail_crop": N`, `detail_<picture>_…png`: the same grid as a 1:1 crop. Judge refine, face repair and upscalers
+on the detail sheets; they are invisible on thumbnails. `games/turing_accords/bakeoff/finish_v1.json` is the model
+(`bakeoff_finish.bat`). Keep the model bake-offs raw — a finishing chain on every cell multiplies the hours and hides
+what the model itself did; finish only the survivors.
+
+**Before any long run, run the tools test** (`test_tools.bat` → `games/turing_accords/batches/tools_v1.json`, 13 jobs,
+priority 10): one small job per tool, so a missing node or model fails in minutes, not at 3 a.m.
 
 ## Writing prompts that work
 

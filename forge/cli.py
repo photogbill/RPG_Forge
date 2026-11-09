@@ -207,6 +207,9 @@ def cmd_models(cfg: dict, args: list[str]) -> int:
     if args[0] == "licence":
         if len(args) < 4 or args[3].lower() not in ("yes", "no"):
             print('usage: models licence <file> "<licence name>" yes|no [where you checked]'); return 2
+        if not args[2].strip() or "<" in args[2] or ">" in args[2]:
+            print(f'"{args[2]}" is the placeholder from the instructions, not a licence name. Type the name shown on the '
+                  'model\'s page, e.g. "CreativeML Open RAIL++-M". Nothing was recorded.'); return 2
         from . import manifest
         p = manifest.record_licence(cfg, args[1], args[2], args[3].lower() == "yes", " ".join(args[4:]))
         print(f"recorded {Path(args[1]).name}: {args[2]} — commercial OK: {args[3].lower()} → {p}")

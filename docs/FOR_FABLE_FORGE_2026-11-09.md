@@ -5,6 +5,15 @@ first hour's rooms. Everything you need is built and tested against a fake Comfy
 yet. Full detail: `docs/HANDOFF_FORGE_2026-11-09.md`. How to drive it: `docs/CLAUDE.md` (last section). Fields:
 `docs/JOB_TYPES.md`. Templates: `jobs/templates/`.
 
+> **Fable, 2026-11-09 afternoon — done with this note:** the checklist below is now two things William can run.
+> `test_tools.bat` → `games/turing_accords/batches/tools_v1.json` (13 jobs: scene_paint ×2 variants, the 2560 street,
+> repaint canny sweep / no control / depth, upscale, icon ×2, sleeve ×2, pipeline, normal map, glow mask) and
+> `bakeoff_finish.bat` → `games/turing_accords/bakeoff/finish_v1.json` (refine off / 0.30 / 0.45, FreeU, face_fix 0.30 /
+> 0.50 on four pictures × four checkpoints, with 1:1 detail sheets). Both are the first two steps of `bakeoff_tonight.bat`.
+> Not covered yet: `flux2_klein` through scene_paint (only the 9B klein is on disk — non-commercial; the 4B is not pulled)
+> and `approve` (needs a finished render to point at; and see the licence note below — the ArtUniverse record on file
+> has a placeholder for its licence name). The game's `make_placeholders.py` now skips approved files.
+
 ## Before the test run (William, once)
 
 `pull_quality.bat` → `install_comfy_faces.bat` → (optional, depth only) `install_comfy_aux.bat` → restart

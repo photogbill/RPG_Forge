@@ -171,3 +171,33 @@ ignored — push.bat's `git add -A` would otherwise have tried to push ~100 GB o
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 
+## 2026-11-09
+
+Bake-off: tool categories, a finishing suite, and a tools test
+
+The bake-off could only queue raw renders. A category can now queue any of the forge's tools
+("type": "scene_paint" + "job": {...}), so a suite compares treatments on the same picture and seed.
+
+- forge/bakeoff.py: category/suite `type` / `job_type`, `job`, `detail_crop`, `detail_at`, per-category
+  `seconds_per_render`; the report takes each job's first picture (scene.png, icon.png ...) instead of
+  only render.png; new across_<picture> grids (rows checkpoints, columns categories - also useful for
+  the style suite) and detail_<picture> grids (the same as a 1:1 crop, because refine and face repair
+  cannot be judged on a thumbnail).
+- games/turing_accords/bakeoff/finish_v1.json: 4 pictures x 4 SDXL checkpoints x 6 finishes at
+  1920x1080 (upscale only, refine 0.30, refine 0.45, FreeU, face_fix 0.30 / 0.50) = 88 paintings.
+- games/turing_accords/batches/tools_v1.json: 13 jobs, one per Night 2 tool, priority 10, so a missing
+  node or model shows up in minutes. Uses ref/bills_house_greybox_test.png, drawn from the game's real
+  bills_house map at x3.
+- test_tools.bat, bakeoff_finish.bat; bakeoff_tonight.bat now queues those two first and skips them
+  with a message if pull_quality.bat / install_comfy_faces.bat have not been run.
+- `models licence` refuses a placeholder such as "<licence name>" as the licence name.
+- docs/CLAUDE.md, docs/FOR_FABLE_FORGE_2026-11-09.md, README.md updated. Tests: 61 -> 64, all green.
+- docs/model_licences/: the licence texts William supplied (CreativeML Open RAIL++-M for SDXL 1.0; Krea 2
+  Community License v1), kept out of the repo root so they are not mistaken for the forge's own MIT licence.
+  models/licences.json: ArtUniverseSDXL_v8 recorded as CreativeML Open RAIL++-M (replaces the placeholder).
+
+The model bake-offs (sdxl_v1, style_v1, FLUX) are unchanged and stay raw on purpose.
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+
