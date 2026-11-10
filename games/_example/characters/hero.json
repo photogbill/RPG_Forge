@@ -1,0 +1,22 @@
+{
+ "id": "hero",
+ "name": "Hero",
+ "asymmetric": false,
+ "default_variant": "default",
+ "variants": {
+  "default": {
+   "prompt": "{{char.hero}}",
+   "negative": null,
+   "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "seed": 1001,
+   "references": [],
+   "wanted": {
+    "field_sheet": "placeholder/hero_hero",
+    "portrait": "placeholder/portrait_hero"
+   }
+  }
+ }
+}

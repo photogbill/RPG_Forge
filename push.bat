@@ -47,6 +47,20 @@ echo.>>CHANGELOG.md
 echo.>>CHANGELOG.md
 
 :commit
+rem Never push what .gitignore excludes, even if git tracked it before (a game's own data, run state).
+rem Nothing is deleted from this PC - git just stops carrying those files from this commit on.
+git ls-files -ci --exclude-standard > "%TEMP%\rpgforge_untrack.txt"
+for %%A in ("%TEMP%\rpgforge_untrack.txt") do if %%~zA GTR 0 (
+  echo -- no longer pushing files that .gitignore excludes ^(they stay on this PC^)
+  git rm -r -q --cached --pathspec-from-file="%TEMP%\rpgforge_untrack.txt"
+  if errorlevel 1 (
+    echo Could not stop tracking the excluded files ^(git older than 2.26?^) - NOTHING was committed or pushed.
+    echo Update git ^(https://git-scm.com/download/win^) and run push.bat again.
+    pause
+    exit /b 1
+  )
+)
+del "%TEMP%\rpgforge_untrack.txt" 2>nul
 git add -A
 if defined USEFILE git commit -F "%MSGFILE%"
 if not defined USEFILE git commit -m "!MSG!"

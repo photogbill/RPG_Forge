@@ -30,8 +30,8 @@ page alone.
    palette holding? composition clear at 288×162? Write the verdict in one line per card.
 5. **Correct.** Re-queue only what missed, with a changed prompt phrase or a fixed `seed` from the
    variant that was close (seeds are in `prov.json`). Same `name`, new job → a new id; the old stays.
-6. **Approve.** Copy the approved file + its `prov.json` into the game's asset folder (for the Turing
-   Accords game: `project/assets/<kind>/…` plus `project/assets/_provenance/<name>.json`). Record what
+6. **Approve.** Copy the approved file + its `prov.json` into the game's asset folder (for a Godot
+   game: `project/assets/<kind>/…` plus `project/assets/_provenance/<name>.json`). Record what
    was approved in the batch file's `approved` list so the next session knows.
 
 ## Committing
@@ -62,11 +62,11 @@ A category can queue one of the forge's **tools** instead of a raw render — `"
 repaint …) plus `"job": {…extra fields…}` — so a suite compares *treatments* on the same picture and seed. The report
 then also builds `across_<picture>_…png` (rows checkpoints, columns categories — this works for style suites too) and,
 with `"detail_crop": N`, `detail_<picture>_…png`: the same grid as a 1:1 crop. Judge refine, face repair and upscalers
-on the detail sheets; they are invisible on thumbnails. `games/turing_accords/bakeoff/finish_v1.json` is the model
+on the detail sheets; they are invisible on thumbnails. `games/<game>/bakeoff/finish_v1.json` (in your game folder) is the model
 (`bakeoff_finish.bat`). Keep the model bake-offs raw — a finishing chain on every cell multiplies the hours and hides
 what the model itself did; finish only the survivors.
 
-**Before any long run, run the tools test** (`test_tools.bat` → `games/turing_accords/batches/tools_v1.json`, 13 jobs,
+**Before any long run, run the tools test** (a small batch of one job per tool — `games/<game>/batches/tools_v1.json`, 13 jobs,
 priority 10): one small job per tool, so a missing node or model fails in minutes, not at 3 a.m.
 
 ## Writing prompts that work
@@ -88,18 +88,17 @@ priority 10): one small job per tool, so a missing node or model fails in minute
 with a new palette), `contact.png` (variants), `prov.json`, `report.json` (palette/colour counts for
 CPU jobs), `job.json` (receipt with timings). `jobs/failed/<id>.json` — `error`, `traceback`.
 
-## Where the Turing Accords pieces are
+## A game's own pieces are not in this repo
 
-- Game config: `games/turing_accords/forge.game.json` (palette resurrect-64 until the palette test is
-  judged; style prefix; card size 288×162; tile 32; hero cell 48×72).
-- First batch: `games/turing_accords/batches/gate_law_cards.json` — the 21 vignette cards of
-  `D:\Turing Accords Game\Set_Pieces\IV-T3_Gate_Law.md`; approved cards go to
-  `D:\Turing Accords Game\project\assets\vignettes\gate_law\NN_slug.png` (same names as the placeholders,
-  so the storyboard sheet picks them up with no edit).
+RPG_Forge is a public, game-agnostic engine (William, 2026-11-10): **nothing specific to one game is pushed.** A game's
+forge data is `games/<game>/` (git-ignored; start from `games/_example/`); its plans, hand-offs, kickoff prompts and
+verdicts are `local/<game>/` (git-ignored). Read `local/<game>/CLAUDE_<game>.md` and the newest hand-off in
+`local/<game>/docs/` before working on that game. Commit messages are public too: describe the forge change, not the
+game's characters or story.
 
 ## Engines beyond SDXL (2026-11-09)
 
-A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (default), `flux2_klein` (FLUX.2 [klein] 4B — `forge/engines/flux2_graph.py`) or `flux1` (FLUX.1 dev/schnell and fine-tunes — `forge/engines/flux1_graph.py`). For FLUX the job's `checkpoint` is the diffusion-model file; text encoder and VAE default from `forge.json → comfy.flux2 / comfy.flux1`. A FLUX suite may **discover** its checkpoints instead of listing them: `checkpoint_dirs` (folders), `base_filter` (`flux1`), `checkpoint_include` / `checkpoint_exclude` (regexes on the name), `base_override` (pin the architecture when the header scan cannot tell). LoRA compatibility is checked by detected base (SDXL LoRAs never go on FLUX, FLUX.1 LoRAs never on klein); `lora_base_override` pins a LoRA with no metadata. Model folders: `forge.json → model_dirs` (William's collections: `sdmodels`, `lora models`, `flux_models`, `flux_lora`); after adding a folder run `python -m forge comfy-paths` and restart ComfyUI. Licences: klein 4B and FLUX.1 schnell are Apache-2.0; FLUX.1 dev and most Civitai FLUX fine-tunes are **non-commercial** — `models/models.json` flags them and `prov.json` records the flag; never put one in a shipped-asset job. Reading: `docs/NEXT_MODELS.md`, `docs/BAKEOFF_1_VERDICT.md`.
+A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (default), `flux2_klein` (FLUX.2 [klein] 4B — `forge/engines/flux2_graph.py`) or `flux1` (FLUX.1 dev/schnell and fine-tunes — `forge/engines/flux1_graph.py`). For FLUX the job's `checkpoint` is the diffusion-model file; text encoder and VAE default from `forge.json → comfy.flux2 / comfy.flux1`. A FLUX suite may **discover** its checkpoints instead of listing them: `checkpoint_dirs` (folders), `base_filter` (`flux1`), `checkpoint_include` / `checkpoint_exclude` (regexes on the name), `base_override` (pin the architecture when the header scan cannot tell). LoRA compatibility is checked by detected base (SDXL LoRAs never go on FLUX, FLUX.1 LoRAs never on klein); `lora_base_override` pins a LoRA with no metadata. Model folders: `forge.json → model_dirs` (William's collections: `sdmodels`, `lora models`, `flux_models`, `flux_lora`); after adding a folder run `python -m forge comfy-paths` and restart ComfyUI. Licences: klein 4B and FLUX.1 schnell are Apache-2.0; FLUX.1 dev and most Civitai FLUX fine-tunes are **non-commercial** — `models/models.json` flags them and `prov.json` records the flag; never put one in a shipped-asset job. Reading: `docs/NEXT_MODELS.md`, the bake-off verdicts in `local/<game>/docs/`.
 
 
 ## Painted backgrounds, the manifest and approval (2026-11-09, Night 2)
@@ -110,15 +109,15 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   the game's `checkpoints_by_job` / `loras_by_job` for that type. Big targets (a scrolling street) refine at ≤4 MP and are
   upscaled after (`refine_max_mp`). Templates: `jobs/templates/scene_paint.json`, `repaint.json`, `pipeline.json`.
 - **Know what the game wants:** `python -m forge wanted --refresh` reads the game folder (read-only) into
-  `games/turing_accords/wanted.json`: every placeholder, vignette, per-map scene background (×3 size), and the 159 sleeves.
-  Names are paths under `project/assets/` without the extension (`scenes/bills_house`, `vignettes/gate_law/01_ribbon`).
+  `games/<game>/wanted.json`: every placeholder, vignette, per-map scene background (×3 size), every sleeve and icon.
+  Names are paths under `project/assets/` without the extension (`scenes/town_square`, `vignettes/intro/01_title`).
 - **Approve by path:** `python -m forge approve <job-id> --as <wanted-name> [--pick N] [--dry-run]`. This replaces the manual
   copy in step 6 above: it checks the licence of **every** model that touched the pixels (the job, its pipeline steps, and
   any forge job it was made from), refuses unknown or non-commercial ones, backs up what it replaces to
   `out/_approved_backup/`, writes `_provenance/<name>.json` in the game and records the approval. A Civitai model is
   "unknown" until a person checks its page and runs `python -m forge models licence <file> "<licence>" yes|no "<where>"` —
   never record one on their behalf.
-- **Non-commercial models are a no-go for this game (William, 2026-11-09)** — none is registered as a default anywhere in
+- **Non-commercial models are a no-go for shipped art (William, 2026-11-09)** — none is registered as a default anywhere in
   the paint path (the upscaler is RealESRGAN BSD-3, not 4x-UltraSharp; depth is Depth Anything V2 *Small*; there is no
   CodeFormer/GFPGAN). Face repair is FaceDetailer only: it repaints faces with the job's own checkpoint.
 - **Judge:** `python -m forge review <batch|suite> --by category|model` → `out/review/<name>/index.html`; ratings come
@@ -165,7 +164,7 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   it, turn "cell 7" into `bakeoff rate <suite> <id> <1-5>` from the index.
 - **Mornings:** `report night` first (`out/reports/night_<date>.html/.md`).
 - **Big maps:** `scene_big` never climbs more than `max_step` (2×) per step (William: "6X disappoints usually").
-  `scene_kit big: true` is not wired yet (`docs/WIRE_NIGHT_3.md` W1).
+  `scene_kit big: true` is not wired yet (see the per-game wiring notes in `local/<game>/docs/`).
 - **States of a room:** `scene_state` with `greybox_base` + `greybox_state` (the mask is what changed; refused over 35 %).
   Outside the mask the picture — and, for a kit, every companion — is bit-identical to the base.
 - **Before approving a kit:** `kit check <id> --map <map>`; `approve --set` runs it and refuses on a *fail*.
@@ -184,7 +183,7 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   queued) and, at a console, asks him whether the facing guess is right. The mapping file
   (`games/<game>/intake/<character>[__<variant>]/<sheet>.intake.json`) is the record; numbers are on `numbers.png`.
   Contract: `sheet.png`, one row, S,SW,W,NW,N,NE,E,SE, cell 144×216, feet at y = 210. Never mirror an `asymmetric`
-  character without saying so (Sarah's holster).
+  character without saying so (a holster on one hip ends up on the wrong side).
 - **Characters:** `games/<game>/characters/<id>.json`. Inheritance runs in a submit shim (`forge/cli_night4.py`) until
   WIRE_NIGHT_4 moves it. `character_set` is expanded at SUBMIT (registry + blocks → plain-text renders).
 - **Production:** `produce plan` writes `games/<game>/batches/produce_plan.json` (+ .md); it adds TODO placeholder blocks

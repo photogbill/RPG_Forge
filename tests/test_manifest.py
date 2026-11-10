@@ -26,7 +26,7 @@ def make_world(tmp_path):
     (data / "items.json").write_text(json.dumps({"coolant": {"name": "Coolant", "kind": "repair", "desc": "Cools a core."}}), encoding="utf-8")
     games = tmp_path / "games"
     (games / "tg" / "batches").mkdir(parents=True)
-    src = cfgmod.ROOT / "games" / "turing_accords" / "export_wanted.py"
+    src = cfgmod.ROOT / "games" / "_example" / "export_wanted.py"
     (games / "tg" / "export_wanted.py").write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
     (games / "tg" / "forge.game.json").write_text(json.dumps({"game_root": str(game_root), "asset_root": str(assets),
         "provenance_dir": str(assets / "_provenance")}), encoding="utf-8")

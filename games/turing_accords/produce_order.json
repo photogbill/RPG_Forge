@@ -1,5 +1,0 @@
-{
- "_comment": "Night 4 (F3): the order produce plan paints in. PROVISIONAL — written by the Opus session without the game folder; Fable (with William) confirms or rewrites. first_hour: the eight maps a player sees in the first hour, Bill's house first (roadmap). story: every other map in order of first appearance. Maps not listed come after, alphabetically. Names are map ids (scenes/<id>).",
- "first_hour": ["bills_house", "linden_mills_street", "school_street", "hobby_shop", "gun_store", "uncle_workshop", "roadside_stop", "dry_fork_street"],
- "story": ["mile_212_bar", "dockerys_juke", "opera_lobby", "darpa_lab", "level_seven", "augusta_ruin", "atlanta_church", "new_orleans_quarter", "el_paso_bridge", "tucson_boneyard", "mont_ross_hangar", "damascus_compound", "washington_mall", "cheyenne_approach", "cheyenne_core", "overture_void"]
-}

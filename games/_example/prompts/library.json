@@ -1,0 +1,6 @@
+{
+ "_comment": "Your game's prompt blocks \u2014 reference as {{style.house}} in any job. A block starting with TODO refuses to expand.",
+ "blocks": {
+  "style.house": "TODO your house style words"
+ }
+}

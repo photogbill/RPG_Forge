@@ -1,14 +1,14 @@
 """The character registry (Night 4, F2): one file per character, every variant's recipe in one place.
 
     games/<game>/characters/<id>.json
-    {"id": "sarah", "name": "Sarah", "asymmetric": true,
-     "variants": {"guardian": {"prompt": "{{char.sarah.prefix}}, {{char.sarah.guardian}}", "negative": "…",
+    {"id": "hero", "name": "Hero", "asymmetric": true,
+     "variants": {"armoured": {"prompt": "{{char.hero.base}}, {{char.hero.armoured}}", "negative": "…",
                                "checkpoint": "…", "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 28,
                                "seed": 24101, "references": ["D:\\…"], "asymmetric": true,
-                               "wanted": {"field_sheet": "placeholder/hero_sarah", "portrait": "…",
+                               "wanted": {"field_sheet": "placeholder/hero_hero", "portrait": "…",
                                           "battle_pose": null, "portrait_moods": ["neutral", …]}}}}
 
-A job may say `"character": "sarah", "variant": "warrior"` and inherit the variant's recipe: prompt, negative,
+A job may say `"character": "hero", "variant": "armoured"` and inherit the variant's recipe: prompt, negative,
 checkpoint, loras, sampler, scheduler, steps, cfg, seed, size. The job's own keys always win. A job whose `prompt`
 contains `{{character}}` gets the variant's prompt put in at that point instead (so a pose or a mood can be added
 around the face). The job records `character`, `variant` and `character_registry` (a hash of the file), so a

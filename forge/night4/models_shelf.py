@@ -17,8 +17,8 @@ from .. import config as cfgmod
 
 EXTS = (".safetensors", ".ckpt", ".pt", ".pth", ".gguf", ".bin", ".sft")
 
-# The verdicts, by file stem (normalised). Sources: docs/SPRITE_BAKEOFF_VERDICT.md (2026-11-10, "remove models that
-# obviously won't be used" — William) and docs/BAKEOFF_1_VERDICT.md (2026-11-09). "scope" says what the drop covers.
+# The verdicts, by file stem (normalised), from the bake-off verdicts of 2026-11-09/10 (William: "remove models that
+# obviously won't be used"). "scope" says what the drop covers.
 DROPPED = {
     "sd_xl_base_1.0": ("sprites", "invents shields/blades/rifles not in the prompt (sprite verdict); still the portrait pick and the forge default"),
     "sdvn6-realxl-detailface": ("sprites", "crops at the thigh, glamour drift (sprite verdict); portraits at most"),

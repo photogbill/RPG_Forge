@@ -53,3 +53,22 @@ games/*/refs.local.json
 jobs/_cancelled*/
 jobs/drafts/
 jobs/_held*/
+
+# Night 4: notes and data that are William's own or one game's — on this PC only, never pushed
+/local/
+
+# RPG_Forge is game-agnostic (William, 2026-11-10): no game's own data is ever pushed.
+games/*
+!games/README.md
+!games/_example/
+# session notes, plans and hand-offs are per game → local/<game>/ (ignored above via /local/)
+/CHANGELOG.md
+/_old_sprite_bakeoff.bat.txt
+# one game's run scripts (they name that game's suites) — kept beside the forge on this PC, not pushed
+/SPRITE_[0-9]_*.bat
+/bakeoff_tonight*.bat
+/bakeoff_finish.bat
+/bakeoff_flux.bat
+/bakeoff_new_models.bat
+/bakeoff_styles.bat
+/test_tools.bat

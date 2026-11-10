@@ -12,7 +12,7 @@
 | `lora models\MMH3-RealismSlider-V1.safetensors` | a 2.7 MB *slider* LoRA (a LECO-style concept slider; usually SDXL or SD1.5; no metadata) | nothing — it is in tonight's new-models suite at strength 0.8; if the cells match the no-LoRA cells it is SD1.5 and gets dropped | in the queue |
 
 ## SDXL LoRAs that are new and in tonight's queue
-`Animated_Concept` (painted animation-concept look; sdxl base) · `Synthetic_Breed` (robots — trigger `syntheticbreed`; the Sentinel candidate) · `futuristic_stlye` (sci-fi scenery) · `lora-sdxl-perfect-eyes` (portraits only, trigger `perfecteyes`) · `MMH3-RealismSlider-V1` (see above). Suite: `games/turing_accords/bakeoff/sdxl_v1_newmodels.json`; they join the `sdxl_v1` grids as new columns.
+`Animated_Concept` (painted animation-concept look; sdxl base) · `Synthetic_Breed` (robots — trigger `syntheticbreed`) · `futuristic_stlye` (sci-fi scenery) · `lora-sdxl-perfect-eyes` (portraits only, trigger `perfecteyes`) · `MMH3-RealismSlider-V1` (see above). Suite: `games/turing_accords/bakeoff/sdxl_v1_newmodels.json`; they join the `sdxl_v1` grids as new columns.
 
 ## FLUX — wired today (2026-11-09, at William's request: "get flux integrated… we may learn that flux is the way to go")
 

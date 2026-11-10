@@ -1,0 +1,5 @@
+{
+ "_comment": "Words never allowed in a submitted prompt (artist names, LoRA trigger words you must not use).",
+ "words": [],
+ "lora_triggers_forbidden": []
+}

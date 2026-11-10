@@ -21,7 +21,7 @@ Everything in RPG_Forge is a file in one of these folders. This document is the 
 {
   "type": "scene_card",              // required — one of docs/JOB_TYPES.md
   "name": "gate_law_01_ribbon",      // recommended — letters, digits, - _ . ; becomes part of the id
-  "game": "turing_accords",          // optional — pulls palette/style/sizes from games/<game>/forge.game.json
+  "game": "mygame",                 // optional — pulls palette/style/sizes from games/<game>/forge.game.json
   "batch": "gate_law_cards",         // optional — set automatically when submitted in a batch
   "prompt": "…",                     // type-specific fields follow
   "seed": -1                         // -1 = random; the chosen seed is recorded in prov.json
@@ -39,7 +39,7 @@ queue assigns one. A folder listing of `jobs/done/` is therefore a timeline.
 ### Batch file
 
 ```json
-{"batch": "gate_law_cards", "defaults": {"type": "scene_card", "game": "turing_accords"},
+{"batch": "intro_cards", "defaults": {"type": "scene_card", "game": "mygame"},
  "jobs": [{"name": "01_ribbon", "prompt": "…"}, {"name": "02_garage", "prompt": "…"}]}
 ```
 

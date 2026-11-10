@@ -1,0 +1,25 @@
+{
+ "_comment": "A template. Copy games/_example to games/<your game>/ \u2014 that folder is git-ignored (each game's data stays on your PC). Point game_root at the game's own folder.",
+ "palette": "resurrect-64",
+ "card_size": [
+  864,
+  486
+ ],
+ "tile_size": 96,
+ "hero_cell": [
+  144,
+  216
+ ],
+ "scene_size": [
+  1920,
+  1080
+ ],
+ "style_prefix": "",
+ "negative": "text, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality",
+ "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+ "checkpoints_by_job": {},
+ "loras_by_job": {},
+ "game_root": "D:\\\\MyGame",
+ "asset_root": "D:\\\\MyGame\\\\project\\\\assets",
+ "provenance_dir": "D:\\\\MyGame\\\\project\\\\assets\\\\_provenance"
+}

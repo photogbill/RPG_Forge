@@ -4,7 +4,7 @@
 GPU paints it, cleans it, snaps it to your palette and leaves the result — with a contact sheet and a
 provenance record — in another folder. Nothing leaves your machine, nothing needs an API key, and
 anyone who can write a text file can drive it: you, a script, or an AI assistant working through the
-same folders. Built for [*The Turing Accords*](https://github.com/photogbill) JRPG; made for any game.
+same folders. A game-agnostic engine: each game's own data stays in `games/<game>/` on your PC (never pushed).
 
 ```
 jobs/pending/*.json  ──►  worker (GPU: ComfyUI · CPU: Pillow/numpy)  ──►  out/<job-id>/
@@ -59,7 +59,7 @@ trigger words the trainer left behind. `install_comfy.bat` points ComfyUI at all
 
 Fine-tunes and LoRAs are unpredictable and sometimes perfect, so instead of guessing: `bakeoff.bat` queues
 **every checkpoint × every compatible LoRA (+ none) × a suite of test prompts** — portraits, scene cards,
-sprite sheets, tiles, maps, icons, props, concepts (`games/turing_accords/bakeoff/sdxl_v1.json`) — with one
+sprite sheets, tiles, maps, icons, props, concepts (`games/<game>/bakeoff/*.json`) — with one
 seed and identical sampler settings, grouped by checkpoint so ComfyUI reloads less. Incompatible pairs (an
 SD1.5 or FLUX LoRA on an SDXL checkpoint, which ComfyUI would silently ignore) are skipped and listed; a
 render that fails is a red cell, and the run moves on. Every render is also filed twice — `out\bakeoff\<suite>\by_model\<checkpoint>\<lora>\` and
@@ -84,11 +84,11 @@ Linux/macOS: `python -m venv venv && . venv/bin/activate && pip install -r requi
 ## A job
 
 ```json
-{"type": "scene_card", "name": "gate_law_01_ribbon", "game": "turing_accords",
- "prompt": "a kitchen at breakfast; a synthetic housekeeper with a ribbon in her apron pours coffee; a child reaches for her hand; warm morning light"}
+{"type": "scene_card", "name": "intro_01_kitchen", "game": "mygame",
+ "prompt": "a farmhouse kitchen at breakfast, window light from the left, steam rising from a coffee pot"}
 ```
 
-A batch is `{"batch": "name", "defaults": {...}, "jobs": [...]}` — see `games/turing_accords/batches/`.
+A batch is `{"batch": "name", "defaults": {...}, "jobs": [...]}` — see `games/_example/`.
 A game's palette, style prefix and sizes live in `games/<game>/forge.game.json`, so jobs stay short.
 
 ## Repository map
@@ -100,7 +100,7 @@ jobs/             pending/ running/ done/ failed/ — the queue; templates/ — 
 out/              results, one folder per job id
 models/           weights (ignored) + models.json registry with licences
 palettes/         master palettes (.hex, Lospec format)
-games/            per-game config and job batches (turing_accords is the first)
+games/            per-game config and batches — git-ignored, one folder per game; games/_example is the template
 docs/             PROTOCOL.md · JOB_TYPES.md · CLAUDE.md · LICENSING.md · ROADMAP.md
 tests/            pytest (CPU side; 24 tests)
 ```
@@ -108,7 +108,7 @@ tests/            pytest (CPU side; 24 tests)
 ## Status
 
 v0.2 (2026-11-09) — painted-background pipeline, game manifest + approve, pipelines, review pages, pre-flight
-doctor (see `docs/HANDOFF_FORGE_2026-11-09.md`). v0.1 — the queue, the CLI, the CPU tools and the ComfyUI driver are real and tested; the GPU handlers
+doctor (session hand-offs are kept per game, locally). v0.1 — the queue, the CLI, the CPU tools and the ComfyUI driver are real and tested; the GPU handlers
 run against an SDXL workflow out of the box. FLUX.2 klein and Qwen-Image-Edit workflows are added by
 exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipeline (image → 3D proxy →
 8 facings → pixelize) and the overworld job are designed in `docs/ROADMAP.md` and not built yet.
@@ -159,15 +159,14 @@ New job types are **plug-ins** (`forge/plugins/`): a running worker picks them u
 | Every model in shipped art | `credits.bat` | — |
 | Nine-slice UI panels; button states | `op.bat nine-slice …` | `nine_slice`, `button_states` |
 
-Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, and what runs next. What is left to
-wire with an empty queue: `docs/WIRE_NIGHT_3.md`. Hand-off: `docs/HANDOFF_FORGE_NIGHT_3.md`.
+Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, and what runs next. Session notes are kept per game, locally.
 
 ## Night 4 (2026-11-10) — production: your sheets in, a queue that runs for days, verdicts back
 
 | What | .bat | Job type |
 |---|---|---|
-| **Your character sheets → the game's sprite sheet.** Any grid, any backdrop (flat, white, painted checkerboard, real alpha), labels dropped. The forge numbers the figures, guesses the facings and *asks you* if the guess is right; one height, feet on one baseline, centred on the feet; packed to 8 facings S…SE at 144×216 (+ frames). Nothing of yours is copied or changed | `sprite_intake.bat "<sheet or folder>" sarah guardian` | `sprite_intake` |
-| The character registry: one file per character, each variant's recipe (checkpoint, sampler, **locked seed**, prompt blocks, `asymmetric`). A job with `"character": "sarah", "variant": "warrior"` inherits it | `characters.bat list / show / check / stubs / set` | `character_set` (moods on one face + battle pose + a generated sheet) |
+| **Your character sheets → the game's sprite sheet.** Any grid, any backdrop (flat, white, painted checkerboard, real alpha), labels dropped. The forge numbers the figures, guesses the facings and *asks you* if the guess is right; one height, feet on one baseline, centred on the feet; packed to 8 facings S…SE at 144×216 (+ frames). Nothing of yours is copied or changed | `sprite_intake.bat "<sheet or folder>" hero default` | `sprite_intake` |
+| The character registry: one file per character, each variant's recipe (checkpoint, sampler, **locked seed**, prompt blocks, `asymmetric`). A job with `"character": "hero", "variant": "armoured"` inherits it | `characters.bat list / show / check / stubs / set` | `character_set` (moods on one face + battle pose + a generated sheet) |
 | What the game is missing → one ordered plan (first hour first, a town in one sitting on one seed) → a queue that refuses until every look block is written | `produce.bat plan` · `produce.bat queue` · `produce.bat status` | — |
 | Approved pictures → the game, with a ledger (undo-able; replaced files kept in `out\_replaced`). If the game folder isn't reachable, it writes a copy .bat for you | `deliver.bat [--dry]` · `deliver.bat undo <name>` | — |
 | Leave running beside a long queue: parks the queue under 40 GB free, brings it back by itself, writes the 24-hour report | `produce_watch.bat` | — |
@@ -178,7 +177,7 @@ wire with an empty queue: `docs/WIRE_NIGHT_3.md`. Hand-off: `docs/HANDOFF_FORGE_
 | Every model file: loads? licence, used by, verdict, size — and what is safe to delete | `models_report.bat` | — |
 | What in out\ could be archived (report only) | `housekeeping.bat` | — |
 
-Hand-off: `docs/HANDOFF_FORGE_NIGHT_4.md`. Left to wire with an empty queue: `docs/WIRE_NIGHT_4.md`.
+Session hand-offs and plans are per game, in `local/<game>/` (never pushed).
 
 ## Licence
 

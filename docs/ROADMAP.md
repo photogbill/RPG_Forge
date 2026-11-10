@@ -38,7 +38,7 @@ The first location from concept to lit map, so the whole pipeline is seen once b
    cost); emit the game's biome/road/town map. Deterministic and re-runnable when the scale changes.
 2. **Underground sites** — seed procedural dungeons at real places from public records: the USGS
    Mineral Resources Data System (abandoned mines), decommissioned Atlas/Titan missile silos, salt
-   caverns. In *The Turing Accords* these are Valkyrie's foundries and the party's safe houses.
+   caverns.
 3. **Dungeon generators** — BSP rooms (facilities), cellular caves (mines), wave-function-collapse
    (ruined cities) → the engine's ASCII map format + `on_enter` hooks.
 
