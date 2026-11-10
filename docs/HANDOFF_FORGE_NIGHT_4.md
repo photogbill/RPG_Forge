@@ -69,3 +69,20 @@ first` needs only `style.house` and the eight `place.*` of the first hour.
   the texture meets the bottom. The wrap itself is seamless; the GPU polish is meant for that line.
 - Questions only you can answer: is `hero_sarah_light` the Part 1 hologram (a third Sarah variant)? Which seed is
   Sarah's face (from hair_test_v1/v2)?
+
+## For the next build plan (William, 2026-11-10 afternoon, after the hand-off)
+
+**ON HOLD (William, 2026-11-10 15:46): items 1 and 2 wait until he has a solution — no rush; do not plan them yet.**
+
+1. **A face reference for a character.** Lock a character's face to a photograph, by path, never copied into the
+   repo. Use only licence-clean routes: IP-Adapter Plus Face on SDXL, or FLUX.2 klein reference editing (check each
+   licence before wiring). **Not** InstantID, IP-Adapter FaceID or PuLID, because their face-recognition models are
+   non-commercial research only. The registry gains `face_reference` per variant, and a bake-off on one seed shows
+   which route holds the face.
+2. **Kelly's face (William's wife) for one of the Synthetic Ranch Sarahs.** Details to be worked out later; William
+   thinks it's doable. Gate: **Kelly's OK first** — her face would be in the Ranch scenes. Needs: a registry entry
+   for that synthetic, a frontal photo (the red-hood portrait is a profile with eyes lowered, too little for a face
+   lock), and the photo guard taught a named, consenting person (today it accepts `people: none | william` only).
+3. **The president's face:** William decides when the time comes; nothing to do now.
+4. **Sarah's light variant** is in the registry (`hero_sarah_light`); its look block `char.sarah.light` is Fable's to
+   write — William's blue hologram images are the reference.

@@ -398,3 +398,17 @@ Hand-off: docs/HANDOFF_FORGE_NIGHT_4.md. Part B (empty queue): docs/WIRE_NIGHT_4
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 
+## 2026-11-10
+
+Sarah's light variant (before she has a body); characters list hides note keys
+
+William 2026-11-10: hero_sarah_light is Sarah when she first comes into being, before she has a body. The registry
+gains a third variant "light" (placeholder/hero_sarah_light, portrait_sarah_light; not asymmetric — no holster yet;
+look block char.sarah.light is a TODO for Fable). The separate sarah_light stub is retired. `characters list` no
+longer prints note keys (those starting with "_").
+The Night 4 hand-off gains "For the next build plan": a licence-clean face reference, Kelly's face for one
+Ranch Sarah (gated on her OK) — both on hold at William's word, Sarah's light look block.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+

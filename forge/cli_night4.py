@@ -190,7 +190,7 @@ def cmd_characters(cfg: dict, args: list[str]) -> int:
             for r in rows:
                 if r.get("error"):
                     print(f"  {r['id']:16s} ERROR {r['error']}"); continue
-                w = ", ".join(f"{k}={v}" for k, v in r["wanted"].items() if isinstance(v, str))
+                w = ", ".join(f"{k}={v}" for k, v in r["wanted"].items() if isinstance(v, str) and not k.startswith("_"))
                 print(f"  {r['id']:16s} {r['variant']:10s} {'stub ' if r['stub'] else '     '}seed={r['seed']}  "
                       f"{r['checkpoint'] or '-'}  {'ASYMMETRIC ' if r['asymmetric'] else ''}{w}")
             return 0

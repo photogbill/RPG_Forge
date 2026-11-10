@@ -17,16 +17,31 @@
    "steps": 28,
    "cfg": 6.0,
    "seed": 24101,
-   "size": [832, 1216],
+   "size": [
+    832,
+    1216
+   ],
    "asymmetric": true,
    "references": [],
-   "alternatives": {"photographic": "RealVisXL_V5.0_fp16.safetensors"},
-   "sheet_loras": ["SpriteSheet.safetensors", "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"],
+   "alternatives": {
+    "photographic": "RealVisXL_V5.0_fp16.safetensors"
+   },
+   "sheet_loras": [
+    "SpriteSheet.safetensors",
+    "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"
+   ],
    "wanted": {
     "field_sheet": "placeholder/hero_sarah",
     "portrait": "placeholder/portrait_sarah",
     "battle_pose": null,
-    "portrait_moods": ["neutral", "smile", "resolve", "grief", "anger", "surprise"]
+    "portrait_moods": [
+     "neutral",
+     "smile",
+     "resolve",
+     "grief",
+     "anger",
+     "surprise"
+    ]
    }
   },
   "warrior": {
@@ -39,17 +54,59 @@
    "steps": 28,
    "cfg": 6.0,
    "seed": 24101,
-   "size": [832, 1216],
+   "size": [
+    832,
+    1216
+   ],
    "asymmetric": true,
    "references": [],
-   "alternatives": {"photographic": "RealVisXL_V5.0_fp16.safetensors"},
-   "sheet_loras": ["SpriteSheet.safetensors", "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"],
+   "alternatives": {
+    "photographic": "RealVisXL_V5.0_fp16.safetensors"
+   },
+   "sheet_loras": [
+    "SpriteSheet.safetensors",
+    "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"
+   ],
    "wanted": {
     "field_sheet": null,
     "_field_sheet_note": "the game has one Sarah field sheet (placeholder/hero_sarah) — a Warrior slot is the game's to add (contract question in HANDOFF_FORGE_NIGHT_4.md)",
     "portrait": null,
     "battle_pose": null,
-    "portrait_moods": ["neutral", "grin", "fury", "resolve"]
+    "portrait_moods": [
+     "neutral",
+     "grin",
+     "fury",
+     "resolve"
+    ]
+   }
+  },
+  "light": {
+   "describe": "Light: Sarah before she has a body — when she first comes into being (William 2026-11-10); a hologram of light (the cyan placeholder hero_sarah_light)",
+   "prompt": "{{char.sarah.light}}",
+   "negative": "{{neg.sarah}}",
+   "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "cfg": 6.0,
+   "seed": 24101,
+   "size": [
+    832,
+    1216
+   ],
+   "asymmetric": false,
+   "_asymmetric_why": "no body yet, so no holster",
+   "references": [],
+   "wanted": {
+    "field_sheet": "placeholder/hero_sarah_light",
+    "portrait": "placeholder/portrait_sarah_light",
+    "battle_pose": null,
+    "portrait_moods": [
+     "neutral",
+     "smile",
+     "resolve",
+     "grief"
+    ]
    }
   }
  }
