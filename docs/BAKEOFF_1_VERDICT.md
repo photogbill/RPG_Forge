@@ -44,3 +44,6 @@ The painterly checkpoints are superb at exactly what the game now needs — comp
 
 ## Ratings file
 No `bakeoff rate` entries yet — the verdicts above are the ratings. When the style bake-off lands, rate the winning cells so the index shows them.
+
+## Ruling after the verdict (William, 2026-11-09 20:45)
+`amano_yoshitaka_xl` stays available. His rule: a LoRA named after an artist may be used as a model; **the artist's name and the LoRA's listed trigger keywords are never put in a prompt.** (Fable's note, for the record: a style LoRA pulls toward what it was trained on whenever it is loaded, keyword or not — strength is the real dial; keep it low and judge the pictures.) The "Avoid" line above stands only for the two checkpoints where it produced noise.

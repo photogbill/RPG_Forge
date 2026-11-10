@@ -1,0 +1,39 @@
+{
+ "type": "render",
+ "game": "turing_accords",
+ "name": "sprite-dpmpp3msde-expo_sarah_SDVN6-RealXL-Detailface_MMH3-RealismSlider-V1_24101",
+ "batch": "bakeoff/sprite_samplers_v1",
+ "prompt": "full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, iridescent hair shifting between magenta-violet and cobalt blue like the surface of a solar panel, fine cell-grid sheen, violet eyes, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with a small glowing violet core set in a chest plate at the sternum, flat black boots, clean readable silhouette, even soft studio light, flat plain white background",
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery",
+ "checkpoint": "SDVN6-RealXL-Detailface.safetensors",
+ "loras": [
+  {
+   "name": "MMH3-RealismSlider-V1.safetensors",
+   "strength": 0.8,
+   "clip": 0.8
+  }
+ ],
+ "seed": 24101,
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 30,
+ "cfg": 5.5,
+ "sampler": "dpmpp_3m_sde",
+ "scheduler": "exponential",
+ "style_prefix": "",
+ "priority": 50,
+ "meta": {
+  "suite": "sprite_samplers_v1",
+  "category": "sprite-dpmpp3msde-expo",
+  "prompt_id": "sarah",
+  "checkpoint": "SDVN6-RealXL-Detailface.safetensors",
+  "lora": "MMH3-RealismSlider-V1.safetensors",
+  "seed": 24101,
+  "trigger": "",
+  "sampler": "dpmpp3msde-expo"
+ },
+ "id": "20261110-063925-sprite-dpmpp3msde-expo_sarah_SDVN6-RealXL-Detail-d034",
+ "submitted_at": "2026-11-10T06:39:25"
+}

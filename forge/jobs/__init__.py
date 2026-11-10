@@ -23,10 +23,9 @@ def get_handlers(reload: bool = False) -> dict:
     if reload:
         from .. import bakeoff as _bakeoff, pipeline as _pipeline
         from ..engines import sdxl_graph as _graph, comfy as _comfy, flux1_graph as _f1, flux2_graph as _f2, graph_ops as _go
-        from ..engines import krea2_graph as _k2
         from ..ops import edges as _ed, lighting as _lt, depth as _dp, layers as _ly
         # dependencies first, then the handler modules that import them
-        for mod in (_graph, _f1, _f2, _k2, _go, _comfy, _ed, _lt, _dp, _ly, _bakeoff, common, cpu, gpu, paint, assets, scene, _pipeline):
+        for mod in (_graph, _f1, _f2, _go, _comfy, _ed, _lt, _dp, _ly, _bakeoff, common, cpu, gpu, paint, assets, scene, _pipeline):
             try:
                 importlib.reload(mod)
             except Exception:  # a half-saved file: keep the last good version
@@ -60,6 +59,13 @@ def get_handlers(reload: bool = False) -> dict:
         "emissive_mask": cpu.emissive_mask,
         "overworld": cpu.overworld,
     }
+    # plug-in job types (forge/plugins/*.py): how a job type is added while a worker is running.
+    # A broken plug-in keeps its last good version and can never remove a built-in type.
+    try:
+        from .. import plugins as _plugins, schema as _schema
+        HANDLERS.update(_plugins.load(job_types=_schema.JOB_TYPES, builtin=HANDLERS))
+    except Exception:  # noqa: BLE001
+        pass
     return HANDLERS
 
 

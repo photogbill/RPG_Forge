@@ -382,23 +382,34 @@ def approve_set(cfg: dict, job_id: str, wanted_name: str, game: str | None = Non
     return plan
 
 
-def licence_conditions(cfg: dict, chain: list[dict]) -> list[str]:
-    """Conditions attached to commercial use (e.g. Krea 2's revenue cap), from models/models.json
-    `licence_condition` — printed wherever such a model is in a chain."""
-    reg = cfgmod.ROOT / "models" / "models.json"
-    if not reg.exists():
-        return []
-    data = json.loads(reg.read_text(encoding="utf-8")).get("models", {})
+def licence_conditions(cfg: dict, chain: list[dict], root: Path | None = None) -> list[str]:
+    """Conditions attached to commercial use (e.g. a revenue cap), from models/models.json
+    `licence_condition` — printed wherever such a model is in a chain. Night 3B: also the `licence_condition` of an
+    entry in models/licences.json (an outside tool recorded with `handoff tool add`)."""
+    root = Path(root or cfgmod.ROOT)
     out = []
     files = {c.get("file") for c in chain}
-    for mname, m in data.items():
-        cond = m.get("licence_condition")
-        if not cond:
-            continue
-        names = {Path(x).name for x in m.get("files", [])} | set((m.get("save_as") or {}).values()) | set(m.get("aliases") or [])
-        hit = sorted(files & names)
-        if hit:
-            out.append(f"{hit[0]} ({mname}): {cond}")
+    reg = root / "models" / "models.json"
+    if reg.exists():
+        data = json.loads(reg.read_text(encoding="utf-8")).get("models", {})
+        for mname, m in data.items():
+            cond = m.get("licence_condition")
+            if not cond:
+                continue
+            names = {Path(x).name for x in m.get("files", [])} | set((m.get("save_as") or {}).values()) | set(m.get("aliases") or [])
+            hit = sorted(files & names)
+            if hit:
+                out.append(f"{hit[0]} ({mname}): {cond}")
+    local = root / "models" / "licences.json"
+    if local.exists():
+        try:
+            recs = json.loads(local.read_text(encoding="utf-8"))
+        except ValueError:
+            recs = {}
+        for key in sorted(files & set(recs)):
+            cond = (recs.get(key) or {}).get("licence_condition")
+            if cond:
+                out.append(f"{key} ({recs[key].get('kind') or 'licence on file'}): {cond}")
     return out
 
 

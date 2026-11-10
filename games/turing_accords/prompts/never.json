@@ -1,0 +1,5 @@
+{
+ "_comment": "Words that must never appear in a submitted prompt (whole words, case-blind; checked by submit and bakeoff submit after {{block}} expansion). William's ruling 2026-11-09: a LoRA named after an artist may be used; the artist's name and the LoRA's trigger keywords never go in a prompt. 'words' holds the artist names from the LoRA inventory (today: amano_yoshitaka_xl). 'lora_triggers_forbidden' is for trigger keywords William reads off the model pages - add them here.",
+ "words": ["amano", "yoshitaka"],
+ "lora_triggers_forbidden": []
+}

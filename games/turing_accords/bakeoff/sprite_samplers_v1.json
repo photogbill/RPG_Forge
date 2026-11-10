@@ -1,0 +1,172 @@
+{
+ "suite": "sprite_samplers_v1",
+ "game": "turing_accords",
+ "_comment": "SPRITE-ONLY sweep (William, 2026-11-10 01:29): Sarah's game sprite, one prompt, on every SDXL checkpoint x every compatible LoRA (+ no LoRA) x every sampler at that sampler's OWN optimal steps/cfg/scheduler (they converge very differently), two generations with a different seed each (the same two seeds in every cell, so cells stay comparable). Question: which model/LoRA/sampler gets the face and eyes right on a full-body figure. Read out/bakeoff/sprite_samplers_v1/: across_sarah_<lora>_<seed>.png = rows checkpoints, columns samplers; by_category/sprite-<sampler>/sarah/ = every model on one sampler. No style prefix (tests the model, not the house look). Priority 50 so it runs ahead of anything else queued.",
+ "checkpoints": "*",
+ "loras": "*",
+ "include_no_lora": true,
+ "lora_strength": 0.8,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "seeds": [
+  24101,
+  77213
+ ],
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 28,
+ "cfg": 6.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "karras",
+ "seconds_per_render": 9.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery",
+ "lora_triggers": {
+  "FFTALevel4_20241206-1733511624460-000004.safetensors": "fftalevel64, pixel art",
+  "HadesLevel_20241207-1733548878458-000004.safetensors": "hadeslevel",
+  "TileMapStyle_v1.safetensors": "tilemapstyle",
+  "fantasy map-heavy.safetensors": "fantasy map style",
+  "FinalFantasy_Tactics_Sprite_Sheet.safetensors": "sprite sheet",
+  "SpriteSheet.safetensors": "sprite sheet",
+  "SpriteSheet (1).safetensors": "sprite sheet",
+  "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors": "sprite sheet, multiple views, full body, simple background",
+  "Retro_Illustration.safetensors": "2d game scene",
+  "Pixel_Xl_V1.safetensors": "pixel art",
+  "game_icon_v1.0.safetensors": "game icon",
+  "gmic icon_food category-000012.safetensors": "game icon",
+  "DD_Table_RPG.safetensors": "",
+  "rpg_portrait.safetensors": "",
+  "amano_yoshitaka_xl.safetensors": ""
+ },
+ "job": {
+  "priority": 50
+ },
+ "samplers": [
+  {
+   "label": "euler-normal",
+   "sampler": "euler",
+   "scheduler": "normal",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  },
+  {
+   "label": "eulera-normal",
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "steps": 35,
+   "cfg": 6.0,
+   "evals": 35
+  },
+  {
+   "label": "heun-karras",
+   "sampler": "heun",
+   "scheduler": "karras",
+   "steps": 20,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "dpm2-karras",
+   "sampler": "dpm_2",
+   "scheduler": "karras",
+   "steps": 20,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "dpmpp2sa-karras",
+   "sampler": "dpmpp_2s_ancestral",
+   "scheduler": "karras",
+   "steps": 25,
+   "cfg": 6.0,
+   "evals": 50
+  },
+  {
+   "label": "dpmppsde-karras",
+   "sampler": "dpmpp_sde",
+   "scheduler": "karras",
+   "steps": 15,
+   "cfg": 5.5,
+   "evals": 30
+  },
+  {
+   "label": "dpmpp2m-karras",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "cfg": 6.0,
+   "evals": 28
+  },
+  {
+   "label": "dpmpp2msde-karras",
+   "sampler": "dpmpp_2m_sde",
+   "scheduler": "karras",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  },
+  {
+   "label": "dpmpp3msde-expo",
+   "sampler": "dpmpp_3m_sde",
+   "scheduler": "exponential",
+   "steps": 30,
+   "cfg": 5.5,
+   "evals": 30
+  },
+  {
+   "label": "unipcbh2-sgm",
+   "sampler": "uni_pc_bh2",
+   "scheduler": "sgm_uniform",
+   "steps": 22,
+   "cfg": 6.0,
+   "evals": 22
+  },
+  {
+   "label": "deis-simple",
+   "sampler": "deis",
+   "scheduler": "simple",
+   "steps": 25,
+   "cfg": 6.0,
+   "evals": 25
+  },
+  {
+   "label": "lms-karras",
+   "sampler": "lms",
+   "scheduler": "karras",
+   "steps": 35,
+   "cfg": 6.0,
+   "evals": 35
+  },
+  {
+   "label": "ddim-ddimu",
+   "sampler": "ddim",
+   "scheduler": "ddim_uniform",
+   "steps": 40,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "ersde-expo",
+   "sampler": "er_sde",
+   "scheduler": "exponential",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  }
+ ],
+ "categories": {
+  "sprite": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, iridescent hair shifting between magenta-violet and cobalt blue like the surface of a solar panel, fine cell-grid sheen, violet eyes, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with a small glowing violet core set in a chest plate at the sternum, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  }
+ }
+}

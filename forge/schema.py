@@ -194,11 +194,11 @@ JOB_TYPES: dict[str, dict] = {
         "needs": "cpu",
         "doc": "A tangent-space normal map for the game's `<id>_n.png` slot, OpenGL convention (Godot). `source` "
                "'luminance' (F11: height = brightness) or 'depth' (N1: from a depth map — `depth` is one path per input; "
-               "`detail` 0..1 blends the luminance normals back in for brush texture; `smooth` (default 1.0) blurs the height first; "
+               "`detail` 0..1 blends the luminance normals back in for brush texture; `flatten` 0..1 (default 0.85) removes the depth's slow trend first so a receding floor does not read as one big slope; `smooth` (default 1.0) blurs the height first; "
                "Output: <name>_n.png, <name>_lit.png (a lit-from-the-left preview), contact.png "
                "(with source 'depth', both kinds side by side unless `compare` is false).",
         "required": ["inputs"],
-        "optional": {"source": "luminance", "depth": None, "strength": 2.0, "smooth": 1.0, "detail": 0.0,
+        "optional": {"source": "luminance", "depth": None, "strength": 2.0, "smooth": 1.0, "detail": 0.0, "flatten": 0.85,
                      "invert_y": False, "preview": True, "compare": None},
     },
     "emissive_mask": {
@@ -255,12 +255,23 @@ JOB_TYPES: dict[str, dict] = {
 }
 
 
+def _plugins() -> None:
+    """Merge plug-in job types (forge/plugins/*.py) into JOB_TYPES. Called when a type is not known, and for the docs."""
+    try:
+        from . import plugins
+        plugins.load(job_types=JOB_TYPES)
+    except Exception:  # noqa: BLE001 - a broken plug-in never breaks validation of the built-in types
+        pass
+
+
 def validate(job: dict) -> list[str]:
     """Return a list of problems (empty = valid)."""
     problems: list[str] = []
     if not isinstance(job, dict):
         return ["job is not an object"]
     t = job.get("type")
+    if t not in JOB_TYPES:
+        _plugins()
     if t not in JOB_TYPES:
         return [f"unknown job type '{t}' (known: {', '.join(sorted(JOB_TYPES))})"]
     spec = JOB_TYPES[t]
@@ -305,6 +316,8 @@ def validate(job: dict) -> list[str]:
 
 def with_defaults(job: dict) -> dict:
     """Fill a validated job's optional fields with the type's defaults (None = 'use config')."""
+    if job["type"] not in JOB_TYPES:
+        _plugins()
     spec = JOB_TYPES[job["type"]]
     out = dict(spec["optional"])
     out.update(job)
@@ -314,10 +327,13 @@ def with_defaults(job: dict) -> dict:
 def needs_gpu(job: dict) -> bool:
     if job.get("type") == "pipeline":
         return any(needs_gpu(st) for st in job.get("steps") or [] if isinstance(st, dict) and st.get("type") in JOB_TYPES)
+    if job["type"] not in JOB_TYPES:
+        _plugins()
     return JOB_TYPES[job["type"]]["needs"] == "gpu"
 
 
 def render_docs() -> str:
+    _plugins()
     lines = ["# Job types", "", "Generated from `forge/schema.py` — do not edit by hand.", ""]
     for t, spec in JOB_TYPES.items():
         lines.append(f"## `{t}`  ({spec['needs'].upper()})")

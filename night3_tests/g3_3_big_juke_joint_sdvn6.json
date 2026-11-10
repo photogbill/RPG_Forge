@@ -1,0 +1,22 @@
+{
+ "type": "scene_big",
+ "name": "g3_3_big_juke_joint_sdvn6",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "prompt": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a Delta juke joint at night, strings of christmas lights, a humming generator by the door, an old bluesman on a stool with a guitar, warm light spilling onto dirt",
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, jpeg artifacts, oversaturated neon, plastic skin, extra heads, duplicated figures",
+ "checkpoint": "SDVN6-RealXL-Detailface.safetensors",
+ "source": "out/20261109-213236-t1_refine_030_dockerys_juke_SDVN6-RealXL-Detailf-5078/scene.png",
+ "target": [
+  3840,
+  2160
+ ],
+ "tile": [
+  1536,
+  1152
+ ],
+ "overlap": 128,
+ "denoise": 0.3,
+ "seed": 1001
+}

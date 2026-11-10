@@ -1,0 +1,39 @@
+{
+ "type": "render",
+ "game": "turing_accords",
+ "name": "sprite-euler-normal_sarah_gmic-icon-V5-000180_SpriteSheet_24101",
+ "batch": "bakeoff/sprite_samplers_v1",
+ "prompt": "sprite sheet, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, iridescent hair shifting between magenta-violet and cobalt blue like the surface of a solar panel, fine cell-grid sheen, violet eyes, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with a small glowing violet core set in a chest plate at the sternum, flat black boots, clean readable silhouette, even soft studio light, flat plain white background",
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery",
+ "checkpoint": "gmic icon_V5-000180.safetensors",
+ "loras": [
+  {
+   "name": "SpriteSheet.safetensors",
+   "strength": 0.8,
+   "clip": 0.8
+  }
+ ],
+ "seed": 24101,
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 30,
+ "cfg": 6.0,
+ "sampler": "euler",
+ "scheduler": "normal",
+ "style_prefix": "",
+ "priority": 50,
+ "meta": {
+  "suite": "sprite_samplers_v1",
+  "category": "sprite-euler-normal",
+  "prompt_id": "sarah",
+  "checkpoint": "gmic icon_V5-000180.safetensors",
+  "lora": "SpriteSheet.safetensors",
+  "seed": 24101,
+  "trigger": "sprite sheet",
+  "sampler": "euler-normal"
+ },
+ "id": "20261110-063943-sprite-euler-normal_sarah_gmic-icon-V5-000180_Sp-77d8",
+ "submitted_at": "2026-11-10T06:39:43"
+}

@@ -15,14 +15,14 @@
     "flux2-klein-4b": {
       "repo": "Comfy-Org/flux2-klein-4B",
       "files": [
-        "split_files/diffusion_models/flux-2-klein-base-4b-fp8.safetensors",
-        "split_files/diffusion_models/flux-2-klein-4b-fp8.safetensors"
+        "split_files/diffusion_models/flux-2-klein-base-4b.safetensors",
+        "split_files/diffusion_models/flux-2-klein-4b.safetensors"
       ],
       "dest": "diffusion_models",
       "license": "Apache-2.0",
       "commercial_ok": true,
       "workflow": "flux2_klein",
-      "notes": "FLUX.2 [klein] 4B, ComfyUI repackage, fp8: the base model (20 steps, cfg 5 — takes LoRAs and negatives) and the distilled one (4 steps, cfg 1). Needs flux2-klein-text-encoder and flux2-vae. Graph: forge/engines/flux2_graph.py."
+      "notes": "FLUX.2 [klein] 4B, ComfyUI repackage (7.75 GB each; file names corrected 2026-11-09 - the repo has no -fp8 files): the base model (20 steps, cfg 5 — takes LoRAs and negatives) and the distilled one (4 steps, cfg 1). Needs flux2-klein-text-encoder and flux2-vae. Graph: forge/engines/flux2_graph.py."
     },
     "flux2-klein-9b": {
       "repo": "black-forest-labs/FLUX.2-klein-9B",
@@ -67,7 +67,7 @@
     "flux1-schnell-fp8": {
       "repo": "Kijai/flux-fp8",
       "files": [
-        "flux1-schnell-fp8.safetensors"
+        "flux1-schnell-fp8-e4m3fn.safetensors"
       ],
       "dest": "diffusion_models",
       "license": "Apache-2.0",
@@ -99,15 +99,15 @@
       "notes": "CLIP-L and T5-XXL (fp8) for every FLUX.1 model and fine-tune."
     },
     "flux1-vae": {
-      "repo": "black-forest-labs/FLUX.1-schnell",
+      "repo": "Comfy-Org/Lumina_Image_2.0_Repackaged",
       "files": [
-        "ae.safetensors"
+        "split_files/vae/ae.safetensors"
       ],
       "dest": "vae",
       "license": "Apache-2.0",
       "commercial_ok": true,
       "workflow": "flux1",
-      "notes": "The FLUX.1 VAE (identical for dev and schnell)."
+      "notes": "The FLUX.1 VAE (identical for dev and schnell). Pulled from Comfy-Org's Apache-2.0 repackage because black-forest-labs/FLUX.1-schnell is gated (401 without a login) - changed 2026-11-09."
     },
     "flux2-klein-9b-text-encoder": {
       "repo": "Comfy-Org/flux2-klein-9B",
@@ -181,52 +181,6 @@
       "commercial_ok": true,
       "workflow": "scene_paint control depth",
       "notes": "MiDaS depth (fallback when the Depth Anything V2 node is absent); downloaded by comfyui_controlnet_aux on first use."
-    },
-    "krea2-turbo-fp8": {
-      "repo": "Comfy-Org/Krea-2",
-      "files": [
-        "diffusion_models/krea2_turbo_fp8_scaled.safetensors"
-      ],
-      "dest": "diffusion_models",
-      "license": "Krea 2 Community License v1",
-      "commercial_ok": true,
-      "licence_condition": "revenue under US$1M/year — Krea 2 Community License §2.3 (above it, an enterprise licence from Krea)",
-      "workflow": "krea2",
-      "notes": "Krea 2 Turbo (12.9B DiT, distilled): 8 steps, cfg 1, er_sde/simple, 1024-2048 px. Needs krea2-text-encoder and qwen-image-vae. Graph: forge/engines/krea2_graph.py. Licence text: docs/model_licences/Krea_2_Community_License_v1.pdf (William supplied it 2026-11-09)."
-    },
-    "krea2-raw-fp8": {
-      "repo": "Comfy-Org/Krea-2",
-      "files": [
-        "diffusion_models/krea2_raw_fp8_scaled.safetensors"
-      ],
-      "dest": "diffusion_models",
-      "license": "Krea 2 Community License v1",
-      "commercial_ok": true,
-      "licence_condition": "revenue under US$1M/year — Krea 2 Community License §2.3 (above it, an enterprise licence from Krea)",
-      "workflow": "krea2",
-      "notes": "Krea 2 Raw (undistilled base): ~50 steps, cfg 3.5. FILE NAME NOT VERIFIED - check the Comfy-Org/Krea-2 file list before pulling; the Turbo name is from Comfy's docs."
-    },
-    "krea2-text-encoder": {
-      "repo": "Comfy-Org/Krea-2",
-      "files": [
-        "text_encoders/qwen3vl_4b_fp8_scaled.safetensors"
-      ],
-      "dest": "text_encoders",
-      "license": "Apache-2.0 (Qwen3-VL-4B)",
-      "commercial_ok": true,
-      "workflow": "krea2",
-      "notes": "Qwen3-VL-4B for Krea 2 (CLIPLoader type krea2). forge.json -> comfy.krea2.text_encoder can point at another Qwen3-VL-4B file you already have."
-    },
-    "qwen-image-vae": {
-      "repo": "Comfy-Org/Krea-2",
-      "files": [
-        "vae/qwen_image_vae.safetensors"
-      ],
-      "dest": "vae",
-      "license": "Apache-2.0 (Qwen-Image VAE)",
-      "commercial_ok": true,
-      "workflow": "krea2",
-      "notes": "The VAE Krea 2 uses (Wan 2.1 latent format, ~300 MB). Not on disk as of 2026-11-09: pull_model.bat qwen-image-vae."
     }
   }
 }

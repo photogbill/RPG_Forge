@@ -1,0 +1,14 @@
+{
+ "type": "inpaint",
+ "name": "g4_2_inpaint_augusta_oval",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "init": "out/20261109-213236-t1_refine_030_augusta_ruin_RealVisXL-V5-0-fp16_n-7b10/scene.png",
+ "mask": "night3_tests/inputs/oval_mask_augusta.png",
+ "mask_feather": 12,
+ "prompt": "a weathered stone fountain, test picture",
+ "checkpoint": "RealVisXL_V5.0_fp16.safetensors",
+ "seed": 1001,
+ "denoise": 0.85
+}

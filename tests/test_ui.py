@@ -51,3 +51,37 @@ def test_snapshot_actions_and_http(tmp_path):
             assert e.code == 403                                       # no X-Forge header → refused
     finally:
         srv.shutdown()
+
+
+def test_night3_report_link_kit_check_ab_and_upnext(tmp_path):
+    """G9: /report redirects to the newest morning report, /out serves it, kit-check colours reach the card,
+    /api/job feeds the A/B view, and the ETA area names what runs next."""
+    import urllib.request
+    cfg, root, assets = make_world(tmp_path)
+    (tmp_path / "jobs" / "paused").mkdir(exist_ok=True)
+    fake_done_job(tmp_path, "J1", "sd_xl_base_1.0.safetensors", outputs=("card.png",))
+    (tmp_path / "out" / "J1" / "check.json").write_text(json.dumps({"verdict": "warn"}), encoding="utf-8")
+    Image.new("RGB", (10, 10)).save(tmp_path / "out" / "J1" / "check.png")
+    (tmp_path / "jobs" / "pending" / "P1.json").write_text(json.dumps({"id": "P1", "type": "render", "batch": "late", "priority": 0}), encoding="utf-8")
+    (tmp_path / "jobs" / "pending" / "P2.json").write_text(json.dumps({"id": "P2", "type": "render", "batch": "first", "priority": 10}), encoding="utf-8")
+    st = ui.State(cfg).snapshot()
+    assert st["recent"][0]["check"] == {"verdict": "warn", "image": "J1/check.png"}
+    assert st["upcoming"] == ["first", "late"]
+    srv = ui.make_server(cfg, 0)
+    port = srv.server_address[1]
+    t = threading.Thread(target=srv.serve_forever, daemon=True)
+    t.start()
+    try:
+        base = f"http://127.0.0.1:{port}"
+        r = urllib.request.urlopen(base + "/report")
+        assert r.geturl().startswith(base + "/out/reports/night_") and b"forge overnight" in r.read()
+        assert json.loads(urllib.request.urlopen(base + "/api/job?id=J1").read())["id"] == "J1"
+        for bad in ("/out/../forge.json", "/out/..%2Fjobs/done/J1.json"):
+            try:
+                urllib.request.urlopen(base + bad)
+                assert False, bad
+            except urllib.error.HTTPError as e:
+                assert e.code == 404
+        assert b"Compare A/B" in urllib.request.urlopen(base + "/").read()
+    finally:
+        srv.shutdown()

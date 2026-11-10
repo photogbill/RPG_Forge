@@ -1,0 +1,190 @@
+{
+ "suite": "sprite_samplers_v2",
+ "game": "turing_accords",
+ "_comment": "v2 (William, 2026-11-10 02:25): his prompt prefix '8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage' replaces the 'solar panel' wording (v1 drew literal solar panels); canon nuclear core + trefoil and holster added; tile/map/icon/level LoRAs, the icon checkpoint, FLUX/MOSS/unknown LoRAs mislabelled as SDXL, and the banned Krea 2 cinematicFantasy are skipped. v1's 53 finished renders stay as the before-picture. Question: which model/LoRA/sampler gets the face and eyes right on a full-body figure. Read out/bakeoff/sprite_samplers_v1/: across_sarah_<lora>_<seed>.png = rows checkpoints, columns samplers; by_category/sprite-<sampler>/sarah/ = every model on one sampler. No style prefix (tests the model, not the house look). Priority 50 so it runs ahead of anything else queued.",
+ "checkpoints": "*",
+ "loras": "*",
+ "include_no_lora": true,
+ "lora_strength": 0.8,
+ "skip": {
+  "checkpoints": [
+   "gmic icon_V5-000180.safetensors"
+  ],
+  "loras": [
+   "DD_Table_RPG.safetensors",
+   "FFTALevel4_20241206-1733511624460-000004.safetensors",
+   "HadesLevel_20241207-1733548878458-000004.safetensors",
+   "RPGmaps_v5.safetensors",
+   "TileMapStyle_v1.safetensors",
+   "fantasy map-heavy.safetensors",
+   "game_icon_v1.0.safetensors",
+   "gmic icon_food category-000012.safetensors",
+   "Retro_Illustration.safetensors",
+   "RPGv6-itr15_710008.safetensors",
+   "FluxDFaeTasticDetails.safetensors",
+   "bbeam_comic.safetensors",
+   "moss_image_sft_4_steps_lora_v2_600_avg_rank_72_bf16.safetensors",
+   "pinholecamview.safetensors",
+   "cinematicFantasy_v1.safetensors"
+  ]
+ },
+ "seeds": [
+  24101,
+  77213
+ ],
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 28,
+ "cfg": 6.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "karras",
+ "seconds_per_render": 9.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery, solar panel, machinery, props, objects beside her, swimsuit, bare legs",
+ "lora_triggers": {
+  "FFTALevel4_20241206-1733511624460-000004.safetensors": "fftalevel64, pixel art",
+  "HadesLevel_20241207-1733548878458-000004.safetensors": "hadeslevel",
+  "TileMapStyle_v1.safetensors": "tilemapstyle",
+  "fantasy map-heavy.safetensors": "fantasy map style",
+  "FinalFantasy_Tactics_Sprite_Sheet.safetensors": "sprite sheet",
+  "SpriteSheet.safetensors": "sprite sheet",
+  "SpriteSheet (1).safetensors": "sprite sheet",
+  "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors": "sprite sheet, multiple views, full body, simple background",
+  "Retro_Illustration.safetensors": "2d game scene",
+  "Pixel_Xl_V1.safetensors": "pixel art",
+  "game_icon_v1.0.safetensors": "game icon",
+  "gmic icon_food category-000012.safetensors": "game icon",
+  "DD_Table_RPG.safetensors": "",
+  "rpg_portrait.safetensors": "",
+  "amano_yoshitaka_xl.safetensors": ""
+ },
+ "job": {
+  "priority": 60
+ },
+ "samplers": [
+  {
+   "label": "euler-normal",
+   "sampler": "euler",
+   "scheduler": "normal",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  },
+  {
+   "label": "eulera-normal",
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "steps": 35,
+   "cfg": 6.0,
+   "evals": 35
+  },
+  {
+   "label": "heun-karras",
+   "sampler": "heun",
+   "scheduler": "karras",
+   "steps": 20,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "dpm2-karras",
+   "sampler": "dpm_2",
+   "scheduler": "karras",
+   "steps": 20,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "dpmpp2sa-karras",
+   "sampler": "dpmpp_2s_ancestral",
+   "scheduler": "karras",
+   "steps": 25,
+   "cfg": 6.0,
+   "evals": 50
+  },
+  {
+   "label": "dpmppsde-karras",
+   "sampler": "dpmpp_sde",
+   "scheduler": "karras",
+   "steps": 15,
+   "cfg": 5.5,
+   "evals": 30
+  },
+  {
+   "label": "dpmpp2m-karras",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "cfg": 6.0,
+   "evals": 28
+  },
+  {
+   "label": "dpmpp2msde-karras",
+   "sampler": "dpmpp_2m_sde",
+   "scheduler": "karras",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  },
+  {
+   "label": "dpmpp3msde-expo",
+   "sampler": "dpmpp_3m_sde",
+   "scheduler": "exponential",
+   "steps": 30,
+   "cfg": 5.5,
+   "evals": 30
+  },
+  {
+   "label": "unipcbh2-sgm",
+   "sampler": "uni_pc_bh2",
+   "scheduler": "sgm_uniform",
+   "steps": 22,
+   "cfg": 6.0,
+   "evals": 22
+  },
+  {
+   "label": "deis-simple",
+   "sampler": "deis",
+   "scheduler": "simple",
+   "steps": 25,
+   "cfg": 6.0,
+   "evals": 25
+  },
+  {
+   "label": "lms-karras",
+   "sampler": "lms",
+   "scheduler": "karras",
+   "steps": 35,
+   "cfg": 6.0,
+   "evals": 35
+  },
+  {
+   "label": "ddim-ddimu",
+   "sampler": "ddim",
+   "scheduler": "ddim_uniform",
+   "steps": 40,
+   "cfg": 6.0,
+   "evals": 40
+  },
+  {
+   "label": "ersde-expo",
+   "sampler": "er_sde",
+   "scheduler": "exponential",
+   "steps": 30,
+   "cfg": 6.0,
+   "evals": 30
+  }
+ ],
+ "categories": {
+  "sprite": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  }
+ }
+}

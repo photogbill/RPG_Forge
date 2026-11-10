@@ -1,0 +1,22 @@
+{
+ "type": "scene_big",
+ "name": "g3_2_big_level_seven_realvis",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "prompt": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, a black-site corridor, a wall of monitors showing a surgical theater, soldiers and technicians watching with their faces lit by the screens, the table itself never visible, dread",
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, jpeg artifacts, oversaturated neon, plastic skin, extra heads, duplicated figures",
+ "checkpoint": "RealVisXL_V5.0_fp16.safetensors",
+ "source": "out/20261109-213236-t1_refine_030_level_seven_RealVisXL-V5-0-fp16_no-f6a8/scene.png",
+ "target": [
+  3840,
+  2160
+ ],
+ "tile": [
+  1536,
+  1152
+ ],
+ "overlap": 128,
+ "denoise": 0.3,
+ "seed": 1001
+}

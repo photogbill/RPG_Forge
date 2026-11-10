@@ -124,7 +124,7 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   data — the prompts are the game's notes, not art direction; write them properly before submitting (submit refuses drafts).
 - **Before a long run:** `doctor` checks ComfyUI's nodes per graph/stage and every model file the pending queue names.
 
-## Scene sets, Krea 2, the dashboard (2026-11-09, session 2)
+## Scene sets, the dashboard (2026-11-09, session 2)
 
 - **A scene is six files.** `scene_kit` (one job) = paint (`scene_paint`, or `repaint` when `init` is given) →
   `depth_map` → `normal_map` (`source: "depth"`, `detail` blends brush texture back in) → `emissive_mask` →
@@ -139,16 +139,37 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
   companions as `scenes/<map>_n` … with `optional: true` (`wanted --missing` hides them; `--all` shows them).
 - **Do not queue twice:** `bakeoff submit` skips cells already done/pending/running/paused (failed ones re-queue);
   `--force` overrides. `submit <batch> --skip-done` for plain batches (by batch + name + type).
-- **Krea 2:** `"graph": "krea2"` (`forge/engines/krea2_graph.py`, read from ComfyUI 0.44's own Krea 2 code). Turbo
-  8 steps / cfg 1; Raw ~50 / cfg 3.5; er_sde / simple; text encoder via `forge.json → comfy.krea2`; VAE
-  `qwen_image_vae.safetensors`. A model with `licence_condition` in models.json (Krea 2: revenue under US$1M/year)
-  is printed by `approve` and `licences`. **The Stable Yogi Krea 2 fine-tune's own file says "commercial use by
-  permission only"** — never record a licence for it on William's behalf.
+- **Krea 2 is cut — do not propose it** (William, 2026-11-09: "if Krea 2 has that license, we won't use it
+  period"). The scanner still recognises Krea 2 files so `models unusable` lists them for deletion. `approve` /
+  `licences` print any `licence_condition` a registry model carries (none today).
 - **Dashboard** `python -m forge ui` (`ui.bat`), `forge/ui.py`: read-only except Retry / Pause / Resume / Approve
   (POSTs need the `X-Forge: 1` header). **ETA**: `forge/eta.py`, `eta.bat`.
 - **Detail crops:** `bakeoff report <suite> --detail-at <prompt>=x,y[,size]` / `--detail-auto` → saved in
   `out/bakeoff/<suite>/detail_at.json`; `report` and `review` both read it (`forge/detail.py`).
-- **Models:** `models unusable` (report only, never delete); the scanner now tells krea2 / flux2 / flux3 apart from
+- **Models:** `models unusable` (report only, never delete); the scanner now tells flux2 / flux3 (and krea2) apart from
   FLUX.1 (ComfyUI's own detection keys). `licence.bat` with no arguments asks one question at a time.
 - **Writing files into D:\RPG_Forge from a cloud session:** a commit over an existing file sometimes does not land.
   Commit to a new path (`_incoming/`, git-ignored) and `mv` it into place from `device_bash`, then check `md5sum`.
+
+
+## Night 3 (2026-11-09) — read this for anything added that night
+
+- **Plug-in job types** (`forge/plugins/<name>.py`: `JOB_TYPES`, `HANDLERS`, `DEPENDS`). Night 3's: `scene_big`,
+  `inpaint`, `scene_state` (GPU); `facings_pack`, `anim_preview`, `turnaround_split`, `nine_slice`, `button_states` (CPU).
+  Their specs live in `forge/night3/specs.py` (no imports — a plug-in must not import `forge.jobs` at load time, because
+  `forge.jobs` loads the plug-ins; handlers import lazily). `tests/test_night3_plugins.py` guards that they all load.
+- **Reading results as a model:** `review <suite> --compact` (≤ 12 cells, labels in the picture, `review_index.json`
+  maps cell numbers to job ids) and `--pairs A,B` (two treatments side by side with the 1:1 crop). Stage a sheet, read
+  it, turn "cell 7" into `bakeoff rate <suite> <id> <1-5>` from the index.
+- **Mornings:** `report night` first (`out/reports/night_<date>.html/.md`).
+- **Big maps:** `scene_big` never climbs more than `max_step` (2×) per step (William: "6X disappoints usually").
+  `scene_kit big: true` is not wired yet (`docs/WIRE_NIGHT_3.md` W1).
+- **States of a room:** `scene_state` with `greybox_base` + `greybox_state` (the mask is what changed; refused over 35 %).
+  Outside the mask the picture — and, for a kit, every companion — is bit-identical to the base.
+- **Before approving a kit:** `kit check <id> --map <map>`; `approve --set` runs it and refuses on a *fail*.
+- **Prompts:** write style words once as blocks in `games/<game>/prompts/*.json` and reference them as `{{style.house}}`.
+  The shipped blocks are placeholders (`TODO …`) and refuse to expand until someone writes them. Never put a name from
+  `never.json` in a prompt — `submit` refuses it (William's artist-LoRA ruling).
+- **What to paint next:** `brief missing` → `games/<game>/batches/draft_missing.json` (a draft; every `{{block}}` must
+  exist before it submits).
+- **Credits:** `credits` → `out/reports/CREDITS_MODELS.md`.

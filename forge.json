@@ -65,13 +65,7 @@
     "fp8_cast_over_gb": 14.0,
     "upscale_model": "RealESRGAN_x4plus.pth",
     "controlnet_union": "xinsir-union-sdxl-promax.safetensors",
-    "face_detector": "bbox/face_yolov8m.pt",
-    "krea2": {
-      "text_encoder": "qwen3vl_4b_int8_convrot.safetensors",
-      "vae": "qwen_image_vae.safetensors",
-      "sampler": "er_sde",
-      "scheduler": "simple"
-    }
+    "face_detector": "bbox/face_yolov8m.pt"
   },
   "worker": {
     "poll_sec": 2.0,
@@ -86,5 +80,12 @@
     "render_scale": 4,
     "negative": "text, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality"
   },
-  "allow_external_paths": false
+  "allow_external_paths": false,
+  "tools": {
+    "filter_forge": {
+      "_comment": "Optional (Night 3B, G14): Filter Forge's command-line renderer for the filter_forge job type. Remove or leave empty if you do not have it — doctor then says 'not installed'. library_dirs: extra folders of .ffxml filters to list (your own library is found under %APPDATA% automatically). Filters are used by path and never copied.",
+      "exe": "C:\\Program Files\\Filter Forge 9\\Bin\\FFXCmdRenderer-x64.exe",
+      "library_dirs": []
+    }
+  }
 }

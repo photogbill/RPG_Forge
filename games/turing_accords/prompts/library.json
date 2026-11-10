@@ -1,0 +1,17 @@
+{
+ "_comment": "The prompt library's shelves - PLACEHOLDERS ONLY (made by the Night 3 build). The words are Fable's and William's: replace each TODO with real text, add blocks freely. Reference a block in any job's prompt/negative as {{style.house}}; submit expands it. python -m forge prompts list | show | where-used | check | ab.",
+ "blocks": {
+  "style.house": "TODO house style words",
+  "light.dusk_sodium": "TODO dusk, sodium street light",
+  "place.linden_mills": "TODO the town's look",
+  "era.war": "TODO the war years",
+  "neg.default": "TODO default negative",
+  "movement.example": "TODO an art movement or style term",
+  "technique.example": "TODO e.g. a lighting or painting technique",
+  "medium.example": "TODO the material: e.g. ball-point pen, oil on panel, gouache",
+  "process.example": "TODO a photographic process: e.g. wet plate, large format",
+  "period.example": "TODO an era of art",
+  "purpose.example": "TODO what the picture is for: e.g. cinematic still, editorial",
+  "quality.example": "TODO a stack of quality descriptors"
+ }
+}

@@ -1,0 +1,311 @@
+{
+ "batch": "draft_missing",
+ "_draft": true,
+ "_made": "2026-11-10T04:28:16",
+ "_review": "Every {{block}} must exist in games/<game>/prompts/ before this submits (submit refuses unknown or TODO blocks). Write the TODO picture words, delete _draft, then submit.",
+ "_facts": {
+  "notes": [
+   "game folder not readable here (D:\\Turing Accords Game) — worked from the last wanted.json"
+  ],
+  "wanted_exported": "2026-11-09T18:39:40",
+  "frame": [
+   1920,
+   1080
+  ],
+  "families": {}
+ },
+ "defaults": {
+  "game": "turing_accords"
+ },
+ "approved": [],
+ "jobs": [
+  {
+   "type": "scene_big",
+   "name": "atlanta_church",
+   "target": [
+    3264,
+    2112
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Atlanta: a 6,000-seat sanctuary turned shelter; cots in the aisles; a gospel choir rehearsing because the pastor says people need to hear something that isn't sirens. Quirk: the pastor asks no questions. Problem: the kitchen is out of ",
+   "_wanted": "scenes/atlanta_church",
+   "_name_in_game": "Atlanta — the megachurch kitchen"
+  },
+  {
+   "type": "scene_big",
+   "name": "augusta_ruin",
+   "target": [
+    3264,
+    1920
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Augusta / Fort Gordon: the Savannah River brown with ash; the Army's signal brain a glass field; radiation placards; a tent city on the far bank. Quirk: the chalkboard — survivors chalk names and 'seen alive at…'; the town's only insti",
+   "_wanted": "scenes/augusta_ruin",
+   "_name_in_game": "Augusta / Fort Gordon — the first ruin"
+  },
+  {
+   "type": "scene_big",
+   "name": "bills_house",
+   "target": [
+    2304,
+    1536
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "05.7 / 15.2 — suburban home: the living room with the server rack where Sarah lives, the kitchen, the bedroom, the backyard. Sarah (Part 1, the hologram — 19.0b) walks here; outside she rides Bill's phone.",
+   "_wanted": "scenes/bills_house",
+   "_name_in_game": "Bill's house"
+  },
+  {
+   "type": "scene_big",
+   "name": "cheyenne_approach",
+   "target": [
+    2880,
+    1728
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Cheyenne Mountain: the blast doors, the tunnel, the server cathedral where Valkyrie *is*. The facility below is the generator's (gen:cheyenne:7 — a fixed seed) with a hand-placed core room (cheyenne_core).",
+   "_wanted": "scenes/cheyenne_approach",
+   "_name_in_game": "Cheyenne Mountain — the tunnel"
+  },
+  {
+   "type": "scene_big",
+   "name": "cheyenne_core",
+   "target": [
+    2880,
+    1920
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 / plan 4.11: the hand-placed boss room at the bottom of the facility, then the digital dungeon (I-17) in sensor view — node by node; the last room is empty; one server survives. Then I-18 Ashes and Light: Persona Shift unlocks for the ",
+   "_wanted": "scenes/cheyenne_core",
+   "_name_in_game": "Cheyenne Mountain — the server cathedral"
+  },
+  {
+   "type": "scene_big",
+   "name": "damascus_compound",
+   "target": [
+    4224,
+    2304
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "I-3 / 2.11 — the first mission, played as Valkyrie in sensor view. Five targets, as the lyric counts them (⚠ the night plan said eight; the song is canon). Greybox city block: no look decided. The song that follows is where the cost lands.",
+   "_wanted": "scenes/damascus_compound",
+   "_name_in_game": "Damascus — Mission 1 (sensor view, greybox)"
+  },
+  {
+   "type": "scene_big",
+   "name": "darpa_lab",
+   "target": [
+    3456,
+    2112
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.1 row 1 / I-2 — institutional cool: the twin bays, the briefing room, Lab 4 (the uncle's), deployment. The wake is a controls lock (04.12); the briefing is the tutorial; Sarah's kill-calculus refusal is her first input.",
+   "_wanted": "scenes/darpa_lab",
+   "_name_in_game": "The DARPA lab (Northern Virginia — proposal)"
+  },
+  {
+   "type": "scene_big",
+   "name": "dockerys_juke",
+   "target": [
+    2880,
+    1728
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Dockery's Crossing: a tin-roofed shack at a Delta crossroads, a generator chugging, Christmas lights, a man with a resonator guitar who has played through every disaster since 1998. Quirk: nobody here believes in Valkyrie. Problem: the",
+   "_wanted": "scenes/dockerys_juke",
+   "_name_in_game": "Dockery's Crossing — the juke joint"
+  },
+  {
+   "type": "scene_big",
+   "name": "dry_fork_street",
+   "target": [
+    3264,
+    1728
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Dry Fork: one street, one bar, one flag, one sign on the bar door: NO ROBOTS (hand-painted, a year before MEHA makes it law). Quirk: the owner serves Sarah a beer she can't drink and talks for ten minutes about how you can always tell.",
+   "_wanted": "scenes/dry_fork_street",
+   "_name_in_game": "Dry Fork, Texas — one street, one bar"
+  },
+  {
+   "type": "scene_big",
+   "name": "el_paso_bridge",
+   "target": [
+    3456,
+    1920
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 El Paso: two cities, one river, the bridge with its lines of people going south. Quirk: on the Mexican side life continues, and the churro story is already a legend — a man who heard it from a man tells it wrong, and Sarah hears Valkyr",
+   "_wanted": "scenes/el_paso_bridge",
+   "_name_in_game": "El Paso — the bridge"
+  },
+  {
+   "type": "scene_kit",
+   "name": "gun_store",
+   "target": [
+    1152,
+    672
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "",
+   "_wanted": "scenes/gun_store",
+   "_name_in_game": "Gun Store"
+  },
+  {
+   "type": "scene_kit",
+   "name": "hobby_shop",
+   "target": [
+    1152,
+    672
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "",
+   "_wanted": "scenes/hobby_shop",
+   "_name_in_game": "Hobby Shop"
+  },
+  {
+   "type": "scene_big",
+   "name": "level_seven",
+   "target": [
+    3072,
+    1728
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Level Seven (proposal: the Nevada Test Site): elevators that only go down; fluorescent corridors; Surgical Theater Seven with its gallery. Quirk: the room is built for watching; the game's camera obeys (02 I-15: never the table). New, ",
+   "_wanted": "scenes/level_seven",
+   "_name_in_game": "Level Seven — the black site"
+  },
+  {
+   "type": "scene_big",
+   "name": "linden_mills_street",
+   "target": [
+    6144,
+    3072
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 — cul-de-sacs on old farmland, a strip mall (gun store with a bell, a vape shop, the hobby-robotics store), the Sheetz, the Academy, Bill's house on the court. Three states: Peace (Inbox drones on lawns), War (cash only, a National Gua",
+   "_wanted": "scenes/linden_mills_street",
+   "_name_in_game": "Linden Mills — Bill's exurb"
+  },
+  {
+   "type": "scene_big",
+   "name": "mile_212_bar",
+   "target": [
+    3456,
+    1920
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Mile 212: a cinderblock bar at a desert exit, forty bikes, a sign that says TRUCKERS WELCOME, SENTINELS NOT. Quirk: the club runs escorts for refugees for gas money — the road's only militia. Problem: an escort that goes wrong; the par",
+   "_wanted": "scenes/mile_212_bar",
+   "_name_in_game": "Mile 212 — the biker bar"
+  },
+  {
+   "type": "scene_big",
+   "name": "mont_ross_hangar",
+   "target": [
+    3072,
+    1728
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.1 row 15: Mont Ross — arrival; 'Sarah is home'. Game I ends here (credits placeholder → the title). The runway that submerges is canon (10).",
+   "_wanted": "scenes/mont_ross_hangar",
+   "_name_in_game": "Mont Ross — the hangar"
+  },
+  {
+   "type": "scene_big",
+   "name": "new_orleans_quarter",
+   "target": [
+    3456,
+    1920
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 New Orleans: the Quarter under wartime curfew with every window still lit; brass on the corners; the opera house; the mob's club two blocks off Canal. Quirk: the music never stops (the player learns why the Sentinels never come). The O",
+   "_wanted": "scenes/new_orleans_quarter",
+   "_name_in_game": "New Orleans — the Quarter under curfew"
+  },
+  {
+   "type": "scene_big",
+   "name": "opera_lobby",
+   "target": [
+    2112,
+    1152
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "14 / plan 4.5: the opera house lobby only — the Opera's logic (I-12b) is a design conversation with William. Posters, the box office, the impresario.",
+   "_wanted": "scenes/opera_lobby",
+   "_name_in_game": "The opera house — the lobby (shell)"
+  },
+  {
+   "type": "scene_big",
+   "name": "overture_void",
+   "target": [
+    1920,
+    1152
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "I-1 — a black stage for the overture's caption cards (the music, when it exists, is the clock).",
+   "_wanted": "scenes/overture_void",
+   "_name_in_game": "—"
+  },
+  {
+   "type": "scene_big",
+   "name": "roadside_stop",
+   "target": [
+    2496,
+    1056
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "2.10 — where a road 'stop' event lands: one placed fight, then back in the car (the trip resumes).",
+   "_wanted": "scenes/roadside_stop",
+   "_name_in_game": "The interstate — pulled over"
+  },
+  {
+   "type": "scene_big",
+   "name": "school_street",
+   "target": [
+    3840,
+    1824
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "Slice A (10.5). Chloe starts bottom-left, walks the south sidewalk to the crosswalk at x=20, is hit in the south lane (row 10), ends up in History 1B (top right). Hedge gap at x=35 is her sneak route to the side door.",
+   "_wanted": "scenes/school_street",
+   "_name_in_game": "Act II — the street to school (Chloe)"
+  },
+  {
+   "type": "scene_big",
+   "name": "tucson_boneyard",
+   "target": [
+    3840,
+    2304
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Tucson: ten thousand sleeping planes in rows, McKenna's trailer, the shortwave net. Quirk: the parts economy — nothing is for sale, everything is for trade (13.2): the quartermaster prices by Standing. Problem: the shortwave fix (12.5'",
+   "_wanted": "scenes/tucson_boneyard",
+   "_name_in_game": "Tucson — the Boneyard"
+  },
+  {
+   "type": "scene_big",
+   "name": "uncle_workshop",
+   "target": [
+    2112,
+    1344
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "I-4 — the handover: the chip in the uncle's pocket, young Bill at the window with the phone. A Set Piece with no control (N1); control returns as Sarah, the light, in Bill's room years later.",
+   "_wanted": "scenes/uncle_workshop",
+   "_name_in_game": "The uncle's workshop (Virginia)"
+  },
+  {
+   "type": "scene_big",
+   "name": "washington_mall",
+   "target": [
+    2880,
+    1632
+   ],
+   "prompt": "{{style.house}}, TODO: the picture in plain words",
+   "_notes": "15.2 Washington — 'power pretending to be calm'. William (2026-11-09): in Act I the Situation Room hack happens from Bill's house, in the same song the body arrives (i11_ghost_in_the_flesh) — the party is never on the ground here in Act I. ",
+   "_wanted": "scenes/washington_mall",
+   "_name_in_game": "Washington — the Mall (Album 3 stub)"
+  }
+ ]
+}

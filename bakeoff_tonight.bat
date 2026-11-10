@@ -18,6 +18,30 @@ rem                  bakeoff_report.bat style_v1        (the style comparison)
 rem                  bakeoff_report.bat flux2_klein_v1  and  bakeoff_report.bat flux1_v1   (if FLUX ran)
 if not exist venv (echo Run install.bat first. & pause & exit /b 1)
 call venv\Scripts\activate.bat
+rem --- added 2026-11-09 21:00: this one file now does the whole evening ---
+rem   (0a) put back anything a stopped worker left half done, and anything parked by pause.bat
+rem   (0b) pull the commercial FLUX models (FLUX.2 klein 4B + FLUX.1 schnell, Apache-2.0, about 34 GB the first time;
+rem        files already here are skipped, so a second run is instant). Skip the download:  bakeoff_tonight.bat noflux
+rem   (7)  at the end it starts the worker for you.
+echo [0/7] Putting stopped and parked jobs back in the queue ...
+python -m forge requeue
+python -m forge resume
+python -m forge comfy-up >nul
+if errorlevel 1 goto comfyclosed
+echo.
+echo ComfyUI is still running. Close its window now (it must restart to see new models), then
+pause
+:comfyclosed
+if /i "%~1"=="noflux" goto afterflux
+echo.
+echo [0/7] Commercial FLUX models (skipped if already downloaded) ...
+python -m forge models pull flux2-vae
+python -m forge models pull flux2-klein-text-encoder
+python -m forge models pull flux2-klein-4b
+python -m forge models pull flux1-vae
+python -m forge models pull flux1-text-encoders
+python -m forge models pull flux1-schnell-fp8
+:afterflux
 if exist "out\bakeoff\sdxl_v1\plan.json" if not exist "out\bakeoff\sdxl_v1\plan_run1_2026-11-08.json" copy /y "out\bakeoff\sdxl_v1\plan.json" "out\bakeoff\sdxl_v1\plan_run1_2026-11-08.json" >nul
 echo Registering model folders with ComfyUI and scanning them (header-only, fast) ...
 python -m forge comfy-paths >nul
@@ -57,6 +81,8 @@ echo Anything already finished or already queued was skipped (run this twice and
 echo.
 python -m forge eta
 echo.
-echo Start run_worker.bat now if it is not running.
-echo Progress any time: doctor.bat
+echo Progress any time: doctor.bat   or   ui.bat
+echo.
+echo [7/7] Starting the worker in this window. If a worker is ALREADY running in another window, close this one instead.
 pause
+call run_worker.bat

@@ -1,0 +1,22 @@
+{
+ "type": "scene_big",
+ "name": "g3_4_big_opera_sdxl_base",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "prompt": "digital painting, cinematic lighting, rich saturated colour, strong value contrast, painterly brushwork with crisp detail at the focal point, wide establishing composition, no text, an opera house exterior on a rainy night in the French Quarter, every window lit, wet street reflecting the lights, a crowd under umbrellas, music in the air",
+ "negative": "text, letters, watermark, signature, logo, blurry, deformed, extra limbs, extra fingers, low quality, jpeg artifacts, oversaturated neon, plastic skin, extra heads, duplicated figures",
+ "checkpoint": "sd_xl_base_1.0.safetensors",
+ "source": "out/20261109-213236-t1_refine_030_new_orleans_opera_sd-xl-base-1-0_n-e520/scene.png",
+ "target": [
+  3840,
+  2160
+ ],
+ "tile": [
+  1536,
+  1152
+ ],
+ "overlap": 128,
+ "denoise": 0.3,
+ "seed": 1001
+}

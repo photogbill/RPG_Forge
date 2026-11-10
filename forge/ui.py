@@ -88,6 +88,24 @@ class State:
                     ok = None
         return "ok" if ok is True else ("no" if ok is False else "unknown")
 
+    def check_of(self, j: dict) -> dict | None:
+        """Night 3 (G5/G9): the kit check's verdict, if `kit check` (or approve --set) has run on this job."""
+        p = self.out / str(j.get("id")) / "check.json"
+        if not p.exists():
+            return None
+        try:
+            v = json.loads(p.read_text(encoding="utf-8")).get("verdict")
+        except (OSError, ValueError):
+            return None
+        return {"verdict": v, "image": f"{j['id']}/check.png" if (p.parent / "check.png").exists() else None}
+
+    def job(self, jid: str) -> dict | None:
+        for st in ("done", "failed", "pending", "running", "paused"):
+            p = self.jobs / st / f"{jid}.json"
+            if p.exists():
+                return self._read(p)
+        return None
+
     def snapshot(self) -> dict:
         from . import eta
         pend, run, done, failed, paused = (self.folder(s) for s in ("pending", "running", "done", "failed", "paused"))
@@ -108,7 +126,16 @@ class State:
             started = j.get("started_at")
             running.append({"id": j["id"], "type": j.get("type"), "name": j.get("name"), "batch": j.get("batch"), "started": started})
         e = eta.estimate(self.cfg)
+        # Night 3 (G9): which batch is running now and which are still to come, in the order the worker takes them
+        order = sorted(pend, key=lambda j: (-int(j.get("priority") or 0), str(j.get("id"))))
+        upcoming = []
+        for j in order:
+            b = str(j.get("batch") or "(no batch)")
+            if b not in upcoming:
+                upcoming.append(b)
+        now_batch = running[0]["batch"] if running else None
         return {
+            "now_batch": now_batch, "upcoming": [b for b in upcoming if b != now_batch][:6],
             "counts": {"pending": len(pend), "running": len(run), "done": len(done), "failed": len(failed), "paused": len(paused)},
             "eta": {"seconds": e["seconds"], "human": eta.human(e["seconds"]) if e["pending"] else "—", "based_on": e["based_on"]},
             "running": running,
@@ -116,7 +143,8 @@ class State:
             "recent": [{"id": j["id"], "type": j.get("type"), "name": j.get("name"), "batch": j.get("batch"),
                         "image": self.image_for(j), "licence": self.licence_of(j),
                         "outputs": [o for o in ((j.get("result") or {}).get("outputs") or [])],
-                        "set": bool((j.get("result") or {}).get("slots")), "finished": j.get("finished_at")} for j in recent],
+                        "set": bool((j.get("result") or {}).get("slots")), "finished": j.get("finished_at"),
+                        "check": self.check_of(j)} for j in recent],
             "failed": [{"id": j["id"], "type": j.get("type"), "name": j.get("name"), "batch": j.get("batch"),
                         "error": str(j.get("error") or "")[:600], "finished": j.get("finished_at")} for j in fails],
             "colours": TYPE_COLOURS,
@@ -186,6 +214,13 @@ def act(cfg: dict, action: str, body: dict) -> dict:
             return {"ok": False, "message": "choose what this picture is for (a wanted name, e.g. scenes/bills_house)"}
         try:
             if body.get("set"):
+                from . import kitcheck                    # Night 3 (G5): refuse a kit that fails the check
+                kd = cfgmod.path_of(cfg, "out") / jid
+                if kd.is_dir():
+                    chk = kitcheck.check(cfg, kd, name.split("/")[-1])
+                    bad = [l for l in chk["lines"] if l["status"] == "fail"]
+                    if bad:
+                        return {"ok": False, "message": "kit check failed: " + "; ".join(f"{l['check']} — {l['message']}" for l in bad)}
                 plan = manifest.approve_set(cfg, jid, name, dry_run=dry)
                 rows = [{"what": r["slot"], "file": Path(r["file"]).name, "dest": r["dest"], "size": r["size"]} for r in plan["rows"]]
             else:
@@ -230,6 +265,27 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(self.state.snapshot())
             elif u.path == "/api/wanted":
                 self._json(wanted_names(self.cfg))
+            elif u.path == "/report":                      # Night 3 (G1/G9): the newest morning report
+                from . import night_report
+                rep = night_report.latest(self.cfg)
+                if rep is None:
+                    rep, _md, _r = night_report.build(self.cfg)
+                self.send_response(302)
+                self.send_header("Location", "/out/reports/" + rep.name)
+                self.end_headers()
+            elif u.path.startswith("/out/"):                 # read-only files under out/ (reports, bake-off pages)
+                rel = u.path[len("/out/"):]
+                src = (self.state.out / rel).resolve()
+                types = {".html": "text/html; charset=utf-8", ".jpg": "image/jpeg", ".png": "image/png",
+                         ".md": "text/plain; charset=utf-8", ".json": "application/json", ".gif": "image/gif"}
+                if not str(src).startswith(str(self.state.out.resolve())) or not src.is_file() or src.suffix.lower() not in types:
+                    raise FileNotFoundError(rel)
+                self._send(200, src.read_bytes(), types[src.suffix.lower()])
+            elif u.path == "/api/job":                        # Night 3 (G9): one job's fields, for the A/B view
+                j = self.state.job(parse_qs(u.query).get("id", [""])[0])
+                if j is None:
+                    raise FileNotFoundError("job")
+                self._json({k: v for k, v in j.items() if k not in ("traceback",)})
             elif u.path in ("/thumb", "/full"):
                 rel = parse_qs(u.query).get("p", [""])[0]
                 if u.path == "/thumb":
@@ -320,10 +376,12 @@ table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}td,th{b
 <header><h1>RPG<b>_</b>Forge</h1>
 <span class="pill" id="c-pend">queued –</span><span class="pill r" id="c-run">rendering –</span>
 <span class="pill" id="c-done">done –</span><span class="pill f" id="c-fail">failed –</span><span class="pill" id="c-eta">ETA –</span>
+<a class="pill" href="/report" target="_blank" style="color:var(--ink);text-decoration:none">Report</a>
+<button id="ab-btn" onclick="openAB()" disabled>Compare A/B</button>
 <span style="flex:1"></span><button class="stop" onclick="act('pause',{})">Pause queue</button><button class="go" onclick="act('resume',{})">Resume</button>
 <span class="pill" id="clock">–</span></header>
 <main><div>
-<section><h2>Rendering now</h2><div id="now"></div></section>
+<section><h2>Rendering now</h2><div id="now"></div><div id="upnext" style="color:var(--dim);font-size:12.5px;margin-top:6px"></div></section>
 <section><h2>Batches</h2><div id="batches"></div></section>
 <section><h2>Failed</h2><div id="failed"></div></section>
 <section><h2>Colours</h2><div class="legend" id="legend"></div>
@@ -338,6 +396,9 @@ table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}td,th{b
 <div style="display:flex;gap:10px;margin-top:10px"><button onclick="approve(true)">Check</button><button class="go" id="m-confirm" disabled onclick="approve(false)">Confirm</button><span style="flex:1"></span><button onclick="closeModal()">Close</button></div>
 </div></div>
 <div id="zoom" onclick="this.style.display='none'"><img id="zoom-img"></div>
+<div id="ab" onclick="if(event.target.id==='ab')this.style.display='none'" style="position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;z-index:31;overflow:auto;padding:14px">
+<div style="display:flex;gap:12px;align-items:flex-start"><div style="flex:1"><div id="ab-la"></div><img id="ab-a" style="width:100%"></div><div style="flex:1"><div id="ab-lb"></div><img id="ab-b" style="width:100%"></div></div>
+<table id="ab-diff" style="max-width:1100px;background:var(--panel)"></table><button onclick="document.getElementById('ab').style.display='none'">Close</button></div>
 <script>
 let S=null, M=null;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -349,9 +410,21 @@ function draw(){const c=S.counts;
  H('batches',S.batches.map(b=>{const t=b.done+b.failed+b.running+b.pending+b.paused||1,p=x=>(100*x/t).toFixed(1)+'%';
   return `<div class="batch">${esc(b.name)} <small>${b.done}/${t} done${b.failed?` · ${b.failed} failed`:''}${b.pending?` · ${b.pending} to go`:''}</small><div class="bar"><i class="b-done" style="width:${p(b.done)}"></i><i class="b-fail" style="width:${p(b.failed)}"></i><i class="b-run" style="width:${p(b.running)}"></i><i class="b-pause" style="width:${p(b.paused)}"></i></div></div>`}).join('')||'<span style="color:var(--dim)">no recent batches</span>');
  H('failed',S.failed.map(f=>`<div class="fail"><b>${esc(f.name)}</b> <span style="color:var(--dim)">${esc(f.type)} · ${esc(f.batch||'')}</span><pre>${esc(f.error)}</pre><button onclick="act('retry',{id:'${esc(f.id)}'})">Retry</button></div>`).join('')||'<span style="color:var(--dim)">none</span>');
- H('recent',S.recent.map((j,i)=>`<div class="card ${j.licence}"><div class="edge" style="background:${col(j.type)}"></div>${j.image?`<img loading="lazy" src="/thumb?p=${encodeURIComponent(j.image)}" onclick="zoom('${encodeURIComponent(j.image)}')">`:''}<div class="meta"><b>${esc(j.name)}</b><span>${esc(j.type)} · ${esc((j.finished||'').slice(11,16))}</span><br><button onclick="openApprove(${i})">Approve…</button></div></div>`).join(''));
+ H('recent',S.recent.map((j,i)=>`<div class="card ${j.licence}"><div class="edge" style="background:${col(j.type)}"></div>${j.image?`<img loading="lazy" src="/thumb?p=${encodeURIComponent(j.image)}" onclick="zoom('${encodeURIComponent(j.image)}')">`:''}<div class="meta"><b>${esc(j.name)}</b><span>${esc(j.type)} · ${esc((j.finished||'').slice(11,16))}</span>${kitDot(j)}<br><button onclick="openApprove(${i})">Approve…</button> <label style="font-size:12px"><input type="checkbox" ${AB.includes(j.id)?'checked':''} onchange="pickAB('${esc(j.id)}',this.checked)" style="width:auto"> A/B</label></div></div>`).join(''));
+ H('upnext',(S.now_batch?`running: <b>${esc(S.now_batch)}</b>`:'')+(S.upcoming&&S.upcoming.length?` · then: ${S.upcoming.map(esc).join(' → ')}`:''));
  H('legend',Object.entries(S.colours).map(([k,v])=>`<span><i style="background:${v}"></i>${k}</span>`).join(''));}
 const T=(id,t)=>document.getElementById(id).textContent=t, H=(id,h)=>{const e=document.getElementById(id);if(e.innerHTML!==h)e.innerHTML=h;}, col=t=>(S.colours[t]||'#888');
+const KC={pass:'var(--ok)',warn:'#e0a838',fail:'var(--no)'};
+function kitDot(j){if(!j.check)return '';const c=j.check;return ` <span title="kit check: ${esc(c.verdict)} — click for the sheet" style="cursor:pointer;color:${KC[c.verdict]||'#888'}" ${c.image?`onclick="zoom('${encodeURIComponent(c.image)}')"`:''}>● kit ${esc(c.verdict)}</span>`;}
+let AB=[];function pickAB(id,on){AB=AB.filter(x=>x!==id);if(on)AB.push(id);if(AB.length>2)AB=AB.slice(-2);document.getElementById('ab-btn').disabled=AB.length!==2;draw();}
+async function openAB(){const [a,b]=await Promise.all(AB.map(id=>fetch('/api/job?id='+encodeURIComponent(id)).then(r=>r.json())));
+ const ra=S.recent.find(x=>x.id===a.id),rb=S.recent.find(x=>x.id===b.id);
+ document.getElementById('ab-a').src='/full?p='+encodeURIComponent(ra.image);document.getElementById('ab-b').src='/full?p='+encodeURIComponent(rb.image);
+ document.getElementById('ab-la').innerHTML='<b>A</b> '+esc(a.name);document.getElementById('ab-lb').innerHTML='<b>B</b> '+esc(b.name);
+ const skip=new Set(['id','name','submitted_at','started_at','finished_at','result']);const keys=[...new Set([...Object.keys(a),...Object.keys(b)])].filter(k=>!skip.has(k)).sort();
+ const v=x=>x===undefined?'—':esc(typeof x==='object'?JSON.stringify(x):x);
+ document.getElementById('ab-diff').innerHTML='<tr><th>field</th><th>A</th><th>B</th></tr>'+keys.filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])).map(k=>`<tr><td>${esc(k)}</td><td>${v(a[k])}</td><td>${v(b[k])}</td></tr>`).join('')||'<tr><td>no differences in the job fields</td></tr>';
+ document.getElementById('ab').style.display='block';}
 function zoom(p){document.getElementById('zoom-img').src='/full?p='+p;document.getElementById('zoom').style.display='flex';}
 async function post(a,b){const r=await fetch('/api/act/'+a,{method:'POST',headers:{'Content-Type':'application/json','X-Forge':'1'},body:JSON.stringify(b)});return r.json();}
 async function act(a,b){const r=await post(a,b);alert(r.message);refresh();}

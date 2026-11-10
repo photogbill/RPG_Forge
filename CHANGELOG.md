@@ -252,3 +252,123 @@ Hand-off: docs/HANDOFF_FORGE_2026-11-09b.md
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 
+## 2026-11-10
+
+Krea 2 cut from the forge; depth normals ignore the floor ramp
+
+William: the Stable Yogi Krea 2 checkpoint said "commercial use by permission only" - deleted at his request -
+and then "if Krea 2 has that license, we won't use it period". Removed: forge/engines/krea2_graph.py, its
+build_graph branch and hot-reload entry, the doctor krea2 check, the four Krea 2 registry entries, forge.json
+comfy.krea2, the krea2_v1 suite, the Krea tests; docs and the hand-off say so. Kept: generic licence_condition
+printing in approve/licences, and the scanner's Krea 2 detection so `models unusable` lists Krea files
+(cinematicFantasy_v1 is now a delete candidate).
+
+Depth normals (seen on the real GPU output): ComfyUI saves depth as 8-bit, so floors arrived as terraces that
+printed as contour lines/stripes in the normals - a resolution-scaled de-banding blur now runs first; and a receding
+floor read as one big slope - new `flatten` (default 0.85) removes the depth's trend up the screen, only where a
+pixel is ground, so upright objects keep their shape and nothing gets a halo. Comparison: out/_tests/flatten_compare_v5.png.
+
+Real-GPU proof of N1-N3 (batch night3_checks): depth map, normals from depth, layers on the street, and a full
+scene_kit with all six slot files and a commercial-OK licence chain including the depth model.
+
+Night 3 plan: docs/ROADMAP_NIGHT_3.md (G1-G9: morning report, compact review sheets, tiled big scenes,
+inpaint + scene states, kit check, prompt library, sprite-sheet tools, credits, dashboard) and
+KICKOFF_PROMPT_FOR_OPUS_FORGE_NIGHT_3.md.
+
+Plug-in job types (forge/plugins/): a file exposing JOB_TYPES + HANDLERS (+ DEPENDS) is picked up by a running
+worker before its next job - no restart to add a job type. Re-imported only when it changes on disk; a broken or
+half-saved plug-in keeps its last good version; a plug-in can never replace a built-in type. schema.validate /
+with_defaults / needs_gpu / docs learn plug-in types on demand. forge/plugins/ping.py is the example and the
+health check. 10 tests (tests/test_plugins.py); 106 green.
+
+William: deleted the three non-commercial FLUX files from flux_models (FLUX.1 dev x2, klein 9B). Ruling:
+artist-named LoRAs may be used; the artist's name and the LoRA's trigger keywords never go in a prompt.
+
+Fixes found on the first real run: models.json named FLUX files that do not exist on Hugging Face (klein 4B has
+no -fp8 files; schnell fp8 is flux1-schnell-fp8-e4m3fn) - corrected against the repos' file lists. pull_flux.bat had
+mixed line endings and non-ASCII characters, so cmd ran its comments as commands - rewritten (ASCII, CRLF), pulls only
+the commercial models, one model per line so one failure does not stop the rest. bakeoff_tonight.bat now requeues,
+pulls FLUX, queues every suite and starts the worker.
+
+Worker idle-gap fix (forge/queue.py run_worker): accept() called the reloading handler factory once per pending
+file on every claim, so with 3,250 jobs queued the worker sat ~16 s between renders reloading plug-ins. The handler
+map is now loaded once per claim cycle (code fixes still picked up before every claim). SPRITE_1_START.bat requeues
+an interrupted job before starting the worker, so it doubles as the restart.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+
+---
+
+Night 3 (Opus): plug-in job types for big scenes, room states, sprite and UI tools; morning report, review sheets a model can read, kit check, prompt library, brief missing, credits
+
+Every new job type is a plug-in (forge/plugins/) - nothing the running worker reloads was edited. G0: the worker ran the
+ping at 22:54 (plug-in support confirmed).
+
+- G1 report night (night_report.bat): per batch done/failed (causes folded)/queued/skipped, wall time, s/render by
+  checkpoint, slowest, models with licence colour, thumbnails, what to run next. Checked on the 1,280-render 11-08 run.
+- G2 review --compact / --pairs A,B (review_compact.bat): <=12 labelled cells, <=2000 px, <=1.5 MB, review_index.json.
+- G3 scene_big: small whole scene -> climb <=2x per step (William: "6X disappoints usually") -> tiled img2img with
+  ControlNet tile (+ canny from the greybox) -> feathered merge -> seam scores. op tiles-demo.
+- G4 inpaint + scene_state: SetLatentNoiseMask with the job's own checkpoint (no new model/licence); mask from two
+  greyboxes (refused over 35 %); bit-identical outside the mask (tested); kit companions rebuilt only inside it.
+- G5 kit check (kit_check.bat); approve --set (CLI + dashboard) refuses on a fail.
+- G6 prompt library (games/<game>/prompts, placeholders only) expanded by submit and bakeoff submit; never.json with
+  the artist-named LoRA's two words (William's ruling: the LoRA may be used, the name and triggers never prompted).
+- G10/G11 brief missing (paint_missing.bat): one draft per missing painting, type by the facts; room families.
+- G7 facings_pack / anim_preview / turnaround_split; G8 credits; G9 dashboard Report link, kit colours, A/B, up next;
+  G12 nine_slice / button_states. op.bat runs every CPU tool directly.
+
+GPU proofs of G3/G4 are queued for William in night3_tests/run_night3_tests.bat (worker was stopped at 23:09).
+Wiring left for an empty queue: docs/WIRE_NIGHT_3.md. Hand-off: docs/HANDOFF_FORGE_NIGHT_3.md. Tests 106 -> 139.
+
+Night 3B: a hand-off folder for outside tools (G13) and a Filter Forge driver (G14)
+
+- G13 handoff out/in/tool (handoff_out.bat, handoff_in.bat, handoff_tool_add.bat): raw renders out to a folder with
+  a README, results matched back by job id (missing / extra / wrong-size named), filed as handoff_file or handoff_kit
+  jobs (the kit's companions rebuilt from the returned picture). Tool licences live in models/licences.json; approve
+  names every outside tool and asks for a missing licence; a tool's condition prints like a model's.
+- G14 filter_forge job type (filter_forge.bat, filter_forge_proof.bat): task XML from the renderer's own documented
+  vocabulary (a channel is a saved preset; seamless checked against the preset and measured; normals OpenGL, measured
+  against the height channel when there is one); filters used by path, never copied. Proven on the worker: Wet Stone
+  at 1024 in 6 s. Finding: its "seamless" output has a wrap seam.
+- .gitignore: /*.exe and *.ffxml (the Filter Forge installers were in the repo root; push.bat runs git add -A).
+- Plug-ins only while the bake-off ran; nothing the worker reloads was edited. Hand-off: docs/HANDOFF_FORGE_NIGHT_3B.md.
+  Tests 139 -> 155.
+
+Worker idle-gap fix (forge/queue.py run_worker): accept() called the reloading handler factory once per pending
+file on every claim, so with 3,250 jobs queued the worker sat ~16 s between renders reloading plug-ins. The handler
+map is now loaded once per claim cycle (code fixes still picked up before every claim). SPRITE_1_START.bat requeues
+an interrupted job before starting the worker, so it doubles as the restart.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+---
+
+Sprite-only sampler bake-off (SPRITE_1/2/3 .bat)
+
+William, 2026-11-10: sprites are the biggest art risk (faces and eyes go wrong on ~90%-good renders); samplers matter,
+so sweep them. New: a `samplers` axis for bake-off suites — every category runs once per sampler entry with that
+sampler's OWN steps/cfg/scheduler (and `evals` for the time estimate); filed as "<category>-<label>" so the across
+grids become checkpoint x sampler per LoRA and seed. sdxl_graph now accepts every sampler/scheduler ComfyUI 0.44
+offers. Model scan now also covers model_dirs.diffusion_models (klein 4B and schnell were invisible to it).
+Suites: sprite_samplers_v1 (SDXL, 14 samplers, ~3,220 renders), sprite_samplers_klein_v1, sprite_samplers_schnell_v1
+(commercial-OK FLUX only). Queued directly (old bake-off parked in jobs/paused/); William runs SPRITE_1_START.bat (worker), SPRITE_2_LOOK.bat
+(reports + eta, any time), SPRITE_3_FINISHED.bat (resume the old bake-off).
+
+Worker idle-gap fix (forge/queue.py run_worker): accept() called the reloading handler factory once per pending
+file on every claim, so with 3,250 jobs queued the worker sat ~16 s between renders reloading plug-ins. The handler
+map is now loaded once per claim cycle (code fixes still picked up before every claim). SPRITE_1_START.bat requeues
+an interrupted job before starting the worker, so it doubles as the restart.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Sprite run v2 (William 02:25-02:30): his prompt prefix "8k, High definition highly detailed, Perfect violet eyes, Violet
+Purple and cobalt Blue Balayage" (v1's "solar panel" wording drew literal panels); canon nuclear core + trefoil and
+holster. Suites: sprite_samplers_v2 (SDXL minus tile/map/icon/level LoRAs, the icon checkpoint, mislabelled FLUX/MOSS
+LoRAs and banned Krea 2), sprite_samplers_klein_v2, sprite_flux1_v2 (every FLUX.1 model incl. non-commercial dev ones -
+bake-off only - with the FLUX.1 LoRAs that apply), and an extra Pre-Raphaelite Guardian set (guardian_prerap_v1 /
+_flux_v1 / _klein_v1). v1's unrun jobs moved to jobs/_cancelled_sprite_v1/; its 53 renders kept as the before-picture.
+
+

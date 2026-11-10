@@ -40,3 +40,9 @@ jobs/paused/*
 # hand-over folder for files written by an assistant session
 _incoming/
 out/_ui_thumbs/
+
+# installers and licensed third-party files: never pushed (2026-11-10, Night 3B).
+# The Filter Forge installers were sitting in the repo root; push.bat runs `git add -A`. Filters (.ffxml) may not be
+# redistributed (Filter Forge EULA) - the forge stores paths to them, never copies.
+/*.exe
+*.ffxml

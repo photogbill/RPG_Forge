@@ -1,9 +1,9 @@
-# Hand-off — RPG_Forge, 2026-11-09 session 2 (Opus: N1–N9)
+# Hand-off — RPG_Forge, 2026-11-09 session 2 (Opus: N1–N9; N8 built, then cut)
 
 Plan: `docs/ROADMAP_NIGHT_2.md §2b`. **Tests: 64 → 98, all green** (`python -m pytest`; the GPU paths are tested against a
 fake ComfyUI). **The tools test (`tools_v1`) ran on the real GPU first: 13 of 13 done, 0 failed** — nothing from last
 session needed fixing. The queue was empty after it, so everything below is **wired into the live handlers** (no stubs
-except where noted). GPU proof of N1–N3 and N8: see "Proven on the GPU" at the end.
+except where noted). GPU proof of N1–N3: see "Proven on the GPU" at the end.
 
 ## Contract note (read first — for the game session)
 
@@ -24,7 +24,7 @@ mid plane this alpha. Nothing breaks if the game ignores it. The `_slide.png` pr
 | **N5** no double runs | `bakeoff submit` skips cells (suite · category · prompt · checkpoint · LoRA · seed · type · tool fields) already done/pending/running/paused; failed cells re-queue; `--force`. `submit --skip-done` for plain batches. `bakeoff_tonight.bat` submits the tools test with `--skip-done` and ends with `eta` | `forge/dedupe.py`, `forge/eta.py`, `eta.bat` |
 | **N6** detail crops | `bakeoff report <suite> --detail-at <prompt>=x,y[,size]` (saved, kept by later reports) and `--detail-auto` (largest face via Impact Pack nodes, only if ComfyUI is up; manual wins) | `forge/detail.py` |
 | **N7** dashboard | `ui.bat` → http://127.0.0.1:8765: counts, ETA, rendering now, batch bars, newest pictures (licence border, job-type edge, click to zoom), failed jobs + Retry, Pause/Resume, Approve (dry run → Confirm; set approval when the job is a scene_kit; refusals in plain words; licence conditions shown). Stdlib only, 127.0.0.1, POSTs need `X-Forge: 1`; every action logged | `forge/ui.py` |
-| **N8** Krea 2 | graph read from ComfyUI 0.44's own Krea 2 source (UNETLoader + CLIPLoader type `krea2` + `qwen_image_vae` + EmptySD3LatentImage, er_sde/simple; INT8-ConvRot loads natively, no custom node). Registry: Krea 2 Turbo/Raw (commercial OK, `licence_condition` revenue < US$1M), Qwen3-VL-4B text encoder, Qwen-Image VAE. `approve` / `licences` / the dashboard print the condition. `doctor` → `krea2: OK` or exactly what is missing. Suite `krea2_v1` (40 renders, ~1.5 h, both Turbo and Raw settings) — **not submitted** | `forge/engines/krea2_graph.py`, `models/models.json`, `forge.json comfy.krea2` |
+| **N8** Krea 2 | **CUT** (William, 2026-11-09): built and tested, then removed when the Stable Yogi fine-tune's "commercial use by permission only" came up — "if Krea 2 has that license, we won't use it period". Removed: the graph, its wiring, the doctor check, the registry entries, forge.json `comfy.krea2`, the krea2_v1 suite. Kept: generic `licence_condition` printing in `approve` / `licences`; the scanner's Krea 2 detection (so `models unusable` names Krea files for deletion). Note for the record: the Krea 2 *base* licence (Community License v1) differs from the fine-tune's — commercial use allowed under US$1M/year revenue | — |
 | **N9** small things | (a) `licence.bat` with no arguments asks one question at a time, offering the unknown-licence models; (b) `doctor` lists every model with no licence that a job used; (c) `models unusable` → `out/unusable_models.md` (report only); (d) `review` shows the detail crop beside the thumbnail; (e) `bakeoff_tonight.bat` prints the total and an ETA | `forge/cli.py`, `forge/doctor.py`, `forge/model_report.py`, `forge/review.py` |
 | fixes | `test_doctor_shapes_and_queue` used the real model folders (failed once William pulled the models); the scanner called FLUX.2 klein and FLUX.3 files "flux1" (now uses ComfyUI's own detection keys) and did not know Krea 2 | `tests/test_manifest.py`, `forge/ops/safetensors_meta.py` |
 
@@ -36,14 +36,12 @@ mid plane this alpha. Nothing breaks if the game ignores it. The `_slide.png` pr
 - `eta.bat` — how long the queue will take
 - `bakeoff_tonight.bat` twice — the second run queues 0 new
 - `python -m forge bakeoff report finish_v1 --detail-auto` (ComfyUI running) or `--detail-at juke_joint=0.4,0.35`
-- `pull_model.bat qwen-image-vae`, then `doctor.bat` → `krea2: OK`; `python -m forge bakeoff plan games\turing_accords\bakeoff\krea2_v1.json`
 - `python -m forge models unusable` · `licence.bat` (no arguments)
 
 ## What William needs to know
 
-1. **Stable Yogi's Krea 2 fine-tune: "commercial use by permission only"** (written in the file itself, with "no
-   merging"). It's fine for bake-offs; nothing it makes can ship unless he grants permission. Its licence is not recorded,
-   so `approve` refuses it. The Krea 2 **base** models (Comfy-Org/Krea-2) are commercial-OK under US$1M/year revenue.
+1. **Krea 2 is out of the forge.** The Stable Yogi checkpoint was deleted; `cinematicFantasy_v1.safetensors` (a
+   Krea 2 LoRA, 0.2 GB) is still in `lora models\` with nothing that can use it — `models unusable` lists it.
 2. **`models unusable`:** 6 files no graph can run (21.9 GB: the MOSS files, the FLUX.3 klein, two LoRAs whose
    architecture the scanner can't read); 3 non-commercial by their names (FLUX.1 dev derivatives, the 9B klein — 47 GB,
    experiments only); 30 still need a licence check. Nothing was deleted.
@@ -59,3 +57,22 @@ mid plane this alpha. Nothing breaks if the game ignores it. The `_slide.png` pr
 
 - `scene_layers` `fill: "inpaint"` (GPU inpaint of the back plane) — falls back to `extend` with a note.
 - F12 (turnaround → rig), F13 (MOSS-Image — licence still unknown), F14 (IP-Adapter) — unchanged, still P2.
+
+## Proven on the GPU (batch `night3_checks`, after the worker restart)
+
+| Check | Result |
+|---|---|
+| c1 depth + normals (gas station) | 16-bit depth 1920×1080, white = near (bottom 10 % ≈ 0.83, top ≈ 0.0; ~50 000 levels); normals from depth vs luminance on one sheet |
+| c2 layers (street 2560×1080) | auto cuts 0.19 / 0.53; back 2656×1080 (overscan 48), over RGBA; slide preview: no holes |
+| c3 `scene_kit` (gas station) | all six slot files, painting 1920×1080, `_back` 2016×1080; licence chain ArtUniverse + RealESRGAN + Depth Anything V2 Small, commercial OK |
+
+Two fixes came out of looking at it (both in `forge/ops/depth.py`, tested): **de-banding** — ComfyUI saves depth as
+8-bit, so floors arrive as terraces that printed as contour lines in the normals; a blur of ≥ 3 px (at 1080p, scaled)
+now runs before the gradient. **`flatten`** (default 0.85) — a receding floor read as one big slope; the depth's trend up
+the screen is removed only where a pixel is ground, so upright objects keep their shape and nothing gets a halo.
+Side by side: `out/_tests/flatten_compare_v5.png`. Whether 0.85 or 0 looks better under real lights is Fable's / William's
+eye in Godot — reflections on wet ground show as soft bumps either way (that is the depth model reading the reflection).
+
+`approve --set --dry-run` could not be proven from the Linux VM (it cannot resolve `D:\` paths and the game folder is not
+connected); run `approve.bat 20261109-205640-c3_n3_kit_gas_station-f6be scenes/bills_house --set --dry-run` on the PC
+(after `wanted.bat --refresh`) — a dry run copies nothing.

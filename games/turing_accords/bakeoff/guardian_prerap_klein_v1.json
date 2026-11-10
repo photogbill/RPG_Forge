@@ -1,0 +1,85 @@
+{
+ "suite": "guardian_prerap_klein_v1",
+ "game": "turing_accords",
+ "_comment": "EXTRA set: the Pre-Raphaelite Guardian on FLUX.2 klein 4B base + distilled, five samplers.",
+ "graph": "flux2_klein",
+ "base_override": "flux2",
+ "checkpoint_kinds": [
+  "unet",
+  "unknown",
+  "checkpoint"
+ ],
+ "checkpoints": "*",
+ "loras": [],
+ "include_no_lora": true,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "checkpoint_dirs": [
+  "flux_models",
+  "models/diffusion_models"
+ ],
+ "checkpoint_include": "klein",
+ "checkpoint_exclude": "flux3|9b|vae|clip|t5|qwen",
+ "seeds": [
+  24101,
+  77213
+ ],
+ "size": [
+  832,
+  1216
+ ],
+ "steps": null,
+ "cfg": null,
+ "sampler": "euler",
+ "scheduler": "simple",
+ "seconds_per_render": 20.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery, solar panel, machinery, props, objects beside her, swimsuit, bare legs",
+ "job": {
+  "priority": 48
+ },
+ "samplers": [
+  {
+   "label": "euler",
+   "sampler": "euler",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "eulera",
+   "sampler": "euler_ancestral",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "dpmpp2m",
+   "sampler": "dpmpp_2m",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "resms",
+   "sampler": "res_multistep",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "unipc",
+   "sampler": "uni_pc",
+   "scheduler": "simple",
+   "evals": 25
+  }
+ ],
+ "categories": {
+  "guardian": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah_guardian": "8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage, Pre-Raphaelite painting, full body game character sprite of a slender young woman who appears twenty-five, the Guardian: healer and protector, standing calmly facing the viewer, hands low and open, head very slightly bowed, serene gentle expression with the faintest smile, whole figure from head to boots in frame, long hair worn down loose and straight past the shoulder blades, fine-boned oval face, fair skin, matte black tactical bodysuit with armor plates at the forearms and shoulders, the violet nuclear core with a radiation trefoil glowing soft and steady in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, even soft light, flat plain white background"
+   }
+  }
+ }
+}

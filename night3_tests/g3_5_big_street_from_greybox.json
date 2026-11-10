@@ -1,0 +1,26 @@
+{
+ "type": "scene_big",
+ "name": "g3_5_big_street_from_greybox",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "prompt": "a small-town main street at dusk, brick storefronts, lit shop windows, wet asphalt, test picture",
+ "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+ "init": "night3_tests/inputs/street_greybox_3072x1536.png",
+ "size": [
+  1536,
+  768
+ ],
+ "init_denoise": 0.7,
+ "target": [
+  3072,
+  1536
+ ],
+ "tile": [
+  1344,
+  768
+ ],
+ "overlap": 128,
+ "denoise": 0.3,
+ "seed": 1001
+}

@@ -215,9 +215,6 @@ def build_graph(ctx: Context, job: dict, w: int, h: int, seed: int, count: int |
                                   distilled=bool(distilled), weight_dtype=wdt)
         graph_name, extra = "flux2_graph", {"text_encoder": text_encoder, "vae": vae, "distilled": bool(distilled), "weight_dtype": wdt}
         sampler, scheduler = str(job.get("sampler") or "euler"), "flux2"
-    elif graph_kind == "krea2":
-        from ..engines import krea2_graph
-        graph, graph_name, extra, steps, cfg, sampler, scheduler = krea2_graph.from_job(comfy_cfg, job, ckpt, prompt, neg, seed, int(w), int(h), loras)
     elif graph_kind == "flux1":
         fx = comfy_cfg.get("flux1", {})
         steps = int(job["steps"]) if job.get("steps") is not None else (4 if flux1_graph.is_schnell(ckpt) else 20)

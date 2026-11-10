@@ -211,3 +211,14 @@ def test_scene_kit_end_to_end_six_files(tmp_path):
     roles = {l["role"] for l in prov["licences"]}
     assert {"checkpoint", "upscaler", "depth_model"} <= roles and prov["set"] is True
     assert prov["commercial_ok"] is True and (tmp_path / "contact.png").exists() and (tmp_path / "layers.json").exists()
+
+
+def test_flatten_stops_a_receding_floor_reading_as_a_slope():
+    h, w = 270, 480
+    yy = np.mgrid[0:h, 0:w][0] / h
+    d = (0.1 + 0.8 * yy).astype(np.float32)
+    d[150:220, 100:200] += 0.1
+    raw = dp.decode_normals(dp.normals_from_depth(d, flatten=0.0))
+    flat = dp.decode_normals(dp.normals_from_depth(d, flatten=0.85))
+    assert flat[40:120, 300:450, 2].mean() > 0.99 > raw[40:120, 300:450, 2].mean()
+    assert np.abs(flat[148:152, 120:180, 1]).max() > 0.5            # the box's top edge still catches the light

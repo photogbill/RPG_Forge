@@ -1,0 +1,85 @@
+{
+ "suite": "sprite_samplers_klein_v2",
+ "game": "turing_accords",
+ "_comment": "v2 (William, 2026-11-10 02:25): his prompt prefix '8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage' replaces the 'solar panel' wording (v1 drew literal solar panels); canon nuclear core + trefoil and holster added; tile/map/icon/level LoRAs, the icon checkpoint, FLUX/MOSS/unknown LoRAs mislabelled as SDXL, and the banned Krea 2 cinematicFantasy are skipped. v1's 53 finished renders stay as the before-picture. Same Sarah sprite on FLUX.2 [klein] 4B base + distilled (Apache-2.0; the non-commercial 9B is excluded) x the five samplers the klein graph supports; steps/cfg stay each model's own (base 20/5, distilled 4/1).",
+ "graph": "flux2_klein",
+ "base_override": "flux2",
+ "checkpoint_kinds": [
+  "unet",
+  "unknown",
+  "checkpoint"
+ ],
+ "checkpoints": "*",
+ "loras": [],
+ "include_no_lora": true,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "checkpoint_dirs": [
+  "flux_models",
+  "models/diffusion_models"
+ ],
+ "checkpoint_include": "klein",
+ "checkpoint_exclude": "flux3|9b|vae|clip|t5|qwen",
+ "seeds": [
+  24101,
+  77213
+ ],
+ "size": [
+  832,
+  1216
+ ],
+ "steps": null,
+ "cfg": null,
+ "sampler": "euler",
+ "scheduler": "simple",
+ "seconds_per_render": 20.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery, solar panel, machinery, props, objects beside her, swimsuit, bare legs",
+ "job": {
+  "priority": 59
+ },
+ "samplers": [
+  {
+   "label": "euler",
+   "sampler": "euler",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "eulera",
+   "sampler": "euler_ancestral",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "dpmpp2m",
+   "sampler": "dpmpp_2m",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "resms",
+   "sampler": "res_multistep",
+   "scheduler": "simple",
+   "evals": 25
+  },
+  {
+   "label": "unipc",
+   "sampler": "uni_pc",
+   "scheduler": "simple",
+   "evals": 25
+  }
+ ],
+ "categories": {
+  "sprite": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  }
+ }
+}

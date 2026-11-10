@@ -76,12 +76,47 @@ def _height_normals(h: np.ndarray, strength: float, smooth: float, invert_y: boo
 # depth maps are smooth: their per-pixel gradient is ~1/size of a luminance edge's. This scale makes `strength`
 # mean roughly the same thing for both sources at 1080p and keeps it resolution-independent.
 DEPTH_REFERENCE_PX = 1080.0
+DEBAND_PX = 3.0            # minimum blur (px at 1080p) before the depth gradient — removes 8-bit terracing
 
 
-def normals_from_depth(depth: np.ndarray, strength: float = 2.0, smooth: float = 1.5, invert_y: bool = False) -> Image.Image:
-    """Tangent-space normals from a depth map (white = near), OpenGL convention."""
+def _median1d(v: np.ndarray, win: int) -> np.ndarray:
+    r = max(1, win // 2)
+    p = np.pad(v, r, mode="edge")
+    return np.median(np.lib.stride_tricks.sliding_window_view(p, 2 * r + 1), axis=-1).astype(np.float32)
+
+
+def depth_trend(depth: np.ndarray, percentile: float = 25.0, win_frac: float = 0.06) -> np.ndarray:
+    """The slow trend of a depth map *up the screen*: each row's background level (a low percentile, so objects
+    standing in the row do not pull it up), cleaned with a sliding median over ~6% of the height (it removes
+    row-to-row noise, which would otherwise show as stripes, and keeps the sharp step at the horizon), then a
+    whisper of blur. Broadcast across each row: nothing is blurred sideways, so big objects get no halo."""
+    h, w = depth.shape
+    rows = np.percentile(depth, percentile, axis=1).astype(np.float32)
+    rows = _median1d(rows, max(3, int(win_frac * h)))
+    rows = blur(rows[:, None], 1.0)[:, 0]
+    return np.repeat(rows[:, None], w, axis=1)
+
+
+def normals_from_depth(depth: np.ndarray, strength: float = 2.0, smooth: float = 1.5, invert_y: bool = False,
+                       flatten: float = 0.85) -> Image.Image:
+    """Tangent-space normals from a depth map (white = near), OpenGL convention.
+    `flatten` (0..1) removes that much of the depth's trend up the screen first (`depth_trend`): a floor or a road that
+    recedes from the camera has a steady depth ramp, which raw depth-as-height reads as one big tilted surface;
+    flattening keeps object edges and local shape and leaves the floor facing the viewer. 0 = the raw depth gradient."""
+    d = depth.astype(np.float32)
+    f = float(np.clip(flatten, 0.0, 1.0))
+    if f > 0:
+        trend = depth_trend(d)
+        # only where a pixel IS the background (depth within ~5% of its row's level): an upright object keeps its raw
+        # depth, so it neither leans back with the floor's ramp nor tips the other way once the ramp is removed
+        ground = np.clip(1.0 - (d - trend) / 0.05, 0.0, 1.0)
+        ground = np.clip(blur(ground, 1.5), 0.0, 1.0)
+        d = d - f * trend * ground
     scale = max(depth.shape) / DEPTH_REFERENCE_PX * 24.0
-    nx, ny, nz = _height_normals(depth.astype(np.float32), float(strength) * scale, smooth, invert_y)
+    # ComfyUI saves the depth preprocessor's output as 8-bit, so a smooth floor arrives as terraces one grey level
+    # apart; their edges would print as contour lines/stripes in the normals. Blur at least this much first.
+    deband = DEBAND_PX * max(depth.shape) / DEPTH_REFERENCE_PX
+    nx, ny, nz = _height_normals(d, float(strength) * scale, max(float(smooth), deband), invert_y)
     return _encode(nx, ny, nz)
 
 
@@ -104,7 +139,7 @@ def blend_detail(base: Image.Image, detail: Image.Image, amount: float) -> Image
 
 
 def normal_map(img: Image.Image, *, source: str = "luminance", depth: np.ndarray | None = None, strength: float = 2.0,
-               smooth: float = 1.0, detail: float = 0.0, invert_y: bool = False) -> Image.Image:
+               smooth: float = 1.0, detail: float = 0.0, invert_y: bool = False, flatten: float = 0.85) -> Image.Image:
     """The N1 `normal_map`: source "luminance" (F11's behaviour, unchanged) or "depth" (needs `depth`, same size
     as img), optionally with `detail` of the luminance normals blended back in."""
     if source == "luminance":
@@ -115,7 +150,7 @@ def normal_map(img: Image.Image, *, source: str = "luminance", depth: np.ndarray
         raise ValueError("normal_map source 'depth' needs a depth map (job field `depth`)")
     if (depth.shape[1], depth.shape[0]) != img.size:
         raise ValueError(f"depth is {depth.shape[1]}x{depth.shape[0]} but the painting is {img.size[0]}x{img.size[1]}")
-    n = normals_from_depth(depth, strength, max(smooth, 0.0), invert_y)
+    n = normals_from_depth(depth, strength, max(smooth, 0.0), invert_y, flatten)
     if detail > 0:
         n = blend_detail(n, normals_from_luminance(img, 2.0, 1.0, invert_y), detail)
     return n

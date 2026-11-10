@@ -1,0 +1,35 @@
+{
+ "graph": "flux1",
+ "guidance": 3.5,
+ "type": "render",
+ "game": "turing_accords",
+ "name": "sprite-dpmpp2m_sarah_flux1-schnell-fp8-e4m3fn_nolora_24101",
+ "batch": "bakeoff/sprite_samplers_schnell_v1",
+ "prompt": "full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, iridescent hair shifting between magenta-violet and cobalt blue like the surface of a solar panel, fine cell-grid sheen, violet eyes, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with a small glowing violet core set in a chest plate at the sternum, flat black boots, clean readable silhouette, even soft studio light, flat plain white background",
+ "negative": "",
+ "checkpoint": "flux1-schnell-fp8-e4m3fn.safetensors",
+ "loras": [],
+ "seed": 24101,
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 4,
+ "cfg": 1.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "simple",
+ "style_prefix": "",
+ "priority": 48,
+ "meta": {
+  "suite": "sprite_samplers_schnell_v1",
+  "category": "sprite-dpmpp2m",
+  "prompt_id": "sarah",
+  "checkpoint": "flux1-schnell-fp8-e4m3fn.safetensors",
+  "lora": null,
+  "seed": 24101,
+  "trigger": "",
+  "sampler": "dpmpp2m"
+ },
+ "id": "20261110-064250-sprite-dpmpp2m_sarah_flux1-schnell-fp8-e4m3fn_no-7599",
+ "submitted_at": "2026-11-10T06:42:50"
+}

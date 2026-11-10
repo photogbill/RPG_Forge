@@ -27,9 +27,18 @@
   approve <job-id> --as scenes/<map> --set [--dry-run]   a scene_kit's six files as one set (all or nothing)
   licences                               the licence chain of every approved asset → out/licences_<game>.md
   review <suite-or-batch> [--by category|model|type] [--thumb N]   labelled sheets + index.html with ratings export
+  review <suite-or-batch> --compact [--prompt P] | --pairs A,B | --family <template>   ≤12-cell labelled sheets + review_index.json
   rate <suite-or-batch> --import <ratings.json>                    merge the ratings the review page exported
+  brief missing [--no-refresh]           one draft job per missing painting, type chosen by the facts; room families
   brief maps|sleeves|icons               write an editable batch draft from the game's data (games/<game>/batches/draft_*.json)
   docs                                   regenerate docs/JOB_TYPES.md from the schema
+  kit check <job-id> [--map <id>]        is this scene kit safe to approve? pass/warn/fail + check.png (approve --set runs it)
+  op <name> …                            CPU ops as direct commands: tiles-demo, state-mask, … (python -m forge op)
+  prompts list|show|where-used|check|ab   the prompt library: {{block}} references expanded by submit; the never-list
+  credits                                every model that touched a shipped pixel → out/reports/CREDITS_MODELS.md
+  report night [--since T] [--hours 12]  the morning report: what ran, failed, how long → out/reports/ (night_report.bat)
+  handoff out|in|tool …                  hand pictures to an outside tool (a folder) and file what comes back (handoff_out/in.bat)
+  filter-forge list|presets|check|task   Filter Forge's filters, presets and task XML (the filter_forge job type)
   doctor                                 check Python, Pillow, numpy, ComfyUI, GPU, graph nodes, queued models
   (most commands take --game <name>; default turing_accords)
 """
@@ -58,15 +67,35 @@ def cmd_submit(cfg: dict, args: list[str]) -> int:
             data = json.load(f)
         if isinstance(data, dict) and data.get("_draft"):
             print(f"{p.name}: is a DRAFT (made by `brief`) — edit the prompts, delete the \"_draft\" line, then submit"); return 2
+        # Night 3 (G6): expand {{block}} references from the prompt library and check the never-list — the worker
+        # only ever sees plain text; a typo or a never-list word refuses the whole file before anything is queued
+        from . import prompts as _pl
+        try:
+            if isinstance(data, dict) and "jobs" in data:
+                _d = data.get("defaults", {})
+                data = {**data, "defaults": {}, "jobs": _pl.prepare(cfg, [{**_d, **j} for j in data["jobs"]], data.get("game") or _d.get("game"))}
+            elif isinstance(data, dict):
+                data = _pl.prepare(cfg, [data])[0]
+        except _pl.PromptError as e:
+            print(f"{p.name}: refused — {e}"); return 2
         if isinstance(data, dict) and "jobs" in data:
             note = ""
+            if "--skip-done" in args and any(j.get("prompt_blocks") for j in data["jobs"]):
+                lib_jobs = [{**j, **({"batch": j.get("batch") or data["batch"]} if data.get("batch") else {})} for j in data["jobs"] if j.get("prompt_blocks")]
+                other = [j for j in data["jobs"] if not j.get("prompt_blocks")]
+                lib_keep, n_same = _pl.filter_changed(cfg, lib_jobs)
+                if n_same:
+                    note += f"  skipped {n_same} whose expanded prompt is unchanged"
+            else:
+                lib_keep, other = [], data["jobs"]
             if "--skip-done" in args:
+                data = {**data, "jobs": other}
                 from . import dedupe
                 defaults = data.get("defaults", {})
                 full = [{**defaults, **j, **({"batch": j.get("batch") or data["batch"]} if data.get("batch") else {})} for j in data["jobs"]]
                 keep, skipped = dedupe.filter_new(cfg, full)
-                data = {**data, "jobs": keep, "defaults": {}}
-                note = ("  " + dedupe.describe(skipped)) if skipped else ""
+                data = {**data, "jobs": keep + lib_keep, "defaults": {}}
+                note += ("  " + dedupe.describe(skipped)) if skipped else ""
             ids = q.submit_batch(data)
             print(f"{p.name}: queued {len(ids)} jobs" + (f" (batch '{data.get('batch')}')" if data.get("batch") else "") + note)
             total += len(ids)
@@ -372,6 +401,12 @@ def cmd_doctor(cfg: dict, args: list[str]) -> int:
     from . import doctor
     for line in doctor.report(cfg, c):
         print(line)
+    try:                                              # Night 3B (G14): optional outside renderer
+        from .night3b import ffdriver
+        for line in ffdriver.doctor_lines(cfg):
+            print(line)
+    except Exception as e:  # noqa: BLE001 - doctor must always finish
+        print(f"· Filter Forge check failed: {e}")
     return 0
 
 
@@ -444,7 +479,20 @@ def cmd_approve(cfg: dict, args: list[str]) -> int:
     if not pos or not name:
         print("usage: approve <job-id> --as <wanted-name> [--file F | --pick N | --set] [--dry-run] [--game G]"); return 2
     pick = _opt(args, "--pick")
+    from . import handoff as _ho                      # Night 3B (G13): outside tools — say which, ask for a missing licence
+    _ho.approve_preflight(cfg, pos[0])
     if "--set" in args:
+        # Night 3 (G5): a kit that fails `kit check` is not approved (a warning never stops it)
+        from . import kitcheck
+        kd = cfgmod.path_of(cfg, "out") / pos[0]
+        if kd.is_dir():
+            chk = kitcheck.check(cfg, kd, name.split("/")[-1], _opt(args, "--game") or "turing_accords")
+            bad = [l for l in chk["lines"] if l["status"] == "fail"]
+            for l in chk["lines"]:
+                if l["status"] != "pass":
+                    print(f"  kit check {l['status'].upper()}: {l['check']} — {l['message']}")
+            if bad:
+                print(f"✗ refused — kit check failed ({len(bad)} problem(s)); see {kd / 'check.png'}"); return 1
         try:
             r = manifest.approve_set(cfg, pos[0], name, game=_opt(args, "--game"), dry_run="--dry-run" in args)
         except (manifest.ApproveError, FileNotFoundError) as e:
@@ -494,6 +542,9 @@ def cmd_licences(cfg: dict, args: list[str]) -> int:
 
 def cmd_review(cfg: dict, args: list[str]) -> int:
     from . import review
+    if any(a in args for a in ("--compact", "--pairs", "--family")):
+        from .cli_night3 import cmd_review_compact      # Night 3 (G2/G11): sheets a model can read
+        return cmd_review_compact(cfg, args)
     pos = _positional(args, ("--by", "--thumb"))
     if not pos:
         print("usage: review <suite-or-batch> [--by category|model|type] [--thumb 256]"); return 2
@@ -522,6 +573,9 @@ def cmd_rate(cfg: dict, args: list[str]) -> int:
 
 def cmd_brief(cfg: dict, args: list[str]) -> int:
     from . import brief
+    if args and args[0] == "missing":                    # Night 3 (G10/G11): one draft for everything missing
+        from .cli_night3 import cmd_brief_missing
+        return cmd_brief_missing(cfg, args[1:])
     pos = _positional(args, ("--game",))
     if not pos or pos[0] not in brief.KINDS:
         print("usage: brief maps|sleeves|icons [--game G]"); return 2
@@ -588,6 +642,11 @@ def cmd_bakeoff(cfg: dict, args: list[str]) -> int:
                     continue
                 seen.add(sk["lora"])
                 print(f"  SKIP {sk['lora']}: {sk['reason']}")
+        from . import prompts as _pl                      # Night 3 (G6): blocks + never-list for bake-offs too
+        try:
+            p["jobs"] = _pl.prepare(cfg, p["jobs"], suite.get("game"))
+        except _pl.PromptError as e:
+            print(f"refused — {e}"); return 2
         new_jobs, skipped = p["jobs"], {}
         if "--force" not in args:
             from . import dedupe
@@ -641,6 +700,10 @@ COMMANDS = {
     "wanted": cmd_wanted, "approve": cmd_approve, "licences": cmd_licences, "review": cmd_review, "rate": cmd_rate,
     "brief": cmd_brief, "pause": cmd_pause, "resume": cmd_resume,
 }
+from .cli_night3 import COMMANDS as _NIGHT3   # Night 3: report, op, kit, prompts, credits … (forge/cli_night3.py)
+COMMANDS.update(_NIGHT3)
+from .cli_night3b import COMMANDS as _NIGHT3B  # Night 3B: handoff, filter-forge (forge/cli_night3b.py)
+COMMANDS.update(_NIGHT3B)
 
 
 def main(argv: list[str] | None = None) -> int:

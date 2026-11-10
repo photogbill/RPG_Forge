@@ -14,10 +14,11 @@ from pathlib import Path
 
 from . import config as cfgmod
 
-GRAPHS = {"sdxl": "sdxl", "flux1": "flux1", "flux2": "flux2_klein", "krea2": "krea2"}
+GRAPHS = {"sdxl": "sdxl", "flux1": "flux1", "flux2": "flux2_klein"}
 WHY_NOT = {"sd15": "SD 1.5 — the forge has no SD 1.5 graph (and SD 1.5 LoRAs do nothing on SDXL)",
            "sd15/sd2": "SD 1.x/2.x — no graph", "sd2": "SD 2 — no graph", "sd15 (by size)": "looks like SD 1.5 by size — no graph",
            "flux3": "FLUX.3 — the forge has no FLUX.3 graph yet",
+           "krea2": "Krea 2 — cut from the forge (William, 2026-11-09: licence)",
            "unknown": "architecture not recognised from the file header"}
 HELPER_HINTS = ("vae", "qwen3vl", "qwen_3", "t5xxl", "clip_l", "text_encoder", "umt5")
 

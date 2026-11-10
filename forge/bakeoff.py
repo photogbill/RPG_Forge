@@ -20,7 +20,14 @@ A suite (games/<game>/bakeoff/*.json):
      "checkpoint_dirs": ["flux_models"], "base_filter": "flux1",                    # discover checkpoints by folder / architecture instead of listing them
      "lora_base_filter": "flux1", "cfg_by_name": {"dedistill": 3.5},               # LoRAs by architecture; per-model overrides by a name substring
      "lora_checkpoint_filter": "marduk",                                            # apply LoRAs only on checkpoints matching this regex
-     "categories": {"portrait": {"size": [832, 1216], "prompts": {"sarah": "..."}}, ...}}
+     "categories": {"portrait": {"size": [832, 1216], "prompts": {"sarah": "..."}}, ...},
+     "samplers": [{"label": "dpmpp2m-karras", "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 28, "cfg": 6.0,
+                   "evals": 28}, ...]}                                           # optional sampler axis (below)
+
+A suite with `samplers` runs every category once per sampler entry, each with its OWN steps / cfg / scheduler (samplers
+converge at very different step counts; `evals` = model calls per image, for the time estimate — 2× steps for heun,
+dpm_2, dpmpp_sde, dpmpp_2s_ancestral). The category is filed as "<category>-<label>", so the report's across grids
+(rows checkpoints, columns categories) become checkpoint × sampler for each LoRA and seed.
 
 A category normally queues raw `render` jobs. It can queue one of the forge's *tools* instead, so a suite can compare
 what a finishing chain does on each model (same seed, same prompt, only the treatment changes):
@@ -63,7 +70,14 @@ def inventory(cfg: dict, refresh: bool = False) -> list[dict]:
     if inv_path.exists() and not refresh:
         with open(inv_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    recs = sm.scan(cfgmod.model_dirs(cfg, "checkpoints") + cfgmod.model_dirs(cfg, "loras"))
+    # diffusion_models too: FLUX.2 klein and FLUX.1 schnell live in models/diffusion_models, which the checkpoint
+    # folders do not cover (found 2026-11-10 — the klein suites planned 0 jobs). Folders listed twice are scanned once.
+    dirs: list = []
+    for d in (cfgmod.model_dirs(cfg, "checkpoints") + cfgmod.model_dirs(cfg, "diffusion_models")
+              + cfgmod.model_dirs(cfg, "loras")):
+        if str(d).lower() not in {str(x).lower() for x in dirs}:
+            dirs.append(d)
+    recs = sm.scan(dirs)
     inv_path.parent.mkdir(parents=True, exist_ok=True)
     with open(inv_path, "w", encoding="utf-8") as f:
         json.dump(recs, f, indent=1, ensure_ascii=False)
@@ -152,12 +166,16 @@ def plan(suite: dict, inv: list[dict], cfg: dict) -> dict:
                 skipped.append({"checkpoint": ck, "lora": lo, "reason": f"{lo_base} LoRA on a {ck_base} checkpoint — ComfyUI would silently ignore it"})
                 continue
             combos.append((lo, [{"name": lo, "strength": strength, "clip": strength}]))
-        for lo, chain in combos:
-            for cat, cdef in suite.get("categories", {}).items():
+        sampler_axis = suite.get("samplers") or [None]
+        for lo, chain, smp, (cat0, cdef) in ((lo, chain, smp, cc) for lo, chain in combos for smp in sampler_axis
+                                             for cc in suite.get("categories", {}).items()):
+            for cat in [f"{cat0}-{smp['label']}" if smp else cat0]:
                 jtype = str(cdef.get("type") or suite.get("job_type") or "render")
                 jfields = {**(suite.get("job") or {}), **(cdef.get("job") or {})}
                 crop = cdef.get("detail_crop", suite.get("detail_crop"))
                 cat_secs = float(cdef.get("seconds_per_render", suite.get("seconds_per_render", 9.0)))
+                if smp:   # seconds_per_render is quoted for 25 model calls; scale by this sampler's calls
+                    cat_secs = cat_secs * float(smp.get("evals") or smp.get("steps") or 25) / 25.0
                 cat_loras = cdef.get("lora_filter")
                 if cat_loras and lo is not None and not re.search(cat_loras, lo, re.I):
                     continue
@@ -196,10 +214,13 @@ def plan(suite: dict, inv: list[dict], cfg: dict) -> dict:
                             "cfg": extra.get("cfg", (float(suite["cfg"]) if suite.get("cfg") is not None else (6.0 if graph == "sdxl" else None))),
                             "sampler": suite.get("sampler", "dpmpp_2m" if graph == "sdxl" else "euler"),
                             "scheduler": suite.get("scheduler", "karras" if graph == "sdxl" else "simple"),
+                            **({k: smp[k] for k in ("sampler", "scheduler", "steps", "cfg") if smp.get(k) is not None}
+                               if smp else {}),
                             "style_prefix": "",   # bake-offs test the model, not the house style
                             **jfields,            # a tool's own fields (target, refine, face_fix, control …) win
                             "meta": {"suite": suite["suite"], "category": cat, "prompt_id": pid, "checkpoint": ck,
-                                     "lora": lo, "seed": int(seed), "trigger": trig, **meta_extra},
+                                     "lora": lo, "seed": int(seed), "trigger": trig, **meta_extra,
+                                     **({"sampler": smp["label"]} if smp else {})},
                         })
     return {"suite": suite["suite"], "checkpoints": ck_names, "loras": lo_names, "triggers": {k: triggers[k] for k in lo_names},
             "jobs": jobs, "skipped": skipped,

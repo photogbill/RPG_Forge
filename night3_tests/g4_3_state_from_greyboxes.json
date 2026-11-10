@@ -1,0 +1,14 @@
+{
+ "type": "scene_state",
+ "name": "g4_3_state_from_greyboxes",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "base": "out/20261109-205640-c3_n3_kit_gas_station-f6be",
+ "greybox_base": "night3_tests/inputs/greybox_base.png",
+ "greybox_state": "night3_tests/inputs/greybox_state.png",
+ "prompt": "a tall dark metal cabinet, test picture",
+ "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+ "seed": 1001,
+ "denoise": 0.9
+}

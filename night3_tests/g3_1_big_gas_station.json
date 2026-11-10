@@ -1,0 +1,22 @@
+{
+ "type": "scene_big",
+ "name": "g3_1_big_gas_station",
+ "batch": "night3_proof",
+ "priority": 10,
+ "game": "turing_accords",
+ "prompt": "a roadside gas station in the desert at dusk, two pumps under a humming canopy light, wet asphalt after rain, a dusty sedan at the pump, mountains behind",
+ "negative": null,
+ "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+ "source": "out/20261109-205640-c3_n3_kit_gas_station-f6be/scene.png",
+ "target": [
+  3840,
+  2160
+ ],
+ "tile": [
+  1536,
+  1152
+ ],
+ "overlap": 128,
+ "denoise": 0.3,
+ "seed": 1001
+}

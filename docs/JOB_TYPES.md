@@ -156,11 +156,11 @@ Optional (default): `low` (0.08), `high` (0.2), `sigma` (1.2)
 
 ## `normal_map`  (CPU)
 
-A tangent-space normal map for the game's `<id>_n.png` slot, OpenGL convention (Godot). `source` 'luminance' (F11: height = brightness) or 'depth' (N1: from a depth map — `depth` is one path per input; `detail` 0..1 blends the luminance normals back in for brush texture; `smooth` (default 1.0) blurs the height first; Output: <name>_n.png, <name>_lit.png (a lit-from-the-left preview), contact.png (with source 'depth', both kinds side by side unless `compare` is false).
+A tangent-space normal map for the game's `<id>_n.png` slot, OpenGL convention (Godot). `source` 'luminance' (F11: height = brightness) or 'depth' (N1: from a depth map — `depth` is one path per input; `detail` 0..1 blends the luminance normals back in for brush texture; `flatten` 0..1 (default 0.85) removes the depth's slow trend first so a receding floor does not read as one big slope; `smooth` (default 1.0) blurs the height first; Output: <name>_n.png, <name>_lit.png (a lit-from-the-left preview), contact.png (with source 'depth', both kinds side by side unless `compare` is false).
 
 Required: `inputs`
 
-Optional (default): `source` ('luminance'), `depth` (None), `strength` (2.0), `smooth` (1.0), `detail` (0.0), `invert_y` (False), `preview` (True), `compare` (None)
+Optional (default): `source` ('luminance'), `depth` (None), `strength` (2.0), `smooth` (1.0), `detail` (0.0), `flatten` (0.85), `invert_y` (False), `preview` (True), `compare` (None)
 
 ## `emissive_mask`  (CPU)
 
@@ -201,3 +201,97 @@ PLANNED — pull public-domain layers (Natural Earth, TIGER, GNIS, 3DEP, NLCD), 
 Required: `region`
 
 Optional (default): `scale` ('fe6'), `layers` (['naturalearth'])
+
+## `filter_forge`  (CPU)
+
+Render with Filter Forge's command-line renderer (plug-in, forge/night3b/ffdriver.py; needs forge.json tools.filter_forge.exe — the public repo works without it, the job then fails with a plain message). `filter` = path of an .ffxml (never copied — the forge stores paths), `preset` = the preset number (0 = the filter's first preset), `input` = a picture for an effect filter (omit for a texture filter), `size` [w, h] for a texture (default [1024, 1024]). A channel (normal, height, …) is a preset you save in Filter Forge with that channel chosen in its Render Channels menu: `channels` {"final": 0, "normal": 9} renders one task per channel (a list like ["final"] uses `preset`). `seamless: true` checks the preset has Seamless Tiling on (when the forge can read it) and measures the wrap seam of the result. Normal maps come out in OpenGL convention (NormalMapFlipY true; checked against the height/bump channel when one is rendered too) and are also written as <slot>_n.png. Outputs: <slot>_<channel>.png (16-bit), <slot>_n.png, tasks.xml, render.log, contact.png.
+
+Required: `filter`
+
+Optional (default): `preset` (0), `input` (None), `size` ([1024, 1024]), `channels` (['final']), `seamless` (False), `slot_name` ('texture'), `normal_flip_y` (True), `bit_depth` (16), `timeout_sec` (900), `seam_limit` (1.5)
+
+## `handoff_file`  (CPU)
+
+File a picture that came back from an outside tool (plug-in, forge/night3b/handoff_jobs.py; made by `handoff in`): `input` = the returned picture, `source_job` = the forge job it was made from, `tool` = the tool's key in the tool register (`handoff tool add`). The picture becomes this job's own output under the source's file name; provenance follows the source's models and adds the tool as a licence line. Outputs: <name>.png, contact.png (the forge's own version beside the tool's).
+
+Required: `input`, `source_job`, `tool`
+
+Optional (default): `slot_name` (None), `target` (None)
+
+## `handoff_kit`  (GPU)
+
+A scene kit rebuilt on a picture that came back from an outside tool (plug-in; made by `handoff in` when the source was a scene_kit): the returned picture is the painting; depth (Depth Anything V2 Small), normals, glow and layers are built from it with the source kit's settings. Same six files as a kit, so `kit check` and `approve --set` work on it. Provenance: the source's models + the depth model + the tool.
+
+Required: `input`, `source_job`, `tool`
+
+Optional (default): `slot_name` (None), `target` (None), `depth_resolution` (None)
+
+## `inpaint`  (GPU)
+
+Repaint only the masked part of a picture (plug-in, forge/night3/inpaint.py): `init` + `mask` (white = repaint; `mask_grow`/`mask_feather` optional) + a prompt for that part. SDXL with the job's own checkpoint (SetLatentNoiseMask; `method: encode_for_inpaint` for inpaint checkpoints). Outside the mask the output is bit-identical to the init. Outputs: inpaint.png, mask.png, contact.png (base · mask · result · difference).
+
+Required: `init`, `mask`, `prompt`
+
+Optional (default): `checkpoint` (None), `loras` (None), `seed` (-1), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `graph` ('sdxl'), `freeu` (False), `denoise` (0.9), `method` ('noise_mask'), `grow_mask_by` (0), `pad` (96), `min_side` (768), `megapixels` (1.0), `style_prefix` (None), `controlnet` (None), `canny_strength` (0.5), `mask_grow` (0), `mask_feather` (0)
+
+## `scene_state`  (GPU)
+
+A state of a painted room (plug-in): `base` (a painting, or a scene_kit folder) + `mask` or `greybox_base` + `greybox_state` (the mask is what changed, grown and feathered; refused over 35 % of the frame) + a prompt for only the changed part. Outside the mask the state is bit-identical to the base; for a kit, the companions are rebuilt and changed only inside the mask. Outputs: scene.png, mask.png, contact.png, difference.png (+ scene_n/_e/_depth/_over/_back/_mid_alpha for a kit).
+
+Required: `base`, `prompt`
+
+Optional (default): `checkpoint` (None), `loras` (None), `seed` (-1), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `graph` ('sdxl'), `freeu` (False), `denoise` (0.9), `method` ('noise_mask'), `grow_mask_by` (0), `pad` (96), `min_side` (768), `megapixels` (1.0), `style_prefix` (None), `controlnet` (None), `canny_strength` (0.5), `mask` (None), `greybox_base` (None), `greybox_state` (None), `threshold` (12), `grow` (24), `feather` (12.0), `max_share` (0.35), `control` (True), `companions` (True), `mask_grow` (0), `mask_feather` (0)
+
+## `ping`  (CPU)
+
+Plug-in health check (forge/plugins/ping.py): writes ping.txt. If a worker runs it, that worker picks up new plug-in job types without a restart. Output: ping.txt.
+
+Required: 
+
+Optional (default): `say` (None)
+
+## `scene_big`  (GPU)
+
+A painting larger than one pass (plug-in, forge/night3/big.py): small whole-scene paint from the greybox (`init`) or prompt — or start from `source`, an existing painting — → upscale to `target` → tiled img2img refine (ControlNet tile, + canny from the greybox) → feathered merge → seam scores. Outputs: scene.png, small.png, upscaled.png, tiles/, seams.json, seam_sheet.jpg, contact.png.
+
+Required: `prompt`, `target`
+
+Optional (default): `init` (None), `source` (None), `size` (None), `megapixels` (1.0), `init_denoise` (0.65), `tile` ([1344, 768]), `overlap` (128), `max_step` (2.0), `denoise` (0.3), `tile_strength` (0.6), `canny_strength` (0.4), `checkpoint` (None), `loras` (None), `seed` (-1), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `graph` ('sdxl'), `freeu` (False), `upscale_model` (None), `controlnet` (None), `control` (None), `style_prefix` (None)
+
+## `facings_pack`  (CPU)
+
+Single-pose pictures → one facings sheet (plug-in, forge/ops/sprites.py): `input` = a folder of poses named by facing (…_S.png, …_NW.png) or exactly eight in S,SW,W,NW,N,NE,E,SE order. Background removed, one common figure height, feet on one baseline, centred per cell (default 144×216), `mirror` fills a facing from its opposite (['W→E']). Outputs: sheet.png (1152×216), report.json (edge touches), turntable.gif.
+
+Required: `input`
+
+Optional (default): `cell` ([144, 216]), `mirror` (None), `figure_height` (0.92), `baseline` (6), `key` (None), `tolerance` (28)
+
+## `anim_preview`  (CPU)
+
+A sprite sheet → GIF per facing (rows) and a turntable (plug-in). `input` = the sheet, `cell`, `layout` auto|rows|facings, `fps`. Outputs: anim_<facing>.gif, turntable.gif.
+
+Required: `input`
+
+Optional (default): `cell` ([144, 216]), `layout` ('auto'), `fps` (8.0), `turntable_fps` (2.0)
+
+## `turnaround_split`  (CPU)
+
+A 3- or 8-view turnaround sheet → the separate views (plug-in), cut at empty columns. Outputs: view_NN.png.
+
+Required: `input`
+
+Optional (default): `min_gap` (6), `min_width` (12), `key` (None), `tolerance` (28)
+
+## `nine_slice`  (CPU)
+
+A painted panel or frame → a nine-slice (plug-in, forge/ops/ui_pieces.py): trimmed, corners/edges detected (or `margins` {left,top,right,bottom}), centre made tileable, `key` (auto or [r,g,b]) removes a flat background first, margins snapped to a multiple of 3 (UI is 640×360 ×3), `scale` to resize. Outputs: piece.png, piece.json (Godot NinePatchRect patch_margin_*), preview.png (stretched to three sizes).
+
+Required: `input`
+
+Optional (default): `margins` (None), `scale` (1.0), `snap` (3), `tileable` (True), `key` (None)
+
+## `button_states`  (CPU)
+
+One button picture → normal / hover / pressed / disabled by tone only (plug-in). Outputs: <name>_normal.png … and states.png.
+
+Required: `input`

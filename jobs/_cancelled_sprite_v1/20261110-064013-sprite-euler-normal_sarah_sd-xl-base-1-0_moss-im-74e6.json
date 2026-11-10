@@ -1,0 +1,39 @@
+{
+ "type": "render",
+ "game": "turing_accords",
+ "name": "sprite-euler-normal_sarah_sd-xl-base-1-0_moss-image-sft-4-steps-lora-v2-600-avg-r_77213",
+ "batch": "bakeoff/sprite_samplers_v1",
+ "prompt": "full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, iridescent hair shifting between magenta-violet and cobalt blue like the surface of a solar panel, fine cell-grid sheen, violet eyes, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with a small glowing violet core set in a chest plate at the sternum, flat black boots, clean readable silhouette, even soft studio light, flat plain white background",
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery",
+ "checkpoint": "sd_xl_base_1.0.safetensors",
+ "loras": [
+  {
+   "name": "moss_image_sft_4_steps_lora_v2_600_avg_rank_72_bf16.safetensors",
+   "strength": 0.8,
+   "clip": 0.8
+  }
+ ],
+ "seed": 77213,
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 30,
+ "cfg": 6.0,
+ "sampler": "euler",
+ "scheduler": "normal",
+ "style_prefix": "",
+ "priority": 50,
+ "meta": {
+  "suite": "sprite_samplers_v1",
+  "category": "sprite-euler-normal",
+  "prompt_id": "sarah",
+  "checkpoint": "sd_xl_base_1.0.safetensors",
+  "lora": "moss_image_sft_4_steps_lora_v2_600_avg_rank_72_bf16.safetensors",
+  "seed": 77213,
+  "trigger": "",
+  "sampler": "euler-normal"
+ },
+ "id": "20261110-064013-sprite-euler-normal_sarah_sd-xl-base-1-0_moss-im-74e6",
+ "submitted_at": "2026-11-10T06:40:13"
+}

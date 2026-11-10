@@ -126,7 +126,7 @@ exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipelin
 - **Drafts from the game data:** `brief.bat maps|sleeves|icons` (drafts cannot be submitted until their prompts are written).
 - **Queue control:** `"priority": 10` in a job runs it first; `pause.bat` / `resume.bat` park and restore waiting jobs.
 
-## Scene sets, the dashboard and Krea 2 (added 2026-11-09, session 2)
+## Scene sets and the dashboard (added 2026-11-09, session 2)
 
 - **A painted scene is a set of six files** (the game's HD-2D-feel pass): `scene.png` + `_n` (normals from a depth map) +
   `_e` (glow) + `_back` (far parallax plane) + `_over` (walk-behind plane) + `_depth` (16-bit, white = near). One
@@ -137,12 +137,30 @@ exporting from ComfyUI (`forge/engines/workflows/README.md`). The sprite pipelin
   the newest pictures, failed jobs with Retry, Pause/Resume, and Approve (dry run first). Only this PC can see it.
 - **No double runs:** `bakeoff submit` skips cells already queued or finished (`--force` to redo); `submit --skip-done`
   does the same for a plain batch. `eta.bat` says how long the queue will take.
-- **Krea 2:** `graph: "krea2"` (core ComfyUI, no custom node; INT8-ConvRot files load natively). Needs
-  `pull_model.bat qwen-image-vae`. Suite `krea2_v1` (not submitted). Krea 2 base models are commercial-OK under
-  US$1M/year revenue — `approve` and `licences` print that condition.
+- **Krea 2 is not used** (William, 2026-11-09: its licence) — no graph, no registry entry.
 - **Models:** `python -m forge models unusable` → `out/unusable_models.md` (what no graph can run, what is
   non-commercial, what still needs a licence check — report only). `licence.bat` with no arguments asks its questions.
 - **Bake-off detail crops:** `bakeoff report <suite> --detail-at <prompt>=x,y[,size]` or `--detail-auto` (largest face).
+
+## Night 3 (2026-11-09) — big scenes, room states, review for a model, the prompt library
+
+New job types are **plug-ins** (`forge/plugins/`): a running worker picks them up before its next job, no restart.
+
+| What | Command / .bat | Job type |
+|---|---|---|
+| The morning report — what ran, what failed and why, seconds per render by model | `night_report.bat` (`report night`) | — |
+| Review sheets a model can read: ≤ 12 labelled cells, ≤ 2,000 px, ≤ 1.5 MB, `review_index.json`; side-by-side pairs with a 1:1 crop | `review_compact.bat <suite>` (`review --compact` / `--pairs A,B`) | — |
+| Paint past one frame: small whole scene → climb ≤ 2× per step → tiled repaint (ControlNet tile + canny) → feathered merge → seam scores | `op.bat tiles-demo` | `scene_big` |
+| Inpaint; a *state* of a room (the same room years on) — bit-identical to the base outside what changed | `op.bat state-mask …` | `inpaint`, `scene_state` |
+| Is this kit safe to approve? (slots, sizes, normals, depth, glow, planes, walk rings) — `approve --set` refuses on a fail | `kit_check.bat <job>` (`kit check`) | — |
+| Prompt library: `{{style.house}}` blocks expanded by `submit`; the never-list | `prompts.bat` (`prompts …`) | — |
+| One draft for every missing painting, type chosen by the facts; room families | `paint_missing.bat` (`brief missing`) | — |
+| Sprite sheets: eight poses → one 1152×216 facings sheet; GIF previews; turnaround split | `op.bat facings-pack …` | `facings_pack`, `anim_preview`, `turnaround_split` |
+| Every model in shipped art | `credits.bat` | — |
+| Nine-slice UI panels; button states | `op.bat nine-slice …` | `nine_slice`, `button_states` |
+
+Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, and what runs next. What is left to
+wire with an empty queue: `docs/WIRE_NIGHT_3.md`. Hand-off: `docs/HANDOFF_FORGE_NIGHT_3.md`.
 
 ## Licence
 

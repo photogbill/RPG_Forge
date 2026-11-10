@@ -123,12 +123,13 @@ def normal_map(job: dict, ctx: Context, out: Path) -> dict:
     strength = float(_f(job, "strength", 2.0))
     smooth = float(_f(job, "smooth", 1.5 if source == "depth" else 1.0))
     detail = float(_f(job, "detail", 0.0))
+    flatten = float(_f(job, "flatten", 0.85))
     outputs, sheet, labels = [], [], []
     for p, dpath in zip(paintings, depths):
         img = Image.open(p).convert("RGB")
         d = dp.load_depth(dpath, img.size) if dpath is not None else None
         n = dp.normal_map(img, source=source, depth=d, strength=strength, smooth=smooth, detail=detail,
-                          invert_y=bool(job.get("invert_y")))
+                          invert_y=bool(job.get("invert_y")), flatten=flatten)
         save_png(n, out / f"{p.stem}_n.png")
         outputs.append(f"{p.stem}_n.png")
         if _f(job, "preview", True):
@@ -144,6 +145,7 @@ def normal_map(job: dict, ctx: Context, out: Path) -> dict:
         cols = 4 if len(sheet) % 4 == 0 else 2
         save_png(sh.contact_sheet(sheet, labels, cols=cols, cell=(480, 270), title=job.get("name")), out / "contact.png")
     write_prov(out, job, op="normal_map", source=source, strength=strength, smooth=smooth, detail=detail,
+               flatten=flatten if source == "depth" else None,
                convention="OpenGL (green = up)", inputs=[str(p) for p in paintings],
                depth=[str(x) for x in depths] if source == "depth" else None, outputs=outputs)
     return {"outputs": outputs, "source": source}
@@ -199,7 +201,8 @@ def kit_steps(job: dict) -> list[dict]:
         paint,
         {"type": "depth_map", "inputs": ["$steps[1].outputs[0]"], **({"resolution": job["depth_resolution"]} if job.get("depth_resolution") else {})},
         {"type": "normal_map", "inputs": ["$steps[1].outputs[0]"], "source": "depth", "depth": ["$steps[2].outputs[0]"],
-         "strength": n.get("strength", 2.0), "smooth": n.get("smooth", 1.5), "detail": n.get("detail", 0.35), "compare": False},
+         "strength": n.get("strength", 2.0), "smooth": n.get("smooth", 1.5), "detail": n.get("detail", 0.35),
+         "flatten": n.get("flatten", 0.85), "compare": False},
         {"type": "emissive_mask", "inputs": ["$steps[1].outputs[0]"], **{k: v for k, v in e.items()
                                                                         if k in ("threshold", "min_saturation", "colors", "tolerance", "feather")}},
         {"type": "scene_layers", "inputs": ["$steps[1].outputs[0]"], "depth": ["$steps[2].outputs[0]"],

@@ -10,7 +10,7 @@ import json, shutil, subprocess
 from pathlib import Path
 
 from . import config as cfgmod
-from .engines import graph_ops as go, sdxl_graph, flux1_graph, flux2_graph, krea2_graph
+from .engines import graph_ops as go, sdxl_graph, flux1_graph, flux2_graph
 
 REMEDY = {"UnetLoaderGGUF": "install_comfy_gguf.bat", "FaceDetailer": "install_comfy_faces.bat",
           "UltralyticsDetectorProvider": "install_comfy_faces.bat"}
@@ -24,7 +24,6 @@ def graph_shapes() -> dict[str, set[str]]:
     shapes["flux1 all-in-one"] = go.required_nodes(flux1_graph.build("u.safetensors", "p", 1, 1024, 1024, all_in_one=True))
     shapes["flux1 gguf"] = go.required_nodes(flux1_graph.build("u.gguf", "p", 1, 1024, 1024))
     shapes["flux2_klein"] = go.required_nodes(flux2_graph.build("flux-2-klein-4b.safetensors", "p", "", 1, 1024, 1024))
-    shapes["krea2"] = go.required_nodes(krea2_graph.build("k.safetensors", "p", "", 1, 1024, 1024))
     g = sdxl_graph.build("c.safetensors", "p", "n", 1, 1344, 768)
     before = go.required_nodes(g)
     go.add_upscale(g, "u.pth", 1920, 1080)
@@ -96,10 +95,6 @@ def job_models(cfg: dict, job: dict) -> list[tuple[str, tuple[str, ...], str]]:
             fx = comfy.get("flux1", {})
             out += [("clip_l", ("text_encoders", "clip"), job.get("clip_l") or fx.get("clip_l")),
                     ("t5", ("text_encoders", "clip"), job.get("t5") or fx.get("t5")), ("vae", ("vae",), job.get("vae") or fx.get("vae"))]
-        if graph == "krea2":
-            kc = comfy.get("krea2", {})
-            out += [("text_encoder", ("text_encoders", "clip"), job.get("text_encoder") or kc.get("text_encoder", krea2_graph.DEFAULT_TE)),
-                    ("vae", ("vae",), job.get("vae") or kc.get("vae", krea2_graph.DEFAULT_VAE))]
         if graph == "flux2_klein":
             fx = comfy.get("flux2", {})
             te = job.get("text_encoder") or (fx.get("text_encoder_9b") if "9b" in str(ck).lower() else fx.get("text_encoder"))
@@ -117,41 +112,6 @@ def job_models(cfg: dict, job: dict) -> list[tuple[str, tuple[str, ...], str]]:
             det = ff.get("detector") or comfy.get("face_detector", "bbox/face_yolov8m.pt")
             out.append(("face_detector", ("ultralytics_bbox", "ultralytics"), det.split("/", 1)[-1]))
     return [(r, k, n) for r, k, n in out if n]
-
-
-def krea2_report(cfg: dict, info: dict | None) -> list[str]:
-    """N8: "krea2: OK" or exactly what is missing — the nodes, CLIPLoader's krea2 type, and the three files."""
-    kc = cfg.get("comfy", {}).get("krea2", {})
-    te, vae = kc.get("text_encoder", krea2_graph.DEFAULT_TE), kc.get("vae", krea2_graph.DEFAULT_VAE)
-    missing = []
-    inv = []
-    try:
-        p = cfgmod.ROOT / "models" / "inventory.json"
-        d = json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
-        inv = d if isinstance(d, list) else (d.get("models") or d.get("files") or [])
-    except (OSError, ValueError):
-        pass
-    models = sorted(r["file"] for r in inv if r.get("base") == "krea2" and r.get("kind") in ("unet", "checkpoint"))
-    if not models:
-        models = sorted(p.name for k in ("diffusion_models", "checkpoints") for d in _all_dirs(cfg, k) for p in d.glob("*.safetensors") if "krea" in p.name.lower())
-    if not models:
-        missing.append("a Krea 2 diffusion model (pull_model.bat krea2-turbo-fp8)")
-    if find_model(cfg, ("text_encoders", "clip"), te) is None:
-        missing.append(f"text encoder {te} (pull_model.bat krea2-text-encoder, or set forge.json comfy.krea2.text_encoder)")
-    if find_model(cfg, ("vae",), vae) is None:
-        missing.append(f"VAE {vae} (pull_model.bat qwen-image-vae)")
-    if info is not None:
-        need = graph_shapes()["krea2"]
-        lack = sorted(n for n in need if n not in info)
-        if lack:
-            missing.append("nodes " + ", ".join(lack) + " → " + DEFAULT_REMEDY)
-        types = go._spec_options(info.get("CLIPLoader", {}).get("input", {}).get("required", {}).get("type")) or []
-        if "CLIPLoader" in info and "krea2" not in types:
-            missing.append("CLIPLoader has no 'krea2' type → " + DEFAULT_REMEDY)
-    tail = "" if info is not None else " (nodes not checked — ComfyUI is not running)"
-    if missing:
-        return ["krea2: missing " + "; ".join(missing) + tail]
-    return [f"krea2: OK — {len(models)} model(s): {', '.join(models)}" + tail]
 
 
 def unknown_licence_report(cfg: dict) -> list[str]:
@@ -234,5 +194,5 @@ def report(cfg: dict, client=None) -> list[str]:
         try:
             info = client.object_info()
         except Exception as e:  # noqa: BLE001
-            return [f"· could not read /object_info: {e}"] + queue_report(cfg) + krea2_report(cfg, None) + unknown_licence_report(cfg)
-    return node_report(info) + queue_report(cfg) + krea2_report(cfg, info) + unknown_licence_report(cfg)
+            return [f"· could not read /object_info: {e}"] + queue_report(cfg) + unknown_licence_report(cfg)
+    return node_report(info) + queue_report(cfg) + unknown_licence_report(cfg)

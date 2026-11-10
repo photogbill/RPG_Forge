@@ -214,9 +214,14 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
     def current() -> dict:
         return handlers() if callable(handlers) else handlers
 
+    # Load the handler map ONCE per claim cycle. accept() runs for every pending file, and current() reloads the
+    # handler modules — with thousands of jobs queued that was thousands of reloads between renders (~16 s idle per
+    # job in the 2026-11-10 sprite run). Code fixes are still picked up: the map is refreshed before every claim.
+    hmap: dict = {}
+
     def accept(job: dict) -> bool:
         t = job.get("type")
-        if t not in current():
+        if t not in hmap:
             return False
         if schema.needs_gpu(job) and not gpu:
             return False
@@ -227,6 +232,7 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
     ran = 0
     idle_logged = False
     while True:
+        hmap = current()
         claimed = queue.claim(accept)
         if claimed is None:
             if once:
@@ -242,7 +248,7 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
         out_dir = queue.out_dir(job_id)
         t0 = time.time()
         try:
-            result = current()[job["type"]](job, ctx, out_dir) or {}
+            result = hmap[job["type"]](job, ctx, out_dir) or {}
             result["seconds"] = round(time.time() - t0, 1)
             queue.finish(job_id, result=result)
         except Exception as e:  # noqa: BLE001 — every failure is recorded, never swallowed
