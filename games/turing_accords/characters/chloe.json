@@ -1,0 +1,23 @@
+{
+ "id": "chloe",
+ "name": "Chloe",
+ "_stub": "made from wanted.json — fill in when the character is drawn",
+ "asymmetric": null,
+ "default_variant": "default",
+ "variants": {
+  "default": {
+   "prompt": null,
+   "negative": null,
+   "checkpoint": null,
+   "sampler": null,
+   "scheduler": null,
+   "steps": null,
+   "seed": null,
+   "references": [],
+   "wanted": {
+    "field_sheet": "placeholder/hero_chloe",
+    "portrait": "placeholder/portrait_chloe"
+   }
+  }
+ }
+}

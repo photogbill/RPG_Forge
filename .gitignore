@@ -46,3 +46,10 @@ out/_ui_thumbs/
 # redistributed (Filter Forge EULA) - the forge stores paths to them, never copies.
 /*.exe
 *.ffxml
+
+# Night 4 (F6): which of William's photographs may be used (paths + people check) - local only, never pushed
+games/*/refs.local.json
+# Night 4: run-state, not source
+jobs/_cancelled*/
+jobs/drafts/
+jobs/_held*/

@@ -63,7 +63,10 @@ def test_wanted_export_and_status(tmp_path):
     d = manifest.refresh_wanted(cfg, "tg")
     items = d["items"]
     main = {k for k, v in items.items() if not v.get("set_of")}
-    assert main == {"placeholder/hero_sarah", "vignettes/gate_law/01_ribbon", "scenes/bills_house", "sleeves/song_a"}
+    # Night 4: every item in items.json is a wanted icon; one with no `icon` field is proposed at icons/<id>.png
+    assert main == {"placeholder/hero_sarah", "vignettes/gate_law/01_ribbon", "scenes/bills_house", "sleeves/song_a",
+                    "icons/coolant"}
+    assert items["icons/coolant"]["referenced"] is False and items["icons/coolant"]["category"] == "repair"
     assert {k for k, v in items.items() if v.get("set_of") == "scenes/bills_house"} == {
         f"scenes/bills_house{s}" for s in ("_n", "_e", "_back", "_over", "_depth")}
     assert items["scenes/bills_house"]["target_size"] == [2304, 1536] and items["scenes/bills_house"]["exists"] is False

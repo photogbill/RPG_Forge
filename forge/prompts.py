@@ -26,7 +26,8 @@ from pathlib import Path
 from . import config as cfgmod
 
 REF = re.compile(r"\{\{\s*([A-Za-z0-9_.\-]+)\s*\}\}")
-SHELVES = ("style", "light", "place", "era", "neg", "skin", "layout", "movement", "technique", "medium", "process", "period", "purpose", "quality")
+SHELVES = ("style", "light", "place", "era", "neg", "skin", "layout", "movement", "technique", "medium", "process", "period", "purpose", "quality",
+           "char", "mood", "pose", "icon", "culture", "fate", "enclave", "ui", "state", "sleeve")   # Night 4: characters, icons, towns
 TEXT_FIELDS = ("prompt", "negative", "style_prefix")
 
 

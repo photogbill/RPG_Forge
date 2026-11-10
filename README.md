@@ -162,6 +162,24 @@ New job types are **plug-ins** (`forge/plugins/`): a running worker picks them u
 Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, and what runs next. What is left to
 wire with an empty queue: `docs/WIRE_NIGHT_3.md`. Hand-off: `docs/HANDOFF_FORGE_NIGHT_3.md`.
 
+## Night 4 (2026-11-10) — production: your sheets in, a queue that runs for days, verdicts back
+
+| What | .bat | Job type |
+|---|---|---|
+| **Your character sheets → the game's sprite sheet.** Any grid, any backdrop (flat, white, painted checkerboard, real alpha), labels dropped. The forge numbers the figures, guesses the facings and *asks you* if the guess is right; one height, feet on one baseline, centred on the feet; packed to 8 facings S…SE at 144×216 (+ frames). Nothing of yours is copied or changed | `sprite_intake.bat "<sheet or folder>" sarah guardian` | `sprite_intake` |
+| The character registry: one file per character, each variant's recipe (checkpoint, sampler, **locked seed**, prompt blocks, `asymmetric`). A job with `"character": "sarah", "variant": "warrior"` inherits it | `characters.bat list / show / check / stubs / set` | `character_set` (moods on one face + battle pose + a generated sheet) |
+| What the game is missing → one ordered plan (first hour first, a town in one sitting on one seed) → a queue that refuses until every look block is written | `produce.bat plan` · `produce.bat queue` · `produce.bat status` | — |
+| Approved pictures → the game, with a ledger (undo-able; replaced files kept in `out\_replaced`). If the game folder isn't reachable, it writes a copy .bat for you | `deliver.bat [--dry]` · `deliver.bat undo <name>` | — |
+| Leave running beside a long queue: parks the queue under 40 GB free, brings it back by itself, writes the 24-hour report | `produce_watch.bat` | — |
+| Item icons in bulk, one hand per category | (planned by produce) | `icon_batch` |
+| The notes you make in the game with F9 → redo drafts (never queued); the dashboard's **Called out** section approves / dismisses / hands one to you | `feedback_in.bat` | — |
+| One of your photographs → a painted plate (only frames listed with no people, or only you) | — | `photo_plate` |
+| Make a texture tile (Filter Forge's own seamless doesn't survive its command line); `filter_forge` takes `"tileable": true` | — | `tileable` |
+| Every model file: loads? licence, used by, verdict, size — and what is safe to delete | `models_report.bat` | — |
+| What in out\ could be archived (report only) | `housekeeping.bat` | — |
+
+Hand-off: `docs/HANDOFF_FORGE_NIGHT_4.md`. Left to wire with an empty queue: `docs/WIRE_NIGHT_4.md`.
+
 ## Licence
 
 MIT (code). Models and palettes carry their own licences — `docs/LICENSING.md` and `models/models.json`.

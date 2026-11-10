@@ -23,7 +23,7 @@
  "lora_base_filter": "flux1",
  "suite": "sprite_flux1_v2",
  "game": "turing_accords",
- "_comment": "Sarah sprite v2 prompt on EVERY FLUX.1 model (William 02:27: 'don't exclude flux… we won't know if the prompt works with flux until we try') x (no LoRA + the FLUX.1 LoRAs that apply: RPGv6, FluxDFaeTasticDetails, bbeam_comic; RPGmaps skipped - maps) x six samplers, each model's own steps (schnell 4, dev 20, de-distilled 24). LICENCE: FLUX.1 dev and its fine-tunes (FusionV2, SaMay) are NON-COMMERCIAL - bake-off only; schnell is Apache-2.0.",
+ "_comment": "Sarah sprite v2 prompt on EVERY FLUX.1 model (William 02:27: 'don't exclude flux… we won't know if the prompt works with flux until we try') x (no LoRA + the FLUX.1 LoRAs that apply: RPGv6, FluxDFaeTasticDetails, bbeam_comic; RPGmaps skipped - maps) x six samplers, each model's own steps (schnell 4, dev 20, de-distilled 24). LICENCE: FLUX.1 dev and its fine-tunes (FusionV2, SaMay) are NON-COMMERCIAL - bake-off only; schnell is Apache-2.0. | Prompt rewritten 2026-11-10 13:22 (William): his hair block as FLUX-style prose (FLUX ignores (x:1.3) weights and most negatives).",
  "checkpoints": "*",
  "loras": "*",
  "include_no_lora": true,
@@ -97,7 +97,7 @@
     1216
    ],
    "prompts": {
-    "sarah": "8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+    "sarah": "A highly detailed, sharp full-body game character sprite of a slender young woman who looks about twenty-five, standing and facing the viewer, the whole figure from head to boots in frame, on a plain white background in even, soft studio light. Her long hair is iridescent: a balayage that blends cobalt blue into purple, with shifting magenta-violet highlights and a metallic, photovoltaic sheen, a faint fine grid pattern glinting in the highlights like light across a thin film; every strand is crisp and highly detailed, and neither colour wins, the blue and the purple trade places along each strand. Her eyes glow violet. She has the beginning of a smirk. She has a fine-boned oval face and fair skin. She wears a matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core marked with a radiation trefoil set in a small chest plate at her sternum, a holster and gun belt at her hips, and flat black boots. Clean, readable silhouette."
    }
   }
  }

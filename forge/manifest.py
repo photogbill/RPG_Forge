@@ -232,10 +232,12 @@ def approve(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, f
         plan["dry_run"] = True
         return plan
     # back up what is there, then copy
+    backup = None
     if dest.exists():
         bdir = _out_root(cfg) / "_approved_backup" / wanted_name.replace("/", "__")
         bdir.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(dest, bdir / f"{datetime.now():%Y%m%d-%H%M%S}_{dest.name}")
+        backup = bdir / f"{datetime.now():%Y%m%d-%H%M%S}_{dest.name}"
+        shutil.copyfile(dest, backup)
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dest)
     digest = sha256(dest)
@@ -250,8 +252,23 @@ def approve(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, f
                              "provenance": str(prov_dest), "date": record["approved"], "licences": chain}
     (game_dir(cfg, game) / "approved.json").write_text(json.dumps(approved, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
     _note_in_batch(cfg, game, job, wanted_name, src.name)
+    _ledger(cfg, game, wanted_name, job_id, src.name, w["path"], dest, digest, chain, backup)
     plan["sha256"] = digest
     return plan
+
+
+def _ledger(cfg, game, wanted_name, job_id, file, rel, dest, digest, chain, backup) -> None:
+    """Night 4 (F3): approve copies into the game, so it is a delivery too — record it in delivered.json so a redo can
+    be traced (feedback_in) and undone (deliver undo). Never lets a ledger problem fail an approval."""
+    try:
+        import hashlib
+        from .night4 import deliver as _dl
+        _dl.ledger_add(cfg, game, {"action": "approved", "wanted": wanted_name, "job_id": job_id, "file": file,
+                                   "dest": rel, "sha256": digest, "sha1": hashlib.sha1(Path(dest).read_bytes()).hexdigest()[:16],
+                                   "licences": chain, "replaced": str(backup) if backup else None})
+    except Exception as e:  # noqa: BLE001
+        import logging
+        logging.getLogger("forge.manifest").warning("could not write the delivery ledger: %s", e)
 
 
 # ------------------------------------------------------------------ approve a set (N4)
@@ -361,14 +378,17 @@ def approve_set(cfg: dict, job_id: str, wanted_name: str, game: str | None = Non
     provs = [json.loads(Path(p).read_text(encoding="utf-8")) for p in read]
     for r in rows:
         dest, src = Path(r["dest"]), Path(r["file"])
+        backup = None
         if dest.exists():
             bdir = _out_root(cfg) / "_approved_backup" / r["wanted"].replace("/", "__")
             bdir.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(dest, bdir / f"{stamp}_{dest.name}")
+            backup = bdir / f"{stamp}_{dest.name}"
+            shutil.copyfile(dest, backup)
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dest)
         digest = sha256(dest)
         rel = str(dest.relative_to(root)).replace("\\", "/") if _inside(dest, root) else str(dest)
+        _ledger(cfg, game, r["wanted"], job_id, src.name, rel, dest, digest, chain, backup)
         record = {"asset": rel, "wanted": r["wanted"], "set": wanted_name, "slot": r["slot"],
                   "approved": datetime.now().isoformat(timespec="seconds"), "job_id": job_id, "file": src.name,
                   "sha256": digest, "licences": chain, "commercial_ok": True,

@@ -149,7 +149,23 @@ class State:
                         "error": str(j.get("error") or "")[:600], "finished": j.get("finished_at")} for j in fails],
             "colours": TYPE_COLOURS,
             "time": time.strftime("%H:%M:%S"),
+            **self.night4(),
         }
+
+
+def _night4(self) -> dict:
+    """Night 4: the disk guard's banner (produce_watch.bat) and the Called out drafts (feedback_in.bat)."""
+    out = {"guard": None, "called_out": []}
+    try:
+        from .night4 import guard, feedback
+        out["guard"] = (guard.read(self.cfg) or {}).get("message")
+        out["called_out"] = feedback.list_drafts(self.cfg)[:30]
+    except Exception as e:  # noqa: BLE001 — the dashboard must come up whatever
+        log.warning("ui: night 4 panels: %s", e)
+    return out
+
+
+State.night4 = _night4
 
 
 def thumb(out_root: Path, rel: str, width: int = 420) -> Path:
@@ -235,6 +251,11 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         return {"ok": True, "dry_run": dry, "rows": rows, "licences": plan.get("licences"), "conditions": conds,
                 "note": plan.get("size_note"),
                 "message": ("Ready to copy — check the table, then Confirm." if dry else "Approved — copied into the game with provenance.")}
+    if action in ("draft_submit", "draft_dismiss", "draft_himself"):        # Night 4 (F5): Called out
+        from .night4 import feedback
+        r = feedback.draft_action(cfg, action, str(body.get("draft") or ""))
+        log.info("ui: %s %s → %s", action, body.get("draft"), r.get("message"))
+        return r
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -380,9 +401,11 @@ table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}td,th{b
 <button id="ab-btn" onclick="openAB()" disabled>Compare A/B</button>
 <span style="flex:1"></span><button class="stop" onclick="act('pause',{})">Pause queue</button><button class="go" onclick="act('resume',{})">Resume</button>
 <span class="pill" id="clock">–</span></header>
+<div id="guard" style="display:none;background:#5a1d1d;color:#fff;padding:8px 14px;font-weight:600"></div>
 <main><div>
 <section><h2>Rendering now</h2><div id="now"></div><div id="upnext" style="color:var(--dim);font-size:12.5px;margin-top:6px"></div></section>
 <section><h2>Batches</h2><div id="batches"></div></section>
+<section><h2>Called out</h2><div id="called"></div></section>
 <section><h2>Failed</h2><div id="failed"></div></section>
 <section><h2>Colours</h2><div class="legend" id="legend"></div>
 <div class="legend"><span><i style="background:var(--ok)"></i>border: every model commercial-OK</span><span><i style="background:var(--no)"></i>not OK</span><span><i style="background:var(--unk)"></i>unknown / not a picture</span></div></section>
@@ -412,7 +435,9 @@ function draw(){const c=S.counts;
  H('failed',S.failed.map(f=>`<div class="fail"><b>${esc(f.name)}</b> <span style="color:var(--dim)">${esc(f.type)} · ${esc(f.batch||'')}</span><pre>${esc(f.error)}</pre><button onclick="act('retry',{id:'${esc(f.id)}'})">Retry</button></div>`).join('')||'<span style="color:var(--dim)">none</span>');
  H('recent',S.recent.map((j,i)=>`<div class="card ${j.licence}"><div class="edge" style="background:${col(j.type)}"></div>${j.image?`<img loading="lazy" src="/thumb?p=${encodeURIComponent(j.image)}" onclick="zoom('${encodeURIComponent(j.image)}')">`:''}<div class="meta"><b>${esc(j.name)}</b><span>${esc(j.type)} · ${esc((j.finished||'').slice(11,16))}</span>${kitDot(j)}<br><button onclick="openApprove(${i})">Approve…</button> <label style="font-size:12px"><input type="checkbox" ${AB.includes(j.id)?'checked':''} onchange="pickAB('${esc(j.id)}',this.checked)" style="width:auto"> A/B</label></div></div>`).join(''));
  H('upnext',(S.now_batch?`running: <b>${esc(S.now_batch)}</b>`:'')+(S.upcoming&&S.upcoming.length?` · then: ${S.upcoming.map(esc).join(' → ')}`:''));
- H('legend',Object.entries(S.colours).map(([k,v])=>`<span><i style="background:${v}"></i>${k}</span>`).join(''));}
+ H('legend',Object.entries(S.colours).map(([k,v])=>`<span><i style="background:${v}"></i>${k}</span>`).join(''));
+ const g=document.getElementById('guard');g.style.display=S.guard?'block':'none';g.textContent=S.guard||'';
+ H('called',(S.called_out||[]).map(d=>`<div class="fail"><b>${esc(d.wanted)}</b> <span style="color:var(--dim)">${esc(d.type)} · ${esc(d.why||'')}</span><pre>${esc(d.note||'')}</pre><button onclick="act('draft_submit',{draft:'${esc(d.draft)}'})" ${d.ready?'':'disabled title="Fable fills the mask and prompt first"'}>Approve draft</button> <button onclick="act('draft_dismiss',{draft:'${esc(d.draft)}'})">Dismiss</button> <button onclick="act('draft_himself',{draft:'${esc(d.draft)}'})">He'll fix it himself</button></div>`).join('')||'<span style="color:var(--dim)">nothing called out</span>');}
 const T=(id,t)=>document.getElementById(id).textContent=t, H=(id,h)=>{const e=document.getElementById(id);if(e.innerHTML!==h)e.innerHTML=h;}, col=t=>(S.colours[t]||'#888');
 const KC={pass:'var(--ok)',warn:'#e0a838',fail:'var(--no)'};
 function kitDot(j){if(!j.check)return '';const c=j.check;return ` <span title="kit check: ${esc(c.verdict)} — click for the sheet" style="cursor:pointer;color:${KC[c.verdict]||'#888'}" ${c.image?`onclick="zoom('${encodeURIComponent(c.image)}')"`:''}>● kit ${esc(c.verdict)}</span>`;}

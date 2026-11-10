@@ -372,3 +372,29 @@ bake-off only - with the FLUX.1 LoRAs that apply), and an extra Pre-Raphaelite G
 _flux_v1 / _klein_v1). v1's unrun jobs moved to jobs/_cancelled_sprite_v1/; its 53 renders kept as the before-picture.
 
 
+## 2026-11-10
+
+Night 4: production — sprite intake, character registry, produce/deliver, icons, feedback, photo plates, tileable, model shelf
+
+Night 4 (Opus, from docs/ROADMAP_NIGHT_4.md, Part A — the worker was running). Tests 155 → 189, all green.
+Every new job type is a plug-in (forge/plugins/night4_*.py, helpers in forge/night4/), commands in forge/cli_night4.py.
+
+- F1 sprite_intake (+ sprite_intake.bat): a drawn character sheet (any grid, flat/white/checker/alpha backdrop,
+  labels dropped) → the game's facings sheet (S..SE, 144x216), one scale, feet on one baseline, centred on the
+  feet; a mapping file per sheet, fixed by answering questions at the console; edge report; refuses photos.
+- F2 character registry (games/turing_accords/characters/: Sarah guardian/warrior + 23 cast stubs), inheritance via a
+  submit shim, character_set (moods on a locked seed, battle pose, generated sheet through intake), review --character.
+- F3 export_wanted: every item's icon, enemies, UI, validator file, hashes, towns (look/fate/enclaves);
+  produce plan/queue/status; deliver + delivered.json ledger + undo (approve records there too); disk guard and the
+  24-hour report (produce_watch.bat); housekeeping report; towns: culture/fate/enclave blocks, review --town/--atlas.
+- F4 icon_batch (one seed per category). F5 feedback_in + the dashboard's Called out. F6 photo_plate with the people
+  guard (refs.local.json, git-ignored). F7 tileable (two-pass minimum-error cut; filter_forge "tileable": true).
+- F8 models_report.bat: every model file, used by / verdict / size, and what is safe to delete (report only).
+- Also: the 4 edited sprite suites, hair_test_v1/v2/prerap, docs/SPRITE_BAKEOFF_VERDICT.md; jobs/_cancelled*/ ignored;
+  CLAUDE.md: rewrite the commit title when appending to COMMIT_MESSAGE.txt.
+
+Hand-off: docs/HANDOFF_FORGE_NIGHT_4.md. Part B (empty queue): docs/WIRE_NIGHT_4.md.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+

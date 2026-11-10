@@ -1,0 +1,23 @@
+{
+ "id": "bluesman",
+ "name": "Bluesman",
+ "_stub": "made from wanted.json — fill in when the character is drawn",
+ "asymmetric": null,
+ "default_variant": "default",
+ "variants": {
+  "default": {
+   "prompt": null,
+   "negative": null,
+   "checkpoint": null,
+   "sampler": null,
+   "scheduler": null,
+   "steps": null,
+   "seed": null,
+   "references": [],
+   "wanted": {
+    "field_sheet": "placeholder/npc_bluesman",
+    "portrait": "placeholder/portrait_bluesman"
+   }
+  }
+ }
+}

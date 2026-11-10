@@ -204,11 +204,11 @@ Optional (default): `scale` ('fe6'), `layers` (['naturalearth'])
 
 ## `filter_forge`  (CPU)
 
-Render with Filter Forge's command-line renderer (plug-in, forge/night3b/ffdriver.py; needs forge.json tools.filter_forge.exe — the public repo works without it, the job then fails with a plain message). `filter` = path of an .ffxml (never copied — the forge stores paths), `preset` = the preset number (0 = the filter's first preset), `input` = a picture for an effect filter (omit for a texture filter), `size` [w, h] for a texture (default [1024, 1024]). A channel (normal, height, …) is a preset you save in Filter Forge with that channel chosen in its Render Channels menu: `channels` {"final": 0, "normal": 9} renders one task per channel (a list like ["final"] uses `preset`). `seamless: true` checks the preset has Seamless Tiling on (when the forge can read it) and measures the wrap seam of the result. Normal maps come out in OpenGL convention (NormalMapFlipY true; checked against the height/bump channel when one is rendered too) and are also written as <slot>_n.png. Outputs: <slot>_<channel>.png (16-bit), <slot>_n.png, tasks.xml, render.log, contact.png.
+Render with Filter Forge's command-line renderer (plug-in, forge/night3b/ffdriver.py; needs forge.json tools.filter_forge.exe — the public repo works without it, the job then fails with a plain message). `filter` = path of an .ffxml (never copied — the forge stores paths), `preset` = the preset number (0 = the filter's first preset), `input` = a picture for an effect filter (omit for a texture filter), `size` [w, h] for a texture (default [1024, 1024]). A channel (normal, height, …) is a preset you save in Filter Forge with that channel chosen in its Render Channels menu: `channels` {"final": 0, "normal": 9} renders one task per channel (a list like ["final"] uses `preset`). `seamless: true` checks the preset has Seamless Tiling on (when the forge can read it) and measures the wrap seam of the result. Normal maps come out in OpenGL convention (NormalMapFlipY true; checked against the height/bump channel when one is rendered too) and are also written as <slot>_n.png. `tileable: true` (Night 4) makes every channel tile in the forge afterwards (offset + heal, the same geometry for all channels) → <file>_tile.png, measured before/after. Outputs: <slot>_<channel>.png (16-bit), <slot>_n.png, tasks.xml, render.log, contact.png.
 
 Required: `filter`
 
-Optional (default): `preset` (0), `input` (None), `size` ([1024, 1024]), `channels` (['final']), `seamless` (False), `slot_name` ('texture'), `normal_flip_y` (True), `bit_depth` (16), `timeout_sec` (900), `seam_limit` (1.5)
+Optional (default): `preset` (0), `input` (None), `size` ([1024, 1024]), `channels` (['final']), `seamless` (False), `slot_name` ('texture'), `normal_flip_y` (True), `bit_depth` (16), `timeout_sec` (900), `seam_limit` (1.5), `tileable` (False), `tile_band` (0.12)
 
 ## `handoff_file`  (CPU)
 
@@ -241,6 +241,46 @@ A state of a painted room (plug-in): `base` (a painting, or a scene_kit folder) 
 Required: `base`, `prompt`
 
 Optional (default): `checkpoint` (None), `loras` (None), `seed` (-1), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `graph` ('sdxl'), `freeu` (False), `denoise` (0.9), `method` ('noise_mask'), `grow_mask_by` (0), `pad` (96), `min_side` (768), `megapixels` (1.0), `style_prefix` (None), `controlnet` (None), `canny_strength` (0.5), `mask` (None), `greybox_base` (None), `greybox_state` (None), `threshold` (12), `grow` (24), `feather` (12.0), `max_share` (0.35), `control` (True), `companions` (True), `mask_grow` (0), `mask_feather` (0)
+
+## `sprite_intake`  (CPU)
+
+A character sheet from any outside tool → the game's sprite contract (plug-in, forge/night4/intake.py). `input` = the sheet (any grid, any backdrop: flat, white, painted checkerboard or real alpha; labels between rows are dropped), `character` (+ `variant`). Figures are found as connected shapes, numbered in reading order and mapped to facings/frames by `mapping` (default games/<game>/intake/<character>[__<variant>]/<sheet>.intake.json — the first run writes the forge's guess there; a person fixes it and reruns). One scale, feet on one baseline, centred on the feet. `tool` = "<name version>" of the program that made the sheet (its licence line comes from the tool register). Outputs: sheet.png (one row, 8 facings S…SE, cell 144×216 — the contract), anim.png (rows = facings, columns = frames, when there are frames), numbers.png, frames/, turntable.gif, anim_<facing>.gif, edges.md, report.json.
+
+Required: `input`, `character`
+
+Optional (default): `variant` (None), `mapping` (None), `tool` (None), `cell` ([144, 216]), `figure_height` (0.92), `baseline` (6), `scale` ('uniform'), `key` (None), `tolerance` (30)
+
+## `character_set`  (GPU)
+
+One character variant → its set (plug-in, forge/night4/charset.py): portrait moods on the variant's locked seed (same face, one `{{mood.<m>}}` block each), a battle pose (`{{pose.battle}}`), and a turnaround with the variant's sheet LoRA(s) → cut and packed through sprite_intake into the same sheet contract as a drawn sheet. Everything inherits the registry (games/<game>/characters/<id>.json); job keys win. `parts` picks a subset: ["moods", "battle", "turnaround"]. Outputs: moods/<m>.png, battle.png, turnaround.png, sheet.png (+ the intake files), contact.png.
+
+Required: `character`
+
+Optional (default): `variant` (None), `parts` (None), `moods` (None), `portrait_size` ([896, 1152]), `battle_size` ([832, 1216]), `turnaround_size` ([1536, 768]), `sheet_lora` (None), `sheet_lora_strength` (0.8), `mapping` (None)
+
+## `tileable`  (CPU)
+
+Make a texture tile seamlessly (plug-in, forge/night4/tileable.py): offset by half, heal the cross seam — inpainted on the job's checkpoint when a GPU worker runs it (`heal: inpaint`), a blend otherwise (`heal: blend`, CPU) — and verify with the wrap-seam score before/after; refused (the input kept) if it got worse. `input` = picture or a job folder. Outputs: tile.png, tiled_2x2.png, compare.png, report.json.
+
+Required: `input`
+
+Optional (default): `heal` ('auto'), `band` (0.12), `prompt` (None), `checkpoint` (None), `denoise` (0.6), `seed` (-1), `limit` (1.5)
+
+## `icon_batch`  (GPU)
+
+Many item icons in one job (plug-in, forge/night4/icons.py): `items` = [{"id", "name", "description", "category"}] (produce/brief fill it from wanted.json), one family seed per category so a category looks drawn by one hand; each is rendered square, cut out (transparent), saved at `size` and 2×. Prompt template `prompt` with {name} {description} in it (default: "{{icon.house}}, {{icon.<category>}}, {name}: {description}" — the blocks are Fable's). Outputs: icons/<id>.png, icons@2x/<id>.png, contact_<category>.png.
+
+Required: `items`
+
+Optional (default): `prompt` (None), `size` ([256, 256]), `render_size` ([1024, 1024]), `seeds` (None), `checkpoint` (None), `loras` (None), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `key` ('#ff00ff'), `tolerance` (40)
+
+## `photo_plate`  (GPU)
+
+One of William's photographs → a painted plate (plug-in, forge/night4/photo.py). `photo` is a PATH (never copied into the repo); it must be listed in the git-ignored games/<game>/refs.local.json with `people: none` or `people: william` (his cameo ruling) or the job refuses. img2img on the scene checkpoint at `target` with `denoise` and ControlNet depth/canny from the photo, then the kit companions (depth, normals, glow, layers) so it lights like any painted scene. Provenance: "William's own photograph" + the path.
+
+Required: `photo`, `prompt`
+
+Optional (default): `target` ([1920, 1080]), `denoise` (0.55), `control` ('canny'), `control_strength` (0.5), `checkpoint` (None), `loras` (None), `seed` (-1), `steps` (None), `cfg` (None), `sampler` (None), `scheduler` (None), `negative` (None), `companions` (True), `graph` ('sdxl')
 
 ## `ping`  (CPU)
 

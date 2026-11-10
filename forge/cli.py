@@ -39,6 +39,12 @@
   report night [--since T] [--hours 12]  the morning report: what ran, failed, how long → out/reports/ (night_report.bat)
   handoff out|in|tool …                  hand pictures to an outside tool (a folder) and file what comes back (handoff_out/in.bat)
   filter-forge list|presets|check|task   Filter Forge's filters, presets and task XML (the filter_forge job type)
+  intake <sheet|folder> <char> [variant] a drawn character sheet → the game's sprite sheet (sprite_intake.bat)
+  characters list|show|check|stubs|set   the character registry (characters.bat)
+  produce plan|queue|status|watch        wanted → planned queue; the disk guard (produce.bat, produce_watch.bat)
+  deliver [--dry] | hold | undo | ledger approved pictures → the game, with a ledger (deliver.bat)
+  feedback-in [file]                     the game's F9 notes → redo drafts (feedback_in.bat)
+  models-report / housekeeping           the model shelf; out/ archive candidates — reports only
   doctor                                 check Python, Pillow, numpy, ComfyUI, GPU, graph nodes, queued models
   (most commands take --game <name>; default turing_accords)
 """
@@ -704,6 +710,8 @@ from .cli_night3 import COMMANDS as _NIGHT3   # Night 3: report, op, kit, prompt
 COMMANDS.update(_NIGHT3)
 from .cli_night3b import COMMANDS as _NIGHT3B  # Night 3B: handoff, filter-forge (forge/cli_night3b.py)
 COMMANDS.update(_NIGHT3B)
+from .cli_night4 import COMMANDS as _NIGHT4  # Night 4: intake, characters, produce, deliver … (forge/cli_night4.py)
+COMMANDS.update(_NIGHT4)
 
 
 def main(argv: list[str] | None = None) -> int:

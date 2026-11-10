@@ -1,0 +1,56 @@
+{
+ "id": "sarah",
+ "name": "Sarah",
+ "_comment": "Night 4 seed (Opus, 2026-11-10) from docs/SPRITE_BAKEOFF_VERDICT.md and William's rulings. Facts only — every LOOK block ({{char.sarah.*}}, {{mood.*}}, {{pose.*}}) is a TODO placeholder for Fable to write; submit refuses them until then. The seed is the face lock (a seed holds a face across samplers on ArtUniverse — verdict); 24101 is the first of hair_test_v1's seeds and is PROVISIONAL until Fable/William pick the face from hair_test_v1/v2.",
+ "asymmetric": true,
+ "_asymmetric_why": "holster and sidearm on one hip in both personas (William 2026-11-10) — a flipped sprite puts the gun on the wrong side",
+ "default_variant": "guardian",
+ "facts": "Holster and sidearm in both personas. Nuclear core with a trefoil (canon: nuclear is the only way a synthetic runs 24/7). Violet eyes. Photovoltaic hair, violet-purple and cobalt-blue balayage. Guardian = healer/protector; Warrior = tank.",
+ "variants": {
+  "guardian": {
+   "describe": "Guardian: hair worn down, loose and straight (the sheet William named 'the guardian'); healer/protector",
+   "prompt": "{{char.sarah.prefix}}, {{char.sarah.guardian}}",
+   "negative": "{{neg.sarah}}",
+   "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "cfg": 6.0,
+   "seed": 24101,
+   "size": [832, 1216],
+   "asymmetric": true,
+   "references": [],
+   "alternatives": {"photographic": "RealVisXL_V5.0_fp16.safetensors"},
+   "sheet_loras": ["SpriteSheet.safetensors", "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"],
+   "wanted": {
+    "field_sheet": "placeholder/hero_sarah",
+    "portrait": "placeholder/portrait_sarah",
+    "battle_pose": null,
+    "portrait_moods": ["neutral", "smile", "resolve", "grief", "anger", "surprise"]
+   }
+  },
+  "warrior": {
+   "describe": "Warrior: braided hair (on purpose — William 2026-11-10); tank: hits hard, fast, relentless",
+   "prompt": "{{char.sarah.prefix}}, {{char.sarah.warrior}}",
+   "negative": "{{neg.sarah}}",
+   "checkpoint": "ArtUniverseSDXL_v8.safetensors",
+   "sampler": "dpmpp_2m",
+   "scheduler": "karras",
+   "steps": 28,
+   "cfg": 6.0,
+   "seed": 24101,
+   "size": [832, 1216],
+   "asymmetric": true,
+   "references": [],
+   "alternatives": {"photographic": "RealVisXL_V5.0_fp16.safetensors"},
+   "sheet_loras": ["SpriteSheet.safetensors", "Sprite_sheet_generator_2-_Space_Candy_Media.safetensors"],
+   "wanted": {
+    "field_sheet": null,
+    "_field_sheet_note": "the game has one Sarah field sheet (placeholder/hero_sarah) — a Warrior slot is the game's to add (contract question in HANDOFF_FORGE_NIGHT_4.md)",
+    "portrait": null,
+    "battle_pose": null,
+    "portrait_moods": ["neutral", "grin", "fury", "resolve"]
+   }
+  }
+ }
+}

@@ -1,0 +1,80 @@
+{
+ "suite": "hair_test_v2",
+ "game": "turing_accords",
+ "_comment": "William 13:24: hair_test_v1 went too far — photographic, colour bled onto the armour, hair came out blonde/brown, crop at the thigh. Causes: heavy weights not bound to 'hair', 'flat color' in the negative (an anti-illustration term), 1girl/masterpiece/high-contrast tags. v2 = a gentle ladder from the sprite_samplers_v2 prompt that worked: only the hair phrase changes, the colour words sit inside the same parentheses as 'hair' (no bleed), weights 1.1-1.25; negative = v2's + brown/blonde/monotone hair (no 'flat color'). L5 = L3 as a Pre-Raphaelite painting. ArtUniverse only (the sprite winner), dpmpp_2m karras 28, four seeds.",
+ "checkpoints": [
+  "ArtUniverseSDXL_v8.safetensors"
+ ],
+ "loras": [],
+ "include_no_lora": true,
+ "skip": {
+  "checkpoints": [],
+  "loras": []
+ },
+ "seeds": [
+  24101,
+  77213,
+  31337,
+  90210
+ ],
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 28,
+ "cfg": 6.0,
+ "sampler": "dpmpp_2m",
+ "scheduler": "karras",
+ "seconds_per_render": 20.0,
+ "negative": "text, letters, watermark, signature, logo, blurry, low quality, jpeg artifacts, deformed face, asymmetrical eyes, crossed eyes, lazy eye, malformed pupils, extra eyes, distorted mouth, extra limbs, extra fingers, missing hands, multiple people, duplicated figure, cropped head, cut off feet, busy background, scenery, solar panel, machinery, props, objects beside her, swimsuit, bare legs, brown hair, blonde hair, monotone hair",
+ "job": {
+  "priority": 72
+ },
+ "categories": {
+  "L1_light": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight (cobalt blue and violet purple balayage hair:1.1) past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  },
+  "L2_medium": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight (cobalt blue and violet purple balayage hair:1.25) past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  },
+  "L3_sheen": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight (cobalt blue and violet purple balayage hair:1.15) past the shoulder blades, iridescent sheen on her hair, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  },
+  "L4_twotone": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "8k, High definition highly detailed, Perfect violet eyes, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight two-tone hair past the shoulder blades, (her hair is cobalt blue at the roots blending into violet purple at the tips:1.15), fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  },
+  "L5_prerap": {
+   "size": [
+    832,
+    1216
+   ],
+   "prompts": {
+    "sarah": "Pre-Raphaelite painting, 8k, High definition highly detailed, Perfect violet eyes, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight (cobalt blue and violet purple balayage hair:1.15) past the shoulder blades, iridescent sheen on her hair, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+   }
+  }
+ }
+}

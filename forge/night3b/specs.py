@@ -31,10 +31,11 @@ FILTER_FORGE = {
            "renders one task per channel (a list like [\"final\"] uses `preset`). `seamless: true` checks the preset has "
            "Seamless Tiling on (when the forge can read it) and measures the wrap seam of the result. Normal maps come "
            "out in OpenGL convention (NormalMapFlipY true; checked against the height/bump channel when one is "
-           "rendered too) and are also written as <slot>_n.png. Outputs: <slot>_<channel>.png (16-bit), <slot>_n.png, "
+           "rendered too) and are also written as <slot>_n.png. `tileable: true` (Night 4) makes every channel tile in the "
+           "forge afterwards (offset + heal, the same geometry for all channels) → <file>_tile.png, measured before/after. Outputs: <slot>_<channel>.png (16-bit), <slot>_n.png, "
            "tasks.xml, render.log, contact.png.",
     "required": ["filter"],
     "optional": {"preset": 0, "input": None, "size": [1024, 1024], "channels": ["final"], "seamless": False,
                  "slot_name": "texture", "normal_flip_y": True, "bit_depth": 16, "timeout_sec": 900,
-                 "seam_limit": 1.5},
+                 "seam_limit": 1.5, "tileable": False, "tile_band": 0.12},
 }

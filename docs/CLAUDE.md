@@ -42,7 +42,9 @@ why, ending with your `Co-Authored-By` line — and tell the person to run `push
 with that file as the message, pushes, appends it to `CHANGELOG.md` and keeps it as
 `COMMIT_MESSAGE.last.txt`, so the next session can read what the last push said. If a
 `COMMIT_MESSAGE.txt` already exists when you start, the last change has not been pushed yet: append to
-it rather than overwrite it.
+it rather than overwrite it — **and rewrite its first line so the title covers everything in the file** (push.bat
+uses the first line as the commit title; on 2026-11-10 Night 3, 3B and the sprite run were all pushed under the old
+title "Krea 2 cut…", which made `git log --oneline` look as if they had never been committed).
 
 ## Running a bake-off (choosing models)
 
@@ -173,3 +175,25 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
 - **What to paint next:** `brief missing` → `games/<game>/batches/draft_missing.json` (a draft; every `{{block}}` must
   exist before it submits).
 - **Credits:** `credits` → `out/reports/CREDITS_MODELS.md`.
+
+
+## Night 4 (2026-11-10) — production
+
+- **Sprites are William's** (he draws sheets in an outside tool and bulk-edits them). `sprite_intake` cuts, aligns and
+  packs them: `python -m forge intake <sheet|folder> <character> [variant] [--tool "<name version>"]` runs inline (not
+  queued) and, at a console, asks him whether the facing guess is right. The mapping file
+  (`games/<game>/intake/<character>[__<variant>]/<sheet>.intake.json`) is the record; numbers are on `numbers.png`.
+  Contract: `sheet.png`, one row, S,SW,W,NW,N,NE,E,SE, cell 144×216, feet at y = 210. Never mirror an `asymmetric`
+  character without saying so (Sarah's holster).
+- **Characters:** `games/<game>/characters/<id>.json`. Inheritance runs in a submit shim (`forge/cli_night4.py`) until
+  WIRE_NIGHT_4 moves it. `character_set` is expanded at SUBMIT (registry + blocks → plain-text renders).
+- **Production:** `produce plan` writes `games/<game>/batches/produce_plan.json` (+ .md); it adds TODO placeholder blocks
+  (`place.<map>`, `culture.<town>`, `fate.*`, `enclave.*`, `sleeve.*`, `icon.*`) to `prompts/night4.json` with the
+  game's own words inside — **those words are Fable's to write**. `produce queue` refuses while any is TODO.
+  **Never run `produce queue` without `--dry` from an assistant session against William's live queue** (it submits).
+- **Delivery:** approve (and `deliver`) record every copy into the game in `games/<game>/delivered.json`; `deliver undo`
+  puts back what was replaced. `deliver hold` approves without copying (for sessions that can't reach the game).
+- **Feedback:** `feedback-in` turns `playtest/art_feedback.json` into drafts in `jobs/drafts/` — never queued.
+- **Photographs:** `photo_plate` refuses any frame not listed in the git-ignored `games/<game>/refs.local.json` with
+  `people: none` or `people: william`.
+- `models-report`, `housekeeping`: report only. Nothing in the forge deletes a file.

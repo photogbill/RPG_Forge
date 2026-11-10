@@ -515,6 +515,11 @@ def render(job: dict, ctx, out: Path, runner=None) -> dict:
         save_png(game_normal(na, flip), out / f"{slot}_n.png")
         outputs.append(f"{slot}_n.png")
         measured["normal_flipped_by_forge"] = flip
+    if job.get("tileable"):        # Night 4 (F7): Filter Forge's own seamless does not survive its command-line renderer
+        from ..night4.tileable import tile_channels
+        measured["tileable"] = tile_channels({ch: Path(p) for ch, p in got.items()}, float(job.get("tile_band") or 0.12),
+                                             float(job.get("seam_limit") or 1.5))
+        outputs += [v["file"] for v in measured["tileable"].values() if v.get("file")]
     # contact: every channel, plus a 2×2 tiling of the final image when seamless was asked for
     tiles, labels = [], []
     for ch, p in got.items():

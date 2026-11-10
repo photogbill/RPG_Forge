@@ -1,7 +1,7 @@
 {
  "suite": "sprite_samplers_klein_v2",
  "game": "turing_accords",
- "_comment": "v2 (William, 2026-11-10 02:25): his prompt prefix '8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage' replaces the 'solar panel' wording (v1 drew literal solar panels); canon nuclear core + trefoil and holster added; tile/map/icon/level LoRAs, the icon checkpoint, FLUX/MOSS/unknown LoRAs mislabelled as SDXL, and the banned Krea 2 cinematicFantasy are skipped. v1's 53 finished renders stay as the before-picture. Same Sarah sprite on FLUX.2 [klein] 4B base + distilled (Apache-2.0; the non-commercial 9B is excluded) x the five samplers the klein graph supports; steps/cfg stay each model's own (base 20/5, distilled 4/1).",
+ "_comment": "v2 (William, 2026-11-10 02:25): his prompt prefix '8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage' replaces the 'solar panel' wording (v1 drew literal solar panels); canon nuclear core + trefoil and holster added; tile/map/icon/level LoRAs, the icon checkpoint, FLUX/MOSS/unknown LoRAs mislabelled as SDXL, and the banned Krea 2 cinematicFantasy are skipped. v1's 53 finished renders stay as the before-picture. Same Sarah sprite on FLUX.2 [klein] 4B base + distilled (Apache-2.0; the non-commercial 9B is excluded) x the five samplers the klein graph supports; steps/cfg stay each model's own (base 20/5, distilled 4/1). | Prompt rewritten 2026-11-10 13:22 (William): his hair block as FLUX-style prose (FLUX ignores (x:1.3) weights and most negatives).",
  "graph": "flux2_klein",
  "base_override": "flux2",
  "checkpoint_kinds": [
@@ -78,7 +78,7 @@
     1216
    ],
    "prompts": {
-    "sarah": "8k, High definition highly detailed, Perfect violet eyes, Violet Purple and cobalt Blue Balayage, full body game character sprite of a slender young woman who appears twenty-five, standing in a relaxed ready pose facing the viewer, whole figure from head to boots in frame, long straight hair past the shoulder blades, fine-boned oval face with the beginning of a smirk, fair skin, matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core with a radiation trefoil set in a chest plate at the sternum, holster and gun belt at the hips, flat black boots, clean readable silhouette, even soft studio light, flat plain white background"
+    "sarah": "A highly detailed, sharp full-body game character sprite of a slender young woman who looks about twenty-five, standing and facing the viewer, the whole figure from head to boots in frame, on a plain white background in even, soft studio light. Her long hair is iridescent: a balayage that blends cobalt blue into purple, with shifting magenta-violet highlights and a metallic, photovoltaic sheen, a faint fine grid pattern glinting in the highlights like light across a thin film; every strand is crisp and highly detailed, and neither colour wins, the blue and the purple trade places along each strand. Her eyes glow violet. She has the beginning of a smirk. She has a fine-boned oval face and fair skin. She wears a matte black tactical bodysuit with faceted armor plates at the forearms and shoulders, a glowing violet nuclear core marked with a radiation trefoil set in a small chest plate at her sternum, a holster and gun belt at her hips, and flat black boots. Clean, readable silhouette."
    }
   }
  }

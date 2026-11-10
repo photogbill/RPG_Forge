@@ -12,7 +12,16 @@ What counts as "wanted" (every file the game loads by path, so real art can repl
                                           + its five optional set companions <map>_n/_e/_back/_over/_depth.png
                                           (kind "scene_slot", `set_of` the painting; approve them with --set)
   * sleeves from project/data/records.json (`sleeve` res:// paths)
-  * icons named by items.json `icon` fields, if any
+  * icons for EVERY item in items.json (Night 4): its `icon` path if it has one, else project/assets/icons/<id>.png
+                                          with `referenced: false` (the game must add the `icon` field to load it)
+  * enemies from data/enemies.json (`sprite` / `battle_sprite`), UI pieces from data/ui.json (Night 4), if present
+  * a validator's list, if the game writes one (Night 4, game plan 27 §3.1): project/data/art_needs.json
+    (or project/tools/art_needs.json) — {"items": [{"name", "kind", "path", "target_size", "name_in_game", "description",
+    "notes"}]}. Its entries win over the scan's.
+Every item also carries `sha1` (of the file on disk now, if any) so the forge can tell a stand-in from a delivery.
+Maps carry their town (Night 4, game plan 27 §0a): `town`, `era`, `map_state`, `state_of` from the map file, and from
+data/towns.json the town's `look` (four words), `fate` (erased / emptied / scarred / spared / swollen) and `enclaves`
+([{"from", "name", "map", "block": [x0, y0, x1, y1]}] — blocks in the map's painting pixels).
 Names are the path under project/assets/ without the extension: "placeholder/hero_sarah", "scenes/bills_house".
 Sizes: `size` is the file on disk now (if any); `target_size` is what 10.1b asks for (everything ×3).
 """
@@ -30,6 +39,14 @@ SCENE_SLOTS = (("_n", "normals, OpenGL convention (green = up)"), ("_e", "additi
                ("_back", "far parallax plane, opaque, wider by its overscan each side"),
                ("_over", "walk-behind plane, RGBA"), ("_depth", "16-bit grey depth, white = near"))
 BACK_OVERSCAN = 48   # scene_layers' default, px per side
+
+
+def sha1(p: Path) -> str | None:
+    import hashlib
+    try:
+        return hashlib.sha1(p.read_bytes()).hexdigest()[:16]
+    except OSError:
+        return None
 
 
 def png_size(p: Path) -> list[int] | None:
@@ -74,7 +91,7 @@ def export(game_root: str | Path) -> dict:
         if target is None and size:
             target = [size[0] * SCALE, size[1] * SCALE]
         items[name] = {"name": name, "path": path.replace("\\", "/"), "kind": kind, "exists": p.exists(), "size": size,
-                       "target_size": target, "notes": notes, "source": source}
+                       "target_size": target, "notes": notes, "source": source, "sha1": sha1(p) if p.exists() else None}
 
     for p in sorted((assets / "placeholder").glob("*.png")):
         k = _kind(p.stem)
@@ -85,6 +102,18 @@ def export(game_root: str | Path) -> dict:
     for p in sorted((assets / "vignettes").rglob("*.png")):
         rel = p.relative_to(assets).with_suffix("").as_posix()
         put(rel, f"project/assets/{p.relative_to(assets).as_posix()}", "vignette", source="Set_Pieces")
+    towns = {}
+    tp = proj / "data" / "towns.json"
+    if tp.exists():
+        try:
+            towns = json.loads(tp.read_text(encoding="utf-8")) or {}
+        except (OSError, ValueError):
+            towns = {}
+    enclave_of = {}
+    for tid, t in (towns.items() if isinstance(towns, dict) else []):
+        for e in (t or {}).get("enclaves") or []:
+            if isinstance(e, dict) and e.get("map"):
+                enclave_of.setdefault(e["map"], []).append({**e, "town": tid})
     maps = proj / "data" / "maps"
     for m in sorted(maps.glob("*.json")):
         if m.name.endswith(".painted.json"):
@@ -115,6 +144,13 @@ def export(game_root: str | Path) -> dict:
         items[f"scenes/{mid}"]["greybox"] = greybox if (root / greybox).exists() else None
         items[f"scenes/{mid}"]["name_in_game"] = d.get("name")
         items[f"scenes/{mid}"]["slots"] = [f"scenes/{mid}{sfx}" for sfx, _ in SCENE_SLOTS]
+        town = d.get("town")
+        t = towns.get(town) if isinstance(towns, dict) and town else None
+        items[f"scenes/{mid}"].update({
+            "town": town, "era": d.get("era"), "map_state": d.get("state"), "state_of": d.get("state_of") or d.get("base_map"),
+            "template": d.get("template") or d.get("layout_template"), "skin": d.get("skin"),
+            "look": (t or {}).get("look"), "fate": (t or {}).get("fate"), "town_name": (t or {}).get("name"),
+            "town_era": (t or {}).get("era"), "enclaves": enclave_of.get(mid) or []})
         stem = bg[:-4] if bg.lower().endswith(".png") else bg
         for sfx, what in SCENE_SLOTS:
             st = None
@@ -135,10 +171,56 @@ def export(game_root: str | Path) -> dict:
     it_path = proj / "data" / "items.json"
     if it_path.exists():
         for iid, it in json.loads(it_path.read_text(encoding="utf-8")).items():
-            if isinstance(it, dict) and it.get("icon"):
-                put(f"icons/{iid}", _res(it["icon"]), "icon", it.get("name", ""), target=[256, 256], source="data/items.json")
+            if not isinstance(it, dict):
+                continue
+            path = _res(it["icon"]) if it.get("icon") else f"project/assets/icons/{iid}.png"
+            put(f"icons/{iid}", path, "icon", it.get("name", ""), target=[256, 256], source="data/items.json")
+            items[f"icons/{iid}"].update({"name_in_game": it.get("name"), "description": it.get("desc") or it.get("description"),
+                                          "category": it.get("kind") or it.get("category"), "referenced": bool(it.get("icon"))})
+    en_path = proj / "data" / "enemies.json"
+    if en_path.exists():
+        try:
+            enemies = json.loads(en_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            enemies = {}
+        for eid, e in (enemies.items() if isinstance(enemies, dict) else []):
+            if not isinstance(e, dict):
+                continue
+            ref = e.get("battle_sprite") or e.get("sprite")
+            path = _res(ref) if ref else f"project/assets/enemies/{eid}.png"
+            put(f"enemies/{eid}", path, "enemy", e.get("name", ""), source="data/enemies.json")
+            items[f"enemies/{eid}"].update({"name_in_game": e.get("name"), "description": e.get("desc") or e.get("description"),
+                                            "referenced": bool(ref)})
+    ui_path = proj / "data" / "ui.json"
+    if ui_path.exists():
+        try:
+            ui = json.loads(ui_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            ui = {}
+        for uid, u in (ui.items() if isinstance(ui, dict) else []):
+            if isinstance(u, dict) and u.get("texture"):
+                put(f"ui/{uid}", _res(u["texture"]), "ui", u.get("kind", ""), target=u.get("size"), source="data/ui.json")
+                items[f"ui/{uid}"].update({"ui_kind": u.get("kind"), "nine_slice": u.get("nine_slice")})
+    # the game's own validator list wins (Night 4, game plan 27 §3.1)
+    vpath = None
+    for cand in (root / "project" / "data" / "art_needs.json", root / "project" / "tools" / "art_needs.json"):
+        if cand.exists():
+            vpath = cand
+            break
+    if vpath is not None:
+        try:
+            v = json.loads(vpath.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            v = {}
+        for e in v.get("items") or []:
+            if not isinstance(e, dict) or not e.get("name") or not e.get("path"):
+                continue
+            put(e["name"], _res(e["path"]), e.get("kind") or "other", e.get("notes", ""), target=e.get("target_size"),
+                source=f"validator ({vpath.name})")
+            items[e["name"]].update({k: e[k] for k in ("name_in_game", "description", "category", "town", "era")
+                                     if e.get(k) is not None})
     return {"game": "turing_accords", "game_root": str(root), "exported": datetime.now().isoformat(timespec="seconds"),
-            "count": len(items), "items": items}
+            "count": len(items), "items": items, "towns": towns if isinstance(towns, dict) else {}}
 
 
 def main(argv: list[str]) -> int:
