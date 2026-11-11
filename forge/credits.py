@@ -1,6 +1,6 @@
 """Credits for the models (Night 3, G8): every model that touched a shipped pixel, nameable on demand.
 
-    python -m forge credits [--game turing_accords]   → out/reports/CREDITS_MODELS.md   (credits.bat)
+    python -m forge credits [--game <id>]   → out/reports/CREDITS_MODELS.md   (credits.bat)
 
 Reads the provenance files in the game's asset folder (`_provenance/*.json`, written by `approve`); if the game folder
 is not readable, the forge's own approval records (games/<game>/approved.json). Each model is listed once with its

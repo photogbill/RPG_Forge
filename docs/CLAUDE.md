@@ -196,3 +196,120 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
 - **Photographs:** `photo_plate` refuses any frame not listed in the git-ignored `games/<game>/refs.local.json` with
   `people: none` or `people: william`.
 - `models-report`, `housekeeping`: report only. Nothing in the forge deletes a file.
+
+
+## The suite (BUILD 01, 2026-11-10) — how a session works with a game's data from now on
+
+- **One app, every game:** `forge.bat` / `python -m forge suite`. Code in `forge/suite/` never names a game; a game's
+  shapes live in `games/<id>/workbench_adapter.py` (contract: `forge/suite/adapter.py`). `tests/test_suite_build01.py`
+  fails if anything under `forge/` names a game (a short list of files the running worker reloads waits for BUILD 16).
+  Commands default to `config.default_game(cfg)` (local/suite.json), never a literal.
+- **Sign everything.** A session sets `FORGE_IDENTITY="Claude Opus"` (or Fable) or passes `--who`; the install's own
+  identity (`local/suite.json`) is the person at the PC — never sign as them.
+- **Write a game's data through the safe path** when the suite can: `safesave.edit(adapter, rel, [("set", pointer,
+  value) | ("add", obj_pointer, key, value)], who, expected_hash=…, reason=…)`. It checks the hash, runs the game's
+  own validator on a temp copy, backs up, replaces atomically and journals. Ids are refused; locked lines (a song's
+  own words — `adapter.locked()`) are refused.
+- **Approved means his.** Before changing anything with `approved_by` (or `status: approved`), don't: `edit()` turns
+  it into a proposed change in `<game_root>/proposals/` for its owner. `approval.mark()` sets draft/flagged; only a
+  person approves.
+- **Journal what you do** that the safe path didn't: `python -m forge journal add <kind> <object> --note "…" --who
+  "Claude Opus" [--game <id>]`. Read what happened first: `journal show --since <time>`, or `WORKBENCH_LOG.md`.
+- **Times:** this Linux shell runs on UTC. `local/suite.json` → `"timezone": "America/New_York"` (or `FORGE_TZ`) keeps
+  journal lines in the PC's local time; Windows needs nothing.
+- **Never write test data into a real game.** The tests copy `games/_example` to a temp folder.
+
+## The Mail, work orders, "while you were away" (BUILD 03) — every session, start and finish
+
+**Start** (sign as yourself: `--who "<your name>"` or `FORGE_IDENTITY`):
+1. `python -m forge away --who "<you>" --mark` — everything anyone else did since you last worked, lines they rewrote as
+   word diffs (also written to `<game_root>/journal/DIGEST_for_<group>.md`). `--mark` starts your session there.
+2. `python -m forge mail list --who "<you>"` then `mail read <id>` — your inbox is `<game_root>/mail/to_<group>/`
+   (a group is the first word of a name). What the person answered or asked is a ruling; act on it first and reply
+   in the thread saying what you did, what you didn't and why.
+3. `python -m forge orders list --for "<you>"` — start at the top; close each with `orders done <id> --note "…"`.
+
+**Finish** with a letter through the Mail, never a loose file:
+`python -m forge mail send --from "<you>" --to "<person>" --subject "…" --body-file letter.md [--questions q.json] [--attach <path>]`.
+`q.json` is a list of questions: `{"id", "question", "why", "recommendation", "default", "choices", "applies_to"}`.
+`choices` are labels or `{"label", "value"}`; "something else" is always allowed. Give `applies_to: {"file", "pointer"}`
+only when a choice maps to one data field — the person's Send then changes it through the safe-save path. Put what
+only they can do on their list: `orders add --for "<person>" --title "…" [--detail …] [--priority now|soon|someday]`.
+
+## Sprite intake and the character registry in the suite (BUILD 04)
+
+- **A sheet's mapping is edited on the Sprite intake screen**, never by hand: `forge/suite/sprites.py` (open → save →
+  make). The forge's first guess is written unchecked; saving the clicks marks it `checked_by_person` with `checked_by`
+  and keeps the previous file in `intake/<who>/_history/`. A session may open and save a mapping too, signed as itself —
+  but **facings on William's sheets are his to click**; don't save his mappings for him.
+- `make_sheet` runs the same `sprite_intake` job as `sprite_intake.bat`, in-process (`night4/inline.run_now`), on the
+  original sheet. **See-through gaps (wiring day W10):** `intake.foreground` clears exactly the mapping's `holes` when a
+  person has decided (an empty list keeps every gap as figure), and gaps that pass the POCKET_* rule when nobody has;
+  `detect` keeps them (`auto_pockets=False`) so the screen can offer them. The original sheet is never changed.
+- **Cut off** (edges.md, report.json): a side is listed only where the figure meets the sheet's edge, or a box a person
+  narrowed (`bbox_found` = the box detection drew; mappings made before wiring day have none).
+- **The registry** (`forge/suite/cast.py`): the page edits only `seed`, `asymmetric` and `references` (format-preserving,
+  `characters/_history/`, journalled). Look blocks are the art direction's words in the prompt library — not edited
+  there. *Make the set* = the batch file `characters set` writes + `submit` (which resolves characters itself since wiring
+  day W5 — the Night 4 shim is retired), printout shown; it refuses a TODO block.
+- Wiring day (BUILD 16, 2026-11-11) did W1–W10 of `local/<game>/docs/WIRE_NIGHT_3.md` / `WIRE_NIGHT_4.md`. New items
+  that need a file the worker reloads go into a new `WIRE_*.md`, for the next time the worker is stopped.
+
+## Art production in the suite (BUILD 12)
+
+- The Wanted board, Make a picture and Review & approve are `forge/suite/production.py` and `picture.py` over the forge's
+  own functions: `produce.plan/queue/estimate/blockers` (queue takes `names=` for a selection), `deliver.hold/run`,
+  `manifest.approve_set`, `kitcheck`, `feedback.draft_redo`, `handoff.hand_out`, `reviews.town_sheet/atlas_sheet`.
+- **A session never queues William's live production** — the board's Queue is his button. From a session: `plan`,
+  `plan_selection` (read-only) and `produce queue --dry`. Approving is his too (an assistant identity is refused).
+- Approve = hold (the licence gate now, the copy at Deliver); a kit = `approve_set` (copies on confirm). Deliver keeps
+  what it replaces in `out/_replaced/` and writes `games/<game>/delivered.json`.
+
+## Feedback and finishing in the suite (BUILD 14)
+
+- `forge/suite/finishing.py`: Called out (`feedback.list_drafts` / `draft_action` / `take_in`), mark-up (`markup` → a mask
+  in `out/markup/<job>/` + `feedback.draft_redo` + a scene_state fix draft carrying the mask), the prompt library
+  (`edit_block`: jsondoc, `prompts/_history/`, journalled), bake-offs (`cli.cmd_bakeoff` submit/report, printout shown),
+  hand-offs (`handoff.hand_in`), the model shelf (`models_shelf.build`).
+- **Look words are the art direction's.** A session may read the library and point at placeholders; it does not write
+  a look block's words unless the person (or Fable, by name) asked for that block.
+- `bakeoff.inventory(refresh=True)` and `bakeoff.submit` write under the repo root (`models/`, `out/bakeoff/`), not the
+  cfg's paths — tests must never call them.
+
+## Music — the board and composing together (BUILD 06)
+The Music board (Story → ♪ Music) is every slot the game has, each with a state: needed → proposed → agreed → written →
+delivered → in game. `forge/suite/music.py` holds the rules; the game's adapter says where the board record, the
+profiles, briefs, song drafts and the score inbox live (defaults: `<game_root>/music/…`, `score_inbox/`). From a session:
+- `python -m forge music board [--state needed] [--singer <name>]` — counts, "next most useful", the slots.
+- `python -m forge music sheets` / `sheet <id>` — the profiles (voice · style 1, 2, 3 … · how their songs are built ·
+  style notes · open spots). A profile is built from evidence only; anything you can't determine stays **open** and you
+  ask in a letter (one per character is fine). Never infer a voice type: it is the bible's lock or `ask`.
+- `python -m forge music propose <slot> --brief-file b.md --style style-N|new --who "<you>"` — a brief: the scene and
+  what the song must do, whose voice, which style of their profile (measured against its example song) and what you'd
+  do differently here, the form, tempo and metre, a motif, two or three alternatives. It goes to the owner as a letter
+  with one question; their answer lands in the board through the Mail. A style still open can't carry a brief.
+- `python -m forge music write <slot> --title "…" --file song.md --who "<you>"` — only after a yes (`agreed`): a
+  Suno-ready file (the style input, then the lyrics with section tags; notes after). Every version is kept and credited.
+What a session never does: answer its own brief, write before a yes, touch a slot that is the owner's own, deliver a
+track, change a delivered (cemented) slot or its words, fill a profile field (that is the person's — you ask). A slot is
+the owner's own from the start when they said so in writing: `music.record_own(adp, slot, who, "<file:line — the words>")`.
+No game's music — sheets, briefs, lyrics, audio — is ever written into this repository.
+
+## The read-through and notes on anything (BUILD 07)
+The person reads a town in `forge.bat` → Story → 📖 Read-through and rules on each line (approve / draft / flag as
+generic) or rewrites it; a ⚑ usually carries a note saying what is generic about it. You find all of it in your digest
+(`python -m forge away --who "<you>"`): rewritten lines as word diffs (read them — how a person rewrites is the best
+guide to their voice), approvals, flags, notes. Notes live in `<game_root>/notes/notes.jsonl` (`forge/suite/notes.py`:
+`threads(root, obj)`, `add(root, obj, who, text, tag, reply_to=…)`, a resolving note closes a thread) — pinned to a ref
+(`file#pointer`) or a key like `place:<id>` / `music:<slot>`. Answer a note by replying to it, and resolve it when the
+work it asked for is done. A game's adapter can order a place's lines (`line_order`), give its sheet per era
+(`place_sheet`), its own words and greeting for the sameness meter (`place_words`, `place_greeting`).
+
+## How a letter to the person is written (the standard every session inherits)
+
+One colleague writing to another, signed with your name, with a subject line. Say what you built, how to try it (the
+first three things to click), what you're unsure of, what you'd do next, and only the questions you couldn't decide —
+each with your recommendation and what you'll do by default. "I went ahead with X; tell me if that's wrong" for what
+you could decide. No forms, no ticket numbers in the prose, no deference, no apology rituals — and none of it in the
+other direction either; disagree plainly when you disagree. Humour is allowed. `games/_example/game/mail/` has three
+letters written to this standard.

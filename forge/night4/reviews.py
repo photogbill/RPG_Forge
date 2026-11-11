@@ -89,7 +89,7 @@ def _town_jobs(cfg: dict) -> dict[str, list[dict]]:
     """Paintings grouped by town: a job's meta.town / town, else the town of its map in wanted.json."""
     from .. import manifest
     try:
-        items = manifest.load_wanted(cfg, "turing_accords")["items"]
+        items = manifest.load_wanted(cfg, cfgmod.default_game(cfg))["items"]
     except Exception:  # noqa: BLE001
         items = {}
     town_of = {n.split("/", 1)[1]: w.get("town") for n, w in items.items() if w.get("kind") == "scene" and w.get("town")}

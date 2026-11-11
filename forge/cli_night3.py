@@ -3,6 +3,7 @@
   report night [--since T] [--until T] [--hours 12] [--all] [--open]   the morning report → out/reports/night_<date>.html
 """
 from __future__ import annotations
+from . import config as cfgmod
 import os
 from datetime import datetime
 
@@ -209,9 +210,9 @@ def cmd_kit(cfg: dict, args: list[str]) -> int:
     from . import kitcheck
     pos = _positional(args, ("--map", "--game"))
     if len(pos) < 2 or pos[0] != "check":
-        print("usage: kit check <job-id or folder> [--map <map id>] [--game turing_accords]"); return 2
+        print("usage: kit check <job-id or folder> [--map <map id>] [--game <id>]"); return 2
     kd = _kit_dir(cfg, pos[1])
-    rep = kitcheck.check(cfg, kd, _opt(args, "--map"), _opt(args, "--game", "turing_accords"))
+    rep = kitcheck.check(cfg, kd, _opt(args, "--map"), (_opt(args, "--game") or cfgmod.default_game(cfg)))
     mark = {"pass": "ok  ", "warn": "WARN", "fail": "FAIL"}
     for l in rep["lines"]:
         print(f"  {mark[l['status']]} {l['check']:22s} {l['message']}")
@@ -226,7 +227,7 @@ def cmd_prompts(cfg: dict, args: list[str]) -> int:
     import json
     from . import prompts as pl
     pos = _positional(args, ("--game", "--on", "--n"))
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     sub = pos[0] if pos else "list"
     try:
         lib = pl.load(cfg, game)
@@ -282,7 +283,7 @@ def cmd_prompts(cfg: dict, args: list[str]) -> int:
 # ------------------------------------------------------------------ G10 / G11
 def cmd_brief_missing(cfg: dict, args: list[str]) -> int:
     from . import brief_missing as bm
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     try:
         p, rep, r = bm.write(cfg, game, refresh="--no-refresh" not in args)
     except (FileNotFoundError, ValueError) as e:
@@ -300,7 +301,7 @@ def cmd_brief_missing(cfg: dict, args: list[str]) -> int:
 # ------------------------------------------------------------------ G8
 def cmd_credits(cfg: dict, args: list[str]) -> int:
     from . import credits
-    p, g = credits.write(cfg, _opt(args, "--game", "turing_accords"))
+    p, g = credits.write(cfg, (_opt(args, "--game") or cfgmod.default_game(cfg)))
     print(f"credits: {p}  ({g['approved']} approved file(s), {len(g['models'])} model(s); source: {g['source']})")
     for pr in g["problems"]:
         print(f"  ⚠ {pr}")

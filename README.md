@@ -12,6 +12,95 @@ jobs/pending/*.json  ──►  worker (GPU: ComfyUI · CPU: Pillow/numpy)  ─�
       └──────────── you / a script / Claude write the next job ◄─────────────┘
 ```
 
+## The suite — `forge.bat` (BUILD 01, 2026-11-10)
+
+RPG_Forge is a development suite for every RPG you make, not one game's tool. **`forge.bat`** opens it in your browser
+(http://127.0.0.1:8770 — only this PC can see it):
+
+- **A game picker** first. Each game is a folder `games/<id>/` (git-ignored) with `forge.game.json` → `game_root` (where
+  the game's own folder is) and, for its Story side, a `workbench_adapter.py`. `games/_example/` is a tiny made-up game
+  the suite always opens; every test runs on it.
+- **Art | Story.** Art's **Home** shows whether the art worker is running, what it is making, how much is left and how
+  long, how much disk is free against the guard — with three safe buttons: *Start worker* (opens `run_worker.bat`'s own
+  window), *Pause after this job* (the same as `pause.bat`), *Resume*. **Queue & pictures** is the dashboard `ui.bat` has
+  always shown, served by the same code. Story shows what the suite reads from the chosen game until the Mail (BUILD 03)
+  and the Workbench (BUILD 07) arrive.
+- **Who you are.** The first time it opens it asks your name; every change made through the suite is signed with it.
+- **The Mail** (Story, BUILD 03) — the screen to open first each day. Letters between you and the assistants working on
+  the game: Inbox · Sent · Drafts · Archive, threads, search. A letter's questions are answered in place — pick, type, or
+  "talk to me about this one" — and **Send** puts your reply in the game's `mail\` folder for the next session. Where a
+  question says which data field it sets, picking an answer changes it through the safe path (checked, backed up,
+  logged) and the reply says so. **While you were away** sits at the top: what everyone else did since you last worked.
+- **Work orders** — two lists, "for" each side: what you want done (add one from any letter, question or picture, or a
+  blank box, with a priority), and what only you can do. Plain files in the game's `work_orders\` folder.
+- **Read-through** (Story, BUILD 07) — pick a town and an era and read everything it says, top to bottom, in the order
+  a player meets it: the town's sheet on top, then every line with who says it, when (the conditions in words) and its
+  status, then the quests offered there. Click ✎ or press **E** to rewrite a line in place; **A** approves, **D** leaves
+  it a draft, **G** flags it as generic (with a note), **N** pins a note for Claude, **J/K** move. Song words show locked.
+  A **sameness meter** marks candidates — a line that also appears in another town, a line with no word that belongs to
+  this town, a speaker who never uses its greeting — and says it is mechanical. **Side by side** puts another town (or
+  this one in another era) next to it. If a session changed the file while you were reading, nothing is overwritten:
+  you see both versions and choose. Everything lands in the journal, so the next session's digest has it.
+- **Music** (Story, BUILD 06) — every music slot the game has as one board, each with a coloured state (needed →
+  proposed → agreed → written → delivered → in game), filterable by town, era, voice and state, with the gaps counted on
+  top and the next most useful piece of work. **Drop a finished track on its row** (or deliver one from the score inbox,
+  which guesses the slot): it is copied into the game under the slot's file name, the game's music data points at it,
+  and the slot is cemented — delivered, by you, on that date; loop points (with a play-the-seam button) and volume trim
+  are editable. Briefs from a session arrive as letters you answer yes / yes, but… / no / I'll write this one / not yet;
+  no lyric is drafted before a yes. **Profiles** — what each voice sounds like, from the songs: the voice, each style with
+  its example song, how their songs are built, your style notes, and the open spots you fill in place.
+- **Called out and Mark up** (Art → Review & approve, BUILD 14) — redo drafts from your playtest notes (*Take in playtest
+  notes* reads the game's F9 file), from review notes and from mark-ups: circle or draw over what's wrong on any
+  picture — waiting, approved or already in the game — and say what; the marks become the inpaint mask of a repaint
+  draft beside a full redo with a new seed. Nothing is queued until you press *Queue it*; *Dismiss* keeps it in
+  `jobs\drafts\_dismissed\`; *I'll fix it myself* hands the picture out to you.
+- **Prompt library · Bake-offs · Models · Outside tools** (Art, BUILD 14) — the look-word shelves (red = still a
+  placeholder; words saved format-preserving, every save kept and signed; where used; an A/B draft with and without a
+  block); the game's bake-off suites with renders, hours, grids, Queue and the report; the model shelf with what is
+  **safe to delete** and why (it deletes nothing); hand-offs to outside programs and back, and the tool register.
+  Photographs as plates show the people guard beside the photo field; *Make a texture tile seamlessly* is a kind in
+  Make a picture.
+- **Sprite intake** (Art, BUILD 04) — drop a character sheet from any program (or open one from the game's folder).
+  The forge finds and numbers the figures *on the sheet itself*; click a figure, pick its facing on the compass (or the
+  number pad), leave out repeats, mirror a figure drawn the wrong way round; **Make the game sheet** → the packed sheet
+  (eight facings, one height, one baseline), the turntable and walk GIFs, warnings and the edge report. The mapping file
+  is written for you and kept with every earlier version; you never open it. Backdrop showing through between an arm and
+  the body on a JPEG sheet is found and marked (violet) — keep or clear each. A character the registry marks asymmetric
+  is never flipped without a second yes. The program that made the sheet goes through the tool register (the licence is
+  your answer; the forge never guesses one).
+- **Wanted** (Art, BUILD 12) — everything the game still needs, from its own files, as a board: by town, by kind or by
+  first appearance; each item *missing · stand-in · drafted · queued · rendered · approved · delivered*. **Plan** reads
+  the game and drafts one job per missing item (`produce plan`; nothing queued). Select a town (or anything) → *What
+  would it take?* → jobs, GPU hours, disk against free space and the guard, and every look block that still has no
+  words → **Queue** only when nothing refuses (`produce queue`, now with `names=`). A town sheet per town and the atlas
+  (does each town hold together? do they differ?).
+- **Make a picture** (Art, BUILD 12) — a form by kind (scene kit, big scene, state, portrait set, character set, icon,
+  prop, texture, photo plate, plain render): the fields in plain words with the game's defaults, *for* a wanted item
+  (takes its size; the board follows it), a character to inherit from, a town (its culture and fate blocks, its family
+  seed), how many takes. The prompt the worker will get is shown expanded with every block marked; each refusal sits
+  beside its field. **Queue it** goes through submit like any batch.
+- **Review & approve** (Art, BUILD 12) — pictures waiting for a verdict (made for a wanted item, not yet approved): 1:1
+  zoom, every output, A/B against another take, the licence line, the kit check. **Approve** holds it for delivery (the
+  licence check runs now; a kit is approved as a set); **Redo with a note** writes a draft (never queued); **Send out**
+  makes a hand-off folder. **Deliver to the game** shows the list first, then copies — whatever it replaces is kept in
+  `out/_replaced/`, the ledger records it, nothing is deleted. An assistant can check an approval but not make one.
+- **Characters** (Art, BUILD 04) — the registry as pages: variants, the locked seed (the face lock — change it here),
+  `asymmetric`, reference pictures by path, the look blocks (green written · red not written yet · grey not in the
+  library), what each variant is wanted for; **Make the face sheet** (every variant and mood of one face on one sheet);
+  **Make the set** says what it would queue — or, in submit's own words, why it can't yet — and queues only on a second click.
+
+Under it, the pieces every later screen uses (`forge/suite/`):
+
+| Piece | What it guarantees |
+|---|---|
+| **Adapter contract** (`adapter.py`) | The suite knows places, lines, quests, music slots, people and status — nothing about any one game. A game's adapter says where those are in its files; a second game needs a folder and an adapter, no forge change. |
+| **Safe save** (`safesave.py`) | A data file is changed only through: hash check (someone else saved it? show both, write nothing) → a temp copy checked by the *game's own validator* → backup in `<game_root>/_workbench_backups/<date>/` → atomic replace → journal. Ids never editable; a song's own words locked; unknown fields and formatting kept byte for byte (`jsondoc.py`). |
+| **Journal** (`journal.py`) | Every action, by anyone, is one line in `<game_root>/journal/<yyyy-mm>.jsonl` (who, what, before → after). `WORKBENCH_LOG.md` is its readable view. |
+| **Approved means his** (`approval.py`) | An item someone approved carries `approved_by`. Anyone else's edit to it becomes a *proposed change* for its owner to accept or decline; an assistant can't approve. |
+
+Commands: `python -m forge suite | identity [name] | journal add|show | mail list|read|send|reply | orders add|list|done | away | suite-check` (`mail.bat` for the Mail) (`suite-check` loads and saves every
+data file of every game with no edit and confirms the bytes are identical). `run_tests.bat` runs the forge's tests (safe while the worker renders).
+
 ## Why a folder queue
 
 - **Overnight batches.** Queue two hundred cards before bed; the worker chews through them and the
@@ -69,6 +158,8 @@ opening a folder. `bakeoff_report.bat` builds one grid per prompt
 records verdicts that show up as badges. `bakeoff.bat --quick` is a ten-minute smoke run first.
 
 ## Quick start (Windows)
+
+**Everything below also has a place in the suite: double-click `forge.bat`.**
 
 1. `install.bat` — Python venv + the CPU tools. Run `run_cpu_worker.bat` and you can already snap,
    pixelize and pack.
@@ -150,7 +241,7 @@ New job types are **plug-ins** (`forge/plugins/`): a running worker picks them u
 |---|---|---|
 | The morning report — what ran, what failed and why, seconds per render by model | `night_report.bat` (`report night`) | — |
 | Review sheets a model can read: ≤ 12 labelled cells, ≤ 2,000 px, ≤ 1.5 MB, `review_index.json`; side-by-side pairs with a 1:1 crop | `review_compact.bat <suite>` (`review --compact` / `--pairs A,B`) | — |
-| Paint past one frame: small whole scene → climb ≤ 2× per step → tiled repaint (ControlNet tile + canny) → feathered merge → seam scores | `op.bat tiles-demo` | `scene_big` |
+| Paint past one frame: small whole scene → climb ≤ 2× per step → tiled repaint (ControlNet tile + canny) → feathered merge → seam scores | `op.bat tiles-demo` | `scene_big` · `scene_kit` with `big: true` (the six-file set at any size) |
 | Inpaint; a *state* of a room (the same room years on) — bit-identical to the base outside what changed | `op.bat state-mask …` | `inpaint`, `scene_state` |
 | Is this kit safe to approve? (slots, sizes, normals, depth, glow, planes, walk rings) — `approve --set` refuses on a fail | `kit_check.bat <job>` (`kit check`) | — |
 | Prompt library: `{{style.house}}` blocks expanded by `submit`; the never-list | `prompts.bat` (`prompts …`) | — |
@@ -169,7 +260,7 @@ Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, a
 | The character registry: one file per character, each variant's recipe (checkpoint, sampler, **locked seed**, prompt blocks, `asymmetric`). A job with `"character": "hero", "variant": "armoured"` inherits it | `characters.bat list / show / check / stubs / set` | `character_set` (moods on one face + battle pose + a generated sheet) |
 | What the game is missing → one ordered plan (first hour first, a town in one sitting on one seed) → a queue that refuses until every look block is written | `produce.bat plan` · `produce.bat queue` · `produce.bat status` | — |
 | Approved pictures → the game, with a ledger (undo-able; replaced files kept in `out\_replaced`). If the game folder isn't reachable, it writes a copy .bat for you | `deliver.bat [--dry]` · `deliver.bat undo <name>` | — |
-| Leave running beside a long queue: parks the queue under 40 GB free, brings it back by itself, writes the 24-hour report | `produce_watch.bat` | — |
+| Leave running beside a long queue: parks the queue under 40 GB free, brings it back by itself, writes the 24-hour report | `produce_watch.bat` (the worker also checks the disk guard itself every 5 minutes) | — |
 | Item icons in bulk, one hand per category | (planned by produce) | `icon_batch` |
 | The notes you make in the game with F9 → redo drafts (never queued); the dashboard's **Called out** section approves / dismisses / hands one to you | `feedback_in.bat` | — |
 | One of your photographs → a painted plate (only frames listed with no people, or only you) | — | `photo_plate` |

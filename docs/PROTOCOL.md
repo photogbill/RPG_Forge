@@ -20,16 +20,16 @@ Everything in RPG_Forge is a file in one of these folders. This document is the 
 ```json
 {
   "type": "scene_card",              // required — one of docs/JOB_TYPES.md
-  "name": "gate_law_01_ribbon",      // recommended — letters, digits, - _ . ; becomes part of the id
+  "name": "harbor_01_dawn",          // recommended — letters, digits, - _ . ; becomes part of the id
   "game": "mygame",                 // optional — pulls palette/style/sizes from games/<game>/forge.game.json
-  "batch": "gate_law_cards",         // optional — set automatically when submitted in a batch
+  "batch": "harbor_cards",           // optional — set automatically when submitted in a batch
   "prompt": "…",                     // type-specific fields follow
   "seed": -1                         // -1 = random; the chosen seed is recorded in prov.json
 }
 ```
 
 Unknown fields are kept (and passed to the handler), so a job can carry notes — e.g. `"brief": "card 01 of
-Set_Pieces/IV-T3_Gate_Law.md"` — that come back in the receipt.
+design/harbor_cards.md"` — that come back in the receipt. (Each game's own examples live in `local/<game>/`.)
 
 ### Id
 

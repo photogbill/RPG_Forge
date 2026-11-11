@@ -1,0 +1,9 @@
+{
+ "wren": {
+  "name": "Wren",
+  "kind": "human",
+  "voice": "Dry, quick, never says more than she has to.",
+  "sheet": "sprites/wren.png",
+  "portrait": "wren"
+ }
+}

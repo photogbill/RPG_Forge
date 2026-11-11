@@ -7,7 +7,7 @@ rem   approve.bat <job-id> <wanted-name> [pick-number]          one picture
 rem   approve.bat <job-id> <wanted-name> --set                  a scene_kit's six files (painting, _n, _e, _back, _over, _depth)
 rem   approve.bat <job-id> <wanted-name> --dry-run              look first, copy nothing
 rem   approve.bat <job-id> <wanted-name> --set --dry-run        look at the set first
-rem   e.g. approve.bat 20261110-031500-bills_house-ab12 scenes/bills_house --set
+rem   e.g. approve.bat 20261110-031500-town_square-ab12 scenes/town_square --set
 rem   Not sure of the name?  wanted.bat --missing   lists them.
 if not exist venv (echo Run install.bat first. & pause & exit /b 1)
 call venv\Scripts\activate.bat
@@ -15,7 +15,7 @@ set "JOB=%~1"
 set "NAME=%~2"
 set "PICK=%~3"
 if "%JOB%"=="" set /p "JOB=Job id (folder name under out\): "
-if "%NAME%"=="" set /p "NAME=Wanted name (e.g. scenes/bills_house): "
+if "%NAME%"=="" set /p "NAME=Wanted name (e.g. scenes/town_square): "
 if "%PICK%"=="" goto nopick
 if /i "%PICK%"=="--dry-run" goto dry
 if /i "%PICK%"=="--set" goto set

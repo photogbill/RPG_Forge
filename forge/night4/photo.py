@@ -52,7 +52,7 @@ def guard(cfg: dict, game: str, photo: Path) -> dict:
 def run(job: dict, ctx: Context, out: Path) -> dict:
     from ..jobs import get_handlers
     out = Path(out)
-    game = job.get("game") or "turing_accords"
+    game = job.get("game") or cfgmod.default_game(ctx.cfg)          # W9: the engine names no game
     photo = Path(str(job["photo"]))
     if not photo.is_absolute():
         photo = ctx.resolve(photo)

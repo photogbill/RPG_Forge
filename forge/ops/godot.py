@@ -6,7 +6,7 @@ from pathlib import Path
 def tileset_tres(res_png_path: str, tile_size: int, count: int, blocking: list[bool],
                  collision_layer: int = 1, collision_mask: int = 1) -> str:
     """A TileSet with one atlas source over a horizontal strip of `count` tiles; `blocking[i]` adds a
-    full-square collision polygon to tile i. Same shape the Turing Accords greybox uses."""
+    full-square collision polygon to tile i. Same shape a greybox tile map uses."""
     half = tile_size // 2
     lines = ['[gd_resource type="TileSet" load_steps=3 format=3]', '',
              f'[ext_resource type="Texture2D" path="{res_png_path}" id="1_tiles"]', '',

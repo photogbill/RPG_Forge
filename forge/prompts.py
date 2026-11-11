@@ -119,7 +119,7 @@ def prepare(cfg: dict, jobs: list[dict], game: str | None = None) -> list[dict]:
     out = []
     libs = {}
     for j in jobs:
-        g = j.get("game") or game or "turing_accords"
+        g = j.get("game") or game or cfgmod.default_game(cfg)
         if g not in libs:
             libs[g] = load(cfg, g)
         lib = libs[g]
@@ -199,9 +199,10 @@ def check_library(lib: dict) -> list[str]:
     return probs
 
 
-def ab_drafts(cfg: dict, block: str, batch: str, n: int = 4, game: str = "turing_accords") -> Path:
+def ab_drafts(cfg: dict, block: str, batch: str, n: int = 4, game: str | None = None) -> Path:
     """A `_draft` batch: for up to n finished jobs of `batch` that used `block`, the same job twice — with the block and
     without it — same seed, so the block is judged on its own before it is trusted."""
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     lib = load(cfg, game)
     if block not in lib["blocks"]:
         raise PromptError(f"unknown block '{block}'")

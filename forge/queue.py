@@ -204,11 +204,25 @@ class Queue:
         os.replace(tmp, p)
 
 
-def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_sec: float = 2.0) -> int:
+GUARD_EVERY_SEC = 300.0
+
+
+def _guard(cfg) -> None:
+    """Wiring day W8: the disk guard, inside the worker (so it works without produce_watch.bat). It only moves pending
+    files to paused (and back); the job being rendered finishes. A guard error is logged and never stops the worker."""
+    try:
+        from .night4 import guard
+        guard.check(cfg)
+    except Exception as e:  # noqa: BLE001
+        log.warning("disk guard check failed (the worker carries on): %s", e)
+
+
+def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_sec: float = 2.0, cfg=None) -> int:
     """Claim and run jobs until the queue is empty (`once`) or forever. Returns jobs run.
 
     `handlers` maps job type → callable(job, ctx, out_dir) -> result dict, or is a callable returning
     that map (called before every job, so handler code can be reloaded while the worker runs).
+    `cfg` (W8): when given, the disk guard runs every GUARD_EVERY_SEC — before the first claim, then between jobs.
     A handler's exception becomes a failed job with the traceback saved, and the worker keeps going.
     """
     def current() -> dict:
@@ -231,7 +245,11 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
 
     ran = 0
     idle_logged = False
+    last_guard = 0.0
     while True:
+        if cfg is not None and time.time() - last_guard >= GUARD_EVERY_SEC:
+            _guard(cfg)
+            last_guard = time.time()
         hmap = current()
         claimed = queue.claim(accept)
         if claimed is None:

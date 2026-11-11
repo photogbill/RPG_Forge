@@ -115,7 +115,7 @@ def cmd_intake(cfg: dict, args: list[str]) -> int:
               "[--tool \"<name version>\"] [--queue]"); return 2
     target, character = Path(pos[0]), pos[1]
     variant = pos[2] if len(pos) > 2 else None
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     if not target.exists():
         print(f"not found: {target}"); return 1
     sheets = sorted(p for p in target.iterdir() if p.suffix.lower() in IMG_EXTS) if target.is_dir() else [target]
@@ -179,7 +179,7 @@ def cmd_intake(cfg: dict, args: list[str]) -> int:
 # ------------------------------------------------------------------ F2 characters
 def cmd_characters(cfg: dict, args: list[str]) -> int:
     from .night4 import characters as chm
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     pos = _positional(args, ("--game", "--parts"))
     sub = pos[0] if pos else "list"
     try:
@@ -232,8 +232,9 @@ def cmd_characters(cfg: dict, args: list[str]) -> int:
 
 # ------------------------------------------------------------------ the submit shim (F2 inheritance)
 def cmd_submit(cfg: dict, args: list[str]) -> int:
-    """Night 4 shim: files whose jobs name a `character` are resolved against the registry (and character_set jobs
-    expanded) into _incoming/, then submitted by the usual submit. WIRE_NIGHT_4.md moves this into submit."""
+    """RETIRED (wiring day W5) — `cli.cmd_submit` resolves characters itself. Night 4 shim: files whose jobs name a
+    `character` were resolved against the registry (and character_set jobs expanded) into _incoming/, then submitted
+    by the usual submit. Kept for one release, unused."""
     from . import cli as _cli
     from .night4 import characters as chm, charset
     new_args = []
@@ -296,13 +297,15 @@ def cmd_review(cfg: dict, args: list[str]) -> int:
     return _cli.cmd_review(cfg, args)
 
 
-COMMANDS = {"intake": cmd_intake, "characters": cmd_characters, "submit": cmd_submit, "review": cmd_review}
+# Wiring day W5: `submit` resolves characters itself now (forge/cli.py), so the shim below is no longer a command.
+# Kept for one release in case something outside this repo calls it; nothing in forge does.
+COMMANDS = {"intake": cmd_intake, "characters": cmd_characters, "review": cmd_review}
 
 
 # ------------------------------------------------------------------ F3 production
 def cmd_produce(cfg: dict, args: list[str]) -> int:
     from .night4 import produce
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     pos = _positional(args, ("--game", "--lanes", "--kinds"))
     sub = pos[0] if pos else "status"
     if sub == "plan":
@@ -361,7 +364,7 @@ def cmd_produce(cfg: dict, args: list[str]) -> int:
 
 def cmd_deliver(cfg: dict, args: list[str]) -> int:
     from .night4 import deliver as dl
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     pos = _positional(args, ("--game", "--only", "--as", "--pick", "--file"))
     try:
         if pos and pos[0] == "hold":
@@ -409,7 +412,7 @@ def cmd_feedback_in(cfg: dict, args: list[str]) -> int:
     from .night4 import feedback
     pos = _positional(args, ("--game",))
     try:
-        r = feedback.take_in(cfg, pos[0] if pos else None, _opt(args, "--game", "turing_accords"))
+        r = feedback.take_in(cfg, pos[0] if pos else None, (_opt(args, "--game") or cfgmod.default_game(cfg)))
     except FileNotFoundError as e:
         print(e); return 1
     for f in r["filed"]:
@@ -427,7 +430,7 @@ COMMANDS.update({"feedback-in": cmd_feedback_in})
 # ------------------------------------------------------------------ F8 model shelf
 def cmd_models_report(cfg: dict, args: list[str]) -> int:
     from .night4 import models_shelf
-    p, r = models_shelf.build(cfg, _opt(args, "--game", "turing_accords"), scan="--no-scan" not in args)
+    p, r = models_shelf.build(cfg, (_opt(args, "--game") or cfgmod.default_game(cfg)), scan="--no-scan" not in args)
     print(f"{r['files']} model file(s). Safe to delete: {r['safe_gb']} GB — {r['verdict_gb']} GB dropped by a verdict, "
           f"{r['cant_run_gb']} GB that nothing here can run today (your call). Nothing was deleted.\nReport: {p}")
     return 0

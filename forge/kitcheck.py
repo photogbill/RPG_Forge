@@ -1,6 +1,6 @@
 """`kit check` — is this scene kit safe to approve? (Night 3, G5)
 
-    python -m forge kit check <job-id> [--map <id>] [--game turing_accords]
+    python -m forge kit check <job-id> [--map <id>] [--game <id>]
         → pass / warn / fail per line, out/<id>/check.json and check.png
 
 A kit can look right and be wrong. Checked, each with a plain reason:
@@ -202,7 +202,8 @@ def wanted_size(cfg: dict, game: str, name: str):
         return None
 
 
-def check(cfg: dict, kit_dir: Path, map_id: str | None = None, game: str = "turing_accords", map_data: dict | None = None) -> dict:
+def check(cfg: dict, kit_dir: Path, map_id: str | None = None, game: str | None = None, map_data: dict | None = None) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     kit_dir = Path(kit_dir)
     lines = []
     paths = {k: kit_dir / f for k, f in SLOTS.items()}

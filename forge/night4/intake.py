@@ -89,10 +89,26 @@ def _near(rgb: np.ndarray, keys, tol: int) -> np.ndarray:
     return m
 
 
-def foreground(img: Image.Image, bd: dict) -> tuple[np.ndarray, np.ndarray]:
+# W10 (wiring day): see-through gaps on JPEG sheets — the suite's rule, proven on William's three Gemini sheets (it
+# finds exactly the 14 arm gaps and nothing in a face or the reactor glow, whose medians are ≥ 25).
+POCKET_MIN_AREA = 120          # px; an eye white or a glint is smaller, or not this close to the backdrop colour
+POCKET_MEDIAN = 8              # median distance to the backdrop colour (sum over r, g, b)
+POCKET_SHARE = 0.75            # share of its pixels within 15 of the backdrop colour
+POCKET_TALL = 0.08             # at least this share of a figure's height: an arm's gap is long, an eye is not
+
+
+def foreground(img: Image.Image, bd: dict, holes=None, auto_pockets: bool = True) -> tuple[np.ndarray, np.ndarray]:
     """(fg bool mask, alpha uint8). Flat / checker: the backdrop is what is near a key colour AND connected to the
     sheet's border (so a white eye inside a face survives), plus enclosed pockets that are plainly backdrop too
-    (a checker pocket holding both checker colours; a flat pocket with almost no shading)."""
+    (a checker pocket holding both checker colours; a flat pocket with almost no shading).
+
+    W10 — flat backdrops, see-through gaps (JPEG noise defeats the 'almost no shading' test):
+      holes=None and auto_pockets: also clear every enclosed near-key pocket that passes POCKET_* (no person has
+                                   decided yet — the .bat on a fresh sheet).
+      holes=[[x, y], …]:           a person decided (the suite's mapping): clear exactly the near-key pocket under
+                                   each point and nothing more — a gap they kept as figure stays (an empty list keeps
+                                   them all).
+      auto_pockets=False:          neither (detect() uses this, so the suite can still offer the gaps to the person)."""
     rgba = np.asarray(img.convert("RGBA"))
     if bd["kind"] == "alpha":
         a = rgba[..., 3].copy()
@@ -127,9 +143,42 @@ def foreground(img: Image.Image, bd: dict) -> tuple[np.ndarray, np.ndarray]:
                 bg[y0:y1, x0:x1] |= sel
         elif float(px.std(axis=0).max()) < 3.0:
             bg[y0:y1, x0:x1] |= sel
+    if bd["kind"] in ("flat", "checker") and holes is not None:
+        for pt in holes:
+            x, y = int(pt[0]), int(pt[1])
+            if 0 <= x < w and 0 <= y < h and near[y, x] and lab[y, x] > 0:
+                bg |= lab == lab[y, x]
+    elif bd["kind"] == "flat" and auto_pockets:
+        for bx in pockets(rgb, bd, near, lab, n, edge, ~bg):
+            bg |= lab == bx
     fg = ~bg
     alpha = np.where(fg, 255, 0).astype(np.uint8)
     return fg, alpha
+
+
+def pockets(rgb: np.ndarray, bd: dict, near: np.ndarray, lab: np.ndarray, n: int, edge, fg: np.ndarray) -> list[int]:
+    """Label ids of the enclosed near-key pockets still counted as figure that pass the POCKET_* rule (W10)."""
+    flab, fn = cc.label(fg, 8)
+    fb = cc.boxes(flab, fn)
+    if not fb:
+        return []
+    big = max(b["area"] for b in fb)
+    h_ref = max(_h(b["bbox"]) for b in fb if b["area"] >= 0.25 * big)
+    key = np.asarray(bd["keys"][0], dtype=np.int32)
+    out = []
+    for bx in cc.boxes(lab, n):
+        if bx["id"] in edge or bx["area"] < POCKET_MIN_AREA:
+            continue
+        x0, y0, x1, y1 = bx["bbox"]
+        if (y1 - y0) < POCKET_TALL * h_ref:
+            continue
+        sel = lab[y0:y1, x0:x1] == bx["id"]
+        if not fg[y0:y1, x0:x1][sel].any():
+            continue
+        d = np.abs(rgb[y0:y1, x0:x1][sel].astype(np.int32) - key).sum(axis=1)
+        if float(np.median(d)) <= POCKET_MEDIAN and float((d <= 15).mean()) >= POCKET_SHARE:
+            out.append(int(bx["id"]))
+    return out
 
 
 def decontaminate(img: Image.Image, fg: np.ndarray, bd: dict) -> Image.Image:
@@ -220,7 +269,7 @@ def detect(img: Image.Image, key=None, tolerance: int = 30) -> dict:
                           f"{bd['border_match']:.0%} of the sheet's border matches one colour) — this looks like a "
                           "picture, not a sheet. Put the figures on a plain background (or give `key` = the backdrop "
                           "colour) and run it again")
-    fg, _alpha = foreground(img, bd)
+    fg, _alpha = foreground(img, bd, auto_pockets=False)   # raw: the suite offers the see-through gaps to the person
     lab, n = cc.label(fg, 8)
     comps = cc.boxes(lab, n)
     if not comps:
@@ -325,7 +374,7 @@ def guess_mapping(det: dict) -> dict:
         rows.setdefault(f["row"], []).append(f)
     counts = [len(v) for _, v in sorted(rows.items())]
     nrows = len(counts)
-    entries = [{"n": f["n"], "bbox": f["bbox"], "facing": None, "frame": 0} for f in figs]
+    entries = [{"n": f["n"], "bbox": f["bbox"], "bbox_found": list(f["bbox"]), "facing": None, "frame": 0} for f in figs]
     by_n = {e["n"]: e for e in entries}
     why, conf = "no layout recognised — set each figure's facing by hand", "none"
     if nrows > 1 and len(set(counts)) == 1 and nrows in GUESS_ROWS and counts[0] >= 2:
@@ -375,9 +424,14 @@ def new_mapping(sheet: Path, det: dict, character: str, variant: str | None) -> 
 
 
 # ------------------------------------------------------------------ cutting and normalising
-def cut(rgba: Image.Image, fg: np.ndarray, bbox, bd: dict) -> tuple[Image.Image, dict]:
+def cut(rgba: Image.Image, fg: np.ndarray, bbox, bd: dict, found_bbox=None) -> tuple[Image.Image, dict]:
     """One figure from the cut-out sheet inside bbox: drop blobs that are not part of it (a neighbour's elbow, a
-    speck), tight-crop, and say whether it touches the bbox edge (a limb cut off by the sheet or the box)."""
+    speck), tight-crop, and say where a limb may really be cut off.
+
+    W10 (wiring day): detected boxes are drawn tight round the figure, so every figure touches every side of its own
+    box — that is not news. A side is reported only where the figure touches it AND the box meets the sheet's edge
+    there ("left (sheet edge)"), or a person narrowed the box there ("left (box narrowed)" — `found_bbox` is the box
+    detection drew; a mapping made before wiring day has none, and then only sheet edges are reported)."""
     x0, y0, x1, y1 = [int(v) for v in bbox]
     W, H = rgba.size
     x0, y0, x1, y1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
@@ -400,14 +454,16 @@ def cut(rgba: Image.Image, fg: np.ndarray, bbox, bd: dict) -> tuple[Image.Image,
         raise IntakeError(f"bbox {bbox}: nothing opaque inside")
     tx0, ty0, tx1, ty1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
     bw, bh = x1 - x0, y1 - y0
-    if tx0 <= 0 and x0 > 0 or x0 == 0 and tx0 == 0:
-        info["touches_box"].append("left")
-    if tx1 >= bw and x1 < W or x1 == W and tx1 == bw:
-        info["touches_box"].append("right")
-    if ty0 <= 0:
-        info["touches_box"].append("top")
-    if ty1 >= bh and y1 == H:
-        info["touches_box"].append("bottom (sheet edge)")
+    fb = [int(v) for v in found_bbox] if found_bbox else None
+    for side, touches, at_edge, narrowed in (
+            ("left", tx0 <= 0, x0 <= 0, bool(fb) and x0 > fb[0]),
+            ("top", ty0 <= 0, y0 <= 0, bool(fb) and y0 > fb[1]),
+            ("right", tx1 >= bw, x1 >= W, bool(fb) and x1 < fb[2]),
+            ("bottom", ty1 >= bh, y1 >= H, bool(fb) and y1 < fb[3])):
+        if touches and at_edge:
+            info["touches_box"].append(f"{side} (sheet edge)")
+        elif touches and narrowed:
+            info["touches_box"].append(f"{side} (box narrowed)")
     fig = Image.fromarray(a, "RGBA").crop((int(tx0), int(ty0), int(tx1), int(ty1)))
     return fig, info
 
@@ -482,7 +538,7 @@ def build(img: Image.Image, det_or_fg, mapping: dict, cell=CELL, figure_height: 
         fc = str(e["facing"]).upper()
         if fc not in FACINGS:
             raise IntakeError(f"figure {e.get('n')}: facing '{e['facing']}' — use one of {' '.join(FACINGS)}")
-        fig, info = cut(clean, fg, e["bbox"], bd)
+        fig, info = cut(clean, fg, e["bbox"], bd, e.get("bbox_found"))
         if e.get("flip"):
             fig = ImageOps.mirror(fig)
         used.append((e, fc, int(e.get("frame") or 0), fig, info))

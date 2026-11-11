@@ -180,19 +180,19 @@ Optional (default): `resolution` (1024), `invert` (False)
 
 ## `scene_layers`  (CPU)
 
-Parallax planes from a painting and its depth map (roadmap N2). `depth`: one path per input. `cuts` [a, b] (0 < a < b < 1) or 'auto' (Otsu valleys of the depth histogram). Output per input: <name>_back.png (opaque, holes filled by edge extension, wider by `overscan` px each side), <name>_over.png (RGBA, soft edge `feather` px), <name>_mid_alpha.png (extra: the mid plane's own pixels), <name>_slide.png (the planes sliding ±`preview_shift` px; magenta would be a hole), layers.json (cuts, parallax 0.94/1.0/1.06, coverage). The painting itself is the mid plane and is never changed; a plane under 2% of the frame is dropped with a note.
+Parallax planes from a painting and its depth map (roadmap N2). `depth`: one path per input. `cuts` [a, b] (0 < a < b < 1) or 'auto' (Otsu valleys of the depth histogram). Output per input: <name>_back.png (opaque, holes filled by edge extension, wider by `overscan` px each side), <name>_over.png (RGBA, soft edge `feather` px), <name>_mid_alpha.png (extra: the mid plane's own pixels), <name>_slide.png (the planes sliding ±`preview_shift` px; magenta would be a hole), layers.json (cuts, parallax 0.94/1.0/1.06, coverage). The painting itself is the mid plane and is never changed; a plane under 2% of the frame is dropped with a note. `fill`: 'extend' (default; CPU) or 'inpaint' — the back plane's holes are repainted by the inpaint graph (the far background continued; the real pixels stay bit-identical; `prompt`, `checkpoint`, `loras`, `seed` are used) — this needs the GPU worker, and a CPU-only worker that claims it fails with that message.
 
 Required: `inputs`, `depth`
 
-Optional (default): `cuts` ('auto'), `feather` (3.0), `overscan` (48), `fill` ('extend'), `preview_shift` (40)
+Optional (default): `cuts` ('auto'), `feather` (3.0), `overscan` (48), `fill` ('extend'), `preview_shift` (40), `prompt` (None), `checkpoint` (None), `loras` (None), `seed` (-1)
 
 ## `scene_kit`  (GPU)
 
-A whole painted scene as the game's six-file set, in one job (roadmap N3): scene_paint (or repaint when `init` is given) → depth_map → normal_map (source depth) → emissive_mask → scene_layers. Takes every scene_paint / repaint field, plus `normals` {strength, smooth, detail}, `glow` {threshold, colors, …}, `layers` {cuts, overscan, feather}, `depth_resolution`, `slot_name` (default 'scene'). Output at the top of out/<id>/: scene.png, scene_n.png, scene_e.png, scene_back.png, scene_over.png, scene_depth.png, layers.json, contact.png (painting · depth · lit · glow · planes); each step's files in NN_<type>/. One prov.json whose licence chain covers every model, the depth model included. Approve with `approve <id> --as scenes/<map> --set`.
+A whole painted scene as the game's six-file set, in one job (roadmap N3): scene_paint (or repaint when `init` is given) → depth_map → normal_map (source depth) → emissive_mask → scene_layers. Takes every scene_paint / repaint field, plus `normals` {strength, smooth, detail}, `glow` {threshold, colors, …}, `layers` {cuts, overscan, feather}, `depth_resolution`, `slot_name` (default 'scene'). `big: true` (needs `target`) paints with scene_big — the greybox as `init`, plus its `tile`, `overlap`, `max_step`, `source`, `init_denoise`, `tile_strength`, `canny_strength` — for scenes larger than one pass; give `depth_resolution: 2048` there so depth isn't soft. Output at the top of out/<id>/: scene.png, scene_n.png, scene_e.png, scene_back.png, scene_over.png, scene_depth.png, layers.json, contact.png (painting · depth · lit · glow · planes); each step's files in NN_<type>/. One prov.json whose licence chain covers every model, the depth model included. Approve with `approve <id> --as scenes/<map> --set`.
 
 Required: `prompt`
 
-Optional (default): `init` (None), `denoise` (None), `target` (None), `size` (None), `seed` (-1), `control` (None), `normals` (None), `glow` (None), `layers` (None), `depth_resolution` (None), `slot_name` ('scene'), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `game` (None)
+Optional (default): `init` (None), `denoise` (None), `target` (None), `size` (None), `seed` (-1), `control` (None), `normals` (None), `glow` (None), `layers` (None), `depth_resolution` (None), `slot_name` ('scene'), `big` (False), `graph` ('sdxl'), `checkpoint` (None), `loras` (None), `game` (None)
 
 ## `overworld`  (CPU)
 

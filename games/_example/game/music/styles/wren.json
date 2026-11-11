@@ -1,0 +1,148 @@
+{
+ "id": "wren",
+ "name": "Wren",
+ "kind": "character",
+ "made_by": "Claude Opus",
+ "made": "2026-11-10",
+ "voice": {
+  "type": {
+   "value": "low, dry alto — speaks more than sings",
+   "source": "data/characters.json /wren/voice (made up for the example)"
+  },
+  "delivery": {
+   "value": "half-spoken, clipped",
+   "source": "data/characters.json /wren/voice"
+  },
+  "constant": {
+   "open": true,
+   "asked": "2026-11-10",
+   "question": "What stays the same in Wren's voice whatever the genre?",
+   "found": "the voice note says 'dry, quick'"
+  },
+  "changes": {
+   "value": "none written down",
+   "source": "data/characters.json"
+  }
+ },
+ "styles": [
+  {
+   "id": "style-1",
+   "name": {
+    "value": "Toll-road folk",
+    "source": "an example — made up"
+   },
+   "genre": {
+    "value": [
+     "folk",
+     "waltz"
+    ],
+    "source": "made up"
+   },
+   "instruments": {
+    "value": [
+     "fiddle",
+     "bodhran"
+    ],
+    "source": "made up"
+   },
+   "tempo": {
+    "value": "92 BPM",
+    "source": "made up"
+   },
+   "metre": {
+    "value": "3/4",
+    "source": "made up"
+   },
+   "suno_input": {
+    "value": "dry female alto, half-spoken folk waltz, fiddle, bodhran, 92 BPM",
+    "source": "made up for the example"
+   },
+   "when": {
+    "value": "when she's working the toll",
+    "source": "made up"
+   },
+   "example": {
+    "value": "The Toll (an example title)",
+    "source": "made up"
+   }
+  },
+  {
+   "id": "style-2",
+   "name": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "Wren at night — is there a second style, and what is it?",
+    "found": "nothing on file"
+   },
+   "genre": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "genre words for style 2",
+    "found": ""
+   },
+   "instruments": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "instruments for style 2",
+    "found": ""
+   },
+   "tempo": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "tempo",
+    "found": ""
+   },
+   "metre": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "metre",
+    "found": ""
+   },
+   "suno_input": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "the Suno input",
+    "found": ""
+   },
+   "when": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "when",
+    "found": ""
+   },
+   "example": {
+    "open": true,
+    "asked": "2026-11-10",
+    "question": "an example song",
+    "found": ""
+   }
+  }
+ ],
+ "songs": [],
+ "built": {
+  "observations": [
+   {
+    "text": "Example: lines of four to six words; she never rhymes on 'gold'.",
+    "from": [
+     "The Toll"
+    ]
+   }
+  ],
+  "returns_to": [],
+  "never": {
+   "open": true,
+   "asked": "2026-11-10",
+   "question": "Words Wren never uses?",
+   "found": ""
+  }
+ },
+ "motifs": [],
+ "lines": [],
+ "notes": "",
+ "slots": [
+  "ember_song"
+ ],
+ "evidence": [
+  "data/characters.json (the example's only character)"
+ ]
+}

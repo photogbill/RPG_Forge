@@ -46,7 +46,7 @@
   feedback-in [file]                     the game's F9 notes → redo drafts (feedback_in.bat)
   models-report / housekeeping           the model shelf; out/ archive candidates — reports only
   doctor                                 check Python, Pillow, numpy, ComfyUI, GPU, graph nodes, queued models
-  (most commands take --game <name>; default turing_accords)
+  (most commands take --game <id>; default: local/suite.json → default_game, else the game in games/)
 """
 from __future__ import annotations
 import json
@@ -60,6 +60,15 @@ from .queue import Queue, run_worker
 def _queue(cfg: dict) -> Queue:
     cfgmod.ensure_dirs(cfg)
     return Queue(cfgmod.path_of(cfg, "jobs"), cfgmod.path_of(cfg, "out"))
+
+
+def _with_character(cfg: dict, job: dict, game, _ch, _cs) -> dict:
+    """W5: a character_set job expanded, a job naming a `character` resolved against the registry; others unchanged."""
+    if job.get("type") == "character_set":
+        return _cs.expand_set(cfg, job, game)
+    if job.get("character"):
+        return _ch.resolve(cfg, job, game)
+    return job
 
 
 def cmd_submit(cfg: dict, args: list[str]) -> int:
@@ -76,14 +85,27 @@ def cmd_submit(cfg: dict, args: list[str]) -> int:
         # Night 3 (G6): expand {{block}} references from the prompt library and check the never-list — the worker
         # only ever sees plain text; a typo or a never-list word refuses the whole file before anything is queued
         from . import prompts as _pl
+        # Wiring day W5: a job that names a `character` inherits that character's variant from the registry, and a
+        # character_set job is expanded — here, before the prompt library, so every way in (this command, the suite's
+        # Make a picture and Characters, produce, feedback) resolves characters the same way.
+        from .night4 import characters as _ch, charset as _cs
         try:
             if isinstance(data, dict) and "jobs" in data:
                 _d = data.get("defaults", {})
-                data = {**data, "defaults": {}, "jobs": _pl.prepare(cfg, [{**_d, **j} for j in data["jobs"]], data.get("game") or _d.get("game"))}
+                g = data.get("game") or _d.get("game")
+                merged = [_with_character(cfg, {**_d, **j}, g, _ch, _cs) for j in data["jobs"]]
+                n_char = sum(1 for j in merged if j.get("character"))
+                data = {**data, "defaults": {}, "jobs": _pl.prepare(cfg, merged, g)}
             elif isinstance(data, dict):
-                data = _pl.prepare(cfg, [data])[0]
-        except _pl.PromptError as e:
+                one = _with_character(cfg, data, data.get("game"), _ch, _cs)
+                n_char = 1 if one.get("character") else 0
+                data = _pl.prepare(cfg, [one])[0]
+            else:
+                n_char = 0
+        except (_pl.PromptError, _ch.CharacterError, _cs.CharsetError) as e:
             print(f"{p.name}: refused — {e}"); return 2
+        if n_char:
+            print(f"{p.name}: {n_char} character job(s) resolved from the registry")
         if isinstance(data, dict) and "jobs" in data:
             note = ""
             if "--skip-done" in args and any(j.get("prompt_blocks") for j in data["jobs"]):
@@ -127,7 +149,7 @@ def cmd_worker(cfg: dict, args: list[str]) -> int:
     else:
         print("CPU worker — GPU job types will be left in the queue for a GPU worker")
     q = _queue(cfg)
-    n = run_worker(q, handlers, ctx, gpu=gpu, once=once, poll_sec=float(cfg["worker"]["poll_sec"]))
+    n = run_worker(q, handlers, ctx, gpu=gpu, once=once, poll_sec=float(cfg["worker"]["poll_sec"]), cfg=cfg)   # W8: the guard inside
     print(f"ran {n} job(s); status: {q.status()}")
     return 0
 
@@ -441,7 +463,7 @@ def _positional(args: list[str], flags_with_values: tuple = ()) -> list[str]:
 
 def cmd_wanted(cfg: dict, args: list[str]) -> int:
     from . import manifest
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     if "--refresh" in args:
         try:
             d = manifest.refresh_wanted(cfg, game, _opt(args, "--game-root"))
@@ -492,7 +514,7 @@ def cmd_approve(cfg: dict, args: list[str]) -> int:
         from . import kitcheck
         kd = cfgmod.path_of(cfg, "out") / pos[0]
         if kd.is_dir():
-            chk = kitcheck.check(cfg, kd, name.split("/")[-1], _opt(args, "--game") or "turing_accords")
+            chk = kitcheck.check(cfg, kd, name.split("/")[-1], _opt(args, "--game") or cfgmod.default_game(cfg))
             bad = [l for l in chk["lines"] if l["status"] == "fail"]
             for l in chk["lines"]:
                 if l["status"] != "pass":
@@ -537,7 +559,7 @@ def cmd_approve(cfg: dict, args: list[str]) -> int:
 
 def cmd_licences(cfg: dict, args: list[str]) -> int:
     from . import manifest
-    game = _opt(args, "--game", "turing_accords")
+    game = (_opt(args, "--game") or cfgmod.default_game(cfg))
     text = manifest.licence_report(cfg, game)
     out = cfgmod.path_of(cfg, "out") / f"licences_{game}.md"
     out.write_text(text, encoding="utf-8", newline="\n")
@@ -585,7 +607,7 @@ def cmd_brief(cfg: dict, args: list[str]) -> int:
     pos = _positional(args, ("--game",))
     if not pos or pos[0] not in brief.KINDS:
         print("usage: brief maps|sleeves|icons [--game G]"); return 2
-    out, n = brief.write(cfg, _opt(args, "--game", "turing_accords"), pos[0])
+    out, n = brief.write(cfg, (_opt(args, "--game") or cfgmod.default_game(cfg)), pos[0])
     print(f"wrote {out} — {n} draft job(s). Edit the prompts, delete the \"_draft\" line, then submit.")
     return 0
 
@@ -712,6 +734,8 @@ from .cli_night3b import COMMANDS as _NIGHT3B  # Night 3B: handoff, filter-forge
 COMMANDS.update(_NIGHT3B)
 from .cli_night4 import COMMANDS as _NIGHT4  # Night 4: intake, characters, produce, deliver … (forge/cli_night4.py)
 COMMANDS.update(_NIGHT4)
+from .cli_suite import COMMANDS as _SUITE  # BUILD 01: the suite, journal, identity, suite-check (forge/cli_suite.py)
+COMMANDS.update(_SUITE)
 
 
 def main(argv: list[str] | None = None) -> int:

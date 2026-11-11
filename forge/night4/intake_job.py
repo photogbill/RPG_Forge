@@ -42,7 +42,7 @@ def run(job: dict, ctx: Context, out: Path) -> dict:
         raise it.IntakeError(f"sheet not found: {src}")
     if src.is_dir():
         raise it.IntakeError(f"{src} is a folder — one job per sheet (sprite_intake.bat takes a folder and makes one each)")
-    game = job.get("game") or "turing_accords"
+    game = job.get("game") or cfgmod.default_game(ctx.cfg)          # W9: the engine names no game
     character = str(job["character"])
     variant = job.get("variant")
     warnings: list[str] = []
@@ -79,7 +79,16 @@ def run(job: dict, ctx: Context, out: Path) -> dict:
         warnings.append(f"MIRRORED {', '.join(mapping['mirror'])} although '{character}' is marked asymmetric in the "
                         "registry (a holster on one hip) — the flipped facings carry it on the wrong side")
     cell = tuple(job.get("cell") or it.CELL)
-    built = it.build(img, det["_fg"], mapping, cell, float(job.get("figure_height") or 0.92),
+    # W10: the see-through gaps — a person's `holes` (the suite's mapping) decide exactly which are cleared; with no
+    # decision yet, the proven rule clears them (intake.foreground). detect() kept them, so the suite can offer them.
+    bd_used = mapping.get("backdrop") or det["backdrop"]
+    holes = mapping.get("holes") if "holes" in mapping else None
+    fg = it.foreground(img.convert("RGBA"), bd_used, holes=holes)[0] if bd_used.get("kind") in ("flat", "checker") else det["_fg"]
+    cleared = int((det["_fg"] & ~fg).sum())
+    if cleared:
+        log.info("intake: %s see-through gap pixel(s) cleared (%s)", cleared,
+                 f"{len(holes)} marked by a person" if holes is not None else "found by the rule")
+    built = it.build(img, fg, mapping, cell, float(job.get("figure_height") or 0.92),
                      int(job["baseline"]) if job.get("baseline") is not None else 6, str(job.get("scale") or "uniform"))
     built["warnings"] = warnings + built["warnings"]
     sheet, anim = it.pack(built)
@@ -104,6 +113,7 @@ def run(job: dict, ctx: Context, out: Path) -> dict:
            "confidence": mapping.get("confidence"), "checked_by_person": mapping.get("checked_by_person"),
            "backdrop": det["backdrop"], "found": len(det["figures"]),
            "dropped": [{"what": d["what"], "bbox": d["bbox"]} for d in det["dropped"]],
+           "holes": {"by": "person" if holes is not None else "rule", "marked": len(holes or []), "pixels_cleared": cleared},
            **{k: v for k, v in built.items() if k != "frames"}}
     (out / "report.json").write_text(json.dumps(rep, indent=1, ensure_ascii=False), encoding="utf-8")
     tool = job.get("tool") or mapping.get("tool")

@@ -6,7 +6,7 @@ Read-only on the game folder. Run it from either repo:
 
 What counts as "wanted" (every file the game loads by path, so real art can replace it with no code change):
   * project/assets/placeholder/*.png   — make_placeholders.py's greybox set: tiles, 8-facing sheets, portraits, props
-  * project/assets/vignettes/**.png    — Set_Piece cards (Gate Law …)
+  * project/assets/vignettes/**.png    — Set_Piece cards
   * project/assets/scenes/<map>.png    — one painted background per map in project/data/maps (10.1b; 1920×1080 or
                                           the map's own ×3 size; a <map>.painted.json, if present, names the file)
                                           + its five optional set companions <map>_n/_e/_back/_over/_depth.png

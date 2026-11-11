@@ -1,0 +1,13 @@
+{
+ "lamp_oil": {
+  "title": "Lamp Oil",
+  "place": "harbor_hollow",
+  "era": "after",
+  "giver": "Lighthouse Keeper",
+  "steps": [
+   "Ask the miller in Millstone who still trades in oil.",
+   "Bring a can back up the lighthouse stairs."
+  ],
+  "status": "draft"
+ }
+}

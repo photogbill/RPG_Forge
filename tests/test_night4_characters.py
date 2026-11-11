@@ -156,20 +156,26 @@ def test_character_set_end_to_end_fake_comfy(tmp_path, monkeypatch):
 
 
 def test_submit_shim_resolves_characters(tmp_path, monkeypatch):
-    from forge import cli_night4, cli
+    """Wiring day W5: `submit` itself resolves characters (the Night 4 shim is retired) — the queue sees the resolved
+    and expanded jobs."""
+    from forge import cli, cli_night4
+    from forge.queue import Queue
     cfg = {**_game(tmp_path), "incoming_dir": str(tmp_path / "_incoming")}
     seen = {}
-    monkeypatch.setattr(cli, "cmd_submit", lambda c, a: seen.setdefault("args", a) and 0)
+    monkeypatch.setattr(Queue, "submit_batch", lambda self, data: seen.setdefault("data", data) and ["J1", "J2"])
     b = tmp_path / "b.json"
     b.write_text(json.dumps({"batch": "x", "defaults": {"game": "tg"},
                              "jobs": [{"type": "render", "character": "ana", "prompt": "{{character}}, waving"},
                                       {"type": "render", "prompt": "plain"}]}), encoding="utf-8")
-    cli_night4.cmd_submit(cfg, [str(b), "--skip-done"])
-    resolved = Path(seen["args"][0])
-    assert resolved.parent.name == "_incoming" and seen["args"][1] == "--skip-done"
-    d = json.loads(resolved.read_text(encoding="utf-8"))
-    assert d["jobs"][0]["prompt"] == "{{char.ana}}, waving" and d["jobs"][0]["seed"] == 7
-    assert d["jobs"][1] == {"game": "tg", "type": "render", "prompt": "plain"}
+    assert cli.cmd_submit(cfg, [str(b)]) == 0
+    jobs = seen["data"]["jobs"]
+    assert jobs[0]["prompt"] == "a woman with short hair, waving" and jobs[0]["seed"] == 7      # registry + library
+    assert jobs[0]["variant"] == "a" and jobs[0]["character_registry"]
+    assert jobs[1]["prompt"] == "plain" and "character" not in jobs[1]
+    assert "submit" not in cli_night4.COMMANDS                                                  # the shim is retired
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"type": "render", "game": "tg", "character": "nobody", "prompt": "x"}), encoding="utf-8")
+    assert cli.cmd_submit(cfg, [str(bad)]) == 2                                                 # refused like a PromptError
 
 
 def test_stubs_from_wanted_never_overwrite(tmp_path):

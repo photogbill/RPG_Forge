@@ -186,3 +186,21 @@ def test_plan_never_makes_a_character_block(tmp_path):
     (g / "wanted.json").write_text(json.dumps(wd))
     p = produce.plan(cfg, "tg", refresh=False)
     assert any(j.get("character") == "sarah" for j in p["jobs"]) and "character" not in p["_new_blocks"]
+
+
+def test_w8_the_worker_runs_the_disk_guard_itself(tmp_path, monkeypatch):
+    """Wiring day W8: run_worker(..., cfg=cfg) checks the guard before claiming — under the limit, pending is parked
+    and the worker finds nothing to run (no produce_watch.bat needed)."""
+    from forge.night4 import guard
+    from forge.queue import Queue, run_worker
+    cfg, root, _ = world(tmp_path)
+    cfg["disk_guard_gb"] = 40
+    monkeypatch.setattr(guard, "free_gb", lambda c: 10.0)
+    q = Queue(tmp_path / "jobs", tmp_path / "out")
+    for i in range(2):
+        (tmp_path / "jobs" / "pending" / f"p{i}.json").write_text(json.dumps({"id": f"p{i}", "type": "render"}))
+    ran = run_worker(q, {"render": lambda j, c, o: {}}, None, gpu=False, once=True, cfg=cfg)
+    assert ran == 0
+    assert not list((tmp_path / "jobs" / "pending").glob("*.json"))
+    assert len(list((tmp_path / "jobs" / "paused").glob("*.json"))) == 2
+    assert run_worker(q, {"render": lambda j, c, o: {}}, None, gpu=False, once=True) == 0     # without cfg: no guard

@@ -31,7 +31,7 @@ def setup(tmp_path):
     g1 = Image.new("RGB", (64, 36), (100, 100, 100))
     g2 = g1.copy(); g2.paste((20, 20, 20), (40, 5, 50, 30))
     add("gas_station", (1920, 1080), g1)                                # one frame → scene_kit
-    add("street", (6144, 3072))                                         # larger → scene_big
+    add("street", (6144, 3072))                                         # larger → scene_kit, big (W4)
     add("bills_house", (2304, 1536), g1)                                # base, approved below
     add("bills_house_peace_b", (2304, 1536), g2, state_of="bills_house")  # state, base approved → scene_state
     add("lab", (1920, 1080), g1)
@@ -50,7 +50,8 @@ def test_four_cases_and_families(tmp_path):
     jobs = {j["name"]: j for j in r["draft"]["jobs"]}
     assert "bills_house" not in by                                         # approved: nothing to paint
     assert by["gas_station"]["type"] == "scene_kit" and jobs["gas_station"]["control"]["type"] == "canny"
-    assert by["street"]["type"] == "scene_big" and jobs["street"]["target"] == [6144, 3072] and "init" not in jobs["street"]
+    assert by["street"]["type"] == "scene_kit" and by["street"]["big"] and jobs["street"]["big"] is True
+    assert jobs["street"]["target"] == [6144, 3072] and "init" not in jobs["street"] and jobs["street"]["depth_resolution"] == 2048
     assert by["bills_house_peace_b"]["type"] == "scene_state"
     st = jobs["bills_house_peace_b"]
     assert st["base"] == "out/KIT1" and st["greybox_base"].endswith("bills_house_greybox.png") and st["greybox_state"].endswith("peace_b_greybox.png")
@@ -63,7 +64,7 @@ def test_four_cases_and_families(tmp_path):
     strip = lambda j: {k: v for k, v in j.items() if k not in ("name", "prompt", "meta", "_notes", "_wanted", "_name_in_game")}
     assert strip(fam[0]) == strip(fam[1]) == strip(fam[2])                 # differ only in their references
     p, rep, _ = bm.write(cfg, "tg", refresh=False)
-    assert p.exists() and "| street | 6144x3072 | scene_big |" in rep.read_text(encoding="utf-8")
+    assert p.exists() and "| street | 6144x3072 | scene_kit (big) |" in rep.read_text(encoding="utf-8")
 
 
 def test_family_sheet_from_rendered_members(tmp_path):
@@ -77,3 +78,12 @@ def test_family_sheet_from_rendered_members(tmp_path):
     folder, idx = rc.build_family(cfg, "inn_small")
     assert len(idx["cells"]) == 3 and (folder / "family.jpg").exists()
     assert idx["cells"][0]["label"].startswith("inn_linden")
+
+
+def test_a_big_kit_is_costed_as_scene_big_plus_the_kit(tmp_path):
+    """W4: the plan's estimate for a big scene_kit = scene_big + the kit's companions (not a small kit's minutes)."""
+    from forge.night4 import produce
+    cfg = setup(tmp_path)
+    small = produce.estimate(cfg, [{"type": "scene_kit", "target": [1920, 1080]}])
+    big = produce.estimate(cfg, [{"type": "scene_kit", "target": [6144, 3072], "big": True}])
+    assert big["gpu_hours"] > small["gpu_hours"] and big["disk_gb"] > small["disk_gb"]

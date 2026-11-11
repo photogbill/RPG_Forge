@@ -71,6 +71,8 @@ def write_prov(out_dir: Path, job: dict, **extra) -> Path:
         "created": datetime.now().isoformat(timespec="seconds"),
         "prompt": job.get("prompt"),
         "negative": job.get("negative"),
+        # W3: which prompt-library blocks made the prompt — approve copies prov.json into the game with the picture
+        **{k: job[k] for k in ("prompt_blocks", "prompt_library", "prompt_template") if job.get(k)},
     }
     rec.update(extra)
     p = out_dir / "prov.json"

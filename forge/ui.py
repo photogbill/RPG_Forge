@@ -190,7 +190,7 @@ def thumb(out_root: Path, rel: str, width: int = 420) -> Path:
 def wanted_names(cfg: dict) -> list[str]:
     from . import manifest
     try:
-        w = manifest.load_wanted(cfg, "turing_accords")
+        w = manifest.load_wanted(cfg, cfgmod.default_game(cfg))
     except FileNotFoundError:
         return []
     return sorted(n for n, v in w["items"].items() if not v.get("set_of"))
@@ -227,7 +227,7 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         jid, name = str(body.get("id") or ""), str(body.get("name") or "").strip()
         dry = bool(body.get("dry_run", True))
         if not jid or not name:
-            return {"ok": False, "message": "choose what this picture is for (a wanted name, e.g. scenes/bills_house)"}
+            return {"ok": False, "message": "choose what this picture is for (a wanted name, e.g. scenes/town_square)"}
         try:
             if body.get("set"):
                 from . import kitcheck                    # Night 3 (G5): refuse a kit that fails the check
@@ -412,7 +412,7 @@ table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}td,th{b
 </div><div><section><h2>Newest pictures</h2><div class="grid" id="recent"></div></section></div></main>
 <div id="modal"><div class="box"><h2 id="m-title">Approve</h2>
 <p style="color:var(--dim);margin-top:0">Copies the picture into the game folder with its provenance. Nothing is copied until you press Confirm.</p>
-<label>What is it for? (a wanted name)</label><input id="m-name" list="wanted" placeholder="e.g. scenes/bills_house  or  vignettes/gate_law/01_ribbon"><datalist id="wanted"></datalist>
+<label>What is it for? (a wanted name)</label><input id="m-name" list="wanted" placeholder="e.g. scenes/town_square  or  vignettes/intro/01_title"><datalist id="wanted"></datalist>
 <div id="m-pickrow" style="margin-top:8px"><label>Which picture</label><select id="m-pick"></select></div>
 <label style="display:block;margin-top:8px"><input type="checkbox" id="m-set" style="width:auto"> the whole scene set (painting, normals, glow, planes, depth)</label>
 <div id="m-out"></div>

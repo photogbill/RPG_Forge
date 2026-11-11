@@ -1,0 +1,9 @@
+{
+ "id": "harbor_hollow",
+ "name": "Harbor Hollow",
+ "kind": "town",
+ "eras": ["before", "after"],
+ "summary": "A fishing town under a lighthouse that stopped turning the night the fleet didn't come back.",
+ "greeting": "Fair tide.",
+ "status": "draft"
+}

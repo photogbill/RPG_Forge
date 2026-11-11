@@ -85,7 +85,7 @@ def resolve(cfg: dict, job: dict, game: str | None = None) -> dict:
     cid = job.get("character")
     if not cid:
         return job
-    g = job.get("game") or game or "turing_accords"
+    g = job.get("game") or game or cfgmod.default_game(cfg)         # W9: the engine names no game
     ch = load(cfg, g, str(cid))
     vname, v = variant(ch, job.get("variant"))
     out = dict(job)

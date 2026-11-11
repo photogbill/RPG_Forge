@@ -1,0 +1,20 @@
+{
+ "id": "harbor_keeper",
+ "place": "harbor_hollow",
+ "lines": [
+  {
+   "who": "Lighthouse Keeper",
+   "text": "I still climb up every night. Habit, or hope — I stopped asking which.",
+   "era": "before",
+   "status": "approved",
+   "approved_by": "Bill"
+  },
+  {
+   "who": "Lighthouse Keeper",
+   "text": "Oil's gone. If you find any, the lamp'd thank you. So would I.",
+   "era": "after",
+   "status": "draft",
+   "if": {"not": {"quest": {"lamp_oil": "done"}}}
+  }
+ ]
+}

@@ -24,7 +24,8 @@ from __future__ import annotations
 import io, json, shutil
 from pathlib import Path
 
-from PIL import Image
+import numpy as np
+from PIL import Image, ImageOps
 
 from ..engines import graph_ops as go
 from ..ops import depth as dp, layers as ly, lighting as lt, sheet as sh
@@ -156,12 +157,19 @@ def scene_layers(job: dict, ctx: Context, out: Path) -> dict:
     paintings = _inputs(ctx, job["inputs"])
     depths = _paired(ctx, job, "depth", paintings)
     outputs, report = [], {}
+    backfill_parts: dict = {}
     shift = int(_f(job, "preview_shift", 40))
     for p, dpath in zip(paintings, depths):
         img = Image.open(p).convert("RGB")
         d = dp.load_depth(dpath, img.size)
+        fill = str(_f(job, "fill", "extend"))
+        overscan = int(_f(job, "overscan", 48))
         L = ly.split_layers(img, d, cuts=_f(job, "cuts", "auto"), feather=float(_f(job, "feather", 3.0)),
-                            overscan=int(_f(job, "overscan", 48)), fill=str(_f(job, "fill", "extend")))
+                            overscan=overscan, fill=fill)
+        if fill == "inpaint" and L["back"] is not None:
+            L["back"], parts = _inpaint_back(job, ctx, out, L, img.size, overscan)
+            L["info"]["fill"] = "inpaint"
+            backfill_parts.update(parts)
         made = []
         if L["back"] is not None:
             save_png(L["back"], out / f"{p.stem}_back.png")
@@ -177,9 +185,37 @@ def scene_layers(job: dict, ctx: Context, out: Path) -> dict:
         outputs += made
         report[p.stem] = L["info"]
     (out / "layers.json").write_text(json.dumps(report if len(report) > 1 else next(iter(report.values())), indent=1), encoding="utf-8")
+    extra = {}
+    if backfill_parts:                     # the inpaint's models join the licence chain
+        licences, ok = licence_chain(ctx, backfill_parts)
+        extra = {"licences": licences, "commercial_ok": ok}
     write_prov(out, job, op="scene_layers", inputs=[str(p) for p in paintings], depth=[str(x) for x in depths],
-               layers=report, outputs=outputs)
+               layers=report, outputs=outputs, **extra)
     return {"outputs": outputs, "layers": "layers.json"}
+
+
+BACKFILL_PROMPT = "the far background of the scene, continuing what is around it"
+
+
+def _inpaint_back(job: dict, ctx: Context, out: Path, L: dict, size, overscan: int):
+    """W2 — fill: "inpaint": repaint the back plane's holes (where the nearer planes were lifted off) with the inpaint
+    graph instead of push-pull smearing. Only the holes change; the real pixels stay bit-identical. Needs the GPU."""
+    if ctx.comfy is None:
+        raise SceneError("fill: inpaint needs the GPU worker (ComfyUI) — use fill: extend on a CPU-only worker")
+    from ..night3 import inpaint as _inp
+    from ..ops import state_mask as _sm
+    from . import paint as _paint
+    w, h = size
+    mask = _sm.grow_feather(ImageOps.invert(L["back_known"]), 12, 8)
+    back = L["back"].crop((overscan, 0, overscan + w, h)) if overscan > 0 else L["back"]
+    seed = _paint._seed(job)
+    pj = {**job, "prompt": job.get("prompt") or BACKFILL_PROMPT, "denoise": 0.95}
+    filled, _prov, info = _inp.repaint_masked(ctx, pj, back, mask, out, seed, tag="backfill")
+    arr = np.asarray(filled.convert("RGB"))
+    if overscan > 0:                                 # re-pad exactly as split_layers does
+        arr = np.pad(arr, ((0, 0), (overscan, overscan), (0, 0)), mode="reflect" if overscan < w else "edge")
+    log.info("scene_layers: back plane inpainted (%d px of holes, seed %d)", int((np.asarray(mask) > 0).sum()), seed)
+    return Image.fromarray(arr.astype(np.uint8), "RGB"), info["parts"]
 
 
 # ------------------------------------------------------------------ scene_kit (pipeline preset)
@@ -188,12 +224,21 @@ PAINT_KEYS = ("prompt", "negative", "seed", "size", "target", "crop", "init", "d
               "style_prefix", "megapixels", "all_in_one")
 
 
+BIG_KEYS = ("tile", "overlap", "max_step", "source", "init_denoise", "tile_strength", "canny_strength")
+
+
 def kit_steps(job: dict) -> list[dict]:
     """The step list scene_kit runs. Pure — tested as data."""
-    paint_type = "repaint" if job.get("init") else "scene_paint"
-    paint = {"type": paint_type, **{k: job[k] for k in PAINT_KEYS if job.get(k) is not None}}
-    if paint_type == "repaint" and isinstance(paint.get("denoise"), list):
-        raise SceneError("scene_kit makes one set: give `denoise` as one value (sweep with a plain repaint first)")
+    if job.get("big"):
+        # W1 (wiring day): a scene larger than one pass paints with scene_big (init = the greybox), then the companions.
+        # scene_big takes neither `denoise` (its tiles have their own) nor `control`.
+        keep = tuple(k for k in PAINT_KEYS if k not in ("denoise", "control")) + BIG_KEYS
+        paint = {"type": "scene_big", **{k: job[k] for k in keep if job.get(k) is not None}}
+    else:
+        paint_type = "repaint" if job.get("init") else "scene_paint"
+        paint = {"type": paint_type, **{k: job[k] for k in PAINT_KEYS if job.get(k) is not None}}
+        if paint_type == "repaint" and isinstance(paint.get("denoise"), list):
+            raise SceneError("scene_kit makes one set: give `denoise` as one value (sweep with a plain repaint first)")
     n = dict(job.get("normals") or {})
     e = dict(job.get("glow") or {})
     lay = dict(job.get("layers") or {})
@@ -206,7 +251,10 @@ def kit_steps(job: dict) -> list[dict]:
         {"type": "emissive_mask", "inputs": ["$steps[1].outputs[0]"], **{k: v for k, v in e.items()
                                                                         if k in ("threshold", "min_saturation", "colors", "tolerance", "feather")}},
         {"type": "scene_layers", "inputs": ["$steps[1].outputs[0]"], "depth": ["$steps[2].outputs[0]"],
-         **{k: v for k, v in lay.items() if k in ("cuts", "feather", "overscan", "fill", "preview_shift")}},
+         **{k: v for k, v in lay.items() if k in ("cuts", "feather", "overscan", "fill", "preview_shift")},
+         # W2: an inpainted back plane is painted by the kit's own model (and seed), so its licence chain is the kit's
+         **({k: job[k] for k in ("checkpoint", "loras", "seed", "graph") if job.get(k) is not None}
+            if lay.get("fill") == "inpaint" else {})},
     ]
 
 
@@ -217,8 +265,8 @@ def _find(step_dir: Path, suffix: str) -> Path | None:
 
 def scene_kit(job: dict, ctx: Context, out: Path) -> dict:
     from .. import pipeline
-    from . import HANDLERS, get_handlers
-    handlers = {**(HANDLERS or get_handlers()), **SCENE_HANDLERS}     # this module's steps, whatever the table says
+    from . import get_handlers
+    handlers = {**get_handlers(), **SCENE_HANDLERS}     # plug-ins included (scene_big for `big: true`), and this module's steps
     base = str(job.get("slot_name") or "scene")
     pjob = {**job, "type": "pipeline", "steps": kit_steps(job)}
     res = pipeline.run(pjob, ctx, out, handlers)

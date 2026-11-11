@@ -15,6 +15,7 @@ from pathlib import Path
 
 from PIL import Image
 
+from .. import config as cfgmod
 from ..jobs.common import Context, save_png, write_prov
 
 log = logging.getLogger("forge.charset")
@@ -30,7 +31,7 @@ class CharsetError(ValueError):
 def expand_set(cfg: dict, job: dict, game: str | None = None) -> dict:
     from . import characters as chmod
     from .. import prompts as pl
-    g = job.get("game") or game or "turing_accords"
+    g = job.get("game") or game or cfgmod.default_game(cfg)         # W9: the engine names no game
     ch = chmod.load(cfg, g, str(job["character"]))
     vname, v = chmod.variant(ch, job.get("variant"))
     lib = pl.load(cfg, g)
@@ -97,7 +98,7 @@ def run(job: dict, ctx: Context, out: Path) -> dict:
     turn = next((i for i, r in enumerate(renders) if r["part"] == "turnaround"), None)
     if turn is not None:
         steps.append({"type": "sprite_intake", "input": f"$steps[{turn + 1}].outputs[0]", "character": job["character"],
-                      "variant": job.get("variant"), "game": job.get("game") or "turing_accords",
+                      "variant": job.get("variant"), "game": job.get("game") or cfgmod.default_game(ctx.cfg),
                       **({"mapping": job["mapping"]} if job.get("mapping") else {})})
     res = pipeline.run({**job, "type": "pipeline", "steps": steps}, ctx, out, get_handlers())
     made, tiles, labels, licences = [], [], [], []

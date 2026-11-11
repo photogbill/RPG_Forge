@@ -118,7 +118,8 @@ def bump(cfg: dict, game: str, wanted: str, entry: dict) -> None:
     p.write_text(json.dumps(d, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
 
 
-def take_in(cfg: dict, path: str | None = None, game: str = "turing_accords") -> dict:
+def take_in(cfg: dict, path: str | None = None, game: str | None = None) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     gcfg = cfgmod.game_config(cfg, game)
     root = Path(gcfg.get("game_root") or "")
     src = Path(path) if path else root / "playtest" / "art_feedback.json"

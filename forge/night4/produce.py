@@ -1,13 +1,14 @@
 """Production (Night 4, F3): what the game is missing → one planned queue that can run for days.
 
     plan(cfg, game)     every wanted item that is not delivered → one job (or a reason it waits / is William's),
-                        in order: the first-hour eight (Bill's house first), then by first appearance in the story;
+                        in order: the game's first-hour list (produce_order.json), then by first appearance in the story;
                         kits before states; a town painted in one sitting on one family seed. Prints count, GPU hours
                         (measured s/render where the forge has history) and disk. Writes
                         games/<game>/batches/produce_plan.json (+ .md). Nothing is queued.
     queue(cfg, game)    refuses while any referenced {{block}} is a TODO placeholder or missing (naming them), or a
                         prompt still says TODO, or the disk would fall under the guard; otherwise submits the plan
-                        through submit (character inheritance, --skip-done) in priority lanes.
+                        through submit (character inheritance, --skip-done) in priority lanes. `names=` queues only the
+                        jobs that make those wanted items (the suite's Wanted board: a town, a selection).
     status(cfg)         one screen: done / running / left / ETA / failed by cause, for the produce batches.
 
 Towns (game plan 27 §0a, William 2026-11-10): every map draft carries its town, era, state and the town's look words
@@ -92,7 +93,7 @@ def _words(name: str) -> str:
 
 def _batch_jobs(cfg: dict, game: str) -> dict[str, tuple[str, dict]]:
     """Jobs in the game's own batch files that already name a wanted item (by `_wanted`, or a vignette batch whose
-    file name holds the folder: gate_law_cards.json → vignettes/gate_law/<job name>)."""
+    file name holds the folder: intro_cards.json → vignettes/intro/<job name>)."""
     out = {}
     d = cfgmod.path_of(cfg, "games") / game / "batches"
     for p in sorted(d.glob("*.json")):
@@ -223,7 +224,8 @@ def _own_words(jobs: list[dict], items: dict) -> dict[str, str]:
     return need
 
 
-def plan(cfg: dict, game: str = "turing_accords", refresh: bool = True, generate_sprites: bool = False) -> dict:
+def plan(cfg: dict, game: str | None = None, refresh: bool = True, generate_sprites: bool = False) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     from .. import manifest, brief_missing
     from . import characters as chm
     B = brief_missing.draft(cfg, game, refresh)            # refreshes wanted.json when the game folder is readable
@@ -421,8 +423,23 @@ def _dir_mb(p: Path) -> float:
     return tot / 1e6
 
 
+_measured_cache: dict[str, tuple[float, tuple]] = {}
+
+
 def measured(cfg: dict, sample: int = 12) -> tuple[dict, dict, dict]:
-    """(seconds per job type, MB per job type, how many runs each figure rests on) from finished jobs."""
+    """(seconds per job type, MB per job type, how many runs each figure rests on) from finished jobs. Kept for ten
+    minutes per jobs folder (it walks hundreds of output folders; the suite's Wanted board asks for it on every click)."""
+    import time as _t
+    key = f"{cfgmod.path_of(cfg, 'jobs')}|{cfgmod.path_of(cfg, 'out')}|{sample}"
+    hit = _measured_cache.get(key)
+    if hit and _t.time() - hit[0] < 600:
+        return hit[1]
+    res = _measured(cfg, sample)
+    _measured_cache[key] = (_t.time(), res)
+    return res
+
+
+def _measured(cfg: dict, sample: int = 12) -> tuple[dict, dict, dict]:
     from .. import eta
     hist = eta.history(cfg, 1500)
     secs, _ = eta.per_type(hist, 30)
@@ -452,7 +469,10 @@ def estimate(cfg: dict, jobs: list[dict]) -> dict:
         per_t = "icon" if t == "icon_batch" else t
         s = secs.get(per_t) or FALLBACK_SEC.get(per_t, 60.0)
         m = mb.get(t) or FALLBACK_MB.get(t, 10.0) * (n if t == "icon_batch" else 1)
-        if t == "scene_kit" and j.get("target") and secs.get(t) is None:
+        if t == "scene_kit" and j.get("big"):          # W1/W4: scene_big paints it, then the kit's companions
+            s += secs.get("scene_big") or FALLBACK_SEC["scene_big"]
+            m += mb.get("scene_big") or FALLBACK_MB["scene_big"]
+        elif t == "scene_kit" and j.get("target") and secs.get(t) is None:
             s *= max(1.0, (j["target"][0] * j["target"][1]) / (1920 * 1080))
         tot_s += s * n
         tot_mb += m
@@ -527,13 +547,29 @@ def blockers(cfg: dict, game: str, jobs: list[dict]) -> dict[str, list[str]]:
     return out
 
 
-def queue(cfg: dict, game: str = "turing_accords", lanes: list[str] | None = None, kinds: list[str] | None = None,
-          dry: bool = False, force_disk: bool = False) -> dict:
+def wanted_of(job: dict) -> list[str]:
+    """The wanted item(s) a planned job makes: meta.wanted (a name, or a list for an icon batch) or `_wanted`."""
+    w = (job.get("meta") or {}).get("wanted") or job.get("_wanted")
+    return [w] if isinstance(w, str) else [x for x in (w or []) if isinstance(x, str)]
+
+
+def select(jobs: list[dict], lanes: list[str] | None = None, kinds: list[str] | None = None,
+           names: list[str] | None = None) -> list[dict]:
+    """The plan's jobs in the given lanes / of the given types / making any of the given wanted items (the suite's
+    Wanted board picks by name: a town, a few maps, one icon category)."""
+    want = set(names or [])
+    return [j for j in jobs if (not lanes or j["batch"].split("/")[-1] in lanes) and (not kinds or j["type"] in kinds)
+            and (not want or want & set(wanted_of(j)))]
+
+
+def queue(cfg: dict, game: str | None = None, lanes: list[str] | None = None, kinds: list[str] | None = None,
+          dry: bool = False, force_disk: bool = False, names: list[str] | None = None) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     p = cfgmod.path_of(cfg, "games") / game / "batches" / "produce_plan.json"
     if not p.exists():
         raise FileNotFoundError("no plan yet — run produce.bat plan first")
     data = json.loads(p.read_text(encoding="utf-8"))
-    jobs = [j for j in data["jobs"] if (not lanes or j["batch"].split("/")[-1] in lanes) and (not kinds or j["type"] in kinds)]
+    jobs = select(data["jobs"], lanes, kinds, names)
     if not jobs:
         return {"queued": 0, "refused": {}, "note": "nothing in the plan matches that selection"}
     bad = blockers(cfg, game, jobs)
@@ -551,7 +587,7 @@ def queue(cfg: dict, game: str = "turing_accords", lanes: list[str] | None = Non
     inc = Path(cfg.get("incoming_dir") or (cfgmod.ROOT / "_incoming")) / f"produce_{datetime.now():%Y%m%d-%H%M%S}.json"
     inc.parent.mkdir(parents=True, exist_ok=True)
     inc.write_text(json.dumps(batch, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
-    from ..cli_night4 import cmd_submit
+    from ..cli import cmd_submit          # W5: submit resolves characters itself
     rc = cmd_submit(cfg, [str(inc), "--skip-done"])
     return {"queued": len(clean) if rc == 0 else 0, "rc": rc, "file": str(inc), "estimate": est}
 

@@ -1,0 +1,10 @@
+{
+  "id": "millstone",
+  "name": "Millstone",
+  "kind": "town",
+  "eras": ["before"],
+  "summary": "A river town that grinds everyone else's grain and keeps a ledger of who owes it.",
+  "greeting": "Weighed and fair.",
+  "status": "approved",
+  "approved_by": "Bill"
+}

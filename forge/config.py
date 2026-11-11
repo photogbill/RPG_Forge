@@ -4,6 +4,7 @@ Rule 1 of this repo: nothing is written outside the repo folder unless `allow_ex
 is true. No AppData, no C:\\Users, no surprises — the data lives beside the code.
 """
 from __future__ import annotations
+import time
 import json, os
 from pathlib import Path
 
@@ -82,7 +83,35 @@ def load(path: Path | None = None) -> dict:
         with open(p, "r", encoding="utf-8") as f:
             cfg = _merge(DEFAULTS, json.load(f))
     cfg["_root"] = str(ROOT)
+    apply_timezone(cfg)
     return cfg
+
+
+def timezone_of(cfg: dict | None = None) -> str | None:
+    """The PC's time zone for a session's Linux shell: forge.json → `timezone`, else local/suite.json → `timezone`
+    (git-ignored — a person's time zone is not pushed)."""
+    if cfg and cfg.get("timezone"):
+        return str(cfg["timezone"])
+    try:
+        d = json.loads((ROOT / "local" / "suite.json").read_text(encoding="utf-8"))
+        return str(d["timezone"]) if isinstance(d, dict) and d.get("timezone") else None
+    except (OSError, ValueError):
+        return None
+
+
+def apply_timezone(cfg: dict | None = None) -> str | None:
+    """Wiring day W7: in the Linux VM a session's clock is UTC, so job ids, logs and reports came out five hours
+    ahead. When not on Windows and a time zone is set, every datetime.now() after this is local. Windows: no change
+    (it is local already)."""
+    if os.name == "nt":
+        return None
+    tz = timezone_of(cfg)
+    if not tz or os.environ.get("TZ") == tz:
+        return tz
+    os.environ["TZ"] = tz
+    if hasattr(time, "tzset"):
+        time.tzset()
+    return tz
 
 
 def path_of(cfg: dict, key: str) -> Path:
@@ -138,3 +167,27 @@ def game_config(cfg: dict, game: str | None) -> dict:
         return {}
     with open(p, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def default_game(cfg: dict | None = None) -> str:
+    """The game a command means when it is not told (`--game`). Code never names a game — RPG_Forge is the suite for
+    every game (William, 2026-11-10). Order: forge.json → `default_game` (a local value); local/suite.json →
+    `default_game`, then `last_game` (what the suite last opened); the first game folder under games/ that has a
+    forge.game.json, besides the `_example` template; else `_example`."""
+    if cfg and cfg.get("default_game"):
+        return str(cfg["default_game"])
+    games = ROOT / "games"
+    try:
+        d = json.loads((ROOT / "local" / "suite.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        d = {}
+    if isinstance(d, dict):
+        for k in ("default_game", "last_game"):
+            if d.get(k) and (games / str(d[k]) / "forge.game.json").exists():
+                return str(d[k])
+    try:
+        found = sorted(p.name for p in games.iterdir()
+                       if p.is_dir() and not p.name.startswith(("_", ".")) and (p / "forge.game.json").exists())
+    except OSError:
+        found = []
+    return found[0] if found else "_example"

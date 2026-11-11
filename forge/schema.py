@@ -1,7 +1,7 @@
 """Job types and validation.
 
 A job is a JSON object:
-    {"type": "scene_card", "name": "gate_law_01_ribbon", ...fields...}
+    {"type": "scene_card", "name": "harbor_01_dawn", ...fields...}
 
 `type` picks the handler (forge/jobs/<type>.py). `name` becomes part of the job id and the output
 folder. Every type declares which fields it requires, which are optional (with defaults), and whether
@@ -226,23 +226,30 @@ JOB_TYPES: dict[str, dict] = {
                "<name>_over.png (RGBA, soft edge `feather` px), <name>_mid_alpha.png (extra: the mid plane's own pixels), "
                "<name>_slide.png (the planes sliding ±`preview_shift` px; magenta would be a hole), layers.json (cuts, "
                "parallax 0.94/1.0/1.06, coverage). The painting itself is the mid plane and is never changed; a plane "
-               "under 2% of the frame is dropped with a note.",
+               "under 2% of the frame is dropped with a note. `fill`: 'extend' (default; CPU) or 'inpaint' — the back "
+               "plane's holes are repainted by the inpaint graph (the far background continued; the real pixels stay "
+               "bit-identical; `prompt`, `checkpoint`, `loras`, `seed` are used) — this needs the GPU worker, and a "
+               "CPU-only worker that claims it fails with that message.",
         "required": ["inputs", "depth"],
-        "optional": {"cuts": "auto", "feather": 3.0, "overscan": 48, "fill": "extend", "preview_shift": 40},
+        "optional": {"cuts": "auto", "feather": 3.0, "overscan": 48, "fill": "extend", "preview_shift": 40,
+                     "prompt": None, "checkpoint": None, "loras": None, "seed": -1},
     },
     "scene_kit": {
         "needs": "gpu",
         "doc": "A whole painted scene as the game's six-file set, in one job (roadmap N3): scene_paint (or repaint when "
                "`init` is given) → depth_map → normal_map (source depth) → emissive_mask → scene_layers. Takes every "
                "scene_paint / repaint field, plus `normals` {strength, smooth, detail}, `glow` {threshold, colors, …}, "
-               "`layers` {cuts, overscan, feather}, `depth_resolution`, `slot_name` (default 'scene'). Output at the top "
+               "`layers` {cuts, overscan, feather}, `depth_resolution`, `slot_name` (default 'scene'). `big: true` (needs "
+               "`target`) paints with scene_big — the greybox as `init`, plus its `tile`, `overlap`, `max_step`, `source`, "
+               "`init_denoise`, `tile_strength`, `canny_strength` — for scenes larger than one pass; give "
+               "`depth_resolution: 2048` there so depth isn't soft. Output at the top "
                "of out/<id>/: scene.png, scene_n.png, scene_e.png, scene_back.png, scene_over.png, scene_depth.png, "
                "layers.json, contact.png (painting · depth · lit · glow · planes); each step's files in NN_<type>/. One "
                "prov.json whose licence chain covers every model, the depth model included. Approve with "
                "`approve <id> --as scenes/<map> --set`.",
         "required": ["prompt"],
         "optional": {"init": None, "denoise": None, "target": None, "size": None, "seed": -1, "control": None,
-                     "normals": None, "glow": None, "layers": None, "depth_resolution": None, "slot_name": "scene",
+                     "normals": None, "glow": None, "layers": None, "depth_resolution": None, "slot_name": "scene", "big": False,
                      "graph": "sdxl", "checkpoint": None, "loras": None, "game": None},
     },
     "overworld": {
@@ -307,6 +314,8 @@ def validate(job: dict) -> list[str]:
         problems.append(f"normal_map: 'source' must be 'luminance' or 'depth', got {job.get('source')!r}")
     if t == "normal_map" and job.get("source") == "depth" and not job.get("depth"):
         problems.append("normal_map: source 'depth' needs 'depth' (one depth map per input)")
+    if t == "scene_kit" and job.get("big") and not job.get("target"):
+        problems.append("scene_kit: 'big: true' needs a 'target' size (the size the painting climbs to)")
     if t == "scene_kit" and isinstance(job.get("denoise"), list):
         problems.append("scene_kit: 'denoise' must be one value (a scene_kit makes one set)")
     if t == "repaint" and isinstance(job.get("denoise"), list) and not job["denoise"]:

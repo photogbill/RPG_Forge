@@ -72,3 +72,20 @@ games/*
 /bakeoff_new_models.bat
 /bakeoff_styles.bat
 /test_tools.bat
+# BUILD 01: the suite's run-state inside the example game (journal, proposals, backups, temp) — and its per-install settings live in /local/ (ignored above)
+games/_example/game/journal/
+games/_example/game/proposals/
+games/_example/game/_workbench_backups/
+games/_example/game/_workbench_tmp/
+games/_example/game/WORKBENCH_LOG.md
+# BUILD 03: the example game's mail run-state — the three example letters are tracked, everything else it grows is not
+games/_example/game/mail/state.json
+games/_example/game/mail/*/*
+!games/_example/game/mail/to_bill/20261110-091500_claude-fable_ember-crossing-s-greeting-and-the-harbor.md
+!games/_example/game/mail/to_bill/20261110-094000_claude-opus_the-example-game-s-first-build-three-pla.md
+!games/_example/game/mail/to_claude/20261110-100500_bill_the-miller-s-second-line.md
+games/_example/game/work_orders/
+# BUILD 04: what the example game's sprite intake and registry grow (dropped sheets, mappings, cut-outs, history)
+games/_example/intake/
+games/_example/characters/_history/
+games/_example/batches/

@@ -252,6 +252,7 @@ def test_scene_paint_end_to_end(tmp_path):
     fake = FakeComfy()
     ctx = ctx_with(tmp_path, fake)
     job = {"id": "t1", "type": "scene_paint", "name": "gas_station", "prompt": "a gas station at dusk",
+           "prompt_blocks": ["style.house"], "prompt_library": "prompts/library.json",       # W3
            "checkpoint": "sd_xl_base_1.0.safetensors", "face_fix": True, "variants": 2, "seed": 100}
     res = paint.scene_paint(job, ctx, tmp_path)
     assert res["outputs"] == ["scene_1.png", "scene_2.png"]
@@ -264,6 +265,7 @@ def test_scene_paint_end_to_end(tmp_path):
     assert g["4"]["inputs"]["width"] == 1344
     prov = json.loads((tmp_path / "prov.json").read_text(encoding="utf-8"))
     assert prov["seeds"] == [100, 101] and prov["target"] == [1920, 1080]
+    assert prov["prompt_blocks"] == ["style.house"] and prov["prompt_library"] == "prompts/library.json"   # W3
     roles = {l["role"] for l in prov["licences"]}
     assert {"checkpoint", "upscaler", "face_detector"} <= roles
     assert prov["commercial_ok"] is True        # SDXL base + RealESRGAN + face_yolov8m are registered commercial-OK

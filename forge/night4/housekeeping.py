@@ -23,7 +23,8 @@ def _size(p: Path) -> int:
     return t
 
 
-def report(cfg: dict, days: int = 14, game: str = "turing_accords") -> tuple[Path, dict]:
+def report(cfg: dict, days: int = 14, game: str | None = None) -> tuple[Path, dict]:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     from .. import manifest
     from . import deliver as dl
     out_root = cfgmod.path_of(cfg, "out")

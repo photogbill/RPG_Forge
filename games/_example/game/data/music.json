@@ -1,0 +1,31 @@
+{
+ "harbor_theme": {
+  "file": "music/harbor_theme.ogg",
+  "purpose": "Harbor Hollow, both eras \u2014 the town's theme.",
+  "vocal": false,
+  "scene": "Harbor Hollow",
+  "place": "harbor_hollow",
+  "plays": [
+   "harbor_hollow"
+  ]
+ },
+ "battle": {
+  "file": null,
+  "purpose": "Every ordinary fight.",
+  "vocal": false,
+  "scene": "Any ordinary fight",
+  "plays": [
+   "battle"
+  ]
+ },
+ "ember_song": {
+  "file": null,
+  "purpose": "Wren's song at the Ember Crossing toll \u2014 she sings the toll instead of saying it.",
+  "vocal": true,
+  "scene": "Ember Crossing \u2014 the toll song",
+  "place": "ember_crossing",
+  "singers": [
+   "Wren"
+  ]
+ }
+}

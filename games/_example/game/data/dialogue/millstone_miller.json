@@ -1,0 +1,8 @@
+{
+  "id": "millstone_miller",
+  "place": "millstone",
+  "lines": [
+    {"who": "Miller", "text": "Everything that comes through here gets weighed. Even you.", "era": "before", "status": "draft"},
+    {"who": "Miller", "text": "Hello, traveller. Welcome to our town.", "era": "before", "status": "flagged", "note": "generic on purpose — the sameness meter's test case"}
+  ]
+}

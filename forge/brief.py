@@ -1,8 +1,8 @@
 """Batch drafts from the game's own data (roadmap F10), for Claude or Fable to edit rather than write from zero.
 
-    python -m forge brief maps    [--game turing_accords]   one painted-background job per map (data/maps/*.json)
-    python -m forge brief sleeves [--game turing_accords]   one sleeve job per record (data/records.json)
-    python -m forge brief icons   [--game turing_accords]   one icon job per item (data/items.json)
+    python -m forge brief maps    [--game <id>]   one painted-background job per map (data/maps/*.json)
+    python -m forge brief sleeves [--game <id>]   one sleeve job per record (data/records.json)
+    python -m forge brief icons   [--game <id>]   one icon job per item (data/items.json)
 
 Drafts are written to games/<game>/batches/draft_<what>.json and are marked `"_draft": true` — the prompts are the
 game's own notes put into words, not art direction. Edit them (and delete `_draft`) before submitting. A map

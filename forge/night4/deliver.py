@@ -80,8 +80,9 @@ def held(cfg: dict, game: str) -> dict:
     return _read(_gdir(cfg, game) / "held.json", {})
 
 
-def hold(cfg: dict, job_id: str, wanted_name: str, game: str = "turing_accords", file: str | None = None,
+def hold(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, file: str | None = None,
          pick: int | None = None) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     from .. import manifest
     plan = manifest.approve(cfg, job_id, wanted_name, game, file=file, pick=pick, dry_run=True)   # the same licence gate
     h = held(cfg, game)
@@ -127,7 +128,8 @@ def todo(cfg: dict, game: str, only: str | None = None) -> list[dict]:
     return [o for o in out if not only or o["wanted"] == only]
 
 
-def run(cfg: dict, game: str = "turing_accords", dry: bool = False, only: str | None = None, fit: bool = False) -> dict:
+def run(cfg: dict, game: str | None = None, dry: bool = False, only: str | None = None, fit: bool = False) -> dict:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     from PIL import Image
     gcfg = cfgmod.game_config(cfg, game)
     root = Path(gcfg.get("game_root") or "")

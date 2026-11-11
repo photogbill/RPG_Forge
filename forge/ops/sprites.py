@@ -43,7 +43,7 @@ def bbox(img: Image.Image, thresh: int = 16):
 
 
 def facing_of(name: str) -> str | None:
-    """'sarah_NW.png', 'nw.png', 'sarah-facing-sw' → the facing; longest match first so NW is not read as W."""
+    """'hero_NW.png', 'nw.png', 'hero-facing-sw' → the facing; longest match first so NW is not read as W."""
     stem = Path(name).stem.upper()
     for f in sorted(FACINGS, key=len, reverse=True):
         if re.search(r"(?:^|[^A-Z])" + f + r"(?:$|[^A-Z])", stem):
@@ -111,7 +111,7 @@ def load_poses(folder: Path) -> dict:
         return {f: Image.open(p) for f, p in named.items()}
     if len(files) == 8:
         return {f: Image.open(p) for f, p in zip(FACINGS, files)}
-    raise ValueError(f"{folder}: name the pictures by facing (e.g. sarah_S.png, sarah_NW.png) or give exactly eight")
+    raise ValueError(f"{folder}: name the pictures by facing (e.g. hero_S.png, hero_NW.png) or give exactly eight")
 
 
 def frames_of(sheet: Image.Image, cell=CELL) -> list[list[Image.Image]]:

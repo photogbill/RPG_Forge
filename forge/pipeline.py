@@ -1,6 +1,6 @@
 """Pipelines (roadmap F5): one job that runs a chain of jobs, each step's output feeding the next.
 
-    {"type": "pipeline", "name": "bills_house_paint", "game": "turing_accords",
+    {"type": "pipeline", "name": "house_paint", "game": "<game id>",
      "steps": [
        {"type": "render", "prompt": "…", "size": [1344, 768]},
        {"type": "upscale", "inputs": ["$prev.outputs[0]"], "fit": [1920, 1080]},

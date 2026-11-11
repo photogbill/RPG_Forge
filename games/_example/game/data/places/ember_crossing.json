@@ -1,0 +1,10 @@
+{
+	"id": "ember_crossing",
+	"name": "Ember Crossing",
+	"kind": "town",
+	"eras": ["after"],
+	"summary": "A bridge town rebuilt from what the fire left; nobody sings there except at the toll.",
+	"greeting": "Pay the song.",
+	"status": "draft",
+	"_editor_note": "This file uses tabs and Windows line endings on purpose: the round-trip test proves the suite keeps both."
+}

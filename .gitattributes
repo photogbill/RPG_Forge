@@ -4,3 +4,5 @@
 *.jpg binary
 *.ogg binary
 *.safetensors binary
+# the example game keeps one file with tabs and Windows line endings on purpose (the suite must preserve both)
+games/_example/game/data/places/ember_crossing.json -text

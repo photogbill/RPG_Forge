@@ -115,7 +115,8 @@ def _approved(cfg: dict, game: str) -> dict[str, int]:
     return n
 
 
-def build(cfg: dict, game: str = "turing_accords", scan: bool = True) -> tuple[Path, dict]:
+def build(cfg: dict, game: str | None = None, scan: bool = True) -> tuple[Path, dict]:
+    game = game or cfgmod.default_game(cfg)   # never a literal game (RPG_Forge is game-agnostic)
     from .. import bakeoff, model_report
     from ..jobs.common import Context
     inv = {r["file"]: r for r in (bakeoff.inventory(cfg, refresh=scan) or [])}

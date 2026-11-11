@@ -1,6 +1,6 @@
 """The asset manifest (roadmap F4): what the game wants vs. what the forge has made, and `approve`.
 
-    python -m forge wanted [--refresh] [--kind scene] [--missing] [--game turing_accords]
+    python -m forge wanted [--refresh] [--kind scene] [--missing] [--game <id>]
     python -m forge approve <job-id> --as <wanted-name> [--file scene_2.png | --pick 2] [--dry-run]
     python -m forge models licence <file> "<licence>" yes|no [note]     record a licence you checked yourself
     python -m forge licences                                            the licence chain of every approved asset
@@ -187,7 +187,7 @@ def approve(cfg: dict, job_id: str, wanted_name: str, game: str | None = None, f
             raise ApproveError(f"job {job_id} failed — nothing to approve")
         raise ApproveError(f"no finished job {job_id} in jobs/done/")
     job = json.loads(jp.read_text(encoding="utf-8"))
-    game = game or job.get("game") or "turing_accords"
+    game = game or job.get("game") or cfgmod.default_game(cfg)
     gcfg = cfgmod.game_config(cfg, game)
     wanted = load_wanted(cfg, game)
     if wanted_name not in wanted["items"]:
@@ -308,7 +308,7 @@ def approve_set(cfg: dict, job_id: str, wanted_name: str, game: str | None = Non
             raise ApproveError(f"job {job_id} failed — nothing to approve")
         raise ApproveError(f"no finished job {job_id} in jobs/done/")
     job = json.loads(jp.read_text(encoding="utf-8"))
-    game = game or job.get("game") or "turing_accords"
+    game = game or job.get("game") or cfgmod.default_game(cfg)
     gcfg = cfgmod.game_config(cfg, game)
     wanted = load_wanted(cfg, game)
     items = wanted["items"]

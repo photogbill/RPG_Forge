@@ -144,8 +144,9 @@ def split_layers(painting: Image.Image, depth: np.ndarray, cuts=None, feather: f
         known = back_mask.copy()
         if feather > 0:
             known = blur(known.astype(np.float32), max(1.0, feather)) > 0.999
-        if fill == "inpaint":
-            notes.append("fill 'inpaint' is not built yet in this op — used 'extend' (the GPU inpaint is the job's stage)")
+        # W2: this op always extends (push-pull, CPU). With fill "inpaint" the job (forge/jobs/scene.py) then repaints
+        # the holes on the GPU, so it needs to know which pixels are real: `back_known` (before the overscan pad).
+        out["back_known"] = Image.fromarray((known.astype(np.uint8) * 255), "L")
         filled = push_pull_fill(rgb, known)
         if overscan > 0:
             mode = "reflect" if overscan < w else "edge"

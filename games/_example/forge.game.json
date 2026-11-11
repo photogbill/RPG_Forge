@@ -1,5 +1,6 @@
 {
- "_comment": "A template. Copy games/_example to games/<your game>/ \u2014 that folder is git-ignored (each game's data stays on your PC). Point game_root at the game's own folder.",
+ "_comment": "A template. Copy games/_example to games/<your game>/ \u2014 that folder is git-ignored (each game's data stays on your PC). Point game_root at the game's own folder (here: the made-up example in game/, relative to this folder).",
+ "owner": "Bill",
  "palette": "resurrect-64",
  "card_size": [
   864,
@@ -19,7 +20,7 @@
  "checkpoint": "ArtUniverseSDXL_v8.safetensors",
  "checkpoints_by_job": {},
  "loras_by_job": {},
- "game_root": "D:\\\\MyGame",
+ "game_root": "game",
  "asset_root": "D:\\\\MyGame\\\\project\\\\assets",
  "provenance_dir": "D:\\\\MyGame\\\\project\\\\assets\\\\_provenance"
 }

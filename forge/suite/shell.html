@@ -1,0 +1,1218 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>RPG_Forge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%23f0b040%27/%3E%3C/svg%3E">
+<style>
+:root{--bg:#121217;--bg2:#17171d;--panel:#1d1d24;--panel2:#23232c;--line:#2e2e3a;--ink:#ebe8e2;--dim:#9a98a6;--faint:#6b6977;
+--ok:#46c776;--no:#e5584f;--warn:#f0b040;--accent:#f0b040;--story:#7aa7ff;--lock:#b48cff;--unk:#8a7fd0;--radius:12px}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:radial-gradient(1200px 600px at 10% -10%,#1f1b14 0%,transparent 60%),radial-gradient(900px 500px at 110% 0%,#141a26 0%,transparent 55%),var(--bg);
+color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid #3a3a48;border-radius:8px;padding:8px 14px;cursor:pointer;transition:.15s}
+button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}button:disabled{opacity:.38;cursor:not-allowed}
+button.go{background:linear-gradient(180deg,#2c5a3a,#244a30);border-color:#3f9a5c}button.warn{background:linear-gradient(180deg,#5a4a22,#4a3c1c);border-color:#b08a30}
+button.ghost{background:transparent}
+header{display:flex;align-items:center;gap:18px;padding:12px 22px;border-bottom:1px solid var(--line);background:rgba(18,18,23,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
+.logo{font-weight:700;font-size:20px;letter-spacing:.6px;white-space:nowrap}.logo b{color:var(--accent)}
+.picker{position:relative}.picker select{appearance:none;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 34px 8px 30px;min-width:240px;cursor:pointer}
+.picker:before{content:"";position:absolute;left:12px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:var(--gdot,var(--faint))}
+.picker:after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+.tabs button{border:0;background:transparent;padding:6px 18px;border-radius:7px;color:var(--dim)}
+.tabs button.on{background:var(--panel2);color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}.tabs button.on.story{box-shadow:inset 0 -2px 0 var(--story)}
+.spacer{flex:1}.who{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel);cursor:pointer;color:var(--dim)}
+.who b{color:var(--ink);font-weight:600}.clock{color:var(--faint);font-variant-numeric:tabular-nums;font-size:13px}
+.body{flex:1;display:flex;min-height:0}
+nav{width:200px;padding:18px 10px;border-right:1px solid var(--line);background:rgba(23,23,29,.6)}
+nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--dim);padding:9px 12px;border-radius:8px;margin-bottom:2px}
+nav button.on{background:var(--panel2);color:var(--ink)}nav .soon{font-size:12px;color:var(--faint);padding:14px 12px 4px;line-height:1.45}
+main{flex:1;overflow:auto;padding:22px 26px 40px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;max-width:1400px}
+.card{background:linear-gradient(180deg,var(--panel),#1a1a21);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden}
+.s8{grid-column:span 8}.s4{grid-column:span 4}.s6{grid-column:span 6}.s12{grid-column:span 12}.s3{grid-column:span 3}
+@media(max-width:1100px){.s8,.s4,.s6,.s3{grid-column:span 12}}
+h2{margin:0 0 12px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);font-weight:600}
+.state{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}.state b{font-size:34px;font-weight:650;letter-spacing:.3px}
+.state .since{color:var(--dim);font-size:15px}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;align-self:center;background:var(--faint);box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+.st-rendering{background:var(--warn);animation:pulse 1.6s infinite}.st-idle{background:var(--ok)}.st-stopped{background:#6c6a78}
+.st-stopped-mid-job{background:var(--no)}.st-unknown{background:var(--unk)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(240,176,64,.55)}70%{box-shadow:0 0 0 14px rgba(240,176,64,0)}100%{box-shadow:0 0 0 0 rgba(240,176,64,0)}}
+.words{color:#cfccc5;margin:8px 0 18px;max-width:70ch}.meta{color:var(--faint);font-size:12.5px}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.act small{display:block;color:var(--dim);font-size:12.5px;margin-top:7px;line-height:1.4}
+.act button{width:100%;padding:11px 14px;font-weight:600}
+.preview img{width:100%;border-radius:8px;display:block;background:#0c0c10;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line)}
+.preview .cap{color:var(--dim);font-size:12.5px;margin-top:8px}.empty{color:var(--faint);padding:30px 0;text-align:center}
+.nums{display:flex;gap:22px;flex-wrap:wrap}.num b{display:block;font-size:30px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.1}
+.num span{color:var(--dim);font-size:12.5px}.num.warn b{color:var(--warn)}.num.no b{color:var(--no)}
+.bar{height:12px;border-radius:6px;background:#2a2a34;overflow:hidden;margin:10px 0 6px;position:relative}.bar i{display:block;height:100%;background:linear-gradient(90deg,#3d9a5e,var(--ok))}
+.bar.low i{background:linear-gradient(90deg,#a0372f,var(--no))}.bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--warn)}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.links{display:flex;flex-direction:column;gap:8px;margin-top:6px}.links button{text-align:left}
+.chips span{display:inline-block;padding:2px 9px;margin:3px 6px 0 0;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--dim)}
+iframe{width:100%;height:calc(100vh - 140px);border:1px solid var(--line);border-radius:var(--radius);background:#16161b}
+.hero{display:flex;align-items:center;gap:16px;margin-bottom:18px}.hero h1{margin:0;font-size:26px;font-weight:650}.hero .tag{color:var(--story);border:1px solid #3a4a70;background:#1a2235;padding:3px 10px;border-radius:12px;font-size:12px}
+.note{border-left:3px solid var(--story);background:#1a2030;padding:12px 16px;border-radius:8px;color:#cdd6ea;margin-bottom:18px;max-width:900px}
+.tile b{display:block;font-size:30px;font-weight:650;font-variant-numeric:tabular-nums}.tile .lbl{color:var(--dim);font-size:13px;margin-bottom:10px}
+.sts{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#2a2a34;margin:10px 0 8px}.sts i{display:block;height:100%}
+.k{display:inline-flex;align-items:center;gap:5px;margin-right:10px;font-size:12px;color:var(--dim)}.k i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.c-approved{background:var(--ok)}.c-draft{background:var(--warn)}.c-flagged{background:var(--no)}.c-none{background:#55535f}.c-locked{background:var(--lock)}
+.c-needed{background:var(--no)}.c-assigned{background:var(--warn)}.c-in\ game{background:var(--ok)}
+.jl{list-style:none;margin:0;padding:0}.jl li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.jl li:last-child{border:0}
+.jl .t{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:8px}.jl .w{color:var(--story);margin-right:6px}.jl code{color:#cfc6b0;font-size:12px;word-break:break-all}
+.err{border-left:3px solid var(--no);background:#2a1c1e;padding:10px 14px;border-radius:8px;color:#ffc2bd;margin:8px 0}
+#modal{position:fixed;inset:0;background:rgba(5,5,8,.72);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(3px)}
+#modal .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px;width:min(560px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+#modal h3{margin:0 0 10px;font-size:18px}#modal p{color:#cfccc5;margin:0 0 18px}#modal .row{display:flex;gap:10px;justify-content:flex-end;border:0;padding:0;cursor:default}
+#modal input{width:100%;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid #3a3a48;background:#121217;color:var(--ink);margin-bottom:12px}
+#modal .sugg button{margin:0 6px 12px 0;padding:5px 12px;font-size:13px}
+#toast{position:fixed;right:22px;bottom:22px;max-width:480px;padding:13px 16px;border-radius:10px;background:#1f3a29;border:1px solid #3f9a5c;display:none;z-index:60;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+#toast.no{background:#3a1f22;border-color:#a0443c}
+
+/* ---------- the Mail */
+main.flush{padding:0}
+.mail{display:grid;grid-template-columns:230px minmax(300px,380px) 1fr;height:calc(100vh - 67px)}
+.mfold{border-right:1px solid var(--line);padding:16px 12px;background:rgba(23,23,29,.55);display:flex;flex-direction:column;gap:6px}
+.mfold .compose{width:100%;padding:11px;font-weight:600;margin-bottom:10px}
+.mfold .fb{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--dim);padding:8px 12px;border-radius:8px}
+.mfold .fb.on{background:var(--panel2);color:var(--ink)}.mfold .fb b{background:var(--story);color:#0d1424;border-radius:10px;padding:0 8px;font-size:12px}
+.mfold input{margin-top:12px;font:inherit;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink)}
+.mlist{border-right:1px solid var(--line);overflow:auto;background:rgba(18,18,23,.4)}
+.away{margin:12px;border:1px solid #33456e;background:linear-gradient(180deg,#18223a,#151c2e);border-radius:10px;padding:12px 14px;font-size:13px}
+.away b{color:#cfe0ff}.away .ad{color:var(--dim);margin:6px 0 8px}.away details{margin-top:6px}.away summary{cursor:pointer;color:var(--story)}
+.away li{margin:4px 0;color:#c8cfdd}.away del{color:#e08a8a}.away ins{color:#9fe0a8;text-decoration:none;font-weight:600}
+.row{padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+.row:hover{background:rgba(255,255,255,.025)}.row.sel{background:#1f2433;box-shadow:inset 3px 0 0 var(--story)}
+.row .top{display:flex;justify-content:space-between;gap:8px}.row .fr{color:var(--dim);font-size:13px}.row .dt{color:var(--faint);font-size:12px;white-space:nowrap}
+.row .sj{margin:2px 0;color:#d9d6cf}.row .fl{color:var(--faint);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.unread .fr,.row.unread .sj{color:var(--ink);font-weight:650}.row.unread:before{content:"";position:absolute;left:6px;top:18px;width:7px;height:7px;border-radius:50%;background:var(--story)}
+.qchip{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:9px;margin-top:5px;background:#3a3020;color:var(--warn);border:1px solid #5a4a28}
+.qchip.done{background:#1e3326;color:#8fdca8;border-color:#2f5a3c}
+.mread{overflow:auto;padding:22px 30px 60px}
+.thead{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}.thead h1{margin:0;font-size:22px;font-weight:650;flex:1}
+.lcard{background:linear-gradient(180deg,var(--panel),#1a1a21);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:16px;max-width:900px}
+.lhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#141418;flex:none}
+.lhead .lwho{font-weight:650}.lhead .meta{margin-left:auto}
+.prose{color:#dedbd4;line-height:1.62;font-size:14.5px}.prose p{margin:0 0 11px}.prose ul{margin:0 0 11px;padding-left:20px}.prose code{background:#14141a;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#e6d6b0}
+.prose h3,.prose h4{margin:14px 0 6px}.prose em{color:#c9c6bf}
+.att{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.att a,.att span{font-size:12.5px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--dim)}
+.att img{max-width:260px;border-radius:8px;border:1px solid var(--line);display:block}
+.qs{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.q{background:#16161c;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.q.answered{border-color:#2f5a3c;background:#151d18}.q.parked{border-color:#5a4a28}
+.qh{display:flex;gap:10px;align-items:flex-start}.qn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--dim)}
+.qh b{font-size:14.5px;font-weight:600;line-height:1.45}.why{color:var(--dim);font-size:13px;margin:6px 0 0 34px}
+.rec{font-size:13px;margin:6px 0 0 34px;color:#cdd6ea}.rec i{color:var(--faint)}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0 34px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #3a3a48;border-radius:18px;cursor:pointer;font-size:13px;background:var(--panel2)}
+.pill input{display:none}.pill.on{border-color:var(--story);background:#1d2742;color:#e3ecff}
+.q .other{margin:10px 0 0 34px;width:calc(100% - 34px);font:inherit;font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid #33333f;background:#121217;color:var(--ink)}
+.q .opts{margin:8px 0 0 34px;display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--dim)}.q .opts label{cursor:pointer}
+.q .applies{margin:8px 0 0 34px;font-size:12px;color:var(--faint)}.q .applies code{color:#cfc6b0}
+.q .ans{margin:8px 0 0 34px;font-size:13px;color:#9fe0a8}.q .ans small{color:var(--dim)}
+.linkish{background:none;border:0;padding:0;color:var(--story);font-size:12.5px;cursor:pointer}
+.replybox{max-width:900px;background:var(--panel);border:1px solid #33456e;border-radius:14px;padding:16px 18px;margin-top:4px}
+.replybox textarea,.cmp textarea{width:100%;min-height:80px;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid #33333f;background:#121217;color:var(--ink);resize:vertical}
+.replybox .bar2{display:flex;align-items:center;gap:10px;margin-top:10px}.replybox .tally{color:var(--dim);font-size:13px;flex:1}
+.cmp input,.cmp textarea{width:100%;margin-bottom:10px}.cmp .qrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px}.cmp .qrow input{margin:0}
+#modal .box.wide{width:min(760px,94vw)}
+/* ---------- work orders */
+.orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;max-width:1400px}
+.ocol h2 span{color:var(--ink);text-transform:none;letter-spacing:0;font-size:15px}
+.ocard{background:linear-gradient(180deg,var(--panel),#1a1a21);border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.ocard.now{border-left-color:var(--no)}.ocard.soon{border-left-color:var(--warn)}.ocard.someday{border-left-color:#5a5868}.ocard.closed{opacity:.55}
+.ocard .ot{font-weight:600}.ocard .od{color:#cfccc5;font-size:13px;margin-top:4px}.ocard .om{color:var(--faint);font-size:12px;margin-top:6px}
+.ocard .ob{margin-top:8px;display:flex;gap:8px}.ocard .ob button{padding:4px 10px;font-size:12.5px}
+.oadd{display:grid;grid-template-columns:160px 120px 1fr 1fr auto;gap:10px;align-items:center;margin-bottom:20px;max-width:1400px}
+.oadd input,.oadd select{font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink)}
+.tabs button .badge{background:var(--story);color:#0d1424;border-radius:9px;padding:0 7px;font-size:11.5px;margin-left:6px;font-weight:700}
+.fsel{font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink)}.cmp .fsel{width:100%;margin-bottom:10px}
+/* ---------- BUILD 04: sprite intake and characters */
+.hero .tag.art{color:var(--accent);border-color:#6a5326;background:#2a2316}
+.note.art{border-left-color:var(--accent);background:#221d14;color:#e6dcc6}
+.setup{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr)) 2fr;gap:16px;align-items:start;max-width:1400px}
+@media(max-width:1100px){.setup{grid-template-columns:1fr 1fr}}
+.fld label{display:block;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.fld select,.fld input{width:100%;font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink)}
+.fld small{display:block;color:var(--faint);font-size:12px;margin-top:6px;line-height:1.4}
+.badge2{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:9px;border:1px solid var(--line);color:var(--dim);margin:6px 6px 0 0}
+.badge2.asym{color:var(--lock);border-color:#5b4690;background:#211a33}.badge2.red{color:#ffb4ad;border-color:#7a3631;background:#2a1a1b}
+.badge2.ok{color:#9fe0a8;border-color:#2f5a3c;background:#16241a}.badge2.dim{color:var(--faint)}
+.drop{border:2px dashed #4a4a5a;border-radius:12px;padding:20px;text-align:center;color:var(--dim);cursor:pointer;transition:.15s;min-height:92px;display:flex;flex-direction:column;justify-content:center}
+.drop b{color:var(--ink);font-size:15px}.drop.over{border-color:var(--accent);background:#2a2316;color:var(--ink)}
+.cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;max-width:1400px}
+.cand{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:.15s}
+.cand:hover{border-color:var(--accent);transform:translateY(-1px)}.cand img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#0e0e12;display:block}
+.cand div{padding:6px 9px;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cand div b{color:var(--ink);font-weight:600}
+.work{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;max-width:1500px;margin-top:18px;align-items:start}
+@media(max-width:1100px){.work{grid-template-columns:1fr}}
+.stage{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#0e0e12;user-select:none}
+.stage img{display:block;width:100%}
+.fbox{position:absolute;border:2px solid var(--warn);border-radius:6px;cursor:pointer;transition:box-shadow .12s,border-color .12s;background:rgba(240,176,64,.04)}
+.fbox:hover{background:rgba(240,176,64,.10)}.fbox.on{border-color:var(--ok);background:rgba(70,199,118,.05)}
+.fbox.out{border-style:dashed;border-color:#6c6a78;background:rgba(10,10,14,.45)}.fbox.dup{border-color:#e08a50}
+.fbox.sel{box-shadow:0 0 0 3px var(--accent),0 0 24px rgba(240,176,64,.55);z-index:2}
+.fbox .tg{position:absolute;left:-2px;top:-2px;background:#101014;border-radius:6px 0 8px 0;padding:2px 9px;font-weight:700;font-size:15px;color:var(--warn);white-space:nowrap}
+.fbox.on .tg{color:var(--ok)}.fbox.out .tg{color:#8a8896}.fbox .tg i{font-style:normal;font-weight:600;margin-left:6px;color:var(--ink)}
+.pbox{position:absolute;border:2px solid #a58bff;background:rgba(165,139,255,.42);border-radius:4px;cursor:pointer;z-index:3;min-width:10px;min-height:10px}
+.pbox.kept{background:transparent;border-style:dashed;border-color:#6b5aa8}.pbox:hover{box-shadow:0 0 0 2px #fff}
+.sbox{position:absolute;border:2px dashed var(--warn);border-radius:4px;pointer-events:none;z-index:1}.sbox span{position:absolute;left:0;bottom:-17px;font-size:10.5px;color:var(--warn);white-space:nowrap}
+.fbox.guess{border-color:var(--warn);border-style:dotted}.fbox.guess .tg{color:var(--warn)}.stage.mark,.stage.mark .fbox{cursor:crosshair}
+.lbox{position:absolute;border:1px dashed var(--no);border-radius:4px;pointer-events:none}
+.lbox span{position:absolute;left:0;top:-17px;font-size:10.5px;color:#ff9d95;white-space:nowrap}
+.side{position:sticky;top:76px;display:flex;flex-direction:column;gap:14px}
+.fig{display:flex;gap:12px;align-items:flex-start}.fig canvas{background:#0e0e12;border-radius:8px;border:1px solid var(--line);flex:none}
+.fig h3{margin:0 0 4px;font-size:17px}.fig .meta{line-height:1.45}
+.compass{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.compass button{padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.15}
+.compass button b{font-size:16px}.compass button small{font-size:10.5px;color:var(--dim);text-align:center}
+.compass button.cur{border-color:var(--ok);background:#1d3324}.compass button.skip{background:#1a1a20}.compass button.skip.cur{border-color:#8a8896;background:#26262e}
+.keys{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.5}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#d6d3cc;cursor:pointer;margin-top:8px}.chk input{margin-top:3px}
+.facings{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;max-width:1500px;margin-top:14px}
+@media(max-width:1100px){.facings{grid-template-columns:repeat(4,1fr)}}
+.fc{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:12.5px;min-height:76px}
+.fc b{display:block;font-size:16px}.fc .who2{color:var(--ok);margin-top:2px}.fc.miss{border-color:#6a3330;background:#211717}.fc.miss .who2{color:#ff9d95}
+.fc.fill{border-color:#5b4690;background:#1c1830}.fc.multi{border-color:#7a5a30}.fc label{display:flex;gap:6px;align-items:center;margin-top:6px;color:var(--dim);cursor:pointer;font-size:12px}
+.bar3{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap;max-width:1500px}.bar3 .tally{color:var(--dim);flex:1;font-size:13px}
+.banner{border-radius:10px;padding:11px 15px;margin-top:16px;max-width:1500px;font-size:13.5px}
+.banner.guess{background:#2a2316;border:1px solid #6a5326;color:#f0dfb5}.banner.done{background:#16241a;border:1px solid #2f5a3c;color:#bfe9c8}
+.banner.warn{background:#2a1a1b;border:1px solid #7a3631;color:#ffc2bd}
+.result{margin-top:22px;max-width:1500px}
+.checker{background-color:#2b2b33;background-image:linear-gradient(45deg,#34343e 25%,transparent 25%),linear-gradient(-45deg,#34343e 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#34343e 75%),linear-gradient(-45deg,transparent 75%,#34343e 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;border-radius:10px;border:1px solid var(--line)}
+.gsheet img{display:block;width:100%;image-rendering:auto}.gcells{display:grid;grid-template-columns:repeat(8,1fr);text-align:center;font-size:12px;color:var(--dim);margin-top:6px}
+.gcells span.miss{color:#ff9d95}.gifs{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}.gifs figure{margin:0;text-align:center;font-size:12px;color:var(--dim)}
+.gifs img{height:160px;border-radius:8px;display:block;margin-bottom:4px}
+table.t{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}table.t th,table.t td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.t th{color:var(--dim);font-weight:600;font-size:12px}table.t td.bad{color:#ffb4ad}
+.warnl{list-style:none;padding:0;margin:10px 0}.warnl li{padding:6px 10px;border-left:3px solid var(--warn);background:#221d14;border-radius:6px;margin-bottom:6px;font-size:13px;color:#eadfc4}
+/* characters */
+.chars{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;max-width:1500px}
+@media(max-width:1000px){.chars{grid-template-columns:1fr}}
+.clist{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 150px);overflow:auto;padding-right:4px}
+.clist input{font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink);margin-bottom:6px}
+.citem{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+.citem:hover{background:rgba(255,255,255,.03)}.citem.sel{background:var(--panel2);border-color:var(--line);box-shadow:inset 3px 0 0 var(--accent)}
+.citem .av{width:34px;height:34px;font-size:13px}.citem .nm{font-weight:600}.citem .sub{font-size:12px;color:var(--faint)}
+.citem.stub .nm{color:var(--dim);font-weight:500}
+.vtabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}.vtabs button{border-radius:18px;padding:6px 14px}.vtabs button.on{border-color:var(--accent);background:#2a2316}
+.prompt{background:#121217;border:1px solid var(--line);border-radius:8px;padding:10px 12px;line-height:2;font-size:13.5px;color:#cfccc5}
+.blk{display:inline-block;padding:0 9px;border-radius:9px;font-size:12.5px;line-height:1.75;margin:0 2px;border:1px solid}
+.blk.written{color:#9fe0a8;border-color:#2f5a3c;background:#16241a}.blk.placeholder{color:#ffb4ad;border-color:#7a3631;background:#2a1a1b}
+.blk.missing{color:#a8a6b2;border-color:#4a4a58;background:#1d1d24;border-style:dashed}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;font-size:13.5px}.kv dt{color:var(--dim)}.kv dd{margin:0;word-break:break-word}
+.refs{display:flex;gap:10px;flex-wrap:wrap}.refs figure{margin:0;width:150px;font-size:11.5px;color:var(--dim);position:relative}
+.refs img{width:150px;height:150px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.refs .gone{width:150px;height:150px;border-radius:8px;border:1px dashed #7a3631;color:#ffb4ad;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font-size:12px}
+.refs .x{position:absolute;top:4px;right:4px;padding:1px 7px;font-size:12px;background:rgba(10,10,14,.8)}
+.pics{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.pics a{display:block;font-size:11.5px;color:var(--dim)}
+.pics img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#0e0e12;border-radius:8px;border:1px solid var(--line);display:block;margin-bottom:3px}
+pre.out{background:#0f0f13;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;white-space:pre-wrap;color:#cfccc5;max-height:280px;overflow:auto}
+.plist{margin:6px 0 0;padding-left:18px;font-size:13px;color:#e6c9c4}.plist li{margin:3px 0}
+/* ---------- BUILD 12: wanted, review & approve, make a picture */
+.st-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;border:1px solid var(--line);font-size:12.5px;margin:0 6px 6px 0;cursor:pointer;background:var(--panel2);color:var(--dim)}
+.st-chip.off{opacity:.4}.st-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.s-missing{background:#e5584f}.s-stand-in{background:#c98a3a}.s-drafted{background:#8a7fd0}.s-queued{background:#4f8fd9}.s-rendered{background:#f0b040}.s-approved{background:#7ad07a}.s-delivered{background:#3fa064}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:2px}.seg button{border:0;background:transparent;padding:5px 12px;border-radius:7px;color:var(--dim);font-size:13px}.seg button.on{background:var(--panel2);color:var(--ink)}
+.wtools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 14px;max-width:1500px}.wtools input:not([type=checkbox]){font:inherit;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink);min-width:220px}
+.wlay{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;max-width:1500px;align-items:start}@media(max-width:1100px){.wlay{grid-template-columns:1fr}}
+.wgroup{margin-bottom:16px}.wgroup h3{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:14px;font-weight:600}.wgroup h3 .meta{font-weight:400}
+.wgroup h3 label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim);font-weight:400;cursor:pointer;margin-left:auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.wt{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer;font-size:12.5px;position:relative;transition:.12s}
+.wt:hover{border-color:#55556a}.wt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#2a2316}
+.wt b{display:block;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:16px}
+.wt .ln{color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wt .dot2{position:absolute;right:9px;top:10px;width:9px;height:9px;border-radius:50%}
+.wt .tag{display:inline-block;margin-top:4px;font-size:11px;padding:0 7px;border-radius:8px;border:1px solid var(--line);color:var(--dim)}
+.selpanel{position:sticky;top:76px}.selpanel .big{font-size:28px;font-weight:650}.kv2{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:10px 0}.kv2 dt{color:var(--dim)}.kv2 dd{margin:0}
+.diskbar{height:10px;border-radius:5px;background:#2a2a34;overflow:hidden;position:relative;margin:6px 0}.diskbar i{display:block;height:100%;background:var(--ok)}.diskbar i.need{background:var(--warn);position:absolute;top:0}.diskbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--no)}
+.rlay{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;max-width:1600px;align-items:start}@media(max-width:1100px){.rlay{grid-template-columns:1fr}}
+.rlist{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 150px);overflow:auto;padding-right:4px}
+.ritem{display:flex;gap:10px;padding:7px;border-radius:10px;border:1px solid transparent;cursor:pointer;align-items:center}.ritem:hover{background:rgba(255,255,255,.03)}
+.ritem.sel{background:var(--panel2);border-color:var(--line);box-shadow:inset 3px 0 0 var(--accent)}.ritem img{width:84px;height:60px;object-fit:cover;border-radius:6px;background:#0e0e12;flex:none}
+.ritem .t1{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}.ritem .t2{font-size:11.5px;color:var(--faint)}
+.viewer{background:#0e0e12;border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:70vh;text-align:center;cursor:zoom-in}.viewer.one{cursor:zoom-out;text-align:left}
+.viewer img{max-width:100%;display:inline-block;vertical-align:top}.viewer.one img{max-width:none}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ab figure{margin:0}.ab figcaption{font-size:12px;color:var(--dim);margin-top:4px}
+.ftabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.ftabs button{padding:4px 10px;font-size:12.5px}.ftabs button.on{border-color:var(--accent)}
+.lic{font-size:12.5px}.lic td.ok{color:#9fe0a8}.lic td.no{color:#ffb4ad}.chk-pass{color:#9fe0a8}.chk-warn{color:var(--warn)}.chk-fail{color:#ffb4ad}
+.act3{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.mlay{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;max-width:1500px;align-items:start}@media(max-width:1000px){.mlay{grid-template-columns:1fr}}
+.kindl{display:flex;flex-direction:column;gap:6px}.kindl button{text-align:left;padding:9px 12px;border-radius:9px}.kindl button.on{border-color:var(--accent);background:#2a2316}
+.kindl button small{display:block;color:var(--faint);font-size:11.5px}
+.mform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}.mform .wide{grid-column:span 2}@media(max-width:900px){.mform{grid-template-columns:1fr}.mform .wide{grid-column:span 1}}
+.mform textarea{width:100%;min-height:84px;font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink);resize:vertical}
+.ferr{color:#ffb4ad;font-size:12.5px;margin-top:5px}.fld.bad select,.fld.bad input,.fld.bad textarea{border-color:#a0443c}
+/* ---------- BUILD 14: called out, mark-up, library, bake-offs, models, outside tools */
+.co{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-top:10px}
+.coi{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;gap:10px;font-size:13px}
+.coi img{width:96px;height:72px;object-fit:cover;border-radius:6px;background:#0e0e12;flex:none}.coi .n{color:#e6dcc6}.coi .b{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.coi .b button{padding:3px 9px;font-size:12px}
+.mk-wrap{position:relative;display:inline-block;max-width:100%;line-height:0;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.mk-wrap img{max-width:100%;max-height:58vh;display:block}.mk-wrap canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+.mk-tools{display:flex;gap:8px;margin:10px 0;align-items:center}.mk-tools button.on{border-color:var(--accent);background:#2a2316}
+.llay{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;max-width:1500px;align-items:start}@media(max-width:1000px){.llay{grid-template-columns:1fr}}
+.blk-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.blk-card.placeholder{border-left:3px solid var(--no)}.blk-card.written{border-left:3px solid var(--ok)}
+.blk-card textarea{width:100%;min-height:58px;font:inherit;font-size:13.5px;padding:8px 10px;border-radius:8px;border:1px solid #33333f;background:#121217;color:var(--ink);resize:vertical;margin-top:6px}
+.blk-card .hd{display:flex;gap:10px;align-items:center}.blk-card .hd code{color:#e6d6b0;font-size:13.5px}.blk-card .row3{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}.blk-card .row3 button{padding:4px 10px;font-size:12.5px}
+.mtot{display:flex;gap:16px;flex-wrap:wrap}.mtot .card{min-width:220px}.mtot b{font-size:30px;display:block}
+table.t td.g{color:#9fe0a8}table.t td.r{color:#ffb4ad}table.t td.y{color:var(--dim)}
+
+/* ---------- Music (BUILD 06) */
+.mu-counts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}.mu-counts .n{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+.mu-counts .n b{font-size:20px;display:block}.mu-counts .n.on{border-color:var(--story)}
+.chip{display:inline-block;padding:1px 9px;border-radius:10px;font-size:11.5px;font-weight:650;white-space:nowrap;border:1px solid transparent}
+.chip.needed{background:#3a1f1f;color:#ff9a8f;border-color:#6a2f2a}.chip.proposed{background:#3a3220;color:#f0c060;border-color:#6a5524}
+.chip.agreed{background:#20323a;color:#7fd0f0;border-color:#2a5a6a}.chip.written{background:#25223a;color:#b9a6ff;border-color:#4a3f7a}
+.chip.delivered{background:#1f3a2a;color:#7fe0a0;border-color:#2f6a45}.chip.in-game{background:#2c5a3a;color:#e9ffe9;border-color:#46c776}
+.chip.inherits{background:#26262e;color:var(--faint)}.chip.bill{background:#3a2a1a;color:#ffc87a;border-color:#7a5524}
+table.mu{width:100%;border-collapse:collapse;font-size:13px}table.mu th{text-align:left;color:var(--faint);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.mu td{padding:7px 8px;border-bottom:1px solid #24242d;vertical-align:top}table.mu tr.row{cursor:pointer}table.mu tr.row:hover{background:#1b1b23}
+table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.sel{background:#1e2230}
+.mu-detail{background:#16161c;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:4px 0 10px}
+.mu-detail h4{margin:10px 0 4px;font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px}
+.mu-detail input,.mu-detail textarea,.mu-detail select,.mu-filters select,.mu-filters input{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.mu-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+.mu-sheet .spot.open{border:1px dashed var(--warn);border-radius:8px;padding:6px 10px;margin:4px 0;background:#2a2416}
+.mu-sheet h3{margin:16px 0 6px}.mu-sheet .src{color:var(--faint);font-size:12px}.mu-sheet pre{white-space:pre-wrap;background:#121217;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+
+/* ---------- Read-through (BUILD 07) */
+.rt-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}.rt-top select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.rt-keys{color:var(--faint);font-size:12.5px;margin:-4px 0 12px}.rt-keys kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:11.5px;color:var(--ink)}
+.rt-cols{display:grid;grid-template-columns:1fr;gap:16px}.rt-cols.two{grid-template-columns:1fr 1fr}
+.rt-line{display:grid;grid-template-columns:34px 1fr auto;gap:10px;padding:9px 10px;border-bottom:1px solid #24242d;border-left:3px solid transparent;cursor:pointer}
+.rt-line.sel{background:#1e2230;border-left-color:var(--story)}.rt-line .rt-who{color:var(--story);font-weight:600;font-size:12.5px}
+.rt-line .txt{font-size:15px;line-height:1.5}.rt-line .meta2{color:var(--faint);font-size:12px;margin-top:2px}
+.rt-line .mark{color:var(--warn);font-size:12px}.rt-line textarea{width:100%;font:15px/1.5 inherit;color:var(--ink);background:var(--panel);border:1px solid var(--story);border-radius:8px;padding:6px 8px}
+.rt-st{font-size:11.5px;font-weight:650;padding:1px 8px;border-radius:9px;white-space:nowrap}.rt-st.approved{background:#1f3a2a;color:#7fe0a0}.rt-st.flagged{background:#3a1f1f;color:#ff9a8f}.rt-st.draft{background:#26262e;color:var(--dim)}
+.rt-sheet{background:#16161c;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}.rt-sheet div{margin:3px 0}.rt-sheet b{color:var(--dim);font-weight:500}
+</style></head><body>
+<header>
+  <div class="logo">RPG<b>_</b>Forge</div>
+  <div class="picker" id="picker"><select id="game" title="Which game — everything on the Story side is this game's"></select></div>
+  <div class="tabs"><button id="t-art" class="on">Art</button><button id="t-story" class="story">Story<span class="badge" id="story-badge" style="display:none"></span></button></div>
+  <div class="spacer"></div>
+  <div class="who" id="who" title="Who is using this install — every change is signed with this name">You are <b id="who-name">…</b> ✎</div>
+  <div class="clock" id="clock"></div>
+</header>
+<div class="body">
+  <nav id="nav-art">
+    <button data-s="home" class="on">⌂ Home</button>
+    <button data-s="queue">▦ Queue &amp; pictures</button>
+    <button data-s="wanted">▤ Wanted</button>
+    <button data-s="make">✚ Make a picture</button>
+    <button data-s="review">✓ Review &amp; approve</button>
+    <button data-s="intake">✥ Sprite intake</button>
+    <button data-s="chars">☺ Characters</button>
+    <button data-s="library">❡ Prompt library</button>
+    <button data-s="bakeoffs">⚗ Bake-offs</button>
+    <button data-s="models">▣ Models</button>
+    <button data-s="tools">⇄ Outside tools</button>
+    <div class="soon">Next on this side: wiring day (BUILD 16) — only with the art worker stopped.</div>
+  </nav>
+  <nav id="nav-story" style="display:none">
+    <button data-s="mail" class="on">✉ Mail <span id="nav-unread"></span></button>
+    <button data-s="orders">☑ Work orders</button>
+    <button data-s="overview">◎ Overview</button>
+    <button data-s="read">📖 Read-through</button>
+    <button data-s="music">♪ Music</button>
+    <div class="soon">Next on this side: people, quests and voice sheets (the rest of BUILD 07).</div>
+  </nav>
+  <main id="main">
+    <section id="v-home" class="grid">
+      <div class="card s8" id="c-worker">
+        <h2>The art worker <span class="meta" style="text-transform:none;letter-spacing:0">— shared by every game</span></h2>
+        <div class="state"><span class="dot" id="w-dot"></span><b id="w-state">…</b><span class="since" id="w-since"></span></div>
+        <div class="words" id="w-words"></div>
+        <div class="actions">
+          <div class="act"><button class="go" id="b-start">▶ Start worker</button><small id="d-start"></small></div>
+          <div class="act"><button class="warn" id="b-pause">⏸ Pause after this job</button><small id="d-pause"></small></div>
+          <div class="act"><button id="b-resume">⟲ Resume</button><small id="d-resume"></small></div>
+        </div>
+      </div>
+      <div class="card s4 preview"><h2 id="p-title">Now</h2><div id="p-body" class="empty">…</div></div>
+      <div class="card s4"><h2>Queue</h2>
+        <div class="nums"><div class="num" id="n-pend"><b>–</b><span>waiting</span></div><div class="num" id="n-paused"><b>–</b><span>paused</span></div>
+        <div class="num" id="n-fail"><b>–</b><span>failed</span></div><div class="num" id="n-done"><b>–</b><span>made</span></div></div>
+        <div class="meta" style="margin-top:12px">Time left: <b id="eta" style="color:var(--ink)">–</b> <span id="eta-basis"></span></div>
+        <div class="chips" id="next"></div>
+      </div>
+      <div class="card s4"><h2>Disk</h2><div class="num"><b id="disk-free">–</b><span id="disk-sub"></span></div>
+        <div class="bar" id="disk-bar"><i style="width:0"></i><u></u></div><div class="meta" id="disk-msg"></div></div>
+      <div class="card s4"><h2>Reports &amp; files</h2>
+        <div id="report" class="meta"></div>
+        <div class="links">
+          <button class="ghost" data-open="log">📄 Show me the forge log</button>
+          <button class="ghost" data-open="jobs">📁 Open the jobs folder</button>
+          <button class="ghost" data-open="out">🖼 Open the pictures folder</button>
+        </div>
+      </div>
+    </section>
+    <section id="v-queue" style="display:none"><iframe id="queue-frame" title="Queue and pictures"></iframe></section>
+    <section id="v-wanted" style="display:none">
+      <div class="hero"><h1>Wanted</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><span class="meta" id="w-planmade"></span><button class="ghost" id="w-atlas" title="One painting per town side by side — do the towns differ?">Atlas</button><button id="w-plan" title="Reads the game again and drafts one job per missing item — nothing is queued">↻ Plan</button></div>
+      <div class="note art">Everything the game still needs, from its own files. Select a town (or anything), see the hours and the disk it takes, and queue it — the forge refuses while a look block is still a placeholder, and says which.</div>
+      <div id="w-counts"></div>
+      <div class="wtools"><span class="seg" id="w-group"><button data-g="town" class="on">by town</button><button data-g="kind">by kind</button><button data-g="story">by first appearance</button></span>
+        <input id="w-q" placeholder="Find an item"><label class="chk" style="margin:0"><input type="checkbox" id="w-done"><span>show delivered</span></label></div>
+      <div class="wlay"><div id="w-board"></div><div class="selpanel" id="w-sel"></div></div>
+    </section>
+    <section id="v-make" style="display:none">
+      <div class="hero"><h1>Make a picture</h1><span class="tag art">Art</span></div>
+      <div class="note art">A form, not a prompt box: pick what kind of picture, fill in what it takes in plain words, and see the prompt the worker will get — every library block marked. Nothing is queued until you press Queue it and confirm.</div>
+      <div class="mlay"><div class="kindl" id="m-kinds"></div><div><div class="card" id="m-form"></div><div class="card" id="m-preview" style="margin-top:14px"></div></div></div>
+    </section>
+    <section id="v-review" style="display:none">
+      <div class="hero"><h1>Review &amp; approve</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><a href="#" class="meta" onclick="screen='queue';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='queue'));show();return false">the old dashboard (Called out drafts live there)</a></div>
+      <div id="r-deliver"></div>
+      <div id="r-called"></div>
+      <div class="rlay"><div class="rlist" id="r-list"></div><div id="r-detail"><div class="empty">Choose a picture.</div></div></div>
+    </section>
+    <section id="v-library" style="display:none">
+      <div class="hero"><h1>Prompt library</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><button onclick="libNew()">＋ New block</button></div>
+      <div class="note art">The shelves of look words every picture is built from. Red blocks are still placeholders — the forge refuses to queue anything that uses one. The words are the art direction's; every save is kept and signed.</div>
+      <div id="l-top"></div><div class="llay"><div class="kindl" id="l-shelves"></div><div id="l-blocks"></div></div>
+    </section>
+    <section id="v-bakeoffs" style="display:none">
+      <div class="hero"><h1>Bake-offs</h1><span class="tag art">Art</span></div>
+      <div class="note art">This game's bake-off suites — models × LoRAs × samplers × prompts — with how many renders and how long, whether they ran, and their grids. Queue only on a second click.</div>
+      <div id="b-list"></div>
+    </section>
+    <section id="v-models" style="display:none">
+      <div class="hero"><h1>Models</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><button id="mo-scan" title="Reads every model file's header again (takes a while)">↻ Scan the model folders again</button></div>
+      <div class="note art">Every file under the model folders: does it load, its licence, what still uses it, the verdict on it, its size — and what you could delete. <b>It deletes nothing.</b> If you agree, delete them yourself in Explorer.</div>
+      <div id="mo-body"><div class="empty">Reading the shelf…</div></div>
+    </section>
+    <section id="v-tools" style="display:none">
+      <div class="hero"><h1>Outside tools</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><button onclick="addTool()">＋ Add a program</button></div>
+      <div class="note art">Pictures handed out to another program (Gigapixel, Filter Forge, anything) and brought back. Send one out from Review &amp; approve; edit it in the in folder, save into done, then bring it back here.</div>
+      <div id="t-body"></div>
+    </section>
+    <section id="v-intake" style="display:none">
+      <div class="hero"><h1>Sprite intake</h1><span class="tag art">Art</span><span class="spacer"></span>
+        <a href="/suite/text?what=log" target="_blank" class="meta">Show me the forge log</a></div>
+      <div class="note art">Drop a character sheet made in any program. The forge finds the figures and numbers them on the sheet; you click each one and say which way it faces; it cuts them out, gives them one height and one baseline, and packs the game's sheet — eight facings, S SW W NW N NE E SE. The mapping file is written for you; you never open it.</div>
+      <div class="card"><h2>1 · The sheet</h2>
+        <div class="setup">
+          <div class="fld"><label for="in-ch">Whose sheet</label><select id="in-ch"></select><div id="in-chnote"></div></div>
+          <div class="fld"><label for="in-v">Which variant</label><select id="in-v"></select><small id="in-vnote"></small></div>
+          <div class="fld"><label for="in-tool">Made with</label><select id="in-tool"></select><small id="in-toolnote">The program goes on the picture's licence line. The forge never guesses a licence.</small></div>
+          <div class="drop" id="in-drop" tabindex="0"><b>Drop a sheet here</b><span>or click to choose a picture (png, jpg, webp)</span><input type="file" id="in-file" accept=".png,.jpg,.jpeg,.webp" style="display:none"></div>
+        </div>
+        <div id="in-cands"></div>
+      </div>
+      <div id="in-work"></div>
+      <div id="in-result"></div>
+    </section>
+    <section id="v-chars" style="display:none">
+      <div class="hero"><h1>Characters</h1><span class="tag art">Art</span><span class="spacer"></span>
+        <a href="/suite/text?what=log" target="_blank" class="meta">Show me the forge log</a></div>
+      <div class="chars"><div class="clist" id="c-list"></div><div id="c-page"><div class="empty">Choose a character.</div></div></div>
+    </section>
+    <section id="v-story" style="display:none"></section>
+    <section id="v-mail" class="mail" style="display:none">
+      <div class="mfold">
+        <button class="go compose" onclick="compose()">✎ Write a letter</button>
+        <button class="fb on" data-box="inbox">Inbox <b id="mb-inbox" style="display:none"></b></button>
+        <button class="fb" data-box="sent">Sent</button>
+        <button class="fb" data-box="drafts">Drafts</button>
+        <button class="fb" data-box="archive">Archive</button>
+        <input id="msearch" placeholder="Search the mail" title="Searches every letter you sent or received">
+      </div>
+      <div class="mlist" id="mlist"></div>
+      <div class="mread" id="mread"><div class="empty" style="margin-top:20vh">Choose a letter.</div></div>
+    </section>
+    <section id="v-orders" style="display:none"></section>
+    <section id="v-music" style="display:none"></section>
+    <section id="v-read" style="display:none"></section>
+    <audio id="mu-audio" preload="none"></audio>
+  </main>
+</div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(n??0).toLocaleString();
+let G={games:[],current:'',identity:null,people:[]}, side='art', screen='home', sscreen='mail', H=null;
+let M={box:'inbox',q:'',sel:null,view:null,letters:[],corr:[]};
+async function api(p){const r=await fetch(p,{cache:'no-store'});if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
+async function post(a,b={}){const r=await fetch('/api/suite/act/'+a,{method:'POST',headers:{'Content-Type':'application/json','X-Forge':'1'},body:JSON.stringify(b)});return r.json()}
+function toast(m,ok=true){const t=$('#toast');t.textContent=m;t.className=ok?'':'no';t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',ok?6000:12000)}
+function modal(html,wide){$('#mbox').innerHTML=html;$('#mbox').className='box'+(wide?' wide':'');$('#modal').style.display='flex'}
+function closeModal(){$('#modal').style.display='none'}
+$('#modal').onclick=e=>{if(e.target.id==='modal'&&G.identity)closeModal()};
+function confirmAct(title,does,label,fn){modal(`<h3>${esc(title)}</h3><p>${esc(does)}</p><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">${esc(label)}</button></div>`);
+  $('#m-ok').onclick=async()=>{closeModal();await fn()}}
+const gid=()=>$('#game').value;
+function hue(name){const g=String(name||'?').trim().split(/\s+/)[0].toLowerCase();let h=0;for(const c of g)h=(h*31+c.charCodeAt(0))%360;return h}
+function avatar(name){const ini=String(name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();return `<div class="av" style="background:hsl(${hue(name)},62%,66%)">${esc(ini)}</div>`}
+function md(t){const lines=String(t||'').replace(/\r/g,'').split('\n');let out=[],para=[],list=null;
+  const inl=x=>esc(x).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/~~([^~]+)~~/g,'<del>$1</del>').replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g,'$1<em>$2</em>');
+  const flushP=()=>{if(para.length){out.push('<p>'+para.map(inl).join('<br>')+'</p>');para=[]}};
+  const flushL=()=>{if(list){out.push('<ul>'+list.map(x=>'<li>'+inl(x)+'</li>').join('')+'</ul>');list=null}};
+  for(const l of lines){const m=l.match(/^\s*[-*]\s+(.*)/),h=l.match(/^(#{1,4})\s+(.*)/),n=l.match(/^\s*\d+\.\s+(.*)/);
+    if(!l.trim()){flushP();flushL();continue}
+    if(h){flushP();flushL();out.push(`<h4>${inl(h[2])}</h4>`);continue}
+    if(m||n){flushP();(list=list||[]).push((m||n)[1]);continue}
+    flushL();para.push(l)}
+  flushP();flushL();return out.join('')}
+function when(d){if(!d)return'';const t=String(d).replace('T',' ');const n=new Date();const today=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;return t.slice(0,10)===today?t.slice(11,16):t.slice(5,16)}
+function askWho(){const sug=(G.people||[]).filter(n=>n!==G.identity);modal(`<h3>Who's using this install?</h3><p>Every change made here — an edit, an approval, a letter, a paused queue — is signed with this name in the game's journal, so the next person (or Claude session) knows who did it.</p>
+  ${sug.length?`<div class="sugg">${sug.map(n=>`<button onclick="$('#m-name').value=this.textContent">${esc(n)}</button>`).join('')}</div>`:''}<input id="m-name" placeholder="Your name" value="${esc(G.identity||'')}">
+  <div class="row">${G.identity?'<button class="ghost" onclick="closeModal()">Cancel</button>':''}<button class="go" id="m-ok">That's me</button></div>`);
+  setTimeout(()=>$('#m-name').focus(),50);$('#m-name').onkeydown=e=>{if(e.key==='Enter')$('#m-ok').click()};
+  $('#m-ok').onclick=async()=>{const r=await post('identity',{name:$('#m-name').value});toast(r.message,r.ok);if(r.ok){G.identity=r.identity;$('#who-name').textContent=r.identity;closeModal();await loadGames(true);show()}}}
+$('#who').onclick=askWho;
+function setSide(s){side=s;$('#t-art').classList.toggle('on',s==='art');$('#t-story').classList.toggle('on',s==='story');
+  $('#nav-art').style.display=s==='art'?'':'none';$('#nav-story').style.display=s==='story'?'':'none';show()}
+$('#t-art').onclick=()=>setSide('art');$('#t-story').onclick=()=>setSide('story');
+$$('#nav-art button[data-s]').forEach(b=>b.onclick=()=>{screen=b.dataset.s;$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x===b));show()});
+function setStory(s){sscreen=s;$$('#nav-story button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s===s));show()}
+$$('#nav-story button[data-s]').forEach(b=>b.onclick=()=>setStory(b.dataset.s));
+function show(){const st=side==='story';$('#v-home').style.display=!st&&screen==='home'?'':'none';$('#v-queue').style.display=!st&&screen==='queue'?'':'none';
+  $('#v-intake').style.display=!st&&screen==='intake'?'':'none';$('#v-chars').style.display=!st&&screen==='chars'?'':'none';if(!st&&screen==='intake')loadIntake();if(!st&&screen==='chars')loadChars();
+  for(const k of ['wanted','make','review','library','bakeoffs','models','tools'])$('#v-'+k).style.display=!st&&screen===k?'':'none';if(!st&&screen==='wanted')loadWanted();if(!st&&screen==='make')loadMake();if(!st&&screen==='review'){loadReview();loadCalled()}
+  if(!st&&screen==='library')loadLibrary();if(!st&&screen==='bakeoffs')loadBakeoffs();if(!st&&screen==='models'&&!MO.data)loadModels(false);if(!st&&screen==='tools')loadTools();
+  $('#v-story').style.display=st&&sscreen==='overview'?'':'none';$('#v-mail').style.display=st&&sscreen==='mail'?'':'none';$('#v-orders').style.display=st&&sscreen==='orders'?'':'none';$('#v-music').style.display=st&&sscreen==='music'?'':'none';$('#v-read').style.display=st&&sscreen==='read'?'':'none';
+  $('#main').classList.toggle('flush',st&&sscreen==='mail');
+  if(!st&&screen==='queue'&&!$('#queue-frame').src)$('#queue-frame').src='/art/queue';
+  if(st&&sscreen==='overview')loadOverview();if(st&&sscreen==='mail')loadMail();if(st&&sscreen==='orders')loadOrders();if(st&&sscreen==='music')loadMusic();if(st&&sscreen==='read')loadRead();if(!st&&screen==='home')loadHome()}
+async function loadGames(keep){G=await api('/api/suite/games');const sel=$('#game');
+  sel.innerHTML=G.games.map(g=>`<option value="${esc(g.id)}" ${g.id===G.current?'selected':''}>${esc(g.name)}${g.root_exists?'':' — folder not reachable'}</option>`).join('');
+  paintPicker();$('#who-name').textContent=G.identity||'nobody yet';if(!G.identity&&!keep)askWho();return G}
+function paintPicker(){const g=G.games.find(x=>x.id===gid())||{};$('#picker').style.setProperty('--gdot',g.root_exists?(g.adapter?'var(--ok)':'var(--warn)'):'var(--no)');
+  $('#game').title=g.root?`${g.name}\n${g.root}${g.adapter?'':'\n(no Story adapter yet)'}`:'';badge(g.unread||0)}
+function badge(n){$('#story-badge').style.display=n?'':'none';$('#story-badge').textContent=n;
+  $('#nav-unread').innerHTML=n?`<span class="badge" style="background:var(--story);color:#0d1424;border-radius:9px;padding:0 7px;font-size:11.5px;font-weight:700">${n}</span>`:'';
+  $('#mb-inbox').style.display=n?'':'none';$('#mb-inbox').textContent=n}
+$('#game').onchange=async e=>{const r=await post('pick',{id:e.target.value});G.current=e.target.value;M.sel=null;O.data=null;Object.assign(I,{view:null,result:null,ch:'',v:'',tool:'',list:null});Object.assign(C,{sel:null,page:null,v:null});Object.assign(W,{data:null,sel:new Set(),plan:null});Object.assign(MK,{data:null,type:null,vals:{},pv:null});Object.assign(RV,{data:null,sel:null,view:null,ab:null});Object.assign(LB,{data:null,shelf:null});MO.data=null;Object.assign(MU,{data:null,sel:null,sheet:null});Object.assign(RT,{towns:null,place:'',data:null,sel:0,cmp:null});paintPicker();if(!r.ok)toast(r.message,false);show()};
+// ---------- Home
+const STATE_WORD={rendering:'Rendering',idle:'Idle','stopped':'Stopped','stopped-mid-job':'Stopped mid-job',unknown:"Can't tell"};
+async function loadHome(){if(side!=='art'||screen!=='home')return;try{H=await api('/api/suite/home')}catch(e){$('#w-words').textContent='The suite could not read the forge: '+e;return}
+  const w=H.worker;$('#w-dot').className='dot st-'+w.state;$('#w-state').textContent=STATE_WORD[w.state]||w.state;
+  $('#w-since').textContent=w.since?`since ${String(w.since).replace('T',' ').slice(11,16)} — ${w.since_words}`:'';
+  $('#w-words').textContent=w.words.charAt(0).toUpperCase()+w.words.slice(1)+'.';
+  for(const k of ['start','pause','resume']){const a=H.actions[k];$('#b-'+k).disabled=!a.enabled;$('#d-'+k).textContent=a.enabled?a.does:('Not now — '+a.why_not+'.')}
+  $('#b-resume').textContent='⟲ Resume'+(H.counts.paused?` ${fmt(H.counts.paused)}`:'');
+  const r=w.running[0];$('#p-title').textContent=r?'Making now':'Latest picture';
+  $('#p-body').className=H.preview?'':'empty';
+  $('#p-body').innerHTML=(H.preview?`<img src="/thumb?p=${encodeURIComponent(H.preview)}" alt="">`:'Nothing to show yet.')+
+    `<div class="cap">${r?`<b style="color:var(--ink)">${esc(r.name||r.id)}</b> · ${esc(r.type||'')} · ${esc(r.batch||'')}<br>`:''}${esc(H.preview_note||'')}${H.preview?`<br><button class="linkish" id="p-order">→ a work order about this picture</button>`:''}</div>`;
+  if(H.preview)$('#p-order').onclick=()=>openOrder('job:'+H.preview.split('/')[0],'');
+  const c=H.counts;$('#n-pend b').textContent=fmt(c.pending);$('#n-paused b').textContent=fmt(c.paused);$('#n-fail b').textContent=fmt(c.failed);$('#n-done b').textContent=fmt(c.done);
+  $('#n-paused').className='num'+(c.paused?' warn':'');$('#n-fail').className='num'+(c.failed?' no':'');
+  $('#eta').textContent=H.eta?.human||'–';$('#eta-basis').textContent=H.eta?.based_on?`(${H.eta.based_on})`:'';
+  $('#next').innerHTML=(H.now_batch?`<span style="color:var(--warn)">now: ${esc(H.now_batch)}</span>`:'')+(H.upcoming||[]).map(b=>`<span>${esc(b)}</span>`).join('');
+  const d=H.disk;$('#disk-free').textContent=d.free_gb==null?'?':fmt(Math.round(d.free_gb))+' GB';$('#disk-sub').textContent=`free · the guard pauses the queue under ${fmt(d.limit_gb)} GB`;
+  const max=Math.max(d.limit_gb*4,(d.free_gb||0)*1.15);$('#disk-bar').className='bar'+(d.low?' low':'');$('#disk-bar i').style.width=Math.min(100,100*(d.free_gb||0)/max)+'%';$('#disk-bar u').style.left=(100*d.limit_gb/max)+'%';
+  $('#disk-msg').textContent=d.message||(d.low?'Under the guard — the queue will be paused.':'Room to keep going.');
+  $('#report').innerHTML=H.report?`Last night's report: <a href="/out/reports/${encodeURIComponent(H.report)}" target="_blank">${esc(H.report.replace('.html',''))}</a>`:'No night report yet.';
+  $('#clock').textContent=H.time}
+$('#b-start').onclick=()=>confirmAct('Start the art worker?',H.actions.start.does,'Start it',async()=>{const r=await post('start');toast(r.message,r.ok);setTimeout(loadHome,1500)});
+$('#b-pause').onclick=()=>confirmAct('Pause after this job?',H.actions.pause.does,'Pause',async()=>{const r=await post('pause');toast(r.message,r.ok);loadHome()});
+$('#b-resume').onclick=()=>confirmAct('Resume the queue?',H.actions.resume.does,'Resume',async()=>{const r=await post('resume');toast(r.message,r.ok);loadHome()});
+$$('[data-open]').forEach(b=>b.onclick=async()=>{const r=await post('open',{what:b.dataset.open});toast(r.message,r.ok)});
+// ---------- the Mail
+$$('.mfold .fb').forEach(b=>b.onclick=()=>{M.box=b.dataset.box;M.sel=null;M.q='';$('#msearch').value='';$$('.mfold .fb').forEach(x=>x.classList.toggle('on',x===b));loadMail()});
+let _st;$('#msearch').oninput=e=>{clearTimeout(_st);_st=setTimeout(()=>{M.q=e.target.value.trim();M.sel=null;loadMail()},250)};
+async function loadMail(){let d,aw=null;const g=encodeURIComponent(gid());
+  try{d=await api(`/api/suite/mail?id=${g}&box=${M.q?'all':M.box}${M.q?'&q='+encodeURIComponent(M.q):''}`);
+    if(M.box==='inbox'&&!M.q)aw=await api(`/api/suite/away?id=${g}`)}
+  catch(e){$('#mlist').innerHTML=`<div class="err" style="margin:12px">${esc(e)}</div>`;return}
+  M.letters=d.letters;M.corr=d.correspondents;badge(d.unread);const gg=G.games.find(x=>x.id===gid());if(gg)gg.unread=d.unread;
+  let h='';if(aw&&aw.count)h+=awayCard(aw);
+  if(!d.letters.length)h+=`<div class="empty">${M.q?'Nothing matches.':M.box==='inbox'?'No letters yet.':'Nothing here.'}</div>`;
+  h+=d.letters.map(l=>`<div class="row ${l.unread?'unread':''} ${M.sel===l.id?'sel':''}" data-id="${esc(l.id)}">
+    <div class="top"><span class="fr">${esc(M.box==='sent'||M.box==='drafts'?'to '+l.to:l.from)}</span><span class="dt">${esc(when(l.date))}</span></div>
+    <div class="sj">${esc(l.subject)}</div><div class="fl">${esc(l.first_line)}</div>
+    ${l.n_questions?`<span class="qchip ${l.open_questions?'':'done'}">${l.open_questions?(l.open_questions===l.n_questions?(l.n_questions===1?'1 question':l.n_questions+' questions')+' to answer':l.open_questions+' of '+l.n_questions+' still open'):(l.n_questions===1?'answered':'all '+l.n_questions+' answered')}</span>`:''}</div>`).join('');
+  $('#mlist').innerHTML=h;$$('#mlist .row').forEach(r=>r.onclick=()=>openLetter(r.dataset.id));
+  if(M.sel&&d.letters.some(l=>l.id===M.sel))return;
+  if(d.letters.length&&M.box==='inbox'&&!M.q){const first=d.letters.find(l=>l.unread)||d.letters[0];openLetter(first.id)}
+  else $('#mread').innerHTML='<div class="empty" style="margin-top:20vh">Choose a letter.</div>'}
+function diffHtml(s){return esc(s).replace(/~~(.+?)~~/g,'<del>$1</del>').replace(/\*\*(.+?)\*\*/g,'<ins>$1</ins>')}
+function awayCard(a){const parts=a.sections.map(s=>`${s.entries.length} × ${s.title.toLowerCase()}`).join(' · ');
+  return `<div class="away"><b>While you were away</b><div class="ad">Since ${esc(when(a.since)||'the start')}: ${esc(a.people.join(', '))} — ${esc(parts)}.</div>
+  <details><summary>Show me</summary><ul style="padding-left:18px;margin:6px 0">${a.sections.map(s=>s.entries.map(e=>`<li><span class="meta">${esc(when(e.time))} · ${esc(e.who)}</span> — ${esc(s.title)}${e.obj?`<br><code>${esc(e.obj)}</code>`:''}${e.diff?`<br>${diffHtml(e.diff)}`:''}${e.note?`<br><span class="meta">${esc(e.note)}</span>`:''}</li>`).join('')).join('')}</ul></details>
+  <div style="margin-top:8px"><button class="ghost" style="padding:4px 10px;font-size:12.5px" onclick="awaySeen()">Got it</button></div></div>`}
+async function awaySeen(){const r=await post('away_seen',{game:gid()});if(r.ok)loadMail()}
+async function openLetter(id){const l=M.letters.find(x=>x.id===id);if(l&&l.folder==='drafts'){return compose(l)}
+  M.sel=id;$$('#mlist .row').forEach(r=>r.classList.toggle('sel',r.dataset.id===id));
+  let v;try{v=await api(`/api/suite/letter?id=${encodeURIComponent(gid())}&letter=${encodeURIComponent(id)}`)}catch(e){$('#mread').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  M.view=v;renderThread(v);
+  let changed=false;for(const c of v.letters)if(c.unread){changed=true;await post('mail_read',{game:gid(),letter:c.id});const row=$(`#mlist .row[data-id="${CSS.escape(c.id)}"]`);if(row)row.classList.remove('unread');const x=M.letters.find(y=>y.id===c.id);if(x)x.unread=false}
+  if(changed)badge(M.letters.filter(x=>x.unread).length)}
+function qBlock(c,q,i,mine){const key=c.id+'#'+q.id, a=q.answer;const choices=(q.choices||[]).map(x=>typeof x==='object'?x.label:x);
+  let h=`<div class="q ${a?'answered':q.parked?'parked':''}" data-letter="${esc(c.id)}" data-q="${esc(q.id)}"><div class="qh"><span class="qn">${i+1}</span><b>${esc(q.question)}</b></div>`;
+  if(q.why)h+=`<div class="why">${esc(q.why)}</div>`;
+  if(q.recommendation||q.default)h+=`<div class="rec">${q.recommendation?esc(c.from.split(' ').slice(-1)[0])+' recommends: '+esc(q.recommendation):''}${q.default?` <i>· if you don't answer: ${esc(q.default)}</i>`:''}</div>`;
+  if(a){h+=`<div class="ans">✓ ${esc(a.by)} answered: <b>${esc(a.choice!=null?a.choice:a.text)}</b>${a.choice!=null&&a.text?` — “${esc(a.text)}”`:''}${a.applied?` <small>· ${esc(a.applied.message)}</small>`:''} <small>(${esc(when(a.date))})</small></div>`}
+  else if(mine){h+=`<div class="choices">${choices.map(x=>`<label class="pill"><input type="radio" name="${esc(key)}" value="${esc(x)}">${esc(x)}</label>`).join('')}</div>
+    <input class="other" placeholder="${choices.length?'Something else — in your own words':'Your answer'}">
+    <div class="opts"><label><input type="checkbox" class="talk"> Talk to me about this one</label><label><input type="checkbox" class="later"> Later</label>${q.parked?`<span style="color:var(--warn)">parked last time (${esc(q.parked)})</span>`:''}</div>`;
+    if(q.applies_to)h+=`<div class="applies">Picking an option changes <code>${esc(q.applies_to.file)}#${esc(q.applies_to.pointer)}</code> when you send — checked by the game's validator, backed up, logged. Your own words change nothing.</div>`}
+  else h+=`<div class="ans" style="color:var(--dim)">open${q.parked?' — parked ('+esc(q.parked)+')':''}</div>`;
+  h+=`<div style="margin:8px 0 0 34px"><button class="linkish" data-order="mail:${esc(c.id)}#${esc(q.id)}" data-title="${esc(q.question.slice(0,90))}">→ make it a work order</button></div></div>`;return h}
+function isMine(c){const me=G.identity||'';return c.from!==me&&(c.to===me||c.to.split(' ')[0].toLowerCase()===me.split(' ')[0].toLowerCase())}
+function renderThread(v){const me=G.identity||'';const arch=v.letters.some(c=>c.folder==='archive');
+  let h=`<div class="thead"><h1>${esc(v.subject)}</h1><button class="ghost" data-order="mail:${esc(M.sel)}" data-title="${esc(v.subject)}">→ Work order</button>
+  ${arch?`<button class="ghost" onclick="unarchive()">Back to the inbox</button>`:`<button class="ghost" onclick="archiveSel()">Archive</button>`}</div>`;
+  if(v.open_questions)h+=`<div class="meta" style="margin:-6px 0 14px">${v.open_questions} question${v.open_questions>1?'s':''} open on this thread.</div>`;
+  for(const c of v.letters){const mine=isMine(c);
+    h+=`<div class="lcard"><div class="lhead">${avatar(c.from)}<div><div class="lwho">${esc(c.from)}</div><div class="meta">to ${esc(c.to)}</div></div><div class="meta">${esc(String(c.date).replace('T',' ').slice(0,16))}</div></div>
+    <div class="prose">${md(c.body)}</div>`;
+    if(c.attachments.length){const u=a=>`/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(a)}`;
+      h+=`<div class="att">${c.attachments.map(a=>/\.(png|jpe?g|gif)$/i.test(a)?`<a href="${u(a)}" target="_blank"><img src="${u(a)}" alt="${esc(a)}"></a>`:/\.(md|txt|json)$/i.test(a)?`<a href="${u(a)}" target="_blank">📄 ${esc(a)}</a>`:`<span>📎 ${esc(a)}</span>`).join('')}</div>`}
+    if(c.questions.length)h+=`<div class="qs">${c.questions.map((q,i)=>qBlock(c,q,i,mine)).join('')}</div>`;
+    if(c.answers.length)h+=`<div class="qs">${c.answers.map(a=>`<div class="ans" style="margin:4px 0;color:${a.talk||a.later?'var(--warn)':'#9fe0a8'}">${a.talk?'💬':a.later?'⏳':'✓'} ${esc(a.id)}: <b>${esc(a.choice!=null?a.choice:(a.text||''))}</b>${a.talk?' talk to me about this one':''}${a.later?' later':''}${a.applied?` <small style="color:var(--dim)">· ${esc(a.applied.message)}</small>`:''}</div>`).join('')}</div>`;
+    h+=`</div>`}
+  const last=[...v.letters].reverse().find(c=>c.from!==me);
+  if(last)h+=`<div class="replybox"><textarea id="r-body" placeholder="Write back to ${esc(last.from)} (optional — your answers above go with it)"></textarea>
+    <div class="bar2"><span class="tally" id="r-tally"></span><button class="go" id="r-send">Send</button></div></div>`;
+  $('#mread').innerHTML=h;$('#mread').scrollTop=0;
+  $$('#mread .pill input').forEach(i=>i.onchange=()=>{$$(`#mread input[name="${CSS.escape(i.name)}"]`).forEach(x=>x.parentElement.classList.toggle('on',x.checked));tally()});
+  $$('#mread .q input').forEach(i=>i.addEventListener('input',tally));
+  $$('#mread [data-order]').forEach(b=>b.onclick=()=>openOrder(b.dataset.order,b.dataset.title));
+  if(last){$('#r-send').onclick=()=>sendReply(last.id);tally()}}
+function collect(){const out=[];for(const q of $$('#mread .q:not(.answered)')){const o=q.querySelector('.other');if(!o)continue;const ch=q.querySelector('.pill input:checked'),tx=o.value.trim(),talk=q.querySelector('.talk').checked,later=q.querySelector('.later').checked;
+  if(ch||tx||talk||later)out.push({letter:q.dataset.letter,id:q.dataset.q,choice:ch?ch.value:null,text:tx,talk,later})}return out}
+function tally(){const t=$('#r-tally');if(!t)return;const total=$$('#mread .q:not(.answered) .other').length,a=collect().filter(x=>(x.choice||x.text)&&!x.talk&&!x.later).length;
+  t.textContent=total?`${a} of ${total} answered${total-a?` — the other ${total-a} stay open on this thread`:''}`:''}
+async function sendReply(to){const answers=collect(),body=$('#r-body').value;if(!answers.length&&!body.trim())return toast('Nothing to send yet — answer a question or write a line.',false);
+  $('#r-send').disabled=true;const r=await post('mail_reply',{game:gid(),letter:to,body,answers});toast(r.message,r.ok);$('#r-send').disabled=false;
+  if(r.ok){const sel=M.sel;await loadMail();openLetter(sel)}}
+async function archiveSel(){const r=await post('mail_archive',{game:gid(),letter:M.sel});toast(r.message,r.ok);M.sel=null;loadMail()}
+async function unarchive(){const r=await post('mail_unarchive',{game:gid(),letter:M.sel});toast(r.message,r.ok);M.sel=null;loadMail()}
+function compose(d){d=d||{};const qs=d.questions||[];modal(`<h3>${d.id?'Your draft':'Write a letter'}</h3><div class="cmp">
+  <input id="c-to" list="c-corr" placeholder="To — a name" value="${esc(d.to&&d.to!=='(nobody yet)'?d.to:'')}"><datalist id="c-corr">${M.corr.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+  <input id="c-subj" placeholder="Subject" value="${esc(d.subject&&d.subject!=='(no subject)'?d.subject:'')}"><textarea id="c-body" style="min-height:180px" placeholder="The letter — what you think, what you'd do, and only the questions you need answered.">${esc(d.body||'')}</textarea>
+  <div id="c-qs">${qs.map(q=>qRow(q.question,(q.choices||[]).map(x=>typeof x==='object'?x.label:x).join(', '))).join('')}</div>
+  <button class="linkish" id="c-addq">＋ Ask a question they can answer in place</button></div>
+  <div class="row" style="margin-top:14px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="ghost" id="c-draft">Save draft</button><button class="go" id="c-send">Send</button></div>`,true);
+  $('#c-addq').onclick=()=>$('#c-qs').insertAdjacentHTML('beforeend',qRow('',''));
+  const gather=()=>({game:gid(),draft_id:d.id||null,to:$('#c-to').value,subject:$('#c-subj').value,body:$('#c-body').value,
+    questions:$$('#c-qs .qrow').map(r=>({question:r.children[0].value.trim(),choices:r.children[1].value.split(',').map(x=>x.trim()).filter(Boolean)})).filter(q=>q.question)});
+  $('#c-send').onclick=async()=>{const r=await post('mail_send',gather());toast(r.message,r.ok);if(r.ok){closeModal();loadMail()}};
+  $('#c-draft').onclick=async()=>{const r=await post('mail_draft',gather());toast(r.message,r.ok);if(r.ok){closeModal();loadMail()}};
+  setTimeout(()=>$(d.to?'#c-body':'#c-to').focus(),50)}
+function qRow(q,c){return `<div class="qrow"><input placeholder="A question" value="${esc(q)}"><input placeholder="Choices, comma-separated (optional)" value="${esc(c)}"><button class="ghost" onclick="this.parentElement.remove()">✕</button></div>`}
+// ---------- work orders
+let O={all:false,data:null};
+const sel=(id,opts)=>`<select id="${id}" class="fsel">${opts}</select>`;
+async function loadOrders(){const v=$('#v-orders');let d;try{d=await api(`/api/suite/orders?id=${encodeURIComponent(gid())}${O.all?'&all=1':''}`)}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  O.data=d;const others=d.groups.filter(g=>g.group!==d.me),mine=d.groups.find(g=>g.group===d.me);
+  let h=`<div class="hero"><h1>Work orders</h1><span class="tag">Story</span><span class="spacer"></span><label class="meta" style="cursor:pointer"><input type="checkbox" ${O.all?'checked':''} onchange="O.all=this.checked;loadOrders()"> show finished</label></div>
+  <div class="note">Two lists so nobody has to remember: what you want done, and what only you can do. A session starts at the top of its list and closes each order saying what it did.</div>
+  <div class="oadd">${sel('o-for',d.groups.map(g=>`<option value="${esc(g.label)}" ${g===others[0]?'selected':''}>For ${esc(g.label)}</option>`).join(''))}
+  ${sel('o-pri','<option value="now">Now</option><option value="soon" selected>Soon</option><option value="someday">Someday</option>')}
+  <input id="o-title" placeholder="What to do — one line"><input id="o-detail" placeholder="More, if it helps"><button class="go" id="o-add">Add</button></div><div class="orders">`;
+  for(const g of [...others,...(mine?[mine]:[])]){const n=g.orders.filter(o=>o.status==='open').length;
+    h+=`<div class="ocol"><h2>For <span>${esc(g.label)}</span>${g.group===d.me?' (you)':''} · ${n} open</h2>${g.orders.length?g.orders.map(oCard).join(''):'<div class="meta">Nothing on this list.</div>'}</div>`}
+  v.innerHTML=h+'</div>';
+  $('#o-add').onclick=async()=>{const r=await post('order_add',{game:gid(),for:$('#o-for').value,priority:$('#o-pri').value,title:$('#o-title').value,detail:$('#o-detail').value});toast(r.message,r.ok);if(r.ok)loadOrders()};
+  $('#o-title').onkeydown=e=>{if(e.key==='Enter')$('#o-add').click()};
+  $$('#v-orders [data-close]').forEach(b=>b.onclick=()=>closeOrder(b.dataset.close,b.dataset.status));
+  $$('#v-orders [data-letter]').forEach(b=>b.onclick=()=>goLetter(b.dataset.letter))}
+function oCard(o){const about=o.object?(o.object.startsWith('mail:')?`· <button class="linkish" data-letter="${esc(o.object.slice(5).split('#')[0])}">about a letter</button>`:`· about <code>${esc(o.object)}</code>`):'';
+  return `<div class="ocard ${esc(o.priority)} ${o.status!=='open'?'closed':''}"><div class="ot">${esc(o.title)}</div>${o.detail?`<div class="od">${esc(o.detail)}</div>`:''}
+  <div class="om">${esc(o.priority)} · from ${esc(o.by)} · ${esc(when(o.created))} ${about}${o.status!=='open'?` · <b>${esc(o.status)}</b> by ${esc(o.closed_by||'')}${o.note?' — '+esc(o.note):''}`:''}</div>
+  ${o.status==='open'?`<div class="ob"><button data-close="${esc(o.id)}" data-status="done">Done</button><button class="ghost" data-close="${esc(o.id)}" data-status="dropped">Drop</button></div>`:''}</div>`}
+function closeOrder(id,status){modal(`<h3>${status==='done'?'Done':'Drop it'}?</h3><p>${status==='done'?'Say what was done, if it helps whoever reads the list next.':'Say why, so nobody adds it again.'}</p><input id="o-note" placeholder="A line (optional)" style="width:100%;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid #3a3a48;background:#121217;color:var(--ink);margin-bottom:12px"><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">${status==='done'?'Mark done':'Drop'}</button></div>`);
+  $('#m-ok').onclick=async()=>{const r=await post('order_close',{game:gid(),id,status,note:$('#o-note').value});closeModal();toast(r.message,r.ok);loadOrders()}}
+async function openOrder(obj,title){let d=O.data;if(!d){try{d=O.data=await api(`/api/suite/orders?id=${encodeURIComponent(gid())}`)}catch(e){return toast(String(e),false)}}
+  const others=d.groups.filter(g=>g.group!==d.me);modal(`<h3>A work order</h3><p class="meta" style="margin-bottom:10px">About <code>${esc(obj)}</code></p><div class="cmp">
+  ${sel('w-for',d.groups.map(g=>`<option value="${esc(g.label)}" ${g===others[0]?'selected':''}>For ${esc(g.label)}</option>`).join(''))}
+  <input id="w-title" placeholder="What to do — one line" value="${esc(title||'')}"><textarea id="w-detail" placeholder="More, if it helps"></textarea>
+  ${sel('w-pri','<option value="now">Now</option><option value="soon" selected>Soon</option><option value="someday">Someday</option>')}</div>
+  <div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Add to the list</button></div>`,true);
+  $('#m-ok').onclick=async()=>{const r=await post('order_add',{game:gid(),for:$('#w-for').value,title:$('#w-title').value,detail:$('#w-detail').value,priority:$('#w-pri').value,object:obj});toast(r.message,r.ok);if(r.ok){closeModal();O.data=null;if(sscreen==='orders'&&side==='story')loadOrders()}}}
+function goLetter(id){M.box='inbox';M.q='';$$('.mfold .fb').forEach(x=>x.classList.toggle('on',x.dataset.box==='inbox'));setStory('mail');setTimeout(()=>openLetter(id),300)}
+// ---------- Story
+function statusBar(bs,order){const tot=Object.values(bs||{}).reduce((a,b)=>a+b,0)||1;
+  return `<div class="sts">${order.filter(k=>bs[k]).map(k=>`<i class="c-${k}" style="width:${100*bs[k]/tot}%" title="${k}: ${bs[k]}"></i>`).join('')}</div>`+
+  order.filter(k=>bs[k]).map(k=>`<span class="k"><i class="c-${k}"></i>${fmt(bs[k])} ${k==='none'?'no status yet':k}</span>`).join('')}
+async function loadOverview(fresh){const gid=$('#game').value;const v=$('#v-story');v.innerHTML='<div class="empty">Reading the game…</div>';
+  let d;try{d=await api('/api/suite/game?id='+encodeURIComponent(gid)+(fresh?'&fresh=1':''))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const s=d.summary||{};const name=s.name||gid;let h=`<div class="hero"><h1>${esc(name)}</h1><span class="tag">Story</span><span class="spacer"></span><button id="ov-order">＋ Work order</button></div>`;
+  h+=`<div class="note">What the suite reads from this game — straight from its own files, nothing copied. The town read-through, people and quests arrive with BUILD 07.</div>`;
+  if(d.error)h+=`<div class="err">${esc(d.error)}</div>`;(s.errors||[]).forEach(e=>h+=`<div class="err">${esc(e)}</div>`);
+  if(s.root_exists){const L=s.lines||{},P=s.places||{},Q=s.quests||{},M=s.music_slots||{},Pe=s.people||{};
+    h+=`<div class="grid">
+    <div class="card s4 tile"><div class="lbl">Lines</div><b>${fmt(L.count)}</b>${statusBar(L.by_status||{},['approved','draft','flagged','none'])}${L.locked?`<div class="k" style="margin-top:6px"><i class="c-locked"></i>${fmt(L.locked)} locked — a song's own words</div>`:''}</div>
+    <div class="card s4 tile"><div class="lbl">Places</div><b>${fmt(P.count)}</b>${statusBar(P.by_status||{},['approved','draft','flagged','none'])}${P.dev?`<div class="meta" style="margin-top:6px">${P.dev} of them dev/test places the player never sees</div>`:''}</div>
+    <div class="card s4 tile"><div class="lbl">Quests</div><b>${fmt(Q.count)}</b>${statusBar(Q.by_status||{},['approved','draft','flagged','none'])}</div>
+    <div class="card s6 tile"><div class="lbl">Music slots</div><b>${fmt(M.count)}</b>${statusBar(M.by_status||{},['in game','assigned','needed'])}<div class="meta" style="margin-top:6px">assigned = the game names a file that isn't delivered yet</div></div>
+    <div class="card s6 tile"><div class="lbl">People · data files</div><b>${fmt(Pe.count)} <span style="font-size:16px;color:var(--dim)">people</span> · ${fmt(s.data_files)} <span style="font-size:16px;color:var(--dim)">files</span></b><div class="meta">${esc(s.root)}</div></div>
+    <div class="card s6"><h2>Proposed changes waiting for their owner</h2>${(d.proposals||[]).length?'<ul class="jl">'+d.proposals.map(p=>`<li><span class="w">${esc(p.from)} → ${esc(p.to)}</span><code>${esc(p.file)}#${esc(p.item)}</code><br>${esc(p.reason||'')}</li>`).join('')+'</ul>':'<div class="meta">None. When a Claude session wants to change something you approved, it lands here (and in the Mail, once it exists) for you to accept or decline.</div>'}</div>
+    <div class="card s6"><h2>Journal — newest first</h2>${(d.journal||[]).length?'<ul class="jl">'+d.journal.map(e=>`<li><span class="t">${esc(String(e.time).replace('T',' ').slice(5,16))}</span><span class="w">${esc(e.who)}</span>${esc(e.kind)} ${e.obj?`<code>${esc(e.obj)}</code>`:''}${e.note?`<br><span class="meta">${esc(e.note)}</span>`:''}</li>`).join('')+'</ul>':'<div class="meta">Nothing yet. Every action through the suite will append a line here.</div>'}
+      <div style="margin-top:10px"><a href="/suite/text?what=worklog&id=${encodeURIComponent(gid)}" target="_blank">Show me the whole log (WORKBENCH_LOG.md)</a></div></div>
+    </div>`}
+  v.innerHTML=h;const ob=$('#ov-order');if(ob)ob.onclick=()=>openOrder('game:'+gid,'')}
+// ---------- Sprite intake (BUILD 04)
+const FACINGS=['S','SW','W','NW','N','NE','E','SE'],OPP={W:'E',E:'W',NW:'NE',NE:'NW',SW:'SE',SE:'SW',S:'S',N:'N'};
+const COMPASS=['NW','N','NE','W','-','E','SW','S','SE'],NUMPAD={7:'NW',8:'N',9:'NE',4:'W',6:'E',1:'SW',2:'S',3:'SE',5:'-',0:'-'};
+let I={list:null,ch:'',v:'',tool:'',view:null,figs:[],sel:[],mirror:[],dirty:false,result:null,words:{},all:false};
+const pic=(p,w)=>'/suite/picture?id='+encodeURIComponent(gid())+'&path='+encodeURIComponent(p)+(w?'&w='+w:'');
+async function loadIntake(){if(!I.view){paintWork();paintResult()}try{I.list=await api('/api/suite/intake?id='+encodeURIComponent(gid()))}catch(e){$('#in-cands').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  I.words=I.list.words||{};const cs=I.list.characters||[];
+  if(!I.ch||!cs.find(c=>c.id===I.ch)){const m=(I.list.mappings||[])[0];I.ch=m&&cs.find(c=>c.id===m.character)?m.character:((cs.find(c=>!c.stub)||cs[0]||{}).id||'');if(m&&m.character===I.ch)I.v=m.variant||''}
+  $('#in-ch').innerHTML=cs.map(c=>`<option value="${esc(c.id)}" ${c.id===I.ch?'selected':''}>${esc(c.name)}${c.name.toLowerCase()!==c.id?' — '+esc(c.id):''}${c.stub?' (stub)':''}</option>`).join('')||'<option value="">no characters in the registry</option>';
+  paintVariants();paintTools();paintCands()}
+function curChar(){return (I.list&&I.list.characters||[]).find(c=>c.id===I.ch)}
+function paintVariants(){const c=curChar();const vs=c?c.variants:[];if(!vs.includes(I.v))I.v=vs[0]||'';
+  $('#in-v').innerHTML=vs.length?vs.map(v=>`<option ${v===I.v?'selected':''}>${esc(v)}</option>`).join(''):'<option value="">(none)</option>';
+  $('#in-chnote').innerHTML=c?(c.asymmetric?'<span class="badge2 asym" title="The registry marks this character asymmetric — a flipped figure would carry it on the wrong side">asymmetric — no silent flipping</span>':'')+(c.stub?'<span class="badge2 dim">registry stub</span>':''):'';
+  $('#in-vnote').textContent=vs.length>1?'Each variant keeps its own mapping and its own sheet.':''}
+function paintTools(){const t=I.list.tools||{tools:[]};if(!I.tool)I.tool=t.last||'';
+  $('#in-tool').innerHTML=`<option value="">— not named yet —</option>`+t.tools.map(x=>`<option value="${esc(x.key)}" ${x.key===I.tool?'selected':''}>${esc(x.key)}${x.commercial_ok===false?' (not for commercial use)':''}</option>`).join('')+`<option value="+add">＋ Add a program…</option>`;
+  const cur=t.tools.find(x=>x.key===I.tool);$('#in-toolnote').innerHTML=cur?`<span class="badge2 ${cur.commercial_ok?'ok':'red'}">${cur.commercial_ok?'commercial use permitted':'commercial use NOT permitted'}</span> ${esc(cur.checked||'')}`:'The program goes on the picture\'s licence line. The forge never guesses a licence.'}
+function paintCands(){const cs=(I.list.candidates||[]);const show=I.all?cs:cs.slice(0,12);
+  $('#in-cands').innerHTML=cs.length?`<h2 style="margin-top:18px">Or open one already here <span class="meta" style="text-transform:none;letter-spacing:0">— the game folder's pictures and earlier drops, newest first</span></h2><div class="cands">${show.map((c,i)=>`<div class="cand" data-i="${i}" title="${esc(c.path)}"><img loading="lazy" src="${pic(c.path,300)}" alt=""><div><b>${esc(c.name)}</b><br>${esc(c.where)}${c.mapped.map(m=>` · <span style="color:${m.checked?'var(--ok)':'var(--warn)'}">${esc(m.character)}${m.variant?'/'+esc(m.variant):''}${m.checked?' ✓':' (guess)'}</span>`).join('')}</div></div>`).join('')}</div>${cs.length>12&&!I.all?`<button class="ghost" style="margin-top:10px" onclick="I.all=true;paintCands()">Show all ${cs.length}</button>`:''}`:'';
+  $$('#in-cands .cand').forEach(el=>el.onclick=()=>{const c=show[+el.dataset.i];const m=c.mapped[0];if(m&&!I.view){I.ch=m.character;I.v=m.variant||'';$('#in-ch').value=I.ch;paintVariants()}inOpen(c.path)})}
+$('#in-ch').onchange=e=>{I.ch=e.target.value;I.v='';paintVariants();if(I.view)inOpen(I.view.sheet)};
+$('#in-v').onchange=e=>{I.v=e.target.value;if(I.view)inOpen(I.view.sheet)};
+$('#in-tool').onchange=e=>{if(e.target.value==='+add'){e.target.value=I.tool;return addTool()}I.tool=e.target.value;paintTools();if(I.view)inOpen(I.view.sheet,false,true)};
+function addTool(){modal(`<h3>Add a program to the tool register</h3><p>The program that made the sheets goes on every picture's licence line. Answer from its terms — the forge never guesses one.</p>
+  <input id="t-name" placeholder="Name, as the program calls itself"><input id="t-ver" placeholder="Version (from its About box, or the date you used it)">
+  <div class="choices" style="margin:0 0 12px"><b style="font-weight:500;margin-right:8px">May its results be used commercially?</b><label class="pill"><input type="radio" name="t-c" value="yes">yes</label><label class="pill"><input type="radio" name="t-c" value="no">no</label></div>
+  <input id="t-cond" placeholder="Any condition (a revenue cap, credit required…) — empty for none"><input id="t-where" placeholder="Where you checked (page, date)">
+  <div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Record it</button></div>`);
+  $$('#mbox .pill input').forEach(r=>r.onchange=()=>$$('#mbox .pill').forEach(p=>p.classList.toggle('on',p.querySelector('input').checked)));
+  $('#m-ok').onclick=async()=>{const c=($$('#mbox input[name=t-c]').find(x=>x.checked)||{}).value;
+    const r=await post('tool_add',{game:gid(),name:$('#t-name').value,version:$('#t-ver').value,commercial:c,condition:$('#t-cond').value,where:$('#t-where').value});
+    toast(r.message,r.ok);if(r.ok){closeModal();I.tool=r.key;if(screen==='tools'){loadTools();return}await loadIntake();if(I.view)inOpen(I.view.sheet,false,true)}}}
+const dz=$('#in-drop');dz.onclick=()=>$('#in-file').click();dz.onkeydown=e=>{if(e.key==='Enter')$('#in-file').click()};
+['dragenter','dragover'].forEach(k=>dz.addEventListener(k,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(k=>dz.addEventListener(k,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)inUpload(f)});$('#in-file').onchange=e=>{const f=e.target.files[0];if(f)inUpload(f);e.target.value=''};
+function inUpload(f){if(!I.ch)return toast('Choose whose sheet it is first.',false);if(!G.identity)return askWho();
+  const rd=new FileReader();dz.innerHTML='<b>Reading the sheet…</b>';rd.onload=async()=>{const r=await post('intake_upload',{game:gid(),character:I.ch,variant:I.v,filename:f.name,data:rd.result,tool:I.tool});
+    dz.innerHTML='<b>Drop a sheet here</b><span>or click to choose a picture (png, jpg, webp)</span><input type="file" id="in-file" accept=".png,.jpg,.jpeg,.webp" style="display:none">';$('#in-file').onchange=e=>{const g=e.target.files[0];if(g)inUpload(g);e.target.value=''};
+    if(!r.ok)return toast(r.message,false);toast(r.message);setView(r);loadIntake()};rd.readAsDataURL(f)}
+async function inOpen(sheet,fresh,quiet,force){if(I.dirty&&!quiet&&!force)return confirmAct('Open another sheet?','Your clicks on this sheet are not saved yet — they will be lost.','Open it anyway',()=>inOpen(sheet,fresh,quiet,true));
+  const r=await post('intake_open',{game:gid(),character:I.ch,variant:I.v,sheet,tool:I.tool,fresh:!!fresh});if(!r.ok)return toast(r.message,false);if(!quiet)toast(r.message);setView(r)}
+function setView(v){I.view=v;I.figs=v.figures.map(f=>({...f,bbox:[...f.bbox]}));I.mirror=[...(v.mirror||[])];I.dirty=false;I.mark=false;
+  I.pk=(v.pockets||[]).map(p=>({...p}));
+  I.result=(v.results||[])[0]||null;const first=I.figs.find(f=>!f.facing&&!f.skip)||I.figs[0];I.sel=first?[first.n]:[];paintWork();paintResult();
+  setTimeout(()=>$('#in-work').scrollIntoView({behavior:'smooth',block:'start'}),60)}
+function boxCls(f,cnt){const dup=f.facing&&!f.skip&&cnt[f.facing]>1;const guess=!I.view.checked&&!f.touched&&f.facing&&!f.skip;
+  return `fbox ${f.skip?'out':(guess?'guess':(f.facing?'on':''))} ${dup&&!guess?'dup':''} ${I.sel.includes(f.n)?'sel':''}`}
+function boxTag(f){const guess=!I.view.checked&&!f.touched&&f.facing&&!f.skip;return `${f.n}<i>${esc(f.skip?'left out':(f.facing?f.facing+(f.frame?'·'+f.frame:'')+(guess?' ?':''):'?'))}${f.flip?' ⇋':''}</i>`}
+function frames(){const c={};[...I.figs].sort((a,b)=>a.n-b.n).forEach(f=>{if(f.skip||!f.facing){f.frame=0;return}f.frame=c[f.facing]||0;c[f.facing]=f.frame+1});return c}
+function paintWork(){const v=I.view;if(!v){$('#in-work').innerHTML='';return}const [W,H]=v.size;const cnt=frames();
+  const ban=v.sheet_changed?`<div class="banner warn">This sheet has changed since its mapping was made — the figure numbers may have moved. <button class="warn" style="margin-left:10px;padding:4px 10px" onclick="inOpen(I.view.sheet,true)">Start again from a fresh guess</button> <span class="meta">(the old mapping is kept)</span></div>`:
+    v.checked?`<div class="banner done">Checked by <b>${esc(v.checked_by||'a person')}</b>${v.checked_at?' · '+esc(String(v.checked_at).replace('T',' ').slice(0,16)):''}. Change anything and save again — every earlier version is kept.</div>`:
+    `<div class="banner guess"><b>The forge's guess:</b> ${esc(v.guess||'')} <span class="meta">[confidence: ${esc(v.confidence||'?')}]</span> — only a guess. Click each figure and say which way it faces.</div>`;
+  let h=`<div class="card" style="max-width:1500px;margin-top:18px"><h2>2 · Which way each figure faces <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(v.sheet_name)} · ${W}×${H} · ${v.found} figure(s) · backdrop ${esc(v.backdrop)} · for ${esc(v.character)}${v.variant?' / '+esc(v.variant):''}</span></h2>${ban}
+  <div class="work"><div><div class="stage" id="in-stage"><img id="in-img" src="${pic(v.sheet)}" alt="the sheet">
+  ${I.figs.map(f=>{const [x0,y0,x1,y1]=f.bbox;
+    return `<div class="${boxCls(f,cnt)}" data-n="${f.n}" title="Figure ${f.n} — click, then pick the way it faces (shift-click to pick several)" style="left:${100*x0/W}%;top:${100*y0/H}%;width:${100*(x1-x0)/W}%;height:${100*(y1-y0)/H}%"><span class="tg">${boxTag(f)}</span></div>`}).join('')}
+  ${I.pk.map((p,i)=>`<div class="pbox ${p.hole?'':'kept'}" data-p="${i}" title="${p.hole?'Backdrop showing through — it will be made see-through. Click if it is really part of the figure.':'Kept as part of the figure. Click to make it see-through.'}" style="left:${100*p.bbox[0]/W}%;top:${100*p.bbox[1]/H}%;width:${100*(p.bbox[2]-p.bbox[0])/W}%;height:${100*(p.bbox[3]-p.bbox[1])/H}%"></div>`).join('')}
+  ${(v.strays||[]).map(b=>`<div class="sbox" style="left:${100*b[0]/W}%;top:${100*b[1]/H}%;width:${100*(b[2]-b[0])/W}%;height:${100*(b[3]-b[1])/H}%"><span>a stray shape, left out — part of a figure? widen its box</span></div>`).join('')}
+  ${(v.labels||[]).map(b=>`<div class="lbox" style="left:${100*b[0]/W}%;top:${100*b[1]/H}%;width:${100*(b[2]-b[0])/W}%;height:${100*(b[3]-b[1])/H}%"><span>printed words — ignored</span></div>`).join('')}
+  </div></div><div class="side" id="in-side"></div></div>
+  <h2 style="margin-top:20px">The eight facings, in the game's order</h2><div class="facings" id="in-facings"></div>
+  ${`<div class="banner" style="background:#1c1830;border:1px solid #4b3d80;color:#d9d0ff">${I.pk.length?`<b>See-through gaps:</b> ${I.pk.filter(p=>p.hole).length} of ${I.pk.length} marked (violet) — the backdrop showing between an arm and the body. They are cleared when the sheet is made; click one to keep it as part of the figure instead.`:'<b>See-through gaps:</b> none found.'} <button class="ghost" style="margin-left:8px;padding:3px 10px;font-size:12.5px" id="in-markbtn" onclick="markMode()">${I.mark?'Stop marking':'Mark one by hand…'}</button></div>`}
+  <div class="bar3"><span class="tally" id="in-tally"></span><button class="ghost" onclick="inUndo()">Undo my changes</button><button onclick="inSave()">Save</button><button class="go" id="in-make" onclick="inMake()">✓ Make the game sheet</button></div></div>`;
+  $('#in-work').innerHTML=h;$('#in-stage').classList.toggle('mark',!!I.mark);
+  $$('#in-stage .pbox').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=I.pk[+b.dataset.p];p.hole=!p.hole;I.dirty=true;paintWork()});
+  $('#in-stage').addEventListener('click',e=>{if(!I.mark)return;e.stopPropagation();const r=$('#in-stage').getBoundingClientRect();const [W2,H2]=I.view.size;
+    const x=Math.round((e.clientX-r.left)/r.width*W2),y=Math.round((e.clientY-r.top)/r.height*H2);I.pk.push({pt:[x,y],bbox:[x-8,y-8,x+8,y+8],area:0,marked:true,hole:true});I.mark=false;I.dirty=true;paintWork();
+    toast('Marked. The patch of backdrop colour around that point is cleared when the sheet is made.')},true);
+  $$('#in-stage .fbox').forEach(b=>b.onclick=e=>{const n=+b.dataset.n;if(e.shiftKey||e.ctrlKey||e.metaKey){I.sel=I.sel.includes(n)?I.sel.filter(x=>x!==n):[...I.sel,n]}else I.sel=[n];paintBoxes();paintSide()});
+  $('#in-img').onload=()=>paintSide();paintSide();paintFacings()}
+function paintBoxes(){const cnt=frames();$$('#in-stage .fbox').forEach(b=>{const f=I.figs.find(x=>x.n===+b.dataset.n);b.className=boxCls(f,cnt);b.querySelector('.tg').innerHTML=boxTag(f)})}
+function markMode(){I.mark=!I.mark;$('#in-stage').classList.toggle('mark',I.mark);$('#in-markbtn').textContent=I.mark?'Stop marking':'Mark one by hand…';if(I.mark)toast('Click inside the gap on the sheet — the patch of backdrop colour there will be cleared.')}
+function paintSide(){const s=$('#in-side');if(!s||!I.view)return;const sel=I.figs.filter(f=>I.sel.includes(f.n));
+  if(!sel.length){s.innerHTML='<div class="card"><div class="empty">Click a figure on the sheet.</div></div>';return}
+  const one=sel.length===1?sel[0]:null;const cur=one?(one.skip?'-':one.facing):null;
+  s.innerHTML=`<div class="card"><div class="fig">${one?'<canvas id="in-crop" width="120" height="170"></canvas>':''}<div><h3>${one?'Figure '+one.n:sel.length+' figures: '+sel.map(f=>f.n).join(', ')}</h3>
+    <div class="meta">${one?(one.skip?'Left out of the sheet.':(one.facing?`Faces <b style="color:var(--ink)">${one.facing}</b> — ${esc(I.words[one.facing]||'')}${one.frame?`<br>Frame ${one.frame} of ${one.facing}: an animation frame (anim.png).`:''}`:'Not set yet — which way does it face?')):'Pick a facing for all of them — frames follow the figure numbers.'}</div></div></div>
+    <div class="compass">${COMPASS.map(k=>k==='-'?`<button class="skip ${cur==='-'?'cur':''}" data-f="-" title="Leave this figure out of the sheet"><b>✕</b><small>leave out</small></button>`:`<button class="${cur===k?'cur':''}" data-f="${k}" title="${esc(I.words[k]||'')}"><b>${k}</b><small>${esc(I.words[k]||'')}</small></button>`).join('')}</div>
+    <div class="keys">Keys: the number pad is the compass (8 = N, 2 = S, 4 = W, 6 = E, 7 9 1 3 the corners), 0 = leave out, ← → = previous / next figure. "Left" and "right" are as you look at the sheet.</div>
+    ${one?`<label class="chk"><input type="checkbox" id="in-flip" ${one.flip?'checked':''} ${one.skip?'disabled':''}><span>Mirror this one figure — it was drawn facing the other way from the facing you picked</span></label>
+    <div style="margin-top:10px"><button class="ghost" style="padding:5px 10px;font-size:12.5px" id="in-widen" title="If the edge report says a hand or a weapon was cut off">Widen its box a little</button></div>`:''}</div>`;
+  $$('#in-side .compass button').forEach(b=>b.onclick=()=>pick(b.dataset.f));
+  if(one){const fl=$('#in-flip');if(fl)fl.onchange=()=>{one.flip=fl.checked;I.dirty=true;paintBoxes();tally()};$('#in-widen').onclick=()=>widen(one);drawCrop(one)}}
+function drawCrop(f){const c=$('#in-crop'),img=$('#in-img');if(!c||!img||!img.complete||!img.naturalWidth)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const [x0,y0,x1,y1]=f.bbox,bw=x1-x0,bh=y1-y0,k=Math.min(c.width/bw,c.height/bh);const w=bw*k,h=bh*k;
+  ctx.save();if(f.flip){ctx.translate(c.width,0);ctx.scale(-1,1)}ctx.drawImage(img,x0,y0,bw,bh,(c.width-w)/2,(c.height-h)/2,w,h);ctx.restore()}
+function pick(k){const sel=I.figs.filter(f=>I.sel.includes(f.n)).sort((a,b)=>a.n-b.n);if(!sel.length)return;
+  sel.forEach(f=>{f.touched=true;if(k==='-'){f.skip=true;f.facing=null;f.flip=false}else{f.skip=false;f.facing=k}});
+  I.mirror=I.mirror.filter(m=>{const d=m.split('→')[1];return !I.figs.some(f=>f.facing===d&&!f.skip)});I.dirty=true;
+  if(sel.length===1){const after=I.figs.filter(f=>f.n>sel[0].n);const nx=after.find(f=>!f.facing&&!f.skip)||after[0];if(nx)I.sel=[nx.n]}
+  paintBoxes();paintSide();paintFacings()}
+function widen(f){const [W,H]=I.view.size;const [x0,y0,x1,y1]=f.bbox;const d=Math.round(0.03*(y1-y0));f.bbox=[Math.max(0,x0-d),Math.max(0,y0-d),Math.min(W,x1+d),Math.min(H,y1+d)];f.box=true;I.dirty=true;paintWork();toast(`Figure ${f.n}'s box is ${d}px wider on every side — save and make the sheet again.`)}
+function paintFacings(){const el=$('#in-facings');if(!el)return;const c=curChar()||{};const asym=!!c.asymmetric;
+  el.innerHTML=FACINGS.map(k=>{const fs=I.figs.filter(f=>f.facing===k&&!f.skip).sort((a,b)=>a.n-b.n);const o=OPP[k];const src=o!==k&&I.figs.some(f=>f.facing===o&&!f.skip);const mk=`${o}→${k}`;const on=I.mirror.includes(mk);
+    if(fs.length)return `<div class="fc ${fs.length>1?'multi':''}"><b>${k}</b><div class="who2">figure${fs.length>1?'s':''} ${fs.map(f=>f.n+(f.flip?' ⇋':'')).join(', ')}</div>${fs.length>1?`<div class="meta">${fs.length} frames — an animation. If it's the same pose twice, leave one out.</div>`:`<div class="meta">${esc(I.words[k]||'')}</div>`}</div>`;
+    return `<div class="fc ${on?'fill':'miss'}"><b>${k}</b><div class="who2">${on?'filled by flipping '+o:'missing'}</div>${src?`<label title="${asym?'Careful: the registry marks this character asymmetric — a flipped figure carries it on the wrong side':'Make this facing by mirroring '+o}"><input type="checkbox" data-m="${mk}" ${on?'checked':''}>flip ${o} into ${k}${asym?' (asymmetric!)':''}</label>`:`<div class="meta">${esc(I.words[k]||'')}</div>`}</div>`}).join('');
+  $$('#in-facings input[data-m]').forEach(x=>x.onchange=()=>{const m=x.dataset.m;I.mirror=x.checked?[...I.mirror,m]:I.mirror.filter(y=>y!==m);I.dirty=true;paintFacings()});tally()}
+function tally(){const t=$('#in-tally');if(!t)return;const guess=f=>!I.view.checked&&!f.touched;const set=I.figs.filter(f=>f.facing&&!f.skip&&!guess(f)).length,out=I.figs.filter(f=>f.skip&&!guess(f)).length,open=I.figs.length-set-out;
+  const have=new Set(I.figs.filter(f=>f.facing&&!f.skip).map(f=>f.facing));I.mirror.forEach(m=>have.add(m.split('→')[1]));
+  t.innerHTML=`${set} placed · ${out} left out · <b style="color:${open?'var(--warn)':'var(--ok)'}">${open} still to say</b> · ${have.size} of 8 facings${I.dirty?' · <b style="color:var(--warn)">not saved</b>':''}`}
+function inUndo(){if(I.view)setView(I.view)}
+async function inSave(anyway){if(!G.identity){askWho();return false}const v=I.view;
+  const figs=I.figs.map(f=>({n:f.n,facing:f.skip?null:f.facing,skip:!!f.skip,flip:!!f.flip,...(f.box?{bbox:f.bbox}:{})}));
+  const r=await post('intake_save',{game:gid(),mapping:v.mapping,rev:v.rev,figures:figs,mirror:I.mirror,mirror_anyway:!!anyway,holes:I.pk.filter(p=>p.hole).map(p=>p.pt)});
+  if(!r.ok&&r.asymmetric){return await new Promise(res=>{modal(`<h3>Flip an asymmetric character?</h3><p>${esc(r.message)}</p><div class="row"><button class="ghost" id="m-no">Leave those facings empty</button><button class="warn" id="m-ok">Flip anyway</button></div>`);
+    $('#m-ok').onclick=async()=>{closeModal();res(await inSave(true))};$('#m-no').onclick=async()=>{closeModal();I.mirror=[];paintFacings();res(await inSave(false))}})}
+  if(!r.ok){toast(r.message,false);return false}
+  v.rev=r.rev;v.checked=true;v.checked_by=G.identity;v.checked_at=new Date().toISOString().slice(0,16);I.mirror=r.mirror||[];
+  v.figures=I.figs.map(f=>({...f,bbox:[...f.bbox]}));v.mirror=[...I.mirror];v.pockets=I.pk.map(p=>({...p}));I.figs.forEach(f=>delete f.box);I.dirty=false;toast(r.message);paintWork();return true}
+async function inMake(force){const b=$('#in-make');const left=!I.view.checked?I.figs.filter(f=>!f.touched).length:0;
+  if(left&&!force)return confirmAct('Make it with the forge\'s guess?',`${left} figure(s) still carry the forge's guess — nobody has said which way they face. Make the sheet anyway? (You can fix them and make it again.)`,'Make it anyway',()=>inMake(true));
+  if(I.dirty||!I.view.checked){if(!await inSave())return}
+  b.disabled=true;b.textContent='Making the sheet…';const r=await post('intake_make',{game:gid(),mapping:I.view.mapping});b.disabled=false;b.textContent='✓ Make the game sheet';
+  toast(r.message,r.ok);if(!r.ok)return;I.result=r.result;(I.view.results=I.view.results||[]).unshift(r.result);paintResult();setTimeout(()=>$('#in-result').scrollIntoView({behavior:'smooth',block:'start'}),60)}
+function paintResult(){const el=$('#in-result');const r=I.result;if(!r||!I.view){el.innerHTML='';return}const miss=new Set(r.missing||[]);const c=curChar()||{};
+  el.innerHTML=`<div class="card result"><h2>3 · The game sheet <span class="meta" style="text-transform:none;letter-spacing:0">— job ${esc(r.job)} · ${esc(String(r.when||'').replace('T',' ').slice(0,16))}${r.scale?' · scale '+r.scale:''}</span></h2>
+    <div class="gsheet checker"><img src="${r.sheet}?t=${encodeURIComponent(r.job)}" alt="the packed sheet"></div><div class="gcells">${FACINGS.map(k=>`<span class="${miss.has(k)?'miss':''}">${k}${miss.has(k)?' — missing':''}${(r.mirrored||[]).some(m=>m.endsWith(k))?' (flipped)':''}</span>`).join('')}</div>
+    ${r.holes?`<div class="meta" style="margin-top:8px">${r.holes} see-through gap(s) cleared before packing (the original sheet is untouched).</div>`:''}
+    ${(r.warnings||[]).length?`<ul class="warnl">${r.warnings.map(w=>`<li>⚠ ${esc(w)}</li>`).join('')}</ul>`:'<div class="banner done" style="margin-top:12px">No warnings.</div>'}
+    <div class="gifs"><figure class="checker" style="padding:6px"><img src="${r.turntable}" alt=""><figcaption>turntable</figcaption></figure>${Object.entries(r.anims||{}).map(([k,u])=>`<figure class="checker" style="padding:6px"><img src="${u}" alt=""><figcaption>walk ${esc(k)}</figcaption></figure>`).join('')}</div>
+    ${(r.figures||[]).length?`<table class="t"><tr><th>#</th><th>facing · frame</th><th>rim colour</th><th>at the sheet's edge</th><th>in its cell</th></tr>${r.figures.map(f=>f.used?`<tr><td>${f.n}</td><td>${esc(f.facing)}·${f.frame}${f.flip?' (mirrored)':''}</td><td${f.halo&&f.halo.like_backdrop?' class="bad"':''}><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc((f.halo||{}).rim_colour||'#000')};margin-right:6px"></span>${esc((f.halo||{}).rim_colour||'')}${f.halo&&f.halo.like_backdrop?' — like the backdrop (a light fringe)':''}</td><td${(f.sheet_edge||[]).length?' class="bad"':''}>${esc((f.sheet_edge||[]).length?f.sheet_edge.join(', ')+' — may be cut off':'no')}</td><td${(f.placed.notes||[]).length?' class="bad"':''}>${esc((f.placed.notes||[]).join('; ')||'ok')}</td></tr>`:`<tr><td>${f.n}</td><td colspan="4" class="meta">${esc(f.why==='skip'?'left out':f.why)}</td></tr>`).join('')}</table>`:''}
+    <div class="links" style="flex-direction:row;flex-wrap:wrap;margin-top:14px"><a href="${r.edges}" target="_blank">Show me the edge report</a> · <a href="${r.numbers}" target="_blank">the numbered sheet</a> · <a href="/out/${encodeURIComponent(r.job)}/report.json" target="_blank">report.json</a> · <a href="/suite/text?what=log" target="_blank">the log</a></div>
+    <div class="note art" style="margin-top:14px;margin-bottom:0">When it looks right, approve job <code>${esc(r.job)}</code> in <a href="#" onclick="screen='queue';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='queue'));show();return false">Queue &amp; pictures</a>${c.id?` as the ${esc(c.name)} field sheet`:''}. The game reads delivered sheets after BUILD 11; Review &amp; approve moves onto this screen with BUILD 12.</div>
+    ${(I.view.results||[]).length>1?`<div class="meta" style="margin-top:12px">Earlier sheets from this mapping: ${I.view.results.slice(1).map(x=>`<a href="${x.sheet}" target="_blank">${esc(String(x.when||x.job).replace('T',' ').slice(5,16))}</a>`).join(' · ')}</div>`:''}</div>`}
+document.addEventListener('keydown',e=>{if(side!=='art'||screen!=='intake'||!I.view||$('#modal').style.display==='flex')return;const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA')return;
+  const k=e.key;if(/^[0-9]$/.test(k)&&NUMPAD[k]){e.preventDefault();pick(NUMPAD[k]);return}
+  if(k==='ArrowRight'||k==='ArrowLeft'){e.preventDefault();const ns=I.figs.map(f=>f.n);const i=ns.indexOf(I.sel[0]);const j=k==='ArrowRight'?Math.min(ns.length-1,i+1):Math.max(0,i-1);I.sel=[ns[j]];paintBoxes();paintSide()}});
+// ---------- Characters (BUILD 04)
+let C={list:null,sel:null,page:null,v:null,q:''};
+async function loadChars(){try{C.list=(await api('/api/suite/characters?id='+encodeURIComponent(gid()))).characters}catch(e){$('#c-list').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(!C.sel||!C.list.find(c=>c.id===C.sel))C.sel=(C.list[0]||{}).id||null;paintCharList();if(C.sel)openChar(C.sel);else $('#c-page').innerHTML='<div class="empty">This game has no characters in its registry yet (games/&lt;game&gt;/characters/). <code>characters.bat stubs</code> makes one file per cast member.</div>'}
+function paintCharList(){const q=C.q.toLowerCase();const ls=C.list.filter(c=>!q||(c.name+' '+c.id).toLowerCase().includes(q));
+  $('#c-list').innerHTML=`<input id="c-q" placeholder="Find a character" value="${esc(C.q)}">`+ls.map(c=>`<div class="citem ${c.id===C.sel?'sel':''} ${c.stub?'stub':''}" data-id="${esc(c.id)}">${avatar(c.name)}<div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="sub">${c.stub?'stub — not drawn yet':esc(c.variants.join(' · '))}${c.asymmetric?' · asymmetric':''}${c.placeholders?` · <span style="color:#ff9d95">${c.placeholders} unwritten</span>`:''}</div></div></div>`).join('');
+  const qi=$('#c-q');qi.oninput=()=>{C.q=qi.value;paintCharList();const n=$('#c-q');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
+  $$('#c-list .citem').forEach(el=>el.onclick=()=>{C.sel=el.dataset.id;C.v=null;paintCharList();openChar(C.sel)})}
+async function openChar(cid){let p;try{p=await api('/api/suite/character?id='+encodeURIComponent(gid())+'&cid='+encodeURIComponent(cid))}catch(e){$('#c-page').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  C.page=p;if(!C.v||!p.variants.find(v=>v.name===C.v))C.v=(p.variants.find(v=>v.default)||p.variants[0]||{}).name;paintChar()}
+const blocks=(text,bs)=>{if(!text)return '<span class="meta">none</span>';let i=0;return esc(text).replace(/\{\{\s*([A-Za-z0-9_.\-]+)\s*\}\}/g,(m,ref)=>{const b=bs[i++]||{ref,state:'missing'};
+  const tip=b.state==='written'?b.text:(b.state==='placeholder'?'Not written yet: '+b.text:'Not in the prompt library');return `<span class="blk ${b.state}" title="${esc(tip+(b.file?'\n('+b.file+')':''))}">${esc(ref)}</span>`})};
+function paintChar(){const p=C.page;const v=p.variants.find(x=>x.name===C.v)||{};const gidq=encodeURIComponent(gid());
+  let h=`<div class="hero" style="margin-bottom:10px">${avatar(p.name)}<div><h1 style="font-size:24px">${esc(p.name)}</h1><div class="meta">${esc(p.id)} · <a href="#" onclick="return false" title="${esc(p.file)}">${esc(p.file_rel)}</a></div></div><span class="spacer" style="flex:1"></span>
+    <button onclick="charFace()">☺ Make the face sheet</button><button class="go" onclick="toIntake()">✥ Take in a drawn sheet${v.name?' for '+esc(v.name):''}</button></div>`;
+  if(p.stub)h+=`<div class="note art">A stub — made from the game's cast list. It fills in when this character is drawn.</div>`;
+  if(p.facts)h+=`<div class="note art"><b>Facts:</b> ${esc(p.facts)}</div>`;
+  if(p.library_error)h+=`<div class="err">The prompt library didn't read: ${esc(p.library_error)}</div>`;
+  h+=`<div class="vtabs">${p.variants.map(x=>`<button class="${x.name===C.v?'on':''}" data-v="${esc(x.name)}">${esc(x.name)}${x.default?' ★':''}</button>`).join('')}</div>`;
+  if(v.name){const r=v.recipe||{};
+    h+=`<div class="grid"><div class="card s8"><h2>${esc(v.name)} — the look</h2>${v.describe?`<p style="margin:0 0 12px;color:#dedbd4">${esc(v.describe)}</p>`:''}
+      <div class="meta" style="margin-bottom:4px">Prompt</div><div class="prompt">${blocks(v.prompt,v.blocks)}</div>
+      <div class="meta" style="margin:10px 0 4px">Negative</div><div class="prompt">${blocks(v.negative,v.neg_blocks)}</div>
+      <div style="margin-top:8px"><span class="k"><i class="c-approved"></i>written</span><span class="k"><i class="c-flagged"></i>not written yet</span><span class="k"><i class="c-none"></i>not in the library</span><span class="meta"> — the words live in the prompt library; the art direction writes them.</span></div></div>
+      <div class="card s4"><h2>The face lock</h2><div class="state"><b style="font-size:30px">${v.seed==null||v.seed===-1?'—':esc(v.seed)}</b><button class="ghost" style="padding:4px 10px" onclick="charSeed()">✎ change</button></div>
+        <div class="meta" style="margin-top:6px">${v.seed==null||v.seed===-1?'No locked seed: every render would be a different face.':'The same seed holds the same face across samplers and moods.'}</div>
+        <h2 style="margin-top:16px">Flipping</h2><div>${v.asymmetric?'<span class="badge2 asym">asymmetric</span>':'<span class="badge2">symmetric — may be flipped</span>'} <button class="ghost" style="padding:3px 9px;font-size:12px" onclick="charAsym()">change</button></div>${v.why?`<div class="meta" style="margin-top:6px">${esc(v.why)}</div>`:''}</div>
+      <div class="card s6"><h2>Recipe</h2><dl class="kv">${Object.entries(r).map(([k,x])=>`<dt>${esc(k)}</dt><dd>${esc(Array.isArray(x)?x.join(' × '):x)}</dd>`).join('')}
+        ${v.loras.length?`<dt>loras</dt><dd>${esc(v.loras.map(l=>l.name||l).join(', '))}</dd>`:''}${v.sheet_loras.length?`<dt>sheet loras</dt><dd>${esc(v.sheet_loras.join(', '))}</dd>`:''}
+        ${Object.keys(v.alternatives).length?`<dt>alternatives</dt><dd>${esc(Object.entries(v.alternatives).map(([a,b])=>a+': '+b).join('; '))}</dd>`:''}</dl></div>
+      <div class="card s6"><h2>Wanted from this variant</h2><dl class="kv">${Object.entries(v.wanted).map(([k,x])=>`<dt>${esc(k.replace(/_/g,' '))}</dt><dd>${x==null?'<span class="meta">none</span>':Array.isArray(x)?x.map(m=>`<span class="badge2">${esc(m)}</span>`).join(''):`<code>${esc(x)}</code>`}</dd>`).join('')||'<dd class="meta">nothing listed</dd>'}</dl>${(v.wanted_notes||[]).map(n=>`<div class="meta" style="margin-top:8px">${esc(n)}</div>`).join('')}</div>
+      <div class="card s12"><h2>Reference pictures</h2><div class="refs">${v.references.map(x=>x.exists?`<figure><img loading="lazy" src="/suite/charref?id=${gidq}&cid=${encodeURIComponent(p.id)}&variant=${encodeURIComponent(v.name)}&i=${x.i}&w=360" title="${esc(x.path)}" alt=""><button class="ghost x" data-rm="${x.i}" title="Take it off the list (the picture itself is not touched)">✕</button>${esc(x.name)}</figure>`:`<figure><div class="gone">not found here:<br>${esc(x.path)}</div><button class="ghost x" data-rm="${x.i}">✕</button></figure>`).join('')||'<div class="meta">None yet. References stay where they are on your disk — only their paths are kept here.</div>'}</div>
+        <div style="display:flex;gap:8px;margin-top:12px;max-width:760px"><input id="c-ref" class="fsel" style="flex:1" placeholder="Full path of a picture on this PC, e.g. D:\\Photos\\her.jpg"><button onclick="charRef()">＋ Add</button></div></div>
+      <div class="card s12"><h2>Make the set</h2><div class="meta">Portrait moods on the locked seed, a battle pose and a turnaround cut into the game's sheet — the second road beside a drawn sheet. Nothing is queued until you confirm.</div>
+        <div style="margin-top:10px"><button onclick="charPlan()">What would it make?</button></div><div id="c-plan"></div></div>`;
+    h+=`<div class="card s6"><h2>Problems the check finds</h2>${p.problems.length?`<ul class="plist">${p.problems.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<div class="meta">None.</div>'}</div>
+      <div class="card s6"><h2>The face-consistency sheet</h2>${p.face_sheets.length?p.face_sheets.map(f=>`<a href="${f.url}" target="_blank"><img src="${f.url}?t=${encodeURIComponent(f.when)}" style="width:100%;border-radius:8px;border:1px solid var(--line)" alt=""></a><div class="meta">${esc(String(f.when).replace('T',' ').slice(0,16))}</div>`).join(''):'<div class="meta">Not made yet — every variant and mood of this face on one sheet, to see the face hold.</div>'}</div>
+      <div class="card s12"><h2>Finished pictures of ${esc(p.name)}</h2>${p.pictures.length?`<div class="pics">${p.pictures.map(x=>`<a href="${x.url}" target="_blank"><img loading="lazy" src="${x.thumb}" alt="">${esc(x.variant||'-')} · ${esc(x.type)} · ${esc(String(x.when||'').replace('T',' ').slice(5,16))}</a>`).join('')}</div>`:'<div class="meta">None yet.</div>'}</div></div>`}
+  $('#c-page').innerHTML=h;$$('#c-page .vtabs button').forEach(b=>b.onclick=()=>{C.v=b.dataset.v;paintChar()});
+  $$('#c-page [data-rm]').forEach(b=>b.onclick=()=>{const x=v.references[+b.dataset.rm];confirmAct('Take this reference off the list?',`${x.path} — the picture itself stays where it is; only its path leaves ${p.id} · ${v.name}.`,'Take it off',()=>charEdit('references',{op:'remove',path:x.path}))})}
+async function charEdit(field,value){if(!G.identity)return askWho();const r=await post('char_edit',{game:gid(),cid:C.page.id,variant:C.v,field,value,rev:C.page.rev});toast(r.message,r.ok);if(r.ok)await openChar(C.page.id);if(r.ok)loadCharsQuiet()}
+async function loadCharsQuiet(){try{C.list=(await api('/api/suite/characters?id='+encodeURIComponent(gid()))).characters;paintCharList()}catch(e){}}
+function charSeed(){const v=C.page.variants.find(x=>x.name===C.v);modal(`<h3>The locked seed — ${esc(C.page.name)} · ${esc(v.name)}</h3><p>The seed is the face lock: the same seed gives the same face across samplers and moods. Change it when a face has been chosen from a bake-off. Empty means no lock.</p><input id="m-seed" value="${v.seed==null?'':esc(v.seed)}" placeholder="a whole number"><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Save the seed</button></div>`);
+  $('#m-ok').onclick=()=>{const s=$('#m-seed').value;closeModal();charEdit('seed',s)}}
+function charAsym(){const v=C.page.variants.find(x=>x.name===C.v);const to=!v.asymmetric;confirmAct(to?'Mark this variant asymmetric?':'Mark this variant symmetric?',to?'Sprite intake will then warn before any facing is made by flipping (a holster on one hip would end up on the wrong side).':'Sprite intake will then allow filling a missing facing by mirroring its opposite without a warning. Only right if nothing about this variant is one-sided.',to?'Asymmetric':'Symmetric',()=>charEdit('asymmetric',to))}
+function charRef(){const p=$('#c-ref').value.trim();if(!p)return toast('Paste the full path of a picture first.',false);charEdit('references',{op:'add',path:p})}
+async function charFace(){if(!G.identity)return askWho();toast('Making the face sheet…');const r=await post('char_face',{game:gid(),cid:C.page.id});toast(r.message,r.ok);if(r.ok)openChar(C.page.id)}
+async function charPlan(){const r=await post('char_plan',{game:gid(),cid:C.page.id,variant:C.v});const el=$('#c-plan');
+  if(!r.can_queue){el.innerHTML=`<div class="banner warn">${esc(r.message)}</div>${(r.blocks||[]).length?`<div style="margin-top:8px">Still to write: ${r.blocks.map(b=>`<span class="blk ${b.state}" title="${esc(b.text||'not in the library')}">${esc(b.ref)}</span>`).join(' ')}</div>`:''}`;return}
+  el.innerHTML=`<div class="banner done">${esc(r.message)}</div><table class="t"><tr><th>part</th><th>seed</th><th>size</th><th>checkpoint</th><th>loras</th></tr>${r.renders.map(x=>`<tr><td>${esc(x.part)}</td><td>${esc(x.seed)}</td><td>${esc((x.size||[]).join('×'))}</td><td>${esc(x.checkpoint||'')}</td><td>${esc((x.loras||[]).join(', '))}</td></tr>`).join('')}</table>
+    <div style="margin-top:10px"><button class="go" id="c-queue">Queue these ${r.renders.length} render(s)</button></div><div id="c-printed"></div>`;
+  $('#c-queue').onclick=()=>confirmAct('Queue the set?',`${r.renders.length} render(s) go into the art queue behind what is already waiting. The worker makes them in its own time; nothing is started or stopped.`,'Queue it',async()=>{
+    const q=await post('char_queue',{game:gid(),cid:C.page.id,variant:C.v});toast(q.message,q.ok);$('#c-printed').innerHTML=q.printed?`<pre class="out">${esc(q.printed)}</pre>`:''})}
+function toIntake(){I.ch=C.page.id;I.v=C.v||'';I.view=null;I.result=null;screen='intake';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='intake'));show()}
+// ---------- Wanted (BUILD 12)
+const STATE_LABEL={missing:'missing','stand-in':'stand-in',drafted:'drafted',queued:'queued',rendered:'rendered',approved:'approved',delivered:'delivered'};
+let W={data:null,group:'town',q:'',done:false,off:new Set(),sel:new Set(),plan:null};
+async function loadWanted(){try{W.data=await api('/api/suite/wanted?id='+encodeURIComponent(gid()))}catch(e){$('#w-board').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const d=W.data;$('#w-planmade').textContent=d.plan&&d.plan.made?`plan made ${String(d.plan.made).replace('T',' ').slice(5,16)} · ${d.plan.jobs} job(s)`:'no plan yet';
+  $('#w-counts').innerHTML=(d.error?`<div class="err">${esc(d.error)}</div>`:'')+(d.states||[]).map(s=>`<span class="st-chip ${W.off.has(s)?'off':''}" data-s="${s}" title="click to hide or show"><i class="s-${s}"></i>${esc(STATE_LABEL[s])} <b style="color:var(--ink)">${fmt(d.counts[s]||0)}</b></span>`).join('');
+  $$('#w-counts .st-chip').forEach(c=>c.onclick=()=>{const s=c.dataset.s;W.off.has(s)?W.off.delete(s):W.off.add(s);loadWantedPaint()});
+  const names=new Set(d.items.map(i=>i.name));W.sel=new Set([...W.sel].filter(n=>names.has(n)));loadWantedPaint();paintSel()}
+function loadWantedPaint(){$$('#w-counts .st-chip').forEach(c=>c.classList.toggle('off',W.off.has(c.dataset.s)));paintBoard()}
+$$('#w-group button').forEach(b=>b.onclick=()=>{W.group=b.dataset.g;$$('#w-group button').forEach(x=>x.classList.toggle('on',x===b));paintBoard()});
+$('#w-q').oninput=e=>{W.q=e.target.value.toLowerCase();paintBoard()};$('#w-done').onchange=e=>{W.done=e.target.checked;paintBoard()};
+function wVisible(){return (W.data?W.data.items:[]).filter(i=>(W.done||i.state!=='delivered')&&!W.off.has(i.state)&&(!W.q||(i.name+' '+(i.label||'')+' '+(i.town||'')).toLowerCase().includes(W.q)))}
+function paintBoard(){const el=$('#w-board');if(!W.data)return;const items=wVisible();const groups={};
+  for(const i of items){let k;if(W.group==='town')k=i.town||'(no town — not a map, or the export has no towns yet)';else if(W.group==='kind')k=i.kind;else k=i.rank==null?'later / not in the story order':(i.first_hour?'the first hour':'the story, in order');(groups[k]=groups[k]||[]).push(i)}
+  const keys=Object.keys(groups).sort((a,b)=>a.startsWith('(')-b.startsWith('(')||(W.group==='story'?(a==='the first hour'?-1:b==='the first hour'?1:a.localeCompare(b)):a.localeCompare(b)));
+  if(W.group==='story')keys.forEach(k=>groups[k].sort((a,b)=>(a.rank??9999)-(b.rank??9999)||a.name.localeCompare(b.name)));
+  el.innerHTML=keys.length?keys.map((k,gi)=>{const g=groups[k];const all=g.every(i=>W.sel.has(i.name));const cnt={};g.forEach(i=>cnt[i.state]=(cnt[i.state]||0)+1);
+    return `<div class="wgroup"><h3>${esc(k.replace(/_/g,' '))} <span class="meta">${g.length} · ${Object.entries(cnt).map(([s,n])=>`${n} ${STATE_LABEL[s]}`).join(', ')}</span>${W.group==='town'&&g[0].town?`<a href="#" class="meta" data-ts="${esc(g[0].town)}" title="every painting of this town on one sheet — does it hold together?">town sheet</a>`:''}<label><input type="checkbox" data-g="${gi}" ${all?'checked':''}>select all</label></h3>
+    <div class="tiles">${g.map(i=>`<div class="wt ${W.sel.has(i.name)?'sel':''}" data-n="${esc(i.name)}" title="${esc(i.name+(i.notes?'\n'+i.notes:'')+(i.look?'\nlook: '+i.look:''))}"><i class="dot2 s-${i.state}"></i><b>${esc(i.label||i.name.split('/').pop().replace(/_/g,' '))}</b>
+      <div class="ln">${esc(i.kind)}${i.target_size?' · '+i.target_size.join('×'):''}${i.era?' · '+esc(i.era):''}${i.map_state?' · '+esc(i.map_state):''}</div>
+      <span class="tag">${esc(STATE_LABEL[i.state])}${i.planned&&i.state==='drafted'?' · '+esc(i.planned.type):''}</span>${i.by_hand?' <span class="tag" style="color:var(--story)">yours to draw</span>':''}${i.waiting?` <span class="tag" title="${esc(i.waiting.why+'; waits on '+i.waiting.waits_on)}">waits</span>`:''}${i.first_hour?' <span class="tag">first hour</span>':''}</div>`).join('')}</div></div>`}).join(''):'<div class="empty">Nothing matches.</div>';
+  $$('#w-board .wt').forEach(t=>t.onclick=()=>{const n=t.dataset.n;W.sel.has(n)?W.sel.delete(n):W.sel.add(n);t.classList.toggle('sel');W.plan=null;paintSel()});
+  $$('#w-board [data-ts]').forEach(a=>a.onclick=e=>{e.preventDefault();wSheet(a.dataset.ts)});
+  $$('#w-board h3 input').forEach(c=>c.onchange=()=>{groups[keys[+c.dataset.g]].forEach(i=>c.checked?W.sel.add(i.name):W.sel.delete(i.name));W.plan=null;paintBoard();paintSel()})}
+function paintSel(){const el=$('#w-sel');const n=W.sel.size;const p=W.plan;
+  let h=`<div class="card"><h2>Selection</h2><div class="big">${n}</div><div class="meta">item(s) selected${n?` · <a href="#" onclick="W.sel.clear();W.plan=null;paintBoard();paintSel();return false">clear</a>`:''}</div>`;
+  if(!n){h+='<p class="meta" style="margin-top:10px">Click items on the board, or "select all" on a town.</p></div>';el.innerHTML=h;return}
+  if(!W.data.plan)h+=`<p class="meta" style="margin-top:10px">There is no plan yet. <b>Plan</b> (top right) reads the game and drafts one job per missing item.</p>`;
+  h+=`<div style="margin-top:12px"><button onclick="wPlanSel()">What would it take?</button></div>`;
+  if(p){const e=p.estimate||{};const free=e.free_gb,need=e.disk_gb||0,guard=p.guard_gb||0;
+    h+=`<dl class="kv2"><dt>jobs</dt><dd><b>${p.jobs.length}</b></dd><dt>GPU time</dt><dd>about <b>${e.gpu_hours}</b> hours</dd><dt>disk</dt><dd>about <b>${need}</b> GB${free!=null?` of ${free} GB free (guard ${guard} GB)`:''}</dd></dl>`;
+    if(free!=null){const tot=Math.max(free,need+guard,1);h+=`<div class="diskbar" title="free space; amber = what this needs; red line = the guard"><i style="width:${100*free/tot}%"></i><i class="need" style="left:${100*Math.max(0,free-need)/tot}%;width:${100*Math.min(need,free)/tot}%"></i><u style="left:${100*guard/tot}%"></u></div>${p.disk_ok?'':'<div class="ferr">It would take the disk under the guard — free some space first.</div>'}`}
+    if(p.blockers.length)h+=`<div class="banner warn" style="margin-top:10px"><b>Can't queue yet</b> — these look blocks have no words (the art direction writes them):<ul class="plist">${p.blockers.map(b=>`<li>${esc(b.problem)} <span class="meta">(${b.jobs.length} job${b.jobs.length>1?'s':''})</span></li>`).join('')}</ul></div>`;
+    if(p.left_out.length)h+=`<details style="margin-top:8px"><summary class="meta" style="cursor:pointer">${p.left_out.length} selected item(s) have no job to queue</summary><ul class="plist" style="color:var(--dim)">${p.left_out.map(x=>`<li><code>${esc(x.name)}</code> — ${esc(x.why)}</li>`).join('')}</ul></details>`;
+    h+=`<details style="margin-top:8px"><summary class="meta" style="cursor:pointer">the jobs</summary><table class="t">${p.jobs.map(j=>`<tr><td>${esc(j.name)}</td><td class="meta">${esc(j.type)}</td><td class="meta">${esc(j.lane)}</td></tr>`).join('')}</table></details>`;
+    h+=`<div style="margin-top:12px"><button class="go" ${p.can_queue?'':'disabled'} onclick="wQueue()">Queue ${p.jobs.length} job(s)</button></div>`}
+  el.innerHTML=h+'</div>'}
+async function wSheet(town){const r=await post('wanted_sheet',{game:gid(),town:town||null});if(!r.ok)return toast(r.message,false);
+  modal(`<h3>${town?'Town sheet — '+esc(town.replace(/_/g,' ')):'The atlas — one painting per town'}</h3><p>${esc(r.message)}</p>${r.sheets.map(u=>`<a href="${u}" target="_blank"><img src="${u}?t=${Date.now()}" style="width:100%;border-radius:8px;border:1px solid var(--line);margin-bottom:8px" alt=""></a>`).join('')}<div class="row"><button class="go" onclick="closeModal()">Close</button></div>`,true)}
+$('#w-atlas').onclick=()=>wSheet(null);
+async function wPlanSel(){const r=await post('wanted_select',{game:gid(),names:[...W.sel]});if(!r.ok){toast(r.message,false);return}W.plan=r;paintSel()}
+function wQueue(){const p=W.plan;confirmAct('Queue the selection?',`${p.jobs.length} job(s), about ${p.estimate.gpu_hours} GPU hours, go into the art queue behind what's already waiting. Nothing is started or stopped.`,'Queue it',async()=>{
+  const r=await post('wanted_queue',{game:gid(),names:[...W.sel]});toast(r.message,r.ok);if(r.ok){W.plan=null;W.sel.clear();loadWanted()}})}
+$('#w-plan').onclick=()=>{if(!G.identity)return askWho();confirmAct('Plan from the game?','Reads the game again (its wanted list), drafts one job per missing item and writes the plan file. It can take a minute on a big game. Nothing is queued.','Plan',async()=>{
+  $('#w-plan').disabled=true;$('#w-plan').textContent='Planning…';const r=await post('wanted_plan',{game:gid()});$('#w-plan').disabled=false;$('#w-plan').textContent='↻ Plan';toast(r.message,r.ok);W.plan=null;loadWanted()})};
+// ---------- Make a picture (BUILD 12)
+let MK={data:null,type:null,vals:{},pv:null,timer:null};
+async function loadMake(){try{MK.data=await api('/api/suite/make?id='+encodeURIComponent(gid()))}catch(e){$('#m-form').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(!MK.type||!MK.data.kinds.find(k=>k.type===MK.type))MK.type=MK.data.kinds[0].type;paintKinds();paintMakeForm()}
+function paintKinds(){$('#m-kinds').innerHTML=MK.data.kinds.map(k=>`<button class="${k.type===MK.type?'on':''}" data-t="${k.type}">${esc(k.label)}<small>${esc(k.type)}${k.needs==='cpu'?' · no GPU':''}</small></button>`).join('');
+  $$('#m-kinds button').forEach(b=>b.onclick=()=>{MK.type=b.dataset.t;MK.vals={};MK.pv=null;paintKinds();paintMakeForm()})}
+function mkKind(){return MK.data.kinds.find(k=>k.type===MK.type)}
+function paintMakeForm(){const k=mkKind();const v=MK.vals;const D=MK.data;
+  const inp=f=>{const val=v[f.name]??(f.default==null?'':Array.isArray(f.default)?(f.input==='size'?f.default.join(' × '):f.default.join(', ')):f.default);
+    const tag=f.input==='text'?`<textarea data-f="${f.name}" placeholder="${esc(f.help)}">${esc(val)}</textarea>`:`<input data-f="${f.name}" value="${esc(val)}" placeholder="${esc(f.input==='size'?'width × height':f.input==='path'?'a path, or out/<job id>':'')}">`;
+    return `<div class="fld ${f.input==='text'?'wide':''}" id="mf-${f.name}"><label>${esc(f.label)}${f.required?' *':''}</label>${tag}<small>${esc(f.help||'')}</small><div class="ferr"></div></div>`};
+  const wanted=(D.wanted||[]).filter(w=>!k.for_kind||w.kind===k.for_kind);
+  let h=`<h2>${esc(k.label)}</h2><div class="meta" style="margin:-6px 0 14px">${esc(k.doc)}</div><div class="mform">`;
+  h+=`<div class="fld" id="mf-for"><label>For (a wanted item)</label><select data-x="for"><option value="">— nothing in particular —</option>${wanted.map(w=>`<option ${v.for===w.name?'selected':''}>${esc(w.name)}</option>`).join('')}</select><small>The Wanted board follows it, and it takes the item's size.</small><div class="ferr"></div></div>`;
+  h+=`<div class="fld" id="mf-name"><label>Name</label><input data-x="name" value="${esc(v.name||'')}" placeholder="from the item, or the kind and time"><div class="ferr"></div></div>`;
+  if(k.character){const ch=(D.characters||[]).find(c=>c.id===v.character);h+=`<div class="fld" id="mf-character"><label>Character${k.character==='required'?' *':''}</label><select data-x="character"><option value="">${k.character==='required'?'— choose —':'— nobody —'}</option>${(D.characters||[]).filter(c=>!c.stub||c.id===v.character).map(c=>`<option value="${esc(c.id)}" ${v.character===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><small>Inherits the variant's recipe — its seed, model and look; {{character}} in the prompt puts its words there.</small><div class="ferr"></div></div>
+    <div class="fld" id="mf-variant"><label>Variant</label><select data-x="variant">${(ch?ch.variants:[]).map(x=>`<option ${v.variant===x?'selected':''}>${esc(x)}</option>`).join('')||'<option value="">—</option>'}</select><div class="ferr"></div></div>`}
+  if(k.town)h+=`<div class="fld" id="mf-town"><label>Town</label><select data-x="town"><option value="">— none —</option>${(D.towns||[]).map(t=>`<option value="${esc(t.town)}" ${v.town===t.town?'selected':''}>${esc(t.town.replace(/_/g,' '))}${t.fate?' · '+esc(t.fate):''}</option>`).join('')}</select><small>Adds the town's culture (and fate) blocks and its family seed.</small><div class="ferr"></div></div>`;
+  h+=k.fields.map(inp).join('');
+  h+=`<div class="fld" id="mf-seed"><label>Seed</label><input data-x="seed" value="${esc(v.seed??'')}" placeholder="empty = the town's, the character's, or a new one"><div class="ferr"></div></div>`;
+  h+=`<div class="fld" id="mf-takes"><label>How many</label><input data-x="takes" value="${esc(v.takes??1)}"><small>Takes on neighbouring seeds.</small><div class="ferr"></div></div></div>`;
+  $('#m-form').innerHTML=h;
+  $$('#m-form [data-f],#m-form [data-x]').forEach(el=>{const key=el.dataset.f||el.dataset.x;el.oninput=el.onchange=()=>{MK.vals[key]=el.value;if(key==='character'){MK.vals.variant=undefined;paintMakeForm();return}if(key==='for'){paintMakeForm();return}mkSoon()}});
+  const fw=(D.wanted||[]).find(w=>w.name===v.for);const tg=$('#m-form [data-f="target"]');if(fw&&tg&&fw.target_size&&!tg.value)tg.placeholder=`from ${fw.name}: ${fw.target_size.join(' × ')}`;
+  mkPreview()}
+function mkForm(){const k=mkKind();const v=MK.vals;const fields={};k.fields.forEach(f=>{const el=$(`#m-form [data-f="${f.name}"]`);if(el&&el.value!=='')fields[f.name]=el.value});
+  const x=n=>{const el=$(`#m-form [data-x="${n}"]`);return el?el.value:undefined};return {type:k.type,fields,for:x('for'),name:x('name'),character:x('character'),variant:x('variant'),town:x('town'),seed:x('seed'),takes:x('takes')}}
+function mkSoon(){clearTimeout(MK.timer);MK.timer=setTimeout(mkPreview,450)}
+async function mkPreview(){const r=await post('make_preview',{game:gid(),form:mkForm()});MK.pv=r;$$('#m-form .fld').forEach(f=>{f.classList.remove('bad');const e=f.querySelector('.ferr');if(e)e.textContent=''});
+  if(!r.ok){$('#m-preview').innerHTML=`<div class="err">${esc(r.message)}</div>`;return}
+  for(const p of r.problems){const f=$('#mf-'+p.field);if(f){f.classList.add('bad');const e=f.querySelector('.ferr');e.textContent=(e.textContent?e.textContent+' · ':'')+p.message}}
+  const unplaced=r.problems.filter(p=>!$('#mf-'+p.field));const e=r.estimate||{};
+  $('#m-preview').innerHTML=`<h2>What the worker gets</h2>
+    ${['prompt','negative'].filter(f=>r.shown[f]).map(f=>`<div class="meta" style="margin:6px 0 4px">${f==='prompt'?'Prompt':'Negative'} — as written</div><div class="prompt">${blocks(r.shown[f],r.blocks[f]||[])}</div>
+      <div class="meta" style="margin:8px 0 4px">expanded</div><div class="prompt" style="line-height:1.55">${r.expanded[f]==null?'<span style="color:#ffb4ad">— can\'t expand yet: a block above is red or grey —</span>':esc(r.expanded[f])}</div>`).join('')||'<div class="meta">No prompt of its own — the registry gives it.</div>'}
+    <div style="margin-top:8px"><span class="k"><i class="c-approved"></i>written</span><span class="k"><i class="c-flagged"></i>not written yet</span><span class="k"><i class="c-none"></i>not in the library</span></div>
+    <dl class="kv2">${r.shown.seed!=null?`<dt>seed</dt><dd>${esc(r.shown.seed)}</dd>`:''}${r.shown.checkpoint?`<dt>model</dt><dd>${esc(r.shown.checkpoint)}</dd>`:''}${r.shown.target?`<dt>size</dt><dd>${esc(r.shown.target.join(' × '))}</dd>`:''}${r.shown.renders?`<dt>renders</dt><dd>${r.shown.renders}</dd>`:''}<dt>takes</dt><dd>${r.jobs.length}</dd><dt>about</dt><dd>${e.gpu_hours} GPU hours · ${e.disk_gb} GB</dd></dl>
+    ${unplaced.length?`<div class="banner warn">${unplaced.map(p=>esc(p.message)).join('<br>')}</div>`:''}
+    <div class="act3"><button class="go" ${r.can_queue?'':'disabled'} id="m-queue">Queue it</button><span class="meta">${r.can_queue?'Ready.':`${r.problems.length} thing(s) to fix — marked beside the field.`}</span></div><div id="m-printed"></div>`;
+  const q=$('#m-queue');if(q)q.onclick=()=>{if(!G.identity)return askWho();confirmAct('Queue it?',`${r.jobs.length} take(s) of ${mkKind().label.toLowerCase()} go into the art queue behind what's already waiting.`,'Queue it',async()=>{
+    const z=await post('make_queue',{game:gid(),form:mkForm()});toast(z.message,z.ok);$('#m-printed').innerHTML=z.printed?`<pre class="out">${esc(z.printed)}</pre>`:''})}}
+// ---------- Review & approve → Deliver (BUILD 12)
+let RV={data:null,sel:null,view:null,file:null,one:false,ab:null};
+async function loadReview(){try{RV.data=await api('/api/suite/review?id='+encodeURIComponent(gid()))}catch(e){$('#r-list').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  paintDeliver();paintRList();const all=[...RV.data.waiting,...(RV.data.decided||[]),...RV.data.recent];if(!RV.sel||!all.find(x=>x.id===RV.sel))RV.sel=(all[0]||{}).id;if(RV.sel)openJob(RV.sel);else $('#r-detail').innerHTML='<div class="empty">Nothing finished yet.</div>'}
+function paintDeliver(){const d=RV.data.deliver||{};const n=(d.ready||[]).length,b=(d.refused||[]).length;
+  $('#r-deliver').innerHTML=`<div class="card" style="max-width:1600px;margin-bottom:16px"><h2>Deliver to the game</h2><div class="state" style="gap:10px"><b style="font-size:26px">${n}</b><span class="since">approved picture(s) ready to copy${b?` · ${b} that can't go yet`:''}</span><span style="flex:1"></span>
+    <label class="chk" style="margin:0"><input type="checkbox" id="r-fit"><span>fit sizes that don't match (crop and scale)</span></label><button ${n||b?'':'disabled'} onclick="delList()">Show the list</button><button class="go" ${n?'':'disabled'} onclick="delRun()">Deliver ${n}</button></div>
+    ${d.error?`<div class="err">${esc(d.error)}</div>`:''}<div id="r-dlist"></div><div class="meta" style="margin-top:6px">Copies into the game's asset folder; whatever it replaces is kept in out/_replaced/ and the ledger records it — nothing is deleted. ${d.game_reachable===false?'The game folder isn\'t reachable from here, so it writes the copy list as a .bat instead.':''}</div></div>`}
+function delList(){const d=RV.data.deliver;$('#r-dlist').innerHTML=`<table class="t"><tr><th>wanted</th><th>job</th><th>why</th><th>goes to</th></tr>${d.ready.map(x=>`<tr><td><code>${esc(x.wanted)}</code></td><td class="meta">${esc(x.job_id)}</td><td>${esc(x.why)}</td><td class="meta">${esc(x.dest_rel||'')}</td></tr>`).join('')}${d.refused.map(x=>`<tr><td><code>${esc(x.wanted)}</code></td><td class="meta">${esc(x.job_id||'')}</td><td colspan="2" class="bad">${esc(x.reason)}</td></tr>`).join('')}</table>`}
+function delRun(){const n=RV.data.deliver.ready.length;confirmAct('Deliver into the game?',`${n} picture(s) are copied into the game. Anything they replace is kept in out/_replaced/; the ledger records it so it can be undone.`,'Deliver',async()=>{
+  const r=await post('deliver_run',{game:gid(),dry:false,fit:$('#r-fit').checked});toast(r.message,r.ok);loadReview()})}
+function paintRList(){const sec=(t,ls,empty)=>`<h2 style="margin:6px 0">${t}</h2>`+(ls.length?ls.map(x=>`<div class="ritem ${x.id===RV.sel?'sel':''}" data-id="${esc(x.id)}">${x.image?`<img loading="lazy" src="/thumb?p=${encodeURIComponent(x.image)}" alt="">`:'<img alt="">'}<div style="min-width:0"><div class="t1">${esc(x.wanted||x.name||x.id)}</div><div class="t2">${esc(x.type)} · ${esc(String(x.finished||'').replace('T',' ').slice(5,16))} · licence ${esc(x.licence)}${x.check?' · kit '+esc(x.check.verdict):''}</div></div></div>`).join(''):`<div class="meta" style="padding:6px">${empty}</div>`);
+  $('#r-list').innerHTML=sec('Waiting for your verdict',RV.data.waiting,'Nothing made for a wanted item is waiting.')+sec('Approved and in the game',RV.data.decided||[],'None yet. (Mark one up here when it looks wrong in the game.)')+sec('Other recent pictures',RV.data.recent,'None.');
+  $$('#r-list .ritem').forEach(el=>el.onclick=()=>{RV.sel=el.dataset.id;RV.ab=null;RV.one=false;paintRList();openJob(RV.sel)})}
+async function openJob(jid){let v;try{v=await api('/api/suite/job?id='+encodeURIComponent(gid())+'&jid='+encodeURIComponent(jid))}catch(e){$('#r-detail').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  RV.view=v;RV.file=(v.files[0]||{}).file;paintJob()}
+function paintJob(){const v=RV.view;const f=v.files.find(x=>x.file===RV.file)||v.files[0];const chk=v.kit_check;
+  let h=`<div class="card"><h2>${esc(v.wanted||v.name||v.id)} <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(v.type)} · job ${esc(v.id)}</span></h2>`;
+  if(RV.ab){h+=`<div class="ab"><figure><div class="viewer"><img src="${f?f.url:''}" alt=""></div><figcaption>this one · ${esc(v.id)}</figcaption></figure><figure><div class="viewer"><img src="/out/${encodeURIComponent(RV.ab.id)}/${encodeURIComponent(RV.ab.file)}" alt=""></div><figcaption>${esc(RV.ab.id)} · <a href="#" onclick="RV.ab=null;paintJob();return false">close A/B</a></figcaption></figure></div>`}
+  else h+=f?`<div class="viewer ${RV.one?'one':''}" id="r-view" title="${RV.one?'click to fit':'click for 1:1'}"><img src="${f.url}" alt=""></div><div class="meta" style="margin-top:4px">${esc(f.file)}${f.size?' · '+f.size.join('×'):''}${v.target_size?' · the game wants '+v.target_size.join('×'):''} · ${RV.one?'1:1 — click to fit':'click for 1:1'}</div>`:'<div class="empty">No picture in this job\'s folder.</div>';
+  if(v.files.length>1)h+=`<div class="ftabs">${v.files.map(x=>`<button class="${x.file===(f||{}).file?'on':''}" data-f="${esc(x.file)}">${esc(x.file)}</button>`).join('')}</div>`;
+  if(v.candidates.length)h+=`<div class="meta" style="margin-top:8px">Other takes for ${esc(v.wanted)}: ${v.candidates.map(c=>`<a href="#" data-ab="${esc(c)}">${esc(c)}</a>`).join(' · ')} <span>(A/B)</span></div>`;
+  h+=`<div class="act3">${v.wanted||v.type?`<button class="go" onclick="rvApprove()">✓ Approve${v.set?' the set':''}</button>`:''}<button onclick="rvMarkup()">✎ Mark up</button><button onclick="rvRedo()">↺ Redo with a note</button><button class="ghost" onclick="rvOut()">⇱ Send out to an outside tool</button></div></div>`;
+  h+=`<div class="grid" style="margin-top:14px"><div class="card s6"><h2>How it was made</h2><dl class="kv2"><dt>prompt</dt><dd>${esc(v.prompt||'—')}</dd>${v.negative?`<dt>negative</dt><dd>${esc(v.negative)}</dd>`:''}<dt>seed</dt><dd>${esc(v.seed??'—')}</dd><dt>model</dt><dd>${esc(v.checkpoint||'—')}</dd>${v.comment?`<dt>note</dt><dd>${esc(v.comment)}</dd>`:''}</dl></div>
+    <div class="card s6"><h2>Licence line</h2>${v.licences.length?`<table class="t lic">${v.licences.map(c=>`<tr><td>${esc(c.role||'')}</td><td>${esc(c.file)}</td><td class="${c.commercial_ok?'ok':'no'}">${c.commercial_ok?'commercial OK':c.commercial_ok===false?'NOT commercial':'not on file'}</td></tr>`).join('')}</table>`:'<div class="meta">No model recorded in its provenance — it can\'t be approved.</div>'}</div>
+    ${chk?`<div class="card s12"><h2>Kit check — ${esc(chk.verdict||'')}</h2><table class="t">${(chk.lines||[]).map(l=>`<tr><td class="chk-${esc(l.status)}">${esc(l.status)}</td><td>${esc(l.check)}</td><td>${esc(l.message)}</td></tr>`).join('')}</table></div>`:''}</div>`;
+  $('#r-detail').innerHTML=h;const rv=$('#r-view');if(rv)rv.onclick=()=>{RV.one=!RV.one;paintJob()};
+  $$('#r-detail .ftabs button').forEach(b=>b.onclick=()=>{RV.file=b.dataset.f;paintJob()});
+  $$('#r-detail [data-ab]').forEach(a=>a.onclick=async e=>{e.preventDefault();try{const o=await api('/api/suite/job?id='+encodeURIComponent(gid())+'&jid='+encodeURIComponent(a.dataset.ab));RV.ab={id:o.id,file:(o.files[0]||{}).file};paintJob()}catch(err){toast(String(err),false)}})}
+async function rvApprove(force){const v=RV.view;if(!G.identity)return askWho();
+  const names=(W.data&&W.data.items||[]).map(i=>i.name);const opts=[...new Set([v.wanted,...names].filter(Boolean))];
+  modal(`<h3>Approve ${v.set?'the set':'this picture'}</h3><p>Which wanted item is it for? Approving runs the licence check now${v.set?' and copies the six files into the game':'; Deliver copies it into the game'}.</p>
+    <input id="m-want" list="m-wlist" value="${esc(v.wanted||'')}" placeholder="e.g. scenes/town_square"><datalist id="m-wlist">${opts.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+    ${v.files.length>1&&!v.set?`<select id="m-pick" class="fsel" style="width:100%;margin-bottom:12px">${v.files.map((x,i)=>`<option value="${i+1}" ${x.file===RV.file?'selected':''}>${esc(x.file)}</option>`).join('')}</select>`:''}
+    <div id="m-dry"></div>${/^claude/i.test(G.identity||'')?'<div class="banner warn" style="margin:8px 0">You are signed in as an assistant — Check it works, but approving is the person\'s.</div>':''}<div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button id="m-check">Check it</button><button class="go" id="m-ok" disabled>Approve</button></div>`,true);
+  const body=dry=>({game:gid(),jid:v.id,wanted:$('#m-want').value.trim(),set:v.set,pick:$('#m-pick')?$('#m-pick').value:null,dry});
+  $('#m-check').onclick=async()=>{const r=await post('review_approve',body(true));const asst=/^claude/i.test(G.identity||'');$('#m-dry').innerHTML=r.ok?`<div class="banner done">${esc(r.message)}</div>${r.rows?`<table class="t">${r.rows.map(x=>`<tr><td>${esc(x.what)}</td><td>${esc(x.file)}</td><td class="meta">${esc(x.dest)}</td></tr>`).join('')}</table>`:`<div class="meta" style="margin:6px 0">${esc(r.file||'')} · ${esc((r.size||[]).join('×'))}${r.note?' — '+esc(r.note):''}</div>`}${(r.licences||[]).length?`<div class="meta">licences: ${r.licences.map(c=>esc(c.file)+(c.commercial_ok?' ✓':' ✗')).join(', ')}</div>`:''}`:`<div class="banner warn">${esc(r.message)}</div>`;$('#m-ok').disabled=!r.ok||asst};
+  $('#m-ok').onclick=async()=>{const r=await post('review_approve',body(false));toast(r.message,r.ok);if(r.ok){closeModal();loadReview()}}}
+function rvRedo(){const v=RV.view;if(!G.identity)return askWho();modal(`<h3>Redo with a note</h3><p>A redo draft goes into jobs/drafts with a new seed and your note — it isn't queued until someone approves the draft (Called out, in Queue &amp; pictures).</p><textarea id="m-note" style="width:100%;min-height:90px;font:inherit;padding:10px;border-radius:8px;border:1px solid #3a3a48;background:#121217;color:var(--ink)" placeholder="What should change?"></textarea><div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Make the draft</button></div>`);
+  $('#m-ok').onclick=async()=>{const r=await post('review_redo',{game:gid(),jid:v.id,note:$('#m-note').value});toast(r.message,r.ok);if(r.ok)closeModal()}}
+function rvOut(){const v=RV.view;if(!G.identity)return askWho();confirmAct('Send it out to an outside tool?','A hand-off folder is made under out/handoff with this picture in in/. Edit it in any program, save into done/, then handoff_in.bat brings it back.','Make the folder',async()=>{const r=await post('review_out',{game:gid(),jid:v.id});toast(r.message,r.ok)})}
+// ---------- Called out and mark-up (BUILD 14)
+let CO={drafts:[]};
+async function loadCalled(){try{CO.drafts=(await api('/api/suite/calledout')).drafts}catch(e){CO.drafts=[]}paintCalled()}
+function paintCalled(){const el=$('#r-called');if(!el)return;const ds=CO.drafts;
+  el.innerHTML=`<div class="card" style="max-width:1600px;margin-bottom:16px"><h2>Called out — redo drafts <span class="meta" style="text-transform:none;letter-spacing:0">— from your playtest notes, review notes and mark-ups; nothing here is queued until you say so</span></h2>
+    <div class="act3" style="margin-top:0"><b style="font-size:22px">${ds.length}</b><span class="meta">draft(s)</span><span style="flex:1"></span><button class="ghost" onclick="coTake()" title="Reads the game's playtest/art_feedback.json (the F9 key)">Take in playtest notes</button></div>
+    ${ds.length?`<div class="co">${ds.map(d=>`<div class="coi">${d.marked?`<a href="${d.marked}" target="_blank"><img src="${d.marked}" alt=""></a>`:'<img alt="">'}<div style="min-width:0"><div><b>${esc((d.wanted||'').split('/').pop()||d.type)}</b> <span class="meta">${esc(d.type||'')}${d.by?' · '+esc(d.by):''}</span></div>
+      <div class="n">${esc(d.note||'')}</div><div class="meta">${esc(d.why||'')}</div>
+      <div class="b">${d.ready||d.type!=='scene_state'?`<button class="go" data-co="draft_submit" data-d="${esc(d.draft)}">Queue it</button>`:`<button disabled title="the repaint needs a line saying what it should be (its prompt) — open the draft file, or mark it up again with that line">needs a prompt</button>`}<button data-co="draft_dismiss" data-d="${esc(d.draft)}">Dismiss</button><button class="ghost" data-co="draft_himself" data-d="${esc(d.draft)}">I'll fix it myself</button></div></div></div>`).join('')}</div>`:'<div class="meta">None.</div>'}</div>`;
+  $$('#r-called [data-co]').forEach(b=>b.onclick=()=>{if(!G.identity)return askWho();const a=b.dataset.co,d=b.dataset.d;
+    const what={draft_submit:['Queue this draft?','It goes into the art queue behind what is already waiting.','Queue it'],draft_dismiss:['Dismiss this draft?','It moves to jobs/drafts/_dismissed — kept, not deleted.','Dismiss'],draft_himself:['Fix it yourself?','The picture is handed out to you in a hand-off folder (see Outside tools); the draft is put away.','Hand it out']}[a];
+    confirmAct(what[0],what[1],what[2],async()=>{const r=await post('fin_callout',{game:gid(),action:a,draft:d});toast(r.message,r.ok);loadCalled()})})}
+async function coTake(){if(!G.identity)return askWho();const r=await post('fin_takein',{game:gid()});toast(r.message,r.ok);loadCalled()}
+let MKU={shapes:[],tool:'ellipse',drag:null};
+function rvMarkup(){const v=RV.view;const f=v.files.find(x=>x.file===RV.file)||v.files[0];if(!f)return toast('No picture to mark up.',false);if(!G.identity)return askWho();MKU={shapes:[],tool:'ellipse',drag:null,file:f.file,size:f.size};
+  modal(`<h3>Mark up — ${esc(f.file)}</h3><p>Circle what's wrong (or draw over it), then say what. The marks become the inpaint mask of a redo draft; nothing is queued.</p>
+    <div class="mk-tools"><button class="on" data-t="ellipse">◯ Circle</button><button data-t="stroke">✎ Draw</button><button class="ghost" id="mk-undo">Undo</button><span class="meta" id="mk-n">no marks yet</span></div>
+    <div class="mk-wrap"><img id="mk-img" src="${f.url}" alt=""><canvas id="mk-c"></canvas></div>
+    <textarea id="mk-note" style="width:100%;min-height:60px;margin-top:10px;font:inherit;padding:9px;border-radius:8px;border:1px solid #3a3a48;background:#121217;color:var(--ink)" placeholder="What's wrong? (e.g. the hand has six fingers)"></textarea>
+    <input id="mk-fix" placeholder="What it should be instead — optional; without it, the repaint waits for someone to write it">
+    <div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Make the drafts</button></div>`,true);
+  $('#mbox').style.width='min(1100px,96vw)';const img=$('#mk-img'),c=$('#mk-c');
+  const fit=()=>{c.width=img.clientWidth;c.height=img.clientHeight;mkDraw()};img.onload=fit;if(img.complete)fit();
+  const pt=e=>{const r=c.getBoundingClientRect();const k=(f.size?f.size[0]:img.naturalWidth)/r.width;return [(e.clientX-r.left)*k,(e.clientY-r.top)*k]};
+  c.onmousedown=e=>{const p=pt(e);MKU.drag=MKU.tool==='ellipse'?{kind:'ellipse',box:[p[0],p[1],p[0],p[1]]}:{kind:'stroke',points:[p],width:Math.max(8,(f.size?f.size[0]:img.naturalWidth)*0.025)}};
+  c.onmousemove=e=>{if(!MKU.drag)return;const p=pt(e);if(MKU.drag.kind==='ellipse'){MKU.drag.box[2]=p[0];MKU.drag.box[3]=p[1]}else MKU.drag.points.push(p);mkDraw()};
+  window.onmouseup=()=>{if(MKU.drag){const d=MKU.drag;MKU.drag=null;if(d.kind==='stroke'?d.points.length>1:Math.abs(d.box[2]-d.box[0])>3&&Math.abs(d.box[3]-d.box[1])>3)MKU.shapes.push(d);mkDraw()}};
+  $$('.mk-tools [data-t]').forEach(b=>b.onclick=()=>{MKU.tool=b.dataset.t;$$('.mk-tools [data-t]').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#mk-undo').onclick=()=>{MKU.shapes.pop();mkDraw()};
+  $('#m-ok').onclick=async()=>{const r=await post('fin_markup',{game:gid(),jid:v.id,file:MKU.file,shapes:MKU.shapes,note:$('#mk-note').value,fix:$('#mk-fix').value});
+    toast(r.message,r.ok);if(r.ok){closeModal();window.onmouseup=null;loadCalled()}}}
+function mkDraw(){const c=$('#mk-c'),img=$('#mk-img');if(!c||!img)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const k=c.width/((MKU.size&&MKU.size[0])||img.naturalWidth||c.width);ctx.strokeStyle='#ff4a3d';ctx.fillStyle='rgba(255,60,50,.25)';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';
+  for(const s of [...MKU.shapes,...(MKU.drag?[MKU.drag]:[])]){if(s.kind==='ellipse'){const [x0,y0,x1,y1]=s.box.map(v=>v*k);ctx.beginPath();ctx.ellipse((x0+x1)/2,(y0+y1)/2,Math.abs(x1-x0)/2,Math.abs(y1-y0)/2,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
+    else{ctx.save();ctx.strokeStyle='rgba(255,60,50,.55)';ctx.lineWidth=s.width*k;ctx.beginPath();s.points.forEach((p,i)=>i?ctx.lineTo(p[0]*k,p[1]*k):ctx.moveTo(p[0]*k,p[1]*k));ctx.stroke();ctx.restore()}}
+  const n=$('#mk-n');if(n)n.textContent=MKU.shapes.length?`${MKU.shapes.length} mark(s)`:'no marks yet'}
+// ---------- Prompt library (BUILD 14)
+let LB={data:null,shelf:null};
+async function loadLibrary(){try{LB.data=await api('/api/suite/library?id='+encodeURIComponent(gid()))}catch(e){$('#l-blocks').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const d=LB.data;if(!LB.shelf||!d.shelves.find(s=>s.shelf===LB.shelf))LB.shelf=(d.shelves.find(s=>s.placeholders)||d.shelves[0]||{}).shelf;
+  $('#l-top').innerHTML=(d.error?`<div class="err">${esc(d.error)}</div>`:'')+`<div class="meta" style="margin-bottom:10px">${fmt(d.count)} block(s) · ${d.shelves.reduce((a,s)=>a+s.placeholders,0)} still placeholders · never-list: ${(d.never||[]).concat(d.triggers||[]).map(w=>`<span class="badge2 red">${esc(w)}</span>`).join('')||'empty'}</div>${(d.problems||[]).length?`<details style="margin-bottom:10px"><summary class="meta" style="cursor:pointer">${d.problems.length} thing(s) the library check finds</summary><ul class="plist">${d.problems.slice(0,80).map(p=>`<li>${esc(p)}</li>`).join('')}</ul></details>`:''}`;
+  $('#l-shelves').innerHTML=d.shelves.map(s=>`<button class="${s.shelf===LB.shelf?'on':''}" data-s="${esc(s.shelf)}">${esc(s.shelf)} <small>${s.blocks.length} block(s)${s.placeholders?` · <span style="color:#ff9d95">${s.placeholders} unwritten</span>`:''}${s.known?'':' · not a known shelf'}</small></button>`).join('');
+  $$('#l-shelves button').forEach(b=>b.onclick=()=>{LB.shelf=b.dataset.s;loadLibraryPaint()});loadLibraryPaint()}
+function loadLibraryPaint(){$$('#l-shelves button').forEach(b=>b.classList.toggle('on',b.dataset.s===LB.shelf));const s=LB.data.shelves.find(x=>x.shelf===LB.shelf);if(!s){$('#l-blocks').innerHTML='<div class="empty">No blocks.</div>';return}
+  $('#l-blocks').innerHTML=s.blocks.map((b,i)=>`<div class="blk-card ${b.state}"><div class="hd"><code>{{${esc(b.name)}}}</code><span class="badge2 ${b.state==='written'?'ok':'red'}">${b.state==='written'?'written':'not written yet'}</span><span class="meta">${esc(b.file||'')}</span>${b.missing.length?`<span class="badge2 red">uses ${b.missing.map(esc).join(', ')} — not in the library</span>`:''}</div>
+    <textarea data-i="${i}">${esc(b.text)}</textarea><div class="row3"><button class="go" data-save="${i}">Save</button><a href="#" class="meta" data-wu="${i}">where used</a><span class="meta">A/B on</span><select class="fsel" style="padding:4px 8px" data-abb="${i}">${(LB.data.batches||[]).map(n=>`<option>${esc(n)}</option>`).join('')}</select><button class="ghost" data-ab="${i}" title="a draft batch: the same pictures with and without this block, same seed">Make an A/B draft</button><span class="meta" data-out="${i}"></span></div></div>`).join('');
+  $$('#l-blocks [data-save]').forEach(b=>b.onclick=async()=>{if(!G.identity)return askWho();const i=+b.dataset.save,bl=s.blocks[i];const r=await post('fin_block',{game:gid(),name:bl.name,text:$(`#l-blocks textarea[data-i="${i}"]`).value});toast(r.message,r.ok);if(r.ok&&r.changed)loadLibrary()});
+  $$('#l-blocks [data-wu]').forEach(a=>a.onclick=async e=>{e.preventDefault();const i=+a.dataset.wu;const r=await api('/api/suite/whereused?block='+encodeURIComponent(s.blocks[i].name));$(`#l-blocks [data-out="${i}"]`).textContent=r.hits.length?`used by ${r.hits.length}: `+r.hits.slice(0,6).map(h=>h.name+(h.where?' ('+h.where+')':'')).join(', '):'not used yet'});
+  $$('#l-blocks [data-ab]').forEach(b=>b.onclick=async()=>{if(!G.identity)return askWho();const i=+b.dataset.ab;const r=await post('fin_ab',{game:gid(),block:s.blocks[i].name,batch:$(`#l-blocks [data-abb="${i}"]`).value});toast(r.message,r.ok)})}
+function libNew(){if(!G.identity)return askWho();modal(`<h3>A new block</h3><p>Named shelf.name (e.g. light.dusk_sodium). It goes into prompts/night4.json. Start it with TODO to leave it a placeholder.</p><input id="m-bn" placeholder="shelf.name"><textarea id="m-bt" style="width:100%;min-height:80px;font:inherit;padding:9px;border-radius:8px;border:1px solid #3a3a48;background:#121217;color:var(--ink)" placeholder="the words"></textarea><div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Save</button></div>`);
+  $('#m-ok').onclick=async()=>{const r=await post('fin_block',{game:gid(),name:$('#m-bn').value,text:$('#m-bt').value});toast(r.message,r.ok);if(r.ok){closeModal();LB.shelf=$('#m-bn')?$('#m-bn').value.split('.')[0]:LB.shelf;loadLibrary()}}}
+// ---------- Bake-offs (BUILD 14)
+async function loadBakeoffs(){let d;try{d=await api('/api/suite/bakeoffs?id='+encodeURIComponent(gid()))}catch(e){$('#b-list').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  $('#b-list').innerHTML=(d.error?`<div class="err">${esc(d.error)}</div>`:'')+`<div class="meta" style="margin-bottom:10px">${fmt(d.inventory)} model file(s) in the inventory (scan_models.bat or Models → scan to refresh it).</div>`+(d.suites.length?d.suites.map(s=>s.error?`<div class="err">${esc(s.file)}: ${esc(s.error)}</div>`:`<div class="card" style="max-width:1500px;margin-bottom:12px"><h2>${esc(s.suite)} <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(s.graph)} · ${esc(s.file)}</span></h2>
+    ${s.note?`<div class="meta" style="margin:-4px 0 8px">${esc(String(s.note).slice(0,300))}</div>`:''}<dl class="kv2"><dt>models</dt><dd>${s.checkpoints??'?'} checkpoint(s) × ${s.loras??'?'} LoRA(s) (+ none)</dd><dt>renders</dt><dd><b>${fmt(s.renders)}</b> · about ${s.minutes!=null?(s.minutes>=90?(s.minutes/60).toFixed(1)+' hours':s.minutes+' min'):'?'}</dd><dt>ran</dt><dd>${s.submitted?esc(String(s.submitted).replace('T',' ').slice(0,16)):'not yet'}</dd></dl>
+    ${s.grids.length?`<div class="pics">${s.grids.map(g=>`<a href="${g}" target="_blank"><img loading="lazy" src="${g}" alt="">${esc(g.split('/').pop())}</a>`).join('')}</div>`:''}
+    <div class="act3">${s.report?`<a href="${s.report}" target="_blank">Open the report</a>`:''}<button data-bq="${esc(s.file)}" data-n="${s.renders}">Queue it</button><button class="ghost" data-br="${esc(s.file)}">Make the report</button></div><div data-bout="${esc(s.file)}"></div></div>`).join(''):'<div class="empty">This game has no bake-off suites (games/&lt;game&gt;/bakeoff/*.json).</div>');
+  $$('#b-list [data-bq]').forEach(b=>b.onclick=()=>{if(!G.identity)return askWho();confirmAct('Queue the bake-off?',`${b.dataset.n} render(s) go into the art queue behind what's already waiting.`,'Queue it',async()=>{const r=await post('fin_bakeoff',{game:gid(),action:'queue',file:b.dataset.bq});toast(r.message,r.ok);$(`#b-list [data-bout="${b.dataset.bq}"]`).innerHTML=r.printed?`<pre class="out">${esc(r.printed)}</pre>`:''})});
+  $$('#b-list [data-br]').forEach(b=>b.onclick=async()=>{if(!G.identity)return askWho();b.disabled=true;const r=await post('fin_bakeoff',{game:gid(),action:'report',file:b.dataset.br});b.disabled=false;toast(r.message,r.ok);$(`#b-list [data-bout="${b.dataset.br}"]`).innerHTML=r.printed?`<pre class="out">${esc(r.printed)}</pre>`:'';if(r.ok)loadBakeoffs()})}
+// ---------- Models (BUILD 14)
+let MO={data:null,only:false};
+async function loadModels(scan){$('#mo-body').innerHTML=`<div class="empty">${scan?'Scanning every model file — this takes a while…':'Reading the shelf…'}</div>`;const r=await post('fin_models',{game:gid(),scan:!!scan});if(!r.ok){$('#mo-body').innerHTML=`<div class="err">${esc(r.message)}</div>`;return}MO.data=r;paintModels()}
+$('#mo-scan').onclick=()=>confirmAct('Scan the model folders again?','Reads every model file\'s header again to refresh the inventory (the same as scan_models.bat). It can take several minutes; nothing is changed or deleted.','Scan',()=>loadModels(true));
+function paintModels(){const d=MO.data,t=d.totals;const rows=MO.only?d.rows.filter(r=>r.safe_to_delete):d.rows;
+  $('#mo-body').innerHTML=`<div class="mtot"><div class="card"><div class="meta">safe to delete</div><b style="color:var(--ok)">${t.safe_gb} GB</b><div class="meta">${t.safe} file(s) — nothing still needs them</div></div><div class="card"><div class="meta">of which dropped by a verdict (or non-commercial)</div><b>${t.verdict_gb} GB</b></div><div class="card"><div class="meta">of which nothing can run here today</div><b>${t.cant_run_gb} GB</b><div class="meta">your call — a future graph might</div></div><div class="card"><div class="meta">files on the shelf</div><b>${fmt(t.files)}</b><div class="meta"><a href="${d.report}" target="_blank">the full report</a></div></div></div>
+    <div class="act3"><label class="chk" style="margin:0"><input type="checkbox" id="mo-only" ${MO.only?'checked':''}><span>only what's safe to delete</span></label></div>
+    <table class="t"><tr><th>file</th><th>kind</th><th>size</th><th>loads</th><th>licence</th><th>approved</th><th>runs</th><th>last used</th><th>verdict</th><th>still needed by</th><th></th></tr>${rows.map(r=>`<tr><td title="${esc(r.path)}">${esc(r.file)}</td><td class="meta">${esc(r.kind_dir)}</td><td>${(r.gb||0).toFixed(1)} GB</td><td class="${r.loads?'g':'r'}">${r.loads?'yes':'no'}</td><td class="${r.licence==='green'?'g':r.licence==='red'?'r':'y'}">${esc(r.licence)}</td><td>${r.approved||''}</td><td>${r.runs||''}${r.queued?' (+'+r.queued+')':''}</td><td class="meta">${esc((r.last||'').slice(0,10))}</td><td>${esc(r.verdict)}${r.reason?`<div class="meta">${esc(r.reason)}</div>`:''}</td><td class="meta">${esc((r.needed_by||[]).join('; '))}</td><td>${r.safe_to_delete?'<span class="badge2 ok">safe to delete</span>':''}</td></tr>`).join('')}</table>`;
+  $('#mo-only').onchange=e=>{MO.only=e.target.checked;paintModels()}}
+// ---------- Outside tools (BUILD 14)
+async function loadTools(){let d;try{d=await api('/api/suite/handoffs')}catch(e){$('#t-body').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  $('#t-body').innerHTML=`<div class="card" style="max-width:1500px;margin-bottom:14px"><h2>Hand-offs</h2>${d.handoffs.length?`<table class="t"><tr><th>name</th><th>made</th><th>back</th><th>missing / extra</th><th></th></tr>${d.handoffs.map(h=>`<tr><td><b>${esc(h.name)}</b>${h.notes.length?`<div class="meta">${h.notes.map(esc).join('<br>')}</div>`:''}</td><td class="meta">${esc(String(h.created||'').replace('T',' ').slice(0,16))}</td><td>${h.back} of ${h.entries}</td><td class="meta">${h.missing.length?'missing: '+h.missing.map(esc).join(', '):''}${h.extra.length?'<br>extra: '+h.extra.map(esc).join(', '):''}</td>
+    <td><button class="ghost" data-open="${esc(h.in)}">Open in</button> <button class="ghost" data-open="${esc(h.done)}">Open done</button> <select class="fsel" style="padding:4px 8px" data-tool="${esc(h.name)}"><option value="">program…</option>${d.tools.map(t=>`<option>${esc(t.key)}</option>`).join('')}</select> <button class="go" data-in="${esc(h.name)}" ${h.back?'':'disabled'}>Bring it back</button></td></tr>`).join('')}</table>`:'<div class="meta">None yet — Review &amp; approve → Send out to an outside tool.</div>'}</div>
+    <div class="card" style="max-width:1500px"><h2>The tool register</h2>${d.tools.length?`<table class="t"><tr><th>program</th><th>commercial use</th><th>checked</th></tr>${d.tools.map(t=>`<tr><td>${esc(t.key)}</td><td class="${t.commercial_ok?'g':'r'}">${t.commercial_ok?'permitted':'NOT permitted'}${t.license?`<div class="meta">${esc(t.license)}</div>`:''}</td><td class="meta">${esc(t.checked||'')}</td></tr>`).join('')}</table>`:'<div class="meta">Nothing recorded yet. Every picture an outside program touched needs its licence line here before it can be approved.</div>'}</div>`;
+  $$('#t-body [data-open]').forEach(b=>b.onclick=async()=>{const r=await post('fin_open',{game:gid(),path:b.dataset.open});toast(r.message,r.ok)});
+  $$('#t-body [data-in]').forEach(b=>b.onclick=()=>{if(!G.identity)return askWho();const tool=$(`#t-body [data-tool="${b.dataset.in}"]`).value;confirmAct('Bring it back?',`What came back in done/ goes through the forge again${tool?' as made with '+tool:''} — a scene gets its kit companions rebuilt.`,'Bring it back',async()=>{const r=await post('fin_handin',{game:gid(),name:b.dataset.in,tool});toast(r.message,r.ok);loadTools()})})}
+// ---------- start
+loadGames().then(g=>{const cur=g.games.find(x=>x.id===g.current);if(cur&&cur.unread&&g.identity)setSide('story');else show();
+  setInterval(()=>{if(side==='art'&&screen==='home')loadHome()},5000)});
+setInterval(()=>{const d=new Date();if(!H)$('#clock').textContent=d.toTimeString().slice(0,8)},1000);
+
+// ---------- Music (BUILD 06): the board, delivering, the loop, and the profiles
+let MU={data:null,f:{state:'',place:'',era:'',singer:'',q:''},sel:null,tab:'board',sheet:null,seam:null};
+const MU_WORD={needed:'needed',proposed:'proposed',agreed:'agreed',written:'written',delivered:'delivered','in game':'in game',inherits:'inherits'};
+function muChip(st){return `<span class="chip ${esc(String(st).replace(' ','-'))}">${esc(MU_WORD[st]||st)}</span>`}
+function muVocal(v){return v===true||v==='vocal'?'♪ vocal':v===false||v==='instrumental'?'instrumental':'<span style="color:var(--warn)">ask</span>'}
+async function loadMusic(){const v=$('#v-music');try{MU.data=await api(`/api/suite/music?id=${encodeURIComponent(gid())}`)}catch(e){v.innerHTML=`<div class="err">The Music board couldn't read this game: ${esc(e)}</div>`;return}
+  if(MU.data.error){v.innerHTML=`<div class="err">${esc(MU.data.error)}</div>`;return}paintMusic()}
+function muFiltered(){const f=MU.f,q=f.q.toLowerCase();return MU.data.slots.filter(s=>(!f.state||s.state===f.state||(f.state==='own'&&s.own))&&(!f.place||s.place===f.place)&&(!f.era||s.era===f.era)&&
+  (!f.singer||(s.singers||[]).some(g=>g.name===f.singer))&&(!q||(s.id+' '+(s.scene||'')+' '+(s.purpose||'')).toLowerCase().includes(q)))}
+function paintMusic(){const d=MU.data,c=d.counts,v=$('#v-music');
+  const tabs=`<div class="tabs" style="display:inline-flex"><button class="${MU.tab==='board'?'on story':''}" onclick="MU.tab='board';paintMusic()">The board</button><button class="${MU.tab==='profiles'?'on story':''}" onclick="MU.tab='profiles';paintMusic()">Profiles (${d.sheets.length})</button></div>`;
+  let h=`<div class="hero"><h1>Music</h1><span class="tag">Story</span>${tabs}<span class="spacer" style="flex:1"></span><button onclick="muOpenSlot()">＋ I've had an idea for a song</button></div>`;
+  if(MU.tab==='profiles'){v.innerHTML=h+muProfiles();return}
+  h+=`<div class="mu-counts">${['needed','proposed','agreed','written','delivered','in game'].map(k=>`<div class="n ${MU.f.state===k?'on':''}" onclick="MU.f.state=MU.f.state==='${k}'?'':'${k}';paintMusic()"><b>${fmt(c[k])}</b>${muChip(k)}</div>`).join('')}
+    <div class="n ${MU.f.state==='own'?'on':''}" onclick="MU.f.state=MU.f.state==='own'?'':'own';paintMusic()"><b>${fmt(c.own)}</b><span class="chip bill">${esc(d.owner)}'s own</span></div>
+    <div class="n" title="keeps the music already playing — no slot to fill"><b>${fmt(c.inherits)}</b>${muChip('inherits')}</div></div>`;
+  if(d.next.length)h+=`<div class="card" style="margin-bottom:14px"><h2>Next most useful</h2>${d.next.map(r=>`<div style="margin:6px 0"><a href="#" onclick="muSelect('${esc(r.id)}');return false">${esc(r.scene)}</a> <span class="meta">— ${esc(r.why)}</span></div>`).join('')}</div>`;
+  const inb=d.inbox.filter(x=>!x.delivered_to);
+  if(d.inbox.length)h+=`<div class="card" style="margin-bottom:14px"><h2>The score inbox <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(d.paths.inbox)}\\ · ${inb.length} not yet delivered</span></h2>
+    ${d.inbox.map(x=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="ghost" onclick="muPlay(null,'${esc(x.name)}')">▶</button><b>${esc(x.name)}</b>
+      ${x.delivered_to?`<span class="meta">delivered to ${esc(x.delivered_to)}</span>`:`${x.guess?`<span class="meta">looks like <a href="#" onclick="muSelect('${esc(x.guess.id)}');return false">${esc(x.guess.scene)}</a> (${Math.round(x.guess.score*100)}%)</span> <button class="go" onclick="muDeliverInbox('${esc(x.name)}','${esc(x.guess.id)}')">Deliver there</button>`:'<span class="meta">no guess — open a row and deliver it from there</span>'}`}</div>`).join('')}</div>`;
+  const f=d.filters;
+  h+=`<div class="mu-filters"><input placeholder="search" value="${esc(MU.f.q)}" oninput="MU.f.q=this.value;muTable()" style="width:200px">
+    <select onchange="MU.f.place=this.value;paintMusic()"><option value="">every town</option>${f.places.map(x=>`<option ${MU.f.place===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <select onchange="MU.f.era=this.value;paintMusic()"><option value="">every era</option>${f.eras.map(x=>`<option ${MU.f.era===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <select onchange="MU.f.singer=this.value;paintMusic()"><option value="">every voice</option>${f.singers.map(x=>`<option ${MU.f.singer===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <span class="meta" id="mu-n"></span><span class="meta">· drop an audio file on a row to deliver it</span></div><div id="mu-table"></div>`;
+  v.innerHTML=h;muTable()}
+function muTable(){const rows=muFiltered();$('#mu-n').textContent=`${rows.length} of ${MU.data.slots.length} slots`;
+  $('#mu-table').innerHTML=`<table class="mu"><tr><th>State</th><th>What it's for</th><th></th><th>Who sings</th><th>Where</th><th>The game says</th></tr>${rows.map(s=>`<tr class="row ${MU.sel===s.id?'sel':''}" data-id="${esc(s.id)}">
+    <td>${muChip(s.state)}${s.own?' <span class="chip bill">'+esc(MU.data.owner)+'\'s</span>':''}${s.cemented?' <span title="cemented — delivered by '+esc(s.delivered.by)+' on '+esc((s.delivered.at||'').slice(0,10))+'">🔒</span>':''}</td>
+    <td><b>${esc(s.scene||s.id)}</b>${s.via?`<div class="meta">shares the theme of ${esc(s.via)}</div>`:''}</td><td>${muVocal(s.vocal)}</td>
+    <td>${(s.singers||[]).map(g=>esc(g.name)+(g.voice==='ask'?' <span style="color:var(--warn)" title="no voice lock written down — asked">(ask)</span>':'')).join(', ')}</td>
+    <td>${esc(s.place||'')}${s.era?' · '+esc(s.era):''}</td><td class="meta">${esc(s.game_word||s.game_status||'')}${s.file_exists||s.delivered?` <button class="ghost" style="padding:2px 8px" onclick="event.stopPropagation();muPlay('${esc(s.id)}')">▶</button>`:''}</td></tr>
+    ${MU.sel===s.id?`<tr><td colspan="6">${muDetail(s)}</td></tr>`:''}`).join('')}</table>`;
+  $$('#mu-table tr.row').forEach(tr=>{tr.onclick=()=>{MU.sel=MU.sel===tr.dataset.id?null:tr.dataset.id;muTable()};
+    tr.ondragover=e=>{e.preventDefault();tr.classList.add('drop')};tr.ondragleave=()=>tr.classList.remove('drop');
+    tr.ondrop=e=>{e.preventDefault();tr.classList.remove('drop');const fl=e.dataTransfer.files[0];if(fl)muDeliverFile(tr.dataset.id,fl)}})}
+function muSelect(id){MU.f={state:'',place:'',era:'',singer:'',q:''};MU.sel=id;MU.tab='board';paintMusic();setTimeout(()=>{const r=document.querySelector(`#mu-table tr[data-id="${CSS.escape(id)}"]`);if(r)r.scrollIntoView({block:'center'})},50)}
+function muLink(rel,label){return `<a href="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(rel)}" target="_blank">${esc(label||rel)}</a>`}
+function muDetail(s){const d=s.delivered,me=G.identity||'',person=!/^claude/i.test(me);let h=`<div class="mu-detail" onclick="event.stopPropagation()">`;
+  h+=`<div>${esc(s.purpose||'')}</div><div class="meta">slot <code>${esc(s.id)}</code>${s.track?` · track <code>${esc(s.track)}</code>`:''}${s.file?` · plays <code>${esc(s.file)}</code>`:''}</div>`;
+  if((s.singers||[]).length)h+=`<h4>Voice</h4>${s.singers.map(g=>`<div><b>${esc(g.name)}</b> — ${g.voice==='ask'?'<span style="color:var(--warn)">ask — no voice lock written down</span>':esc(g.voice)} <span class="meta">${esc(g.source||'')}</span>${MU.data.sheets.some(x=>x.name===g.name)?` · <a href="#" onclick="muSheet('${esc(MU.data.sheets.find(x=>x.name===g.name).id)}');return false">profile</a>`:''}</div>`).join('')}`;
+  h+=`<h4>The loop</h4>`;
+  if(s.brief)h+=`<div>Brief: ${muLink(s.brief)}${s.letter?` · <a href="#" onclick="goLetter('${esc(s.letter)}');return false">the letter</a>`:''}${s.verdict?` · ${esc(MU.data.owner)} said <b>${esc(s.verdict)}</b>`:''}</div>`;
+  if(s.state==='proposed'&&person)h+=`<div style="margin:6px 0">Answer the brief: ${MU.data.verdicts.map(x=>`<button onclick="muAnswer('${esc(s.id)}','${esc(x)}')">${esc(x)}</button>`).join(' ')}</div>`;
+  if(s.versions.length)h+=`<div>Versions: ${s.versions.map(x=>`${muLink(x.file,'v'+x.n+' “'+x.title+'”')} <span class="meta">by ${esc(x.by)}, ${esc((x.at||'').slice(0,16).replace('T',' '))}</span>`).join(' · ')}</div>`;
+  if(!s.brief&&!s.versions.length)h+=`<div class="meta">Nothing yet. ${s.own?'This one is yours.':'A session (or you) writes a brief; it comes to you as a letter.'}</div>`;
+  if(person)h+=`<div style="margin:6px 0"><button onclick="muWriteOwn('${esc(s.id)}')">✎ Write / edit the words yourself</button> <button onclick="muHold('${esc(s.id)}',${!s.own})">${s.own?'Let sessions work on it again':'Mine — no session touches it'}</button>
+    <select onchange="muShare('${esc(s.id)}',this.value)"><option value="">${s.shares?'shares '+esc(s.shares)+' — stop':'shares the theme of…'}</option>${MU.data.slots.filter(x=>x.id!==s.id&&!x.shares).map(x=>`<option value="${esc(x.id)}">${esc(x.scene||x.id)}</option>`).join('')}</select></div>`;
+  h+=`<h4>The track</h4>`;
+  if(d){h+=`<div>🔒 Cemented: <b>${esc(d.source)}</b> → <code>${esc(d.file)}</code>, delivered by ${esc(d.by)} on ${esc((d.at||'').slice(0,16).replace('T',' '))}. <button class="ghost" onclick="muPlay('${esc(s.id)}')">▶ play</button></div>
+    <div style="margin:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">loop from <input id="mu-ls" size="6" value="${d.loop_start??''}"> s to <input id="mu-le" size="6" value="${d.loop_end??''}"> s
+     <button onclick="muSeam('${esc(s.id)}')">▶ play the seam</button> · trim <input id="mu-tr" size="5" value="${d.trim_db??''}"> dB <button onclick="muTrialTrim()">hear it</button>
+     ${person?`<button class="go" onclick="muSaveAudio('${esc(s.id)}')">Save loop &amp; trim</button>`:''}</div>`;
+    if(person&&!s.lyric&&s.vocal!==false&&s.vocal!=='instrumental')h+=`<div style="margin-top:8px">The words as delivered (you may have changed some in Suno) — confirm them and they're filed into the game as canon:<br><textarea id="mu-lyr" rows="6" style="width:100%">${''}</textarea><button onclick="muLyric('${esc(s.id)}')">Confirm and file the words</button></div>`;
+    if(s.lyric)h+=`<div>Words filed: ${muLink(s.lyric.file)} <span class="meta">by ${esc(s.lyric.by)}</span></div>`}
+  else h+=`<div class="meta">Not delivered. Drop the finished file on this row, or: <input type="file" accept="audio/*" onchange="muDeliverFile('${esc(s.id)}',this.files[0])"></div>`;
+  if(s.credits.length)h+=`<h4>Credits</h4><div class="meta">${s.credits.map(c=>esc(c.what)+': '+esc(c.by)).join(' · ')}</div>`;
+  if(s.history.length)h+=`<h4>History</h4>${s.history.map(x=>`<div class="meta">${esc((x.time||'').slice(0,16).replace('T',' '))} ${esc(x.who)}: ${esc(x.from||'—')} → ${esc(x.to)} ${esc(x.note||'')}</div>`).join('')}`;
+  return h+'</div>'}
+async function muAct(a,b){const r=await post(a,{game:gid(),...b});toast(r.message,r.ok);if(r.ok)await loadMusic();return r}
+function muAnswer(id,v){muAct('music_answer',{slot:id,verdict:v})}
+function muHold(id,on){muAct('music_hold',{slot:id,on})}
+function muShare(id,other){muAct('music_share',{slot:id,other:other||null})}
+function muSaveAudio(id){muAct('music_audio',{slot:id,loop_start:$('#mu-ls').value,loop_end:$('#mu-le').value,trim_db:$('#mu-tr').value})}
+function muLyric(id){if(confirm('File these words as canon? They are never changed here afterwards.'))muAct('music_lyric',{slot:id,text:$('#mu-lyr').value})}
+function muDeliverInbox(name,id){const s=MU.data.slots.find(x=>x.id===id);if(confirm(`Deliver ${name} to “${s?s.scene:id}”? It is copied into the game and cemented to that slot.`))muAct('music_deliver',{slot:id,inbox:name})}
+function muDeliverFile(id,fl){const s=MU.data.slots.find(x=>x.id===id);if(!fl)return;if(!confirm(`Deliver ${fl.name} to “${s?s.scene:id}”? It is copied into the game and cemented to that slot.`))return;
+  const rd=new FileReader();rd.onload=()=>muAct('music_deliver',{slot:id,filename:fl.name,data:rd.result});rd.readAsDataURL(fl)}
+function muSrc(id,inbox){return `/suite/audio?id=${encodeURIComponent(gid())}`+(inbox?`&inbox=${encodeURIComponent(inbox)}`:`&slot=${encodeURIComponent(id)}`)}
+function muPlay(id,inbox){const a=$('#mu-audio');MU.seam=null;const src=muSrc(id,inbox);if(a.dataset.src===src&&!a.paused){a.pause();return}a.dataset.src=src;a.src=src;a.volume=1;a.play().catch(e=>toast('Could not play it: '+e,false))}
+function muSeam(id){const a=$('#mu-audio'),ls=parseFloat($('#mu-ls').value),le=parseFloat($('#mu-le').value);if(isNaN(ls)||isNaN(le)||le<=ls){toast('Set the loop start and end first (seconds).',false);return}
+  MU.seam={ls,le,until:null};a.src=muSrc(id);a.dataset.src=a.src;a.onloadedmetadata=()=>{a.currentTime=Math.max(0,le-3);a.play()};
+  a.ontimeupdate=()=>{const m=MU.seam;if(!m)return;if(m.until===null&&a.currentTime>=m.le){a.currentTime=m.ls;m.until=m.ls+3}else if(m.until!==null&&a.currentTime>=m.until){a.pause();MU.seam=null}}}
+function muTrialTrim(){const a=$('#mu-audio'),db=parseFloat($('#mu-tr').value||'0');a.volume=Math.max(0,Math.min(1,Math.pow(10,db/20)));if(a.paused&&a.src)a.play();toast(db>0?'Above 0 dB the preview can only play at full volume — the game applies the boost.':`Playing at ${db} dB.`)}
+function muOpenSlot(){modal(`<h3>A song idea</h3><p>It joins the board as a needed slot of yours.</p><input id="mu-t" placeholder="Working title"><input id="mu-p" placeholder="What it's for — the scene, the moment"><input id="mu-s" placeholder="Who sings (names, comma-separated) — or leave empty">
+  <label><input type="checkbox" id="mu-v" checked> vocal</label><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="mu-ok">Add it</button></div>`);
+  $('#mu-ok').onclick=async()=>{const r=await muAct('music_open',{title:$('#mu-t').value,purpose:$('#mu-p').value,singers:$('#mu-s').value,vocal:$('#mu-v').checked});if(r.ok)closeModal()}}
+function muWriteOwn(id){const s=MU.data.slots.find(x=>x.id===id),last=s.versions[s.versions.length-1];
+  modal(`<h3>Your words — ${esc(s.scene||id)}</h3><p>Saved as a new version, by you (every version is kept). Style input first, then the lyrics with [section] tags.</p><input id="mu-wt" placeholder="Title" value="${esc(last?last.title:'')}">
+  <textarea id="mu-wx" rows="16" style="width:100%;font:13px/1.45 Consolas,monospace;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px">${last?'(loading the last version…)':''}</textarea>
+  <div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="mu-wok">Save as a new version</button></div>`,true);
+  if(last)fetch(`/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(last.file)}`).then(r=>r.text()).then(t=>$('#mu-wx').value=t);
+  $('#mu-wok').onclick=async()=>{const r=await muAct('music_write',{slot:id,title:$('#mu-wt').value,text:$('#mu-wx').value});if(r.ok)closeModal()}}
+// ---- profiles
+function muSpot(v,ptr){const person=!/^claude/i.test(G.identity||'');
+  if(v&&typeof v==='object'&&v.open)return `<div class="spot open"><b>open</b> — ${esc(v.question||'')} <span class="src">(asked ${esc(v.asked||'')}${v.found?'; found: '+esc(v.found):''})</span>${person?`<br><input size="60" placeholder="your answer" data-ptr="${esc(ptr)}"><button onclick="muFill(this)">Save</button>`:''}</div>`;
+  if(v&&typeof v==='object'&&'value' in v){const val=Array.isArray(v.value)?v.value.join(', '):v.value;return `${esc(val)} <span class="src">${v.by?'— '+esc(v.by):v.source?'['+esc(v.source)+']':''}</span>`}
+  if(Array.isArray(v))return esc(v.join(', '));return v?esc(v):'—'}
+function muFill(btn){const inp=btn.previousElementSibling;if(!inp.value.trim())return;post('music_sheet',{game:gid(),sheet:MU.sheet.id,pointer:inp.dataset.ptr,value:inp.value}).then(r=>{toast(r.message,r.ok);if(r.ok)muSheet(MU.sheet.id)})}
+function muProfiles(){const d=MU.data;if(!d.sheets.length)return `<div class="empty">No profiles yet — they live in ${esc(d.paths.styles)}\\ in the game folder.</div>`;
+  let h=`<div style="display:flex;gap:18px;align-items:flex-start"><div style="min-width:230px">${d.sheets.map(x=>`<div style="margin:4px 0"><a href="#" onclick="muSheet('${esc(x.id)}');return false" style="${MU.sheet&&MU.sheet.id===x.id?'color:var(--story)':''}">${esc(x.name)}</a> <span class="meta">${x.songs} songs · ${x.styles} style(s)${x.open?` · <span style="color:var(--warn)">${x.open} open</span>`:''}</span></div>`).join('')}</div><div class="mu-sheet" style="flex:1" id="mu-sheet">`;
+  h+=MU.sheet?muSheetHtml(MU.sheet):'<div class="empty">Pick a voice.</div>';return h+'</div></div>'}
+async function muSheet(id){const r=await api(`/api/suite/sheet?id=${encodeURIComponent(gid())}&sheet=${encodeURIComponent(id)}`);if(r.error){toast(r.error,false);return}MU.sheet=r.sheet;MU.tab='profiles';paintMusic()}
+function muSheetHtml(s){const v=s.voice||{};let h=`<h2 style="margin-top:0">${esc(s.name)}</h2><div class="meta">${esc(s.kind)} · made by ${esc(s.made_by||'')} ${esc(s.made||'')} from the evidence listed · ${s._open.length} open spot(s) · ${muLink(MU.data.paths.styles+'/'+s.id+'.md','the .md')}</div>`;
+  h+=`<h3>1 · The voice — the constant</h3>`+[['type','Voice type and range'],['delivery','Delivery'],['constant','What stays the same whatever the genre'],['changes','Where it changes over time']].map(([k,l])=>`<div><b>${l}:</b> ${muSpot(v[k],'/voice/'+k)}</div>`).join('');
+  (s.styles||[]).forEach((st,i)=>{if(st&&st.open){h+=`<h3>2.${i+1} · Style ${i+1}</h3>${muSpot(st,`/styles/${i}`)}`;return}h+=`<h3>2.${i+1} · Style ${i+1} — ${muSpot(st.name,`/styles/${i}/name`)}</h3>`+[['genre','Genre words'],['instruments','Instruments'],['tempo','Tempo'],['metre','Metre'],['when','When they use it'],['example','Example song']].map(([k,l])=>`<div><b>${l}:</b> ${muSpot(st[k],`/styles/${i}/${k}`)}</div>`).join('')+
+    (st.suno_input&&st.suno_input.value?`<div><b>Suno style input (as used):</b> <span class="src">[${esc(st.suno_input.source||'')}]</span><pre>${esc(st.suno_input.value)}</pre></div>`:`<div><b>Suno style input:</b> ${muSpot(st.suno_input,`/styles/${i}/suno_input`)}</div>`)});
+  if(s.styles_note)h+=`<div><b>About these styles:</b> ${muSpot(s.styles_note,'/styles_note')}</div>`;
+  if(s.styles_split&&s.styles_split.open)h+=`<div><b>Separate styles?</b> ${muSpot(s.styles_split,'/styles_split')}</div>`;
+  const b=s.built||{};h+=`<h3>3 · How their songs are built</h3>${(b.observations||[]).map(o=>`<div>• ${esc(o.text)}${o.from&&o.from.length?` <span class="src">(from: ${esc(o.from.length>6?o.from.length+' songs — '+o.from.slice(0,3).join(', ')+' …':o.from.join(', '))})</span>`:''}</div>`).join('')}`;
+  if((b.returns_to||[]).length)h+=`<div>• <b>Words they come back to:</b> ${b.returns_to.map(w=>`${esc(w.word)} <span class="src">(${w.songs.length})</span>`).join(', ')}</div>`;
+  h+=`<div>• <b>Words they never use:</b> ${muSpot(b.never,'/built/never')}</div>`;
+  if((s.motifs||[]).length)h+=`<div style="margin-top:6px"><b>Motifs</b>${s.motifs.map(m=>`<div>“${esc(m.phrase)}” <span class="src">— first in ${esc(m.first)}; also ${esc(m.songs.slice(1).join(', '))}</span></div>`).join('')}</div>`;
+  if((s.lines||[]).length)h+=`<div style="margin-top:6px"><b>Lines that are most them</b>${s.lines.map(x=>`<div><i>${esc(x.title)}</i> l.${x.line}: “${esc(x.text)}”</div>`).join('')}</div>`;
+  h+=`<h3>4 · Style notes</h3>${s.notes&&s.notes.value?muSpot(s.notes,'/notes'):''}${!/^claude/i.test(G.identity||'')?`<div><input size="70" placeholder="anything that doesn't fit a field" data-ptr="/notes"><button onclick="muFill(this)">Save</button></div>`:''}`;
+  h+=`<h3>The songs, in story order</h3>${(s.songs||[]).map(x=>`<div><i>${esc(x.title)}</i> <span class="src">${esc([x.album,x.tempo,x.key,x.suno?'Suno input on disk':''].filter(Boolean).join(' · '))}</span></div>`).join('')||'<div class="meta">none on file</div>'}`;
+  h+=`<h3>5 · Open spots</h3>${s._open.map(o=>`<div class="meta"><code>${esc(o.pointer)}</code> — ${esc(o.question)}</div>`).join('')||'<div class="meta">none</div>'}`;
+  return h}
+
+// ---------- Read-through (BUILD 07): one place, one era, everything it says, in the order a player meets it
+let RT={towns:null,place:'',era:'all',data:null,sel:0,editing:null,cmp:null};
+async function loadRead(){const v=$('#v-read');if(!RT.towns){const r=await api(`/api/suite/towns?id=${encodeURIComponent(gid())}`);if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}RT.towns=r.towns;if(!RT.place&&RT.towns.length)RT.place=RT.towns[0].id}
+  if(!RT.place){v.innerHTML='<div class="empty">This game has no places yet.</div>';return}
+  const r=await api(`/api/suite/read?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.place)}&era=${encodeURIComponent(RT.era)}`);if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}RT.data=r;
+  if(RT.cmp){RT.cmp.data=await api(`/api/suite/read?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.cmp.place)}&era=${encodeURIComponent(RT.cmp.era)}`)}
+  RT.sel=Math.min(RT.sel,Math.max(0,r.lines.length-1));paintRead()}
+function rtSt(st){st=st||'draft';return `<span class="rt-st ${esc(st)}">${{approved:'✦ approved',flagged:'⚑ flagged',draft:'◆ draft'}[st]||esc(st)}</span>`}
+function paintRead(){const d=RT.data,c=d.counts,v=$('#v-read'),eras=['all',...d.eras];
+  let h=`<div class="hero"><h1>Read-through</h1><span class="tag">Story</span></div><div class="rt-top">
+    <select onchange="RT.place=this.value;RT.sel=0;loadRead()">${RT.towns.map(t=>`<option value="${esc(t.id)}" ${t.id===RT.place?'selected':''}>${esc(t.name)}${t.dev?' (dev)':''} — ${t.lines} lines, ${t.approved} ✦${t.flagged?', '+t.flagged+' ⚑':''}</option>`).join('')}</select>
+    <div class="tabs" style="display:inline-flex">${eras.map(e=>`<button class="${RT.era===e?'on story':''}" onclick="RT.era='${e}';RT.sel=0;loadRead()">${e==='all'?'Every era':esc(e[0].toUpperCase()+e.slice(1))}</button>`).join('')}</div>
+    <span class="spacer" style="flex:1"></span><label class="meta">side by side with <select onchange="rtCompare(this.value)"><option value="">—</option>${RT.towns.map(t=>['all',...t.eras].map(e=>`<option value="${esc(t.id)}|${e}" ${RT.cmp&&RT.cmp.place===t.id&&RT.cmp.era===e?'selected':''}>${esc(t.name)} · ${e==='all'?'every era':esc(e)}</option>`).join('')).join('')}</select></label></div>
+  <div class="meta" style="margin-bottom:6px"><b style="color:var(--ink)">${c.lines} lines</b> · ${c.approved} approved · ${c.flagged} flagged · ${c.draft} draft${c.locked?` · ${c.locked} 🔒 song words`:''} · <span style="color:var(--warn)">${c.meter} for the sameness meter</span>${c.notes?` · ${c.notes} note(s)`:''}</div>
+  <div class="rt-keys"><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>A</kbd> approve · <kbd>D</kbd> leave as draft · <kbd>G</kbd> flag as generic (with a note) · <kbd>E</kbd> edit · <kbd>N</kbd> a note for Claude · <kbd>Esc</kbd> stop editing</div>`;
+  h+=`<div class="rt-cols ${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?'two':''}"><div>${rtColumn(d,true)}</div>${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?`<div>${rtColumn(RT.cmp.data,false)}</div>`:''}</div>`;
+  v.innerHTML=h;$$('#v-read .rt-line[data-i]').forEach(el=>el.onclick=e=>{if(e.target.closest('button,textarea'))return;RT.sel=+el.dataset.i;rtPaintSel()});rtPaintSel(false)}
+function rtColumn(d,main){const m=d.meter;let h='';
+  if(!main)h+=`<h2 style="margin:0 0 8px">${esc(d.place.name)} · ${d.era==='all'?'every era':esc(d.era)} <span class="meta">${d.counts.lines} lines</span></h2>`;
+  if(d.sheet.length)h+=`<div class="rt-sheet"><div class="meta" style="margin-bottom:4px">${esc(d.place.name)} — its sheet${d.era!=='all'?' in the '+esc(d.era):''}</div>${d.sheet.map((x,i)=>`<div><b>${esc(x.label)}:</b> <span ${main?`onclick="rtEditSheet(${i})" style="cursor:text" title="click to edit"`:''}>${esc(typeof x.text==='string'?x.text:JSON.stringify(x.text))}</span>${x.status?' '+rtSt(x.status):''}</div>`).join('')}</div>`;
+  if(main&&(m.never_greet.length||m.greeting))h+=`<div class="meta" style="margin-bottom:8px">The meter (${esc(m.how)}).${m.greeting?` Greeting: “${esc(m.greeting)}”${m.never_greet.length?` — never used by ${esc(m.never_greet.slice(0,6).join(', '))}${m.never_greet.length>6?` and ${m.never_greet.length-6} more`:''}`:''}.`:''}</div>`;
+  h+=d.lines.map((l,i)=>`<div class="rt-line" ${main?`data-i="${i}"`:''} id="${main?'rt-l'+i:''}"><div class="meta">${l.n}</div><div>
+    <div class="rt-who">${esc(l.who||'')}${l.locked?' 🔒':''} <span class="meta" style="font-weight:400">${esc(l.source||'')}${l.era?' · '+esc(l.era):''}</span></div>
+    <div class="txt" id="${main?'rt-t'+i:''}">${esc(l.text)}</div>
+    ${l.when?`<div class="meta2">when ${esc(l.when)}</div>`:''}${l.meter.length?`<div class="mark">◌ ${esc(l.meter.join(' · '))}</div>`:''}${l.locked?`<div class="meta2">${esc(l.lock_reason)}</div>`:''}
+    ${main&&l.notes?`<div class="meta2" style="color:var(--story)">✉ ${l.notes} open note(s) <a href="#" onclick="rtNotes(${i});return false">read</a></div>`:''}</div>
+    <div style="text-align:right">${rtSt(l.status)}${main?`<div class="rt-acts" style="margin-top:6px;display:none;gap:4px"><button onclick="rtMark('approved')" title="A">✦</button><button onclick="rtMark('draft')" title="D">◆</button><button onclick="rtFlag()" title="G">⚑</button>${l.locked?'':'<button onclick="rtEdit()" title="E">✎</button>'}<button onclick="rtNote()" title="N">✉</button></div>`:''}</div></div>`).join('')||'<div class="empty">No lines in this era.</div>';
+  if(d.quests.length)h+=`<h2 style="margin:18px 0 6px">Quests offered here</h2>${d.quests.map(q=>`<div class="rt-sheet"><b style="color:var(--ink)">${esc(q.title)}</b> ${rtSt(q.status)} <span class="meta">${esc(q.giver||'')}${q.era?' · '+esc(q.era):''}</span>${q.steps.length?`<ol style="margin:6px 0 0 18px;padding:0">${q.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}</div>`).join('')}`;
+  return h}
+function rtPaintSel(scroll=true){$$('#v-read .rt-line[data-i]').forEach(el=>{const on=+el.dataset.i===RT.sel;el.classList.toggle('sel',on);const a=el.querySelector('.rt-acts');if(a)a.style.display=on?'flex':'none'});
+  const el=$('#rt-l'+RT.sel);if(el&&scroll)el.scrollIntoView({block:'nearest'})}
+function rtCompare(v){if(!v){RT.cmp=null;paintRead();return}const [p,e]=v.split('|');RT.cmp={place:p,era:e};loadRead()}
+function rtLine(){return RT.data&&RT.data.lines[RT.sel]}
+async function rtPost(a,b){const r=await post(a,{game:gid(),...b});if(r.conflict){rtConflict(a,b,r);return r}toast(r.message,r.ok);return r}
+function rtConflict(a,b,r){const c=r.conflict;modal(`<h3>The file changed underneath</h3><p>${esc(c.file)} was changed by someone else (a session, or another program) after this page was read. Nothing was written.</p>
+  <h4>Theirs, now</h4><pre style="white-space:pre-wrap">${esc(JSON.stringify(c.theirs,null,1))}</pre><h4>Yours</h4><pre style="white-space:pre-wrap">${esc(JSON.stringify(c.yours,null,1))}</pre>
+  <div class="row"><button class="ghost" onclick="closeModal();loadRead()">Keep theirs (reload)</button><button class="go" id="rt-mine">Keep mine</button></div>`,true);
+  $('#rt-mine').onclick=async()=>{closeModal();const r2=await rtPost(a,{...b,hash:c.current_hash});if(r2.ok)loadRead()}}
+async function rtMark(st,note){const l=rtLine();if(!l)return;const r=await rtPost('read_mark',{ref:l.ref,status:st,hash:RT.data.hashes[l.file],note:note||null,label:`${l.who}: “${l.text.slice(0,60)}”`});
+  if(r.ok){l.status=r.proposed?l.status:st;if(r.hash)RT.data.hashes[l.file]=r.hash;rtRefreshCounts();const el=$('#rt-l'+RT.sel);if(el)el.querySelector('.rt-st').outerHTML=rtSt(l.status);if(RT.sel<RT.data.lines.length-1){RT.sel++;rtPaintSel()}}}
+function rtRefreshCounts(){const L=RT.data.lines,c=RT.data.counts;c.approved=L.filter(x=>x.status==='approved').length;c.flagged=L.filter(x=>x.status==='flagged').length;c.draft=L.filter(x=>!x.status||x.status==='draft').length;
+  const m=$('#v-read .meta b');if(m&&m.parentElement)m.parentElement.innerHTML=`<b style="color:var(--ink)">${c.lines} lines</b> · ${c.approved} approved · ${c.flagged} flagged · ${c.draft} draft${c.locked?` · ${c.locked} 🔒 song words`:''} · <span style="color:var(--warn)">${c.meter} for the sameness meter</span>${c.notes?` · ${c.notes} note(s)`:''}`}
+function rtFlag(){const l=rtLine();if(!l)return;modal(`<h3>⚑ Flag as generic</h3><p><b>${esc(l.who)}:</b> “${esc(l.text)}”</p><input id="rt-fn" placeholder="What's generic about it? (a note for Claude — optional)">
+  <div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="rt-fok">Flag it</button></div>`);setTimeout(()=>$('#rt-fn').focus(),40);
+  const go=()=>{const n=$('#rt-fn').value.trim()||'generic';closeModal();rtMark('flagged',n)};$('#rt-fok').onclick=go;$('#rt-fn').onkeydown=e=>{if(e.key==='Enter')go()}}
+function rtNote(){const l=rtLine();if(!l)return;modal(`<h3>✉ A note for Claude</h3><p><b>${esc(l.who)}:</b> “${esc(l.text)}”</p><textarea id="rt-nt" rows="3" style="width:100%"></textarea>
+  <div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="rt-nok">Pin it</button></div>`);setTimeout(()=>$('#rt-nt').focus(),40);
+  $('#rt-nok').onclick=async()=>{const t=$('#rt-nt').value;const r=await rtPost('read_note',{ref:l.ref,text:t,label:`${l.who}: “${l.text.slice(0,60)}”`});if(r.ok){closeModal();l.notes++;loadRead()}}}
+async function rtNotes(i){const l=RT.data.lines[i];const r=await api(`/api/suite/notes?id=${encodeURIComponent(gid())}&obj=${encodeURIComponent(l.ref)}`);
+  modal(`<h3>Notes on ${esc(l.who)}'s line</h3>${r.threads.map(t=>`<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><div class="meta">${esc(t.time.replace('T',' ').slice(0,16))} · ${esc(t.who)} · ${esc(t.tag)}${t.open?'':' · resolved'}</div><div>${esc(t.text)}</div>
+    ${t.replies.map(x=>`<div style="margin:6px 0 0 14px"><span class="meta">${esc(x.who)}:</span> ${esc(x.text)}</div>`).join('')}${t.open?`<div style="margin-top:6px"><input id="rp-${esc(t.id)}" placeholder="reply" style="width:70%"> <button onclick="rtReply('${esc(t.id)}',${i})">Reply</button> <button class="ghost" onclick="rtResolve('${esc(t.id)}',${i})">Resolve</button></div>`:''}</div>`).join('')||'<p>No notes.</p>'}
+    <div class="row"><button onclick="closeModal()">Close</button></div>`,true)}
+async function rtReply(id,i){const l=RT.data.lines[i];const t=$('#rp-'+CSS.escape(id)).value;const r=await rtPost('read_note',{ref:l.ref,text:t,reply_to:id});if(r.ok)rtNotes(i)}
+async function rtResolve(id,i){const l=RT.data.lines[i];const r=await rtPost('read_resolve',{ref:l.ref,note:id});if(r.ok){closeModal();loadRead()}}
+function rtEdit(){const l=rtLine();if(!l||l.locked)return;const t=$('#rt-t'+RT.sel);if(!t||t.querySelector('textarea'))return;RT.editing=RT.sel;
+  t.innerHTML=`<textarea rows="3">${esc(l.text)}</textarea><div class="meta2">Enter saves · Shift+Enter a new line · Esc cancels</div>`;const ta=t.querySelector('textarea');ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  ta.onkeydown=async e=>{if(e.key==='Escape'){e.preventDefault();RT.editing=null;t.textContent=l.text;return}
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const val=ta.value;if(val===l.text){RT.editing=null;t.textContent=l.text;return}
+      const r=await rtPost('read_edit',{ref:l.ref,field:l.text_field||'text',value:val,hash:RT.data.hashes[l.file]});
+      if(r.ok){if(!r.proposed)l.text=val;if(r.hash)RT.data.hashes[l.file]=r.hash;RT.editing=null;t.textContent=l.text}}}}
+function rtEditSheet(i){const x=RT.data.sheet[i];if(typeof x.text!=='string')return;modal(`<h3>${esc(x.label)}</h3><textarea id="rt-sv" rows="5" style="width:100%">${esc(x.text)}</textarea><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="rt-sok">Save</button></div>`,true);
+  $('#rt-sok').onclick=async()=>{const r=await rtPost('read_edit',{ref:x.file+'#'+x.pointer.replace(/\/[^/]*$/,''),field:x.pointer.split('/').pop(),value:$('#rt-sv').value,hash:RT.data.hashes[x.file]});if(r.ok){closeModal();loadRead()}}}
+document.addEventListener('keydown',e=>{if(side!=='story'||sscreen!=='read'||!RT.data)return;if($('#modal').style.display==='flex')return;const tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();if(k==='j'){RT.sel=Math.min(RT.sel+1,RT.data.lines.length-1);rtPaintSel()}else if(k==='k'){RT.sel=Math.max(RT.sel-1,0);rtPaintSel()}
+  else if(k==='a')rtMark('approved');else if(k==='d')rtMark('draft');else if(k==='g')rtFlag();else if(k==='e'){e.preventDefault();rtEdit()}else if(k==='n'){e.preventDefault();rtNote()}else return;e.preventDefault()});
+</script></body></html>

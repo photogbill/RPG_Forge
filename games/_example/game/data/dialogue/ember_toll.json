@@ -1,0 +1,14 @@
+{
+ "id": "ember_toll",
+ "place": "ember_crossing",
+ "lines": [
+  {
+   "who": "Toll Singer",
+   "text": "Cross the coals and keep your name, the river takes the rest.",
+   "era": "after",
+   "lyric": "toll_song",
+   "status": "approved",
+   "approved_by": "Bill"
+  }
+ ]
+}

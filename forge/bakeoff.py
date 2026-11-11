@@ -7,7 +7,7 @@ then one report so the pictures can be compared side by side and a model picked 
     python -m forge bakeoff rate   <suite-name> <job-id> <1-5> [note]   record a verdict; the report shows it
 
 A suite (games/<game>/bakeoff/*.json):
-    {"suite": "sdxl_v1", "game": "turing_accords",
+    {"suite": "sdxl_v1", "game": "<game id>",
      "checkpoints": "*" | ["RealVisXL_V5.0_fp16.safetensors", ...],
      "loras": "*" | [...],  "include_no_lora": true,  "lora_strength": 0.8,
      "skip": {"checkpoints": [], "loras": []},
@@ -20,7 +20,7 @@ A suite (games/<game>/bakeoff/*.json):
      "checkpoint_dirs": ["flux_models"], "base_filter": "flux1",                    # discover checkpoints by folder / architecture instead of listing them
      "lora_base_filter": "flux1", "cfg_by_name": {"dedistill": 3.5},               # LoRAs by architecture; per-model overrides by a name substring
      "lora_checkpoint_filter": "marduk",                                            # apply LoRAs only on checkpoints matching this regex
-     "categories": {"portrait": {"size": [832, 1216], "prompts": {"sarah": "..."}}, ...},
+     "categories": {"portrait": {"size": [832, 1216], "prompts": {"hero": "..."}}, ...},
      "samplers": [{"label": "dpmpp2m-karras", "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 28, "cfg": 6.0,
                    "evals": 28}, ...]}                                           # optional sampler axis (below)
 

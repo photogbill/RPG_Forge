@@ -1,12 +1,13 @@
 """"Paint what the game is missing" (Night 3, G10) and room families (G11) — one draft for everything.
 
-    python -m forge brief missing [--game turing_accords] [--no-refresh]      (paint_missing.bat)
+    python -m forge brief missing [--game <id>] [--no-refresh]      (paint_missing.bat)
 
 Refresh wanted.json from the game (read-only; if the game folder is not readable, the last wanted.json is used and the
 report says so), then for every painted-map slot with no approved art write ONE draft job, choosing the type by the
 facts:
     map ≤ one frame (the game's scene_size, 1920×1080)        → scene_kit
-    map larger than one frame                                  → scene_big   (painted small, climbed ≤ 2× per step)
+    map larger than one frame                                  → scene_kit with big: true (scene_big paints it — small,
+                                                                 climbed ≤ 2× per step — then the companions; wiring day W4)
     a state of a map whose base painting is approved           → scene_state (mask from the two greyboxes)
     a state whose base is not approved yet                     → held back, listed as "waiting for its base"
 Each draft carries the map's notes (as `_notes`), its skin word and era as prompt-library references
@@ -144,7 +145,7 @@ def draft(cfg: dict, game: str, refresh: bool = True) -> dict:
         else:
             big = tw > frame[0] or th > frame[1]
             refs = _refs(m, bool(fk))
-            job = {"type": "scene_big" if big else "scene_kit", "name": mid, "target": [tw, th],
+            job = {"type": "scene_kit", "name": mid, "target": [tw, th], **({"big": True, "depth_resolution": 2048} if big else {}),
                    "prompt": ", ".join(refs) + ("" if fk else ", TODO: the picture in plain words")}
             if m.get("greybox"):
                 job["init"] = m["greybox"]
@@ -161,7 +162,7 @@ def draft(cfg: dict, game: str, refresh: bool = True) -> dict:
                 why += f"; family {fk.split(':', 1)[1]} ({len(fams[fk])} members)"
         job.update({"_notes": m["notes"], "_wanted": m["wanted"], "_name_in_game": m["name"]})
         jobs.append(job)
-        table.append({**row, "type": job["type"], "why": why, "waits_on": "" if m.get("greybox") or job["type"] == "scene_state"
+        table.append({**row, "type": job["type"], "big": bool(job.get("big")), "why": why, "waits_on": "" if m.get("greybox") or job["type"] == "scene_state"
                       else "nothing (no greybox yet: painted from the prompt — re-run after the game renders one)"})
     out = {"batch": "draft_missing", "_draft": True, "_made": datetime.now().isoformat(timespec="seconds"),
            "_review": "Every {{block}} must exist in games/<game>/prompts/ before this submits (submit refuses unknown or "
@@ -180,7 +181,7 @@ def write(cfg: dict, game: str, refresh: bool = True) -> tuple[Path, Path, dict]
     L = ["# What the game is missing", "", *[f"> {n}" for n in r["notes"]], "",
          "| map | size | job type | why | waits on |", "|---|---|---|---|---|"]
     for t in r["table"]:
-        L.append(f"| {t['map']} | {t['size']} | {t['type']} | {t['why']} | {t['waits_on']} |")
+        L.append(f"| {t['map']} | {t['size']} | {t['type']}{' (big)' if t.get('big') else ''} | {t['why']} | {t['waits_on']} |")
     rep = cfgmod.path_of(cfg, "out") / "reports" / f"missing_{datetime.now():%Y-%m-%d}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)
     rep.write_text("\n".join(L) + "\n", encoding="utf-8")

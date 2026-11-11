@@ -222,3 +222,67 @@ def test_flatten_stops_a_receding_floor_reading_as_a_slope():
     flat = dp.decode_normals(dp.normals_from_depth(d, flatten=0.85))
     assert flat[40:120, 300:450, 2].mean() > 0.99 > raw[40:120, 300:450, 2].mean()
     assert np.abs(flat[148:152, 120:180, 1]).max() > 0.5            # the box's top edge still catches the light
+
+
+# --- BUILD 16 · W1: scene_kit big: true → scene_big paints, then the companions
+def test_kit_steps_big_paints_with_scene_big():
+    from forge.jobs import scene as sc
+    st = sc.kit_steps({"prompt": "p", "big": True, "target": [6144, 3072], "init": "grey.png", "denoise": 0.5,
+                       "control": {"type": "canny"}, "tile": [1344, 768], "init_denoise": 0.6, "depth_resolution": 2048})
+    assert st[0]["type"] == "scene_big"
+    assert st[0]["target"] == [6144, 3072] and st[0]["init"] == "grey.png" and st[0]["tile"] == [1344, 768]
+    assert "denoise" not in st[0] and "control" not in st[0]          # scene_big takes neither
+    assert st[1]["type"] == "depth_map" and st[1]["resolution"] == 2048
+    assert sc.kit_steps({"prompt": "p"})[0]["type"] == "scene_paint"  # not big: unchanged
+    assert schema.validate({"type": "scene_kit", "prompt": "p", "big": True}) != []   # big needs a target
+
+
+def test_scene_kit_big_end_to_end_six_files(tmp_path):
+    from forge.jobs import scene as sc
+    fake = SceneComfy(info={**FAKE_INFO, **DEPTH_INFO})
+    ctx = ctx_with(fake)
+    job = schema.with_defaults({"id": "kb1", "type": "scene_kit", "name": "street", "prompt": "a long street", "big": True,
+                                "checkpoint": "sd_xl_base_1.0.safetensors", "target": [960, 540], "size": [480, 270],
+                                "tile": [512, 384], "overlap": 64, "refine": False, "layers": {"cuts": [0.3, 0.7]}})
+    assert schema.validate(job) == []
+    res = sc.scene_kit(job, ctx, tmp_path)
+    names = ["scene.png", "scene_n.png", "scene_e.png", "scene_back.png", "scene_over.png", "scene_depth.png"]
+    assert res["outputs"] == names and res["missing_slots"] == []
+    for n in names:
+        assert (tmp_path / n).exists(), n
+    assert Image.open(tmp_path / "scene.png").size == (960, 540)
+    assert sorted(p.name for p in tmp_path.iterdir() if p.is_dir())[0].endswith("scene_big")   # the first step was scene_big
+
+
+# --- BUILD 16 · W2: scene_layers fill: "inpaint" → the Night 3 inpaint graph
+def test_scene_layers_inpaint_fill_repaints_only_the_holes(tmp_path):
+    from forge.jobs import scene as sc
+    img, d = scene()
+    img.save(tmp_path / "street.png")
+    dp.depth_image16(d).save(tmp_path / "street_depth.png")
+    base = {"type": "scene_layers", "inputs": [str(tmp_path / "street.png")], "depth": [str(tmp_path / "street_depth.png")],
+            "checkpoint": "sd_xl_base_1.0.safetensors", "seed": 7}
+    ext = tmp_path / "ext"; ext.mkdir()
+    sc.scene_layers(schema.with_defaults({**base, "id": "e1", "fill": "extend"}), ctx_with(None), ext)
+    fake = SceneComfy(info=FAKE_INFO)
+    inp = tmp_path / "inp"; inp.mkdir()
+    sc.scene_layers(schema.with_defaults({**base, "id": "i1", "fill": "inpaint"}), ctx_with(fake), inp)
+    graphs = [g for g in fake.graphs if go.nodes_of(g, "SetLatentNoiseMask")]
+    assert len(graphs) == 1                                             # one inpaint graph for the back plane
+    info = json.loads((inp / "layers.json").read_text(encoding="utf-8"))
+    assert info["fill"] == "inpaint"
+    a = np.asarray(Image.open(ext / "street_back.png").convert("RGB")).astype(int)
+    b = np.asarray(Image.open(inp / "street_back.png").convert("RGB")).astype(int)
+    assert a.shape == b.shape                                           # same size, overscan included
+    from PIL import ImageOps
+    from forge.ops import state_mask as sm
+    L = ly.split_layers(img, d, overscan=48)
+    untouched = np.asarray(sm.grow_feather(ImageOps.invert(L["back_known"]), 12, 8)) == 0   # outside the (grown) holes
+    ov = 48
+    assert untouched.any() and not untouched.all()
+    assert np.array_equal(a[:, ov:ov + img.width][untouched], b[:, ov:ov + img.width][untouched])   # unchanged where the mask is 0
+    assert not np.array_equal(a, b)                                     # and the holes were repainted
+    prov = json.loads((inp / "prov.json").read_text(encoding="utf-8"))
+    assert any(l.get("role") == "checkpoint" for l in prov.get("licences") or [])          # the inpaint's model is in the chain
+    with pytest.raises(sc.SceneError, match="needs the GPU worker"):
+        sc.scene_layers(schema.with_defaults({**base, "id": "i2", "fill": "inpaint"}), ctx_with(None), tmp_path / "cpu")
