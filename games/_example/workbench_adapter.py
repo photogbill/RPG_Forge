@@ -100,3 +100,94 @@ class Adapter(GameAdapter):
         rel = "data/characters.json"
         return [Person(id=k, name=c.get("name", k), ref=Ref(rel, "/" + k), kind=c.get("kind", ""), voice=c.get("voice", ""),
                        sheet=c.get("sheet"), portrait=c.get("portrait")) for k, c in self.load(rel).items()]
+
+    # ---- optional hooks for Status (BUILD 26): the build queue and the game's own completeness checklist
+    def builds(self) -> list[dict]:
+        """The game's build queue (Builds/BUILD_QUEUE.md, read by the suite's markdown reader)."""
+        from forge.suite import buildqueue
+        return buildqueue.read(self.root / "Builds" / "BUILD_QUEUE.md")
+
+    def completeness(self) -> list[dict]:
+        """The game's own checklist: [{item, have, of} or {item, met}]. Here: COMPLETENESS.json, written by the game's report."""
+        import json
+        p = self.root / "COMPLETENESS.json"
+        if not p.is_file():
+            return []
+        return list(json.loads(p.read_text(encoding="utf-8")).get("items") or [])
+
+    # ---- optional hooks for the Story workbench (BUILD 07b)
+    def reactions(self, person_id: str) -> list[dict]:
+        """A person's reactions (this example keeps none; a real game lists banter, barks, per-town reactions here):
+        [{town, era, text, ref}]."""
+        return []
+
+    def play_command(self, place, era):
+        """The command that starts the game at a place (and era). The example has no engine, so it only says where."""
+        import sys
+        return [sys.executable, "-c", f"print('the example game would start at {place} ({era or 'any era'})')"]
+
+    # ---------- floor plans (BUILD 29) — the model for a game's layout hooks
+    # A place may carry "layout": {"archetypes": {"war": [...], "after": [...]}, "size": "town", "terrain": "river"}
+    # (the owner's assignment). Without one, a suggestion is read from the place's own words, and says so.
+    _SUGGEST = (("toll", "toll_kingdom"), ("bridge", "toll_kingdom"), ("ledger", "ledger_town"), ("fire", "buried_town"))
+
+    def town_sheets(self) -> list[dict]:
+        out = []
+        for rel in self.data_files():
+            if not rel.startswith("data/places/"):
+                continue
+            d = self.load(rel)
+            lay = d.get("layout") or {}
+            words = f"{d.get('summary', '')} {d.get('greeting', '')}".lower()
+            sug = [a for w, a in self._SUGGEST if w in words]
+            sug = list(dict.fromkeys(sug))
+            arch = {era: ({"ids": lay["archetypes"][era], "how": "assigned", "why": ["layout.archetypes"]}
+                          if (lay.get("archetypes") or {}).get(era) else
+                          {"ids": sug, "how": "suggested ◆", "why": [f"{a}: its summary says so" for a in sug]})
+                    for era in ("war", "after")}
+            req = [{"kind": "inn", "label": "INN"}, {"kind": "store", "label": "STORE"}]
+            unknowns = [] if lay.get("terrain") else ["terrain: not on the sheet — laid out on open ground"]
+            out.append({"id": d["id"], "name": d.get("name", d["id"]), "node": d["id"], "ref": rel,
+                        "size": lay.get("size") or "town", "terrain": lay.get("terrain"),
+                        "required_by_era": {"war": req, "after": req}, "tiers_by_era": {"war": {"weapon": 0, "armor": 0, "accessory": 0},
+                                                                                    "after": {"weapon": 1, "armor": 1, "accessory": 1}},
+                        "archetypes": arch, "maps": [], "unknowns": unknowns})
+        return sorted(out, key=lambda s: s["id"])
+
+    @staticmethod
+    def sheet_for(sheet: dict, era: str) -> dict:
+        s = dict(sheet)
+        s["required"] = list(sheet["required_by_era"][era])
+        s["tiers"] = dict(sheet["tiers_by_era"][era])
+        return s
+
+    def layout_check(self, maps: dict) -> list[str]:
+        """This made-up game's map rules: known glyphs, a start spawn, doors that lead somewhere that exists."""
+        from forge.layout.store import GLYPHS_INV
+        out = []
+        have = set(maps) | {p.stem for p in (self.root / "data" / "maps").glob("*.json")} if (self.root / "data" / "maps").is_dir() else set(maps)
+        for mid, m in maps.items():
+            if any(ch not in GLYPHS_INV for r in m["rows"] for ch in r):
+                out.append(f"map {mid}: a glyph the game doesn't know")
+            if not any(e.get("type") == "spawn" and e.get("name") == "start" for e in m["entities"]):
+                out.append(f"map {mid}: no start spawn")
+            for e in m["entities"]:
+                if e.get("type") == "door" and e.get("to") != "travel" and e.get("to") not in have:
+                    out.append(f"map {mid}: door {e.get('id')} -> {e.get('to')} does not exist")
+        return out
+
+    def layout_install(self, maps: dict, folder, who: str) -> list[str]:
+        import json
+        d = self.root / "data" / "maps"
+        d.mkdir(parents=True, exist_ok=True)
+        for mid, m in maps.items():
+            p = d / f"{mid}.json"
+            if p.exists() and json.loads(p.read_text(encoding="utf-8")).get("rows") != m["rows"]:
+                raise ValueError(f"data/maps/{mid}.json already exists and is not this plan — not written over")
+        done = []
+        for mid, m in maps.items():
+            p = d / f"{mid}.json"
+            if not p.exists():
+                p.write_text(json.dumps(m, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+                done.append(f"data/maps/{mid}.json")
+        return done

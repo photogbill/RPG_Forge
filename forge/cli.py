@@ -46,6 +46,8 @@
   feedback-in [file]                     the game's F9 notes → redo drafts (feedback_in.bat)
   models-report / housekeeping           the model shelf; out/ archive candidates — reports only
   doctor                                 check Python, Pillow, numpy, ComfyUI, GPU, graph nodes, queued models
+  tiles materials|plan|submit|report|pick|weathering|build   the materials bake-off and the autotile builder (bakeoff_materials.bat)
+  layout sheets|generate|show|check|approve   the floor-plan generator: town sheet → map + greybox + paint guide (floor_plans.bat)
   (most commands take --game <id>; default: local/suite.json → default_game, else the game in games/)
 """
 from __future__ import annotations
@@ -426,6 +428,12 @@ def cmd_doctor(cfg: dict, args: list[str]) -> int:
     print(("✓ " if comfy_root.exists() else "· ") + f"ComfyUI folder {comfy_root}" + ("" if comfy_root.exists() else " (run install_comfy.bat)"))
     q = _queue(cfg)
     print(f"queue  {q.status()}")
+    try:
+        from .suite import casecheck
+        for line in casecheck.report(cfg):
+            print(line)
+    except Exception as e:  # noqa: BLE001 - doctor must always finish
+        print(f"· case check skipped ({e})")
     from . import doctor
     for line in doctor.report(cfg, c):
         print(line)
@@ -582,9 +590,11 @@ def cmd_review(cfg: dict, args: list[str]) -> int:
         print(e); return 1
     print(f"review: {out / 'index.html'}")
     if "--open" in args:
-        import os
-        if hasattr(os, "startfile"):
-            os.startfile(str(out / "index.html"))   # Windows: open the page in the default browser
+        from .suite import osopen
+        try:
+            osopen.open_path(out / "index.html")      # the page in the default browser, on any computer
+        except OSError:
+            pass
     return 0
 
 
@@ -736,6 +746,10 @@ from .cli_night4 import COMMANDS as _NIGHT4  # Night 4: intake, characters, prod
 COMMANDS.update(_NIGHT4)
 from .cli_suite import COMMANDS as _SUITE  # BUILD 01: the suite, journal, identity, suite-check (forge/cli_suite.py)
 COMMANDS.update(_SUITE)
+from .cli_layout import COMMANDS as _LAYOUT  # BUILD 29: the floor-plan generator (forge/cli_layout.py)
+COMMANDS.update(_LAYOUT)
+from .cli_tiles import COMMANDS as _TILES  # BUILD 30: the materials bake-off and the autotile builder (forge/cli_tiles.py)
+COMMANDS.update(_TILES)
 
 
 def main(argv: list[str] | None = None) -> int:

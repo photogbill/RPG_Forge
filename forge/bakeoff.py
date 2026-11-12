@@ -44,6 +44,7 @@ silently ignore them and the "result" would be a lie. A failed render (OOM, brok
 with its error; the report shows it as a red cell and the run continues.
 """
 from __future__ import annotations
+import os
 import html, json, re
 from datetime import datetime
 from pathlib import Path
@@ -266,14 +267,28 @@ def organized_paths(suite_name: str, meta: dict) -> tuple[Path, Path]:
             root / "by_category" / cat / pid / f"{ck}__{lo}__seed{seed}.png")
 
 
-def file_render(suite_name: str, meta: dict, src: Path) -> list[Path]:
-    """Copy one finished render into both trees (idempotent)."""
+def link_or_copy(src: Path, dest: Path) -> str:
+    """Put `src` at `dest` as a hard link (same file, no extra disk — William 2026-11-11: the copies were adding up),
+    falling back to a copy where links aren't possible. Returns "link" or "copy"."""
     import shutil
+    try:
+        os.link(src, dest)
+        return "link"
+    except OSError:
+        shutil.copy2(src, dest)
+        return "copy"
+
+
+def file_render(suite_name: str, meta: dict, src: Path) -> list[Path]:
+    """File one finished render into both trees (idempotent). Hard links, not copies: the job folder's render.png is
+    the one real file — editing a filed picture edits the render (make a copy first to paint on it)."""
     out = []
     for dest in organized_paths(suite_name, meta):
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists() or dest.stat().st_size != src.stat().st_size:
-            shutil.copy2(src, dest)
+            if dest.exists():
+                dest.unlink()
+            link_or_copy(src, dest)
         out.append(dest)
     return out
 

@@ -41,6 +41,11 @@ def _since_words(iso: str | None) -> str:
     return f"{h} h {m:02d} min" if h < 48 else f"{h // 24} days"
 
 
+def _pc() -> str:
+    from . import runwords
+    return runwords.worker_pc()
+
+
 def data(cfg: dict, ui_state) -> dict:
     """Everything Home shows. `ui_state` is the dashboard's State (it caches the done folder)."""
     t0 = time.time()
@@ -67,9 +72,10 @@ def data(cfg: dict, ui_state) -> dict:
     c = snap["counts"]
     st = w["state"]
     actions = {
-        "start": {"enabled": st in ("stopped", "stopped-mid-job"),
+        "start": {"enabled": st in ("stopped", "stopped-mid-job") and worker.here(),
                   "why_not": {"rendering": "it is already running", "idle": "it is already running (idle)",
-                              "unknown": "I can't tell whether one is running"}.get(st, ""),
+                              "unknown": "I can't tell whether one is running"}.get(st, "") if worker.here() else
+                             f"the art worker runs on {_pc()}, not on this computer",
                   "does": "Opens the GPU worker in its own window, exactly as run_worker.bat does (ComfyUI starts first). "
                           "Close that window to stop it." + (" The job left half-done is put back in the queue first." if st == "stopped-mid-job" else "")},
         "pause": {"enabled": c.get("pending", 0) > 0, "why_not": "nothing is waiting",
@@ -81,7 +87,8 @@ def data(cfg: dict, ui_state) -> dict:
     today = datetime.now().strftime("%Y-%m-%d")
     logf = cfgmod.path_of(cfg, "logs") / f"forge_{today}.log"
     return {
-        "worker": {**w, "since_words": _since_words(w.get("since"))},
+        "worker": {**w, "since_words": _since_words(w.get("since")), "here": worker.here(), "pc": _pc(),
+                   **({} if worker.here() else {"words": f"the art worker runs on {_pc()} — this computer reviews what's in the folders"})},
         "counts": c, "eta": snap.get("eta"), "now_batch": snap.get("now_batch"), "upcoming": snap.get("upcoming", []),
         "preview": preview, "preview_note": preview_note,
         "disk": {"free_gb": free, "limit_gb": limit, "message": gst.get("message"), "low": free is not None and free < limit},

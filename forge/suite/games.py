@@ -91,3 +91,37 @@ def listing(cfg: dict) -> list[dict]:
             e["error"] = f"{type(ex).__name__}: {ex}"
         out.append(e)
     return out
+
+
+def check_root(cfg: dict, game_id: str, folder: str) -> dict:
+    """Settings → This computer → Check: load the game's adapter against `folder` and say what it found, or exactly
+    what is missing. Writes nothing."""
+    raw = str(folder or "").strip().strip('"')
+    if not raw:
+        return {"ok": False, "message": "Type the folder first."}
+    p = Path(raw).expanduser()
+    if not p.is_dir():
+        return {"ok": False, "message": f"There's no folder at {p} on this computer."}
+    if not has_adapter(cfg, game_id):
+        return {"ok": True, "message": f"The folder is there. (This game has no adapter, so there's nothing more to check.)", "found": {}}
+    src = games_dir(cfg) / game_id / "workbench_adapter.py"
+    name = f"forge_game_adapter_check_{game_id.strip('_') or 'example'}"
+    spec = importlib.util.spec_from_file_location(name, src)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    try:
+        spec.loader.exec_module(mod)
+        a = mod.Adapter(game_id, p, game_cfg(cfg, game_id))
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "message": f"The folder is there, but the game's adapter couldn't load: {type(e).__name__}: {e}"}
+    found, missing = {}, []
+    for what, fn in (("places", a.places), ("lines", a.lines), ("music slots", a.music_slots), ("people", a.people)):
+        try:
+            found[what] = len(fn())
+        except Exception as e:  # noqa: BLE001 — say which part is missing; don't stop at the first
+            missing.append(f"{what}: {type(e).__name__}: {e}")
+    if missing and not any(found.values()):
+        return {"ok": False, "message": "That folder doesn't look like this game — " + "; ".join(missing), "found": found}
+    words = ", ".join(f"{n} {w}" for w, n in found.items())
+    return {"ok": True, "message": f"Found it: {words}." + (" Missing: " + "; ".join(missing) if missing else ""), "found": found,
+            "missing": missing}

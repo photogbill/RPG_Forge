@@ -145,7 +145,7 @@ def take_in(cfg: dict, path: str | None = None, game: str | None = None) -> dict
         shot = None
         if e.get("shot"):
             sp = Path(str(e["shot"]).replace("user://", ""))
-            shot = sp if sp.is_absolute() else root / "playtest" / sp
+            shot = sp if sp.is_absolute() else src.parent / sp       # BUILD 17: beside the feedback file (the game's playtest folder)
         for f in files:
             wanted = _wanted_of(f)
             s = _source_of(cfg, game, wanted) if wanted else None

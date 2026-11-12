@@ -313,3 +313,54 @@ each with your recommendation and what you'll do by default. "I went ahead with 
 you could decide. No forms, no ticket numbers in the prose, no deference, no apology rituals — and none of it in the
 other direction either; disagree plainly when you disagree. Humour is allowed. `games/_example/game/mail/` has three
 letters written to this standard.
+
+## Team memory — the rulings book, the idea box, playtest notes (BUILD 17)
+
+**Before you ask the person anything, search the rulings book.** It holds every answer they have given: questions
+answered in the Mail, every line marked ✦ in the game's notes (the files the adapter's `ruling_files()` names; `!x.md`
+leaves a generated report out), and rulings written straight in (`<game_root>/rulings/rulings.jsonl`, append-only).
+- `python -m forge rulings check "the question"` — exit 1 and the ruling(s) when it is already answered. `mail send`
+  runs the same check on every question an assistant sends and **refuses** one already ruled on (`rulings.AlreadyRuled`)
+  unless the question carries `asked_again` — why it must be asked once more. A person is never refused; the page warns.
+- `python -m forge rulings search "words"` — the book, best match first. Read a ruling in its file before building on it.
+- `python -m forge rulings record "…" --by "<person>" --source "where/when they said it, in their words"` — a ruling
+  given in a chat. You write it down; you never make one (`--by` an assistant is refused). `--file/--pointer/--value`
+  **pins** it to a data field: the book then warns whenever the data says anything else (Notes → Rulings, Home, and the
+  safe-save path's `warnings`, journalled as `conflict`). `rulings conflicts` lists them. Retiring a ruling is a person's.
+- **Idea box:** `python -m forge idea list` at the start of a session; sort each (`idea sort <id> --to task|note|letter|
+  file|kept|dropped --where …`) and say where it went in your letter. The person files them with **I** anywhere in the suite.
+- **Playtest notes:** `python -m forge playtest list` / `in` — the game's note key writes `<adapter.playtest_dir()>/notes.jsonl`;
+  taking in routes Art → Called out (redo drafts), Writing → a note on the conversation's first line (else the place),
+  Music → a note on the place, Bug/Balance/Other → a work order, and writes one letter per category (screenshots
+  attached), replying in the category's thread next time. A note is never taken in twice (`playtest_inbox/routed.jsonl`).
+- **Home → Where the game stands** is `forge/suite/standing.py`: n of m from the game's own checklist, lines approved,
+  songs, questions answered — and the next most useful thing for the person and for the assistants.
+
+## User Needs To Provide Image — the forge pool (2026-11-11)
+
+- **Anything the forge can't make well becomes a request, not a guess.** A real person's likeness, a layout the model keeps
+  ignoring after a bake-off, references only the owner has (his photo archive, sheets he made elsewhere). Add it with
+  `python -m forge provide add --title "…" --why "what was tried and how it failed" --helps "what picture would help"
+  [--count n] [--goes-to reference/provided/<id>] [--priority now|soon|someday] [--hold "until …"]`. The pool is
+  `games/<game>/provide_requests.json` (forge-side — works without the game folder). Say *why* with evidence (the
+  suite, the render count) and ask for the smallest thing that unblocks it (a stick-figure layout, three plain photos).
+- `--hold` = listed but not yet a task (waiting on a verdict). `provide open|hold|withdraw <id>`; `provide list`.
+- **The section:** Art → User Needs To Provide Image (`forge/suite/provide.py`, GET `/api/suite/provide`). Opening it —
+  or Tasks — runs `provide.sync()`: each open request is filed once as a work order for the game's owner with
+  `"provide": <id>` and `wants`/`goes_to`, so the card takes the file through `tasks.accept` like any task. A dismissed
+  card is never re-filed. Uploading stays a person's act.
+
+## Sampler bake-offs — every sampler at its own steps (2026-11-11, William's correction)
+
+- **Samplers matter.** Comparing them at one step count each only shows that convergent samplers converge; judge them
+  as a sampler × steps grid (e.g. 4/6/8/12/16/24/32/48 — `sprite_sampler_steps_sdxl_v1`).
+- A `samplers` axis entry **always** names its own `steps` (and scheduler, and cfg where it matters); never leave them to
+  the model default — that runs every sampler at one count and the test means nothing (sprite_flux1_v2 and
+  sprite_samplers_klein_v2 made that mistake; v3 fixes it). `evals` = 2× steps for heun / dpm_2 / dpmpp_sde / dpmpp_2s_a.
+- SDXL ranges: euler / euler_a 20–30 (euler_a above ~30 drifts), dpmpp_2m 20–30, dpmpp_2m_sde 25–35, dpmpp_3m_sde 30–45
+  at cfg 4–6, dpmpp_sde / heun / dpm_2 15–25, uni_pc 12–25, lms 30–40, ddim 25–50.
+- FLUX.1 dev-style (rectified flow): euler + simple 20–25 or + beta 24–30; dpmpp_2m / deis + beta 25–35; heun + beta
+  15–20; cfg 1, guidance 3.5 (2–3 softer/more natural, 4–5 crisper). Ancestral/SDE samplers knock FLUX off its path —
+  test them only as a control. Schnell and distilled klein: their trained 4 steps, euler. Klein's graph uses
+  Flux2Scheduler (no scheduler choice); klein base cfg 5.
+

@@ -105,6 +105,7 @@ def page(adp, place_id: str, era: str = ERAS_ALL) -> dict:
          "draft": sum(r["status"] in (None, "draft") for r in rows), "locked": sum(bool(r["locked"]) for r in rows),
          "meter": sum(bool(r["meter"]) for r in rows), "notes": sum(r["notes"] for r in rows)}
     return {"place": as_dict(place), "era": era, "eras": eras, "sheet": sheet, "lines": rows, "quests": quests, "counts": c,
+            "play": callable(getattr(adp, "play_command", None)),
             "meter": {k: v for k, v in meter.items() if k != "by_ref"}, "hashes": hashes,
             "place_notes": notesmod.threads(adp.root, f"place:{place_id}")}
 

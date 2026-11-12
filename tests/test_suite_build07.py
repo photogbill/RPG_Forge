@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pytest
 
-from forge.suite import approval, away, journal, notes, readthrough, server, settings
+from forge.suite import approval, areas, away, journal, notes, readthrough, server, settings
 from test_suite_build01 import REPO, world  # noqa: F401
 
 BILL, OPUS = "Bill", "Claude Opus"
@@ -157,6 +157,6 @@ def test_the_screen_and_its_routes(w):
         nt = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{port}/api/suite/notes?id=_example").read())
         assert nt == {"threads": []}
         html = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode("utf-8")
-        assert 'data-s="read"' in html and "function loadRead" in html and "rtFlag" in html
+        assert "story/read" in areas.addresses() and "function loadRead" in html and "rtFlag" in html
     finally:
         srv.shutdown()

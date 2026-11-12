@@ -31,11 +31,11 @@ def _positional(args, flags_with_values=()):
 
 
 def _open(path) -> None:
-    if hasattr(os, "startfile"):
-        try:
-            os.startfile(str(path))      # Windows: the default browser / viewer
-        except OSError:
-            pass
+    from .suite import osopen
+    try:
+        osopen.open_path(path)           # the default browser / viewer, on any computer
+    except OSError:
+        pass
 
 
 def _when(s):

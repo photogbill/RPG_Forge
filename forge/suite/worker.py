@@ -134,9 +134,19 @@ def state(cfg: dict, procs=...) -> dict:
             "last_log": last, "checked": datetime.now().isoformat(timespec="seconds")}
 
 
+def here() -> bool:
+    """Can the art worker run on this computer? Not on a Mac: it needs the Windows PC with the NVIDIA card (BUILD 27)."""
+    from . import osopen
+    return osopen.system() != "mac"
+
+
 def start(cfg: dict) -> dict:
     """Open the GPU worker in its own window (run_worker.bat — it starts ComfyUI first if needed). Refuses when a
     worker is already running or the state can't be read (two workers on one GPU fight over it)."""
+    if not here():
+        from . import runwords
+        return {"ok": False, "message": f"The art worker runs on {runwords.worker_pc()} — it can't start on this computer. "
+                                        "Everything else works here, and Review & approve shows whatever is in the folders."}
     st = state(cfg)
     if st["state"] in ("rendering", "idle"):
         return {"ok": False, "message": "the worker is already running — nothing to start"}

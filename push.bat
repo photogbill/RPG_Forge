@@ -62,6 +62,8 @@ for %%A in ("%TEMP%\rpgforge_untrack.txt") do if %%~zA GTR 0 (
 )
 del "%TEMP%\rpgforge_untrack.txt" 2>nul
 git add -A
+rem BUILD 27: the Mac launchers need the executable bit, which a Windows disk can't hold - git records it instead.
+git update-index --chmod=+x install_mac.command forge.command 2>nul
 if defined USEFILE git commit -F "%MSGFILE%"
 if not defined USEFILE git commit -m "!MSG!"
 if errorlevel 1 echo (nothing new to commit - pushing anything already committed)

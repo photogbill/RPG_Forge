@@ -89,3 +89,9 @@ games/_example/game/work_orders/
 games/_example/intake/
 games/_example/characters/_history/
 games/_example/batches/
+
+# BUILD 26/27: the sessions' transfer folder (archives of changed files, copies of a game's data for testing) — never pushed
+_xfer/
+
+# BUILD 27: the Mac's own Python environment (install_mac.command makes it)
+venv-mac/

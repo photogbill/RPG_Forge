@@ -37,7 +37,8 @@ def _all(root: Path) -> list[dict]:
 
 
 def add(root: Path, obj: str, who: str, text: str, tag: str = "note", reply_to: str | None = None,
-        resolves: str | None = None, when: datetime | None = None, label: str | None = None) -> dict:
+        resolves: str | None = None, when: datetime | None = None, label: str | None = None,
+        to: str | None = None) -> dict:
     if not who:
         raise ValueError("a note is signed — set who you are first")
     if not str(obj).strip():
@@ -51,6 +52,8 @@ def add(root: Path, obj: str, who: str, text: str, tag: str = "note", reply_to: 
          "obj": str(obj), "text": str(text).strip(), "tag": tag}
     if label:
         n["label"] = str(label)[:200]
+    if to:
+        n["to"] = str(to)          # BUILD 26: a note addressed to someone becomes a card on their Tasks
     if reply_to:
         n["reply_to"] = reply_to
     if resolves:

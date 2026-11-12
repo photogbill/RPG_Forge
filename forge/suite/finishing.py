@@ -95,8 +95,9 @@ def callout(cfg: dict, game: str, action: str, draft: str, who: str | None) -> d
 def take_in(cfg: dict, game: str, who: str | None) -> dict:
     from ..night4 import feedback
     _need(who, "taking in the notes")
+    from . import playtest
     try:
-        r = feedback.take_in(cfg, None, game)
+        r = feedback.take_in(cfg, playtest.art_file(cfg, game), game)   # BUILD 17: where the game's adapter says F9 writes
     except FileNotFoundError as e:
         return {"ok": False, "message": str(e)}
     msg = (f"{len(r['filed'])} note(s) matched a delivered picture → redo drafts under Called out; {len(r['bumped'])} matched a "
@@ -378,10 +379,8 @@ def open_folder(cfg: dict, path: str) -> dict:
     if base not in p.parents or not p.is_dir():
         raise FinishRefused("only a hand-off folder can be opened from here")
     try:
-        if os.name == "nt":
-            os.startfile(str(p))
-        else:
-            subprocess.Popen(["xdg-open", str(p)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        from . import osopen
+        osopen.open_path(p)
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "message": f"couldn't open it ({e}); it is at {p}"}
     return {"ok": True, "message": f"opened {p}"}

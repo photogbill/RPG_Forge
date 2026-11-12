@@ -1,0 +1,5 @@
+# What the suite (forge.bat / forge.command) needs on ANY computer — Windows, macOS, Linux.
+# requirements.txt stays the full list for the PC with the art worker.
+Pillow>=10.0
+numpy>=1.26
+pytest>=8.0

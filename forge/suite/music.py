@@ -289,6 +289,32 @@ def board(adp) -> dict:
             "verdicts": VERDICT_CHOICES}
 
 
+def briefs_and_songs(adp) -> list[dict]:
+    """Every brief and every song version, newest first, with who wrote it and the slot it's for (BUILD 26, Music →
+    Briefs & songs). All of it read from the board's record — nothing new is stored."""
+    b = load_board(adp)
+    scenes = {}
+    try:
+        scenes = {s["id"]: s.get("scene") or s["id"] for s in slots(adp, b)}
+    except Exception:  # noqa: BLE001 — a game whose slots can't be read still shows its record
+        pass
+    out = []
+    for sid, e in (b.get("slots") or {}).items():
+        if e.get("brief"):
+            at = next((h["time"] for h in e.get("history") or [] if h.get("to") == "proposed"), None)
+            out.append({"what": "brief", "slot": sid, "scene": scenes.get(sid, sid), "by": e.get("brief_by"), "at": at,
+                        "file": e["brief"], "style": e.get("style"), "letter": e.get("letter"), "verdict": e.get("verdict")})
+        for v in e.get("versions") or []:
+            out.append({"what": f"song v{v.get('n')}", "slot": sid, "scene": scenes.get(sid, sid), "by": v.get("by"),
+                        "at": v.get("at"), "file": v.get("file"), "title": v.get("title"), "note": v.get("note")})
+        if e.get("lyric"):
+            ly = e["lyric"] if isinstance(e["lyric"], dict) else {"file": e["lyric"]}
+            out.append({"what": "words as sung", "slot": sid, "scene": scenes.get(sid, sid), "by": ly.get("by"),
+                        "at": ly.get("at"), "file": ly.get("file"), "title": ly.get("title")})
+    out.sort(key=lambda x: str(x.get("at") or ""), reverse=True)
+    return out
+
+
 # ---------------------------------------------------------------- style sheets (B / B2)
 def sheets(adp) -> list[dict]:
     d = adp.root / paths(adp)["styles"]
@@ -494,7 +520,8 @@ def propose(adp, sid: str, who: str, brief: str, style: str | None = None, subje
         save_board(adp, b)
         l = mail.send(adp.root, who, owner, subject or f"Music brief — {s.get('scene') or sid}",
                       str(brief).strip() + f"\n\n---\nThe brief is kept at `{rel}`. Answer below — **yes** / **yes, but…** "
-                      "(say what in your reply) / **no** / **I'll write this one** / **not yet**. No lyric is drafted before a yes.",
+                      "(say what in your reply) / **no** / **I'll write this one** / **not yet**. No lyric is drafted before a yes.\n\n"
+                      f"[Open its row on the board](#music/needed/{sid})",
                       questions=q, attachments=[rel], when=now)
         letter = l.id
         e["letter"] = l.id

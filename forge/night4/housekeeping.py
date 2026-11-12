@@ -1,6 +1,10 @@
-"""out/ housekeeping (Night 4, F3) — REPORT ONLY: what could be archived. Nothing is moved or deleted.
+"""out/ housekeeping (Night 4, F3) — the report says what could be archived (nothing is moved or deleted by it).
 
     python -m forge housekeeping [--days 14]   → out/reports/housekeeping_<date>.md
+    python -m forge housekeeping --dedupe       the bake-off trees' copies become hard links to the job's render (no picture lost)
+    python -m forge housekeeping --prune-comfy  deletes ComfyUI's own copy of every forge picture (out/_comfy/forge*.png) older
+                                                than 20 min — the forge fetched its copy the moment the job finished
+(2026-11-11, William: "any images we don't need, can you delete? They add up in size over time." — only true duplicates.)
 Candidates: bake-off renders older than N days that no review rated ≥ 4 and nothing approved came from; failed-job
 folders; inline test folders. Kept off the list: anything approved or delivered (approved.json / delivered.json),
 anything an approved picture was made from, out/_replaced and out/_approved_backup (those are the undo history)."""
@@ -70,3 +74,68 @@ def report(cfg: dict, days: int = 14, game: str | None = None) -> tuple[Path, di
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text("\n".join(L), encoding="utf-8")
     return p, {k: len(v) for k, v in rows.items()} | {"gb": round(total / 1e9, 2)}
+
+
+# ---------------------------------------------------------------- 2026-11-11: duplicates only
+def prune_comfy(cfg: dict, older_min: float = 20.0) -> tuple[int, int]:
+    """ComfyUI saves every picture to out/_comfy/ too; the forge fetches its own copy into out/<job>/ when the job
+    finishes and never reads _comfy again. Delete forge*.png there older than `older_min` (a running job's file is
+    younger). Returns (files, bytes)."""
+    import time
+    d = cfgmod.path_of(cfg, "out") / "_comfy"
+    if not d.is_dir():
+        return 0, 0
+    cut = time.time() - older_min * 60
+    n = b = 0
+    for f in d.glob("forge*.png"):
+        try:
+            st = f.stat()
+            if st.st_mtime < cut:
+                f.unlink()
+                n += 1
+                b += st.st_size
+        except OSError:
+            continue
+    return n, b
+
+
+def dedupe(cfg: dict) -> dict:
+    """Every bake-off picture is filed twice (by_model/, by_category/) beside the job's own render.png. Replace each
+    filed copy that has the same size as its render with a hard link to it: same picture, one file on disk."""
+    import os
+    from .. import bakeoff
+    jobs = cfgmod.path_of(cfg, "jobs") / "done"
+    out_root = cfgmod.path_of(cfg, "out")
+    r = {"linked": 0, "already": 0, "freed": 0, "skipped": 0}
+    for jf in jobs.glob("*.json"):
+        try:
+            job = json.loads(jf.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        meta = job.get("meta") or {}
+        if not str(job.get("batch", "")).startswith("bakeoff/") or not meta.get("suite"):
+            continue
+        src = bakeoff.job_image(out_root / job.get("id", jf.stem), job)
+        if src is None:
+            continue
+        for dest in bakeoff.organized_paths(meta["suite"], meta):
+            try:
+                if not dest.exists():
+                    continue
+                if os.path.samefile(src, dest):
+                    r["already"] += 1
+                    continue
+                size = dest.stat().st_size
+                if size != src.stat().st_size:
+                    r["skipped"] += 1          # not the same picture (re-rendered?) — leave it
+                    continue
+                tmp = dest.with_name(dest.name + ".lnk_tmp")
+                if tmp.exists():
+                    tmp.unlink()
+                os.link(src, tmp)
+                os.replace(tmp, dest)
+                r["linked"] += 1
+                r["freed"] += size
+            except OSError:
+                r["skipped"] += 1
+    return r

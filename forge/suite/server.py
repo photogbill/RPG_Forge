@@ -8,6 +8,11 @@ Characters (the registry as pages, the face sheet, make the set) — sprites.py 
 picture (picture.py), Review & approve → Deliver and the Wanted board (production.py). BUILD 14 adds Called out and
 mark-up, the prompt library, bake-offs, models and outside tools (finishing.py).
 
+BUILD 26 turns the two halves into **one sidebar of areas** (areas.py): Home · Status · Messages · Tasks · Story · Music ·
+Art · Characters · Workshop · Notes · Settings, each with a strip of tabs and an address (`#music/needed`). Tasks is a
+checklist of everything waiting on the person, with files dropped right on a card (tasks.py; big files stream in through
+POST /api/suite/upload); Status shows every requirement met or not met (status.py).
+
 Bound to 127.0.0.1 — nothing outside this PC can reach it. Every POST needs the `X-Forge: 1` header (a page on
 another site cannot send it without a preflight this server never answers). Every action is logged to the forge log,
 and to the chosen game's journal when it is reachable, signed with the identity setting.
@@ -20,7 +25,10 @@ from urllib.parse import parse_qs, urlparse
 from .. import config as cfgmod
 from .. import ui
 from ..log import get
-from . import approval, away, cast, finishing, games, home, journal, mail, music, notes, orders, picture, production, readthrough, settings, sprites, worker
+from . import approval, areas, away, osopen, runwords, cast, finishing, games, home, journal, mail, music, notes, orders, picture, production, readthrough, settings, sprites, status, tasks, worker, workbench
+from . import ideas, playtest, rulings, standing   # BUILD 17: team memory
+from . import floorplans   # BUILD 29b: Art → Floor plans (the generator in the suite)
+from . import provide   # User Needs To Provide Image (2026-11-11): the forge pool of pictures the forge can't make
 
 log = get("suite")
 HOST, PORT = "127.0.0.1", 8770
@@ -70,6 +78,35 @@ def game_view(cfg: dict, gid: str, fresh: bool = False) -> dict:
     return out
 
 
+def act_floorplan(cfg: dict, action: str, body: dict, who) -> dict:
+    """Art → Floor plans (BUILD 29b). Generating and editing are anyone's (signed); approving is a person's."""
+    gid = str(body.get("game") or current_game(cfg))
+    f = str(body.get("folder") or "")
+    try:
+        if action == "floorplan_generate":
+            r = floorplans.generate(cfg, gid, str(body.get("place") or ""), str(body.get("era") or ""),
+                                    body.get("archetype") or None, int(body.get("count") or 4), who,
+                                    body.get("size") or None)
+            return {"ok": True, "message": f"{len(r['made'])} new candidates ({r['archetype']}).", **r}
+        if action == "floorplan_check":
+            r = floorplans.check(cfg, gid, f, str(body.get("map") or ""), body.get("edits") or [])
+            return {"ok": True, "message": "clean" if r["ok"] else f"{len(r['problems'])} problems", "clean": r["ok"],
+                    "problems": r["problems"]}
+        if action == "floorplan_save":
+            r = floorplans.save(cfg, gid, f, str(body.get("map") or ""), body.get("edits") or [], who)
+            return {"ok": True, "message": "Saved. This plan is yours now — a reroll never writes over it."
+                    + (f" {len(r['problems'])} problems still listed." if r["problems"] else ""), "candidate": r}
+        if action == "floorplan_approve":
+            r = floorplans.approve(cfg, gid, f, who)
+            return {"ok": True, "message": f"Approved: {len(r['installed'])} maps are in the game. {r['plan']}", "result": r}
+        if action == "floorplan_send":
+            r = floorplans.send(cfg, gid, f, str(body.get("question") or ""), who)
+            return {"ok": True, "message": f"Sent to {r['to']} — it's in the Mail.", **r}
+    except floorplans.FloorPlanRefused as e:
+        return {"ok": False, "message": str(e)}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
 def act(cfg: dict, action: str, body: dict) -> dict:
     who = settings.identity()
     if action == "identity":
@@ -93,6 +130,54 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         if r.get("ok"):
             _journal(cfg, "queue", "queue", r.get("message"))
         return r
+    if action == "game_root_check":
+        return games.check_root(cfg, str(body.get("id") or current_game(cfg)), str(body.get("folder") or ""))
+    if action == "game_root_set":
+        gid = str(body.get("id") or current_game(cfg))
+        if gid not in games.game_ids(cfg):
+            return {"ok": False, "message": f"there is no game '{gid}' in games/"}
+        folder = str(body.get("folder") or "").strip()
+        r = games.check_root(cfg, gid, folder) if folder else {"ok": True, "message": "Forgotten — back to the game's own setting."}
+        if not r["ok"]:
+            return r
+        settings.set_game_root(gid, folder)
+        games._loaded.pop(gid, None)
+        _summary_cache.pop(gid, None)
+        areas._badge_cache.pop(gid, None)
+        _journal(cfg, "setting", "game_root", f"{gid} is read from {folder or 'its forge.game.json'} on this computer")
+        return {**r, "message": "Saved for this computer. " + r["message"]}
+    if action == "setting_set":
+        try:
+            settings.set_value(str(body.get("key") or ""), body.get("value"))
+        except ValueError as e:
+            return {"ok": False, "message": str(e)}
+        return {"ok": True, "message": "Saved for this computer."}
+    if action == "place":
+        areas.remember_place(str(body.get("game") or current_game(cfg)), str(body.get("addr") or ""))
+        return {"ok": True, "message": "ok"}
+    if action == "provide_status":   # open an on-hold request now, put one on hold, or withdraw it (the pool file, forge-side)
+        gid = str(body.get("game") or current_game(cfg))
+        if not who:
+            return {"ok": False, "message": "set who you are first (bottom left) — everything here is signed"}
+        try:
+            r = provide.set_status(cfg, gid, str(body.get("id") or ""), str(body.get("status") or ""))
+        except FileNotFoundError:
+            return {"ok": False, "message": "that request isn't in the pool"}
+        except provide.ProvideRefused as e:
+            return {"ok": False, "message": str(e)}
+        _journal(cfg, "art", f"provide:{r['id']}", f"{who} set the picture request '{r['title']}' to {r['status']}")
+        areas._badge_cache.pop(gid, None)
+        word = {"open": "Opened — it's a task now.", "on_hold": "On hold.", "withdrawn": "Withdrawn — kept in the pool, struck through."}
+        return {"ok": True, "message": word.get(r["status"], "Saved."), "request": r}
+    if action in ("task_tick", "task_dismiss"):
+        gid = str(body.get("game") or current_game(cfg))
+        try:
+            r = tasks.tick(cfg, gid, str(body.get("id") or ""), who or "", str(body.get("reason") or ""),
+                           dismiss=action == "task_dismiss", ui_state=getattr(SuiteHandler, "state", None))
+        except tasks.TaskRefused as e:
+            return {"ok": False, "message": str(e)}
+        areas._badge_cache.pop(gid, None)
+        return r
     if action.startswith(("mail_", "order_", "away_")):
         return act_story(cfg, action, body, who)
     if action.startswith(("intake_", "tool_", "char_", "wanted_", "review_", "deliver_", "make_", "fin_")):
@@ -101,6 +186,12 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         return act_music(cfg, action, body, who)
     if action.startswith("read_"):
         return act_read(cfg, action, body, who)
+    if action.startswith("wb_"):
+        return act_workbench(cfg, action, body, who)
+    if action.startswith(("rule_", "idea_", "playtest_")):
+        return act_memory(cfg, action, body, who)
+    if action.startswith("floorplan_"):
+        return act_floorplan(cfg, action, body, who)
     if action == "open":
         what = str(body.get("what") or "")
         paths = {"log": cfgmod.path_of(cfg, "logs"), "jobs": cfgmod.path_of(cfg, "jobs"), "out": cfgmod.path_of(cfg, "out")}
@@ -114,10 +205,7 @@ def act(cfg: dict, action: str, body: dict) -> dict:
             today = sorted(Path(p).glob("forge_*.log"))
             p = today[-1] if today else p
         try:
-            if os.name == "nt":
-                os.startfile(str(p))               # Explorer / the default editor — the same as double-clicking it
-            else:
-                subprocess.Popen(["xdg-open", str(p)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            osopen.open_path(p)                    # Explorer / Finder / the default program — as a double-click
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "message": f"couldn't open it ({e}); it is at {p}"}
         return {"ok": True, "message": f"opened {p}"}
@@ -138,10 +226,11 @@ def act_story(cfg: dict, action: str, body: dict, who: str | None) -> dict:
         if action == "mail_send":
             args = (str(body.get("to") or "").strip(), str(body.get("subject") or "").strip(), str(body.get("body") or ""))
             qs = body.get("questions") or None
+            adp = games.adapter(cfg, gid) if games.has_adapter(cfg, gid) else None
             if body.get("draft_id"):
-                l = mail.send_edited_draft(root, str(body["draft_id"]), who, *args, questions=qs)
+                l = mail.send_edited_draft(root, str(body["draft_id"]), who, *args, questions=qs, adp=adp)
             else:
-                l = mail.send(root, who, *args, questions=qs)
+                l = mail.send(root, who, *args, questions=qs, adp=adp)
             return {"ok": True, "message": f"Sent to {l.to}.", "id": l.id}
         if action == "mail_draft":
             l = mail.save_draft(root, who, str(body.get("to") or ""), str(body.get("subject") or ""), str(body.get("body") or ""),
@@ -166,7 +255,8 @@ def act_story(cfg: dict, action: str, body: dict, who: str | None) -> dict:
             return {"ok": True, "message": "Back in the inbox."}
         if action == "order_add":
             o = orders.add(root, who, str(body.get("for") or ""), str(body.get("title") or ""), str(body.get("detail") or ""),
-                           str(body.get("priority") or "soon"), body.get("object") or None)
+                           str(body.get("priority") or "soon"), body.get("object") or None,
+                           wants=body.get("wants") or None, goes_to=body.get("goes_to") or None, effort=body.get("effort") or None)
             return {"ok": True, "message": f"On the list for {o['for']}.", "order": o}
         if action == "order_close":
             o = orders.close(root, str(body.get("id")), who, str(body.get("note") or ""), str(body.get("status") or "done"))
@@ -264,6 +354,110 @@ def act_read(cfg: dict, action: str, body: dict, who: str | None) -> dict:
             return {"ok": True, "message": "Resolved.", "note": n}
     except ValueError as e:
         return {"ok": False, "message": str(e)}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def memory_view(cfg: dict, what: str, q: dict, ui_state=None) -> dict:
+    """Team memory (BUILD 17): the rulings book, a question checked against it, the idea box, playtest notes, and where
+    the game stands. Read-only."""
+    gid = q.get("id", [current_game(cfg)])[0]
+    one = lambda k, d="": q.get(k, [d])[0]
+    if what == "standing":
+        return standing.data(cfg, gid, ui_state)
+    root = games.game_root(cfg, gid)
+    if not root or not root.is_dir():
+        return {"error": f"the game folder for {gid} isn't reachable from this computer"}
+    adp = games.adapter(cfg, gid) if games.has_adapter(cfg, gid) else None
+    if what == "rulings":
+        kinds = [k for k in one("kind").split(",") if k] or None
+        rows = rulings.search(root, one("q"), adp, limit=int(one("limit", "200") or 200), kinds=kinds,
+                              include_retired=bool(one("retired")))
+        return {"rulings": rows, "summary": rulings.summary(root, adp), "conflicts": rulings.conflicts(root, adp),
+                "files": rulings.book(root, adp)["files"]}
+    if what == "rulecheck":
+        qs = [x for x in q.get("q", []) if str(x).strip()]
+        return {"checked": [{"question": x, "rulings": rulings.check(root, x, adp)} for x in qs]}
+    if what == "ideas":
+        return {"ideas": ideas.listing(root, one("state", "open") or "open"), "counts": ideas.counts(root)}
+    return playtest.inbox(root, adp)
+
+
+def act_memory(cfg: dict, action: str, body: dict, who: str | None) -> dict:
+    """The rulings book, the idea box, playtest notes — signed, through rulings.py / ideas.py / playtest.py (the same
+    functions as python -m forge rulings | idea | playtest)."""
+    if not who:
+        return {"ok": False, "message": "set who you are first (bottom left) — everything here is signed"}
+    gid = str(body.get("game") or current_game(cfg))
+    root = games.game_root(cfg, gid)
+    if not root or not root.is_dir():
+        return {"ok": False, "message": f"the game folder for {gid} isn't reachable"}
+    areas._badge_cache.pop(gid, None)
+    try:
+        if action == "rule_record":
+            at = body.get("applies_to") or None
+            e = rulings.record(root, who, str(body.get("text") or ""), by=str(body.get("by") or "") or None,
+                               source=str(body.get("source") or ""), question=str(body.get("question") or ""),
+                               applies_to=at, value=body.get("value") if at else None)
+            return {"ok": True, "message": "In the rulings book.", "ruling": e}
+        if action == "rule_retire":
+            rulings.retire(root, who, str(body.get("id") or ""), str(body.get("why") or ""))
+            return {"ok": True, "message": "Marked as no longer holding — it stays in the book, struck through."}
+        if action == "idea_add":
+            i = ideas.add(root, who, str(body.get("text") or ""), at=body.get("at") or None, obj=body.get("obj") or None,
+                          label=body.get("label") or None)
+            return {"ok": True, "message": "In the idea box.", "idea": i}
+        if action == "idea_sort":
+            ideas.sort(root, str(body.get("id") or ""), who, str(body.get("to") or ""), str(body.get("where") or ""),
+                       str(body.get("note") or ""))
+            return {"ok": True, "message": "Sorted — the idea says where it went."}
+        if action == "idea_task":
+            o = ideas.to_task(root, str(body.get("id") or ""), who, str(body.get("for") or ""), str(body.get("priority") or "soon"))
+            return {"ok": True, "message": f"A task for {o['for']} now.", "order": o}
+        if action == "idea_note":
+            n = ideas.to_note(root, str(body.get("id") or ""), who, str(body.get("obj") or ""), body.get("label") or None,
+                              body.get("to") or None)
+            return {"ok": True, "message": "Pinned as a note there.", "note": n}
+        if action == "playtest_in":
+            r = playtest.take_in(cfg, gid, who, to=str(body.get("to") or "Claude"))
+            _summary_cache.pop(gid, None)
+            return r
+    except FileNotFoundError as e:
+        return {"ok": False, "message": f"not found: {e}"}
+    except ValueError as e:
+        return {"ok": False, "message": str(e)}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def act_workbench(cfg: dict, action: str, body: dict, who: str | None) -> dict:
+    """People, Quests, Voice sheets, Find & replace, Play from here (BUILD 07b) — signed, through the safe path."""
+    gid = str(body.get("game") or current_game(cfg))
+    if not games.has_adapter(cfg, gid):
+        return {"ok": False, "message": f"{gid} has no Story adapter yet"}
+    adp = games.adapter(cfg, gid)
+    _summary_cache.pop(gid, None)
+    try:
+        if action == "wb_play":
+            return workbench.play(adp, body.get("place") or None, body.get("era") or None, body.get("quest") or None)
+        if not who:
+            return {"ok": False, "message": "set who you are first — every change is signed"}
+        if action == "wb_edit":
+            return _save_words(workbench.edit_field(adp, str(body.get("ref") or ""), body.get("value"), who, body.get("hash") or None,
+                                                    bool(body.get("i_mean_it"))), "Saved.")
+        if action == "wb_mark":
+            st = str(body.get("status") or "")
+            r = readthrough.mark(adp, str(body.get("ref") or ""), st, who, body.get("hash") or None, note=body.get("note") or None,
+                                 label=body.get("label") or None)
+            return _save_words(r, {"approved": "Approved.", "flagged": "Flagged.", "draft": "Left as a draft."}.get(st, "Saved."))
+        if action == "wb_voice":
+            return workbench.save_voice(adp, str(body.get("kind") or ""), str(body.get("vid") or ""), str(body.get("field") or ""),
+                                        body.get("value"), who)
+        if action == "wb_replace":
+            return workbench.replace(adp, str(body.get("q") or ""), str(body.get("repl") or ""), list(body.get("refs") or []), who,
+                                     bool(body.get("case")), bool(body.get("word")))
+    except workbench.WorkbenchRefused as e:
+        return {"ok": False, "message": str(e)}
+    except FileNotFoundError as e:
+        return {"ok": False, "message": f"not found: {e}"}
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -407,6 +601,9 @@ def _tail(p: Path, n: int = 400) -> str:
 class SuiteHandler(ui.Handler):
     cfg: dict = None
 
+    def _json(self, obj, code=200):
+        super()._json(runwords.deep(obj), code)        # on a Mac no .bat is ever shown (BUILD 27)
+
     def _game_root(self, q: dict) -> Path:
         gid = q.get("id", [current_game(self.cfg)])[0]
         root = games.game_root(self.cfg, gid)
@@ -419,9 +616,9 @@ class SuiteHandler(ui.Handler):
         q = parse_qs(u.query)
         try:
             if u.path == "/":
-                self._send(200, SHELL.encode("utf-8"), "text/html; charset=utf-8")
+                self._send(200, runwords.say(SHELL, page=True).encode("utf-8"), "text/html; charset=utf-8")
             elif u.path == "/art/queue":
-                page = ui.PAGE.replace("</head>", "<style>header h1{display:none}</style></head>", 1)
+                page = runwords.say(ui.PAGE.replace("</head>", "<style>header h1{display:none}</style></head>", 1), page=True)
                 self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
             elif u.path == "/api/suite/games":
                 cur = current_game(self.cfg)
@@ -441,6 +638,93 @@ class SuiteHandler(ui.Handler):
                 except OSError:
                     pass
                 self._json({"games": ls, "current": cur, "identity": who, "people": names})
+            elif u.path == "/api/suite/areas":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                self._json({"areas": areas.public(), "needs": areas.needs(self.cfg, gid), "last": areas.last_place(gid),
+                            "old": areas.OLD_SCREENS})
+            elif u.path == "/api/suite/badges":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                self._json(areas.badges(self.cfg, gid, self.state, fresh=bool(q.get("fresh"))))
+            elif u.path == "/api/suite/tasks":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                try:
+                    provide.sync(self.cfg, gid)      # a new picture request shows up on Tasks without anyone running anything
+                except Exception as e:  # noqa: BLE001 — the pool never stops Tasks from opening
+                    log.warning("provide: sync before Tasks failed: %s", e)
+                self._json(tasks.board(self.cfg, gid, settings.identity(), self.state))
+            elif u.path == "/api/suite/floorplans":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                try:
+                    self._json(floorplans.view(self.cfg, gid))
+                except floorplans.FloorPlanRefused as e:
+                    self._json({"error": str(e)})
+            elif u.path == "/api/suite/floorplan":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                try:
+                    self._json(floorplans.open_set(self.cfg, gid, q.get("f", [""])[0], q.get("map", [None])[0]))
+                except floorplans.FloorPlanRefused as e:
+                    self._json({"error": str(e)}, 404)
+            elif u.path == "/suite/layoutimg":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                name = Path(q.get("file", [""])[0]).name
+                try:
+                    fol = floorplans._folder(self.cfg, gid, q.get("f", [""])[0])
+                except floorplans.FloorPlanRefused:
+                    raise FileNotFoundError("plan")
+                src = fol / name
+                if not name.endswith(".png") or not src.is_file():
+                    raise FileNotFoundError("picture")
+                w = q.get("w", [None])[0]
+                body, ctype = picture_bytes(src, int(w) if w and w.isdigit() else None)
+                self._send(200, body, ctype)
+            elif u.path == "/api/suite/provide":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                self._json(provide.view(self.cfg, gid, settings.identity(), self.state))
+            elif u.path == "/api/suite/tasksdone":
+                root = self._game_root(q)
+                self._json({"done": tasks.done(root, settings.identity())})
+            elif u.path == "/api/suite/status":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                tab = q.get("tab", ["glance"])[0]
+                self._json(status.builds(self.cfg, gid) if tab == "builds" else status.completeness(self.cfg, gid) if tab == "game"
+                           else status.glance(self.cfg, gid, self.state))
+            elif u.path == "/api/suite/briefs":
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                self._json({"items": music.briefs_and_songs(games.adapter(self.cfg, gid))} if games.has_adapter(self.cfg, gid)
+                           else {"error": f"{gid} has no Story adapter yet", "items": []})
+            elif u.path in ("/api/suite/people", "/api/suite/person", "/api/suite/quests", "/api/suite/quest", "/api/suite/voices",
+                            "/api/suite/voice", "/api/suite/find", "/api/suite/voicesfor"):
+                gid = q.get("id", [current_game(self.cfg)])[0]
+                if not games.has_adapter(self.cfg, gid):
+                    self._json({"error": f"{gid} has no Story adapter yet"}, 404)
+                    return
+                adp = games.adapter(self.cfg, gid)
+                one = lambda k: q.get(k, [""])[0]
+                try:
+                    if u.path == "/api/suite/people":
+                        self._json({"people": workbench.people(adp)})
+                    elif u.path == "/api/suite/person":
+                        self._json(workbench.person(adp, one("pid")))
+                    elif u.path == "/api/suite/quests":
+                        self._json({"quests": workbench.quests(adp)})
+                    elif u.path == "/api/suite/quest":
+                        self._json(workbench.quest(adp, one("qid")))
+                    elif u.path == "/api/suite/voices":
+                        self._json(workbench.voices(adp))
+                    elif u.path == "/api/suite/voice":
+                        self._json(workbench.voice(adp, one("kind"), one("vid")))
+                    elif u.path == "/api/suite/voicesfor":
+                        pg = readthrough.page(adp, one("place"), one("era") or "all")
+                        self._json(workbench.voices_for(adp, one("place"), [{**l, "ref": l["ref"]} for l in pg["lines"]]))
+                    else:
+                        self._json(workbench.find(adp, one("q"), q.get("repl", [None])[0], bool(one("case")), bool(one("word"))))
+                except (workbench.WorkbenchRefused, ValueError) as e:
+                    self._json({"error": str(e)}, 404)
+            elif u.path in ("/api/suite/rulings", "/api/suite/rulecheck", "/api/suite/ideas", "/api/suite/playtest",
+                            "/api/suite/standing"):
+                self._json(memory_view(self.cfg, u.path.rsplit("/", 1)[-1], q, self.state))
+            elif u.path == "/api/suite/about":
+                self._json(about(self.cfg))
             elif u.path == "/api/suite/home":
                 self._json(home.data(self.cfg, self.state))
             elif u.path == "/api/suite/game":
@@ -617,6 +901,8 @@ class SuiteHandler(ui.Handler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if u.path == "/api/suite/upload":
+            return self._upload(parse_qs(u.query))
         if not u.path.startswith("/api/suite/act/"):
             return super().do_POST()
         if self.headers.get("X-Forge") != "1":
@@ -634,6 +920,103 @@ class SuiteHandler(ui.Handler):
         except Exception as e:  # noqa: BLE001
             log.error("suite POST %s: %s", self.path, traceback.format_exc())
             self._json({"ok": False, "message": f"{type(e).__name__}: {e}"}, 500)
+
+
+    def _upload(self, q: dict):
+        """A file dropped on a task's card, streamed in (a WAV can be hundreds of MB): the raw body goes to
+        <game>/_incoming/<stamp>-<name>.part in 1 MB pieces, is renamed only when every byte has arrived, and only then
+        handed to the area's own delivery (tasks.accept). The kind is checked from the name before a byte is written."""
+        if self.headers.get("X-Forge") != "1":
+            self._send(403, b"forbidden", "text/plain")
+            return
+        self.close_connection = True          # a refused upload isn't read to the end; this connection isn't reused
+        gid = q.get("game", [current_game(self.cfg)])[0]
+        tid = q.get("task", [""])[0]
+        name = tasks.safe_name(q.get("name", ["file"])[0])
+        who = settings.identity() or ""
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            root = games.game_root(self.cfg, gid)
+            if not root or not root.is_dir():
+                raise tasks.TaskRefused(f"the game folder for {gid} isn't reachable")
+            if not who or settings.is_assistant(who):
+                raise tasks.TaskRefused("uploading to a task is a person's act — a session asks for a file with a work order instead")
+            card = tasks.find_card(self.cfg, gid, tid, who, self.state)
+            tasks.check_kind(card, name)
+            if n <= 0:
+                raise tasks.TaskRefused("the file was empty")
+            inc = tasks.incoming_dir(root)
+            inc.mkdir(parents=True, exist_ok=True)
+            tasks.sweep_incoming(root)
+            stamp = settings.now().strftime("%Y%m%d-%H%M%S")
+            part = inc / f"{stamp}-{name}.part"
+            got = 0
+            with open(part, "wb") as f:
+                while got < n:
+                    chunk = self.rfile.read(min(1 << 20, n - got))
+                    if not chunk:
+                        break
+                    f.write(chunk)
+                    got += len(chunk)
+            if got < n:
+                log.warning("suite: upload of %s stopped at %d of %d bytes — nothing delivered", name, got, n)
+                try:
+                    part.unlink()
+                except OSError:
+                    pass
+                self._json({"ok": False, "message": "the upload stopped half-way — nothing was delivered"}, 400)
+                return
+            staged = part.with_name(part.name[:-5])
+            os.replace(part, staged)
+            r = tasks.accept(self.cfg, gid, tid, staged, name, who, self.state)
+            areas._badge_cache.pop(gid, None)
+            log.info("suite: upload %s → %s: %s", name, tid, r.get("message"))
+            self._json(r)
+        except tasks.TaskRefused as e:
+            log.info("suite: upload %s → %s refused: %s", name, tid, e)
+            self._json({"ok": False, "message": str(e)}, 400)
+        except Exception as e:  # noqa: BLE001
+            log.error("suite upload: %s", traceback.format_exc())
+            self._json({"ok": False, "message": f"{type(e).__name__}: {e}"}, 500)
+
+
+def about(cfg: dict) -> dict:
+    """Settings → About and This computer: the version, the tests' last result, where the log is, who you are, and the
+    folder each game is read from."""
+    root = cfgmod.ROOT
+    version = ""
+    for f in ("COMMIT_MESSAGE.last.txt", "CHANGELOG.md"):
+        p = root / f
+        if p.is_file():
+            for l in p.read_text(encoding="utf-8", errors="replace").splitlines():
+                l = l.strip().lstrip("#").strip()
+                if l:
+                    version = l[:200]
+                    break
+        if version:
+            break
+    tests = None
+    tp = cfgmod.path_of(cfg, "logs") / "tests_latest.txt"
+    if tp.is_file():
+        tail = [l for l in tp.read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+        tests = {"line": tail[-1] if tail else "", "when": time.strftime("%Y-%m-%d %H:%M", time.localtime(tp.stat().st_mtime))}
+    logs = sorted(cfgmod.path_of(cfg, "logs").glob("forge_*.log"))
+    return {"version": version, "tests": tests, "log": str(logs[-1]) if logs else str(cfgmod.path_of(cfg, "logs")),
+            "identity": settings.identity(), "settings_file": str(settings.PATH), "forge": str(root),
+            "games": [{"id": g["id"], "name": g["name"], "root": g.get("root"), "reachable": g["root_exists"],
+                       "overridden": bool(settings.game_root_override(g["id"])), "from_game": _game_cfg_root(cfg, g["id"])}
+                      for g in games.listing(cfg)],
+            "system": osopen.system(), "settings": {k: settings.load().get(k) for k in settings.KEYS},
+            "worker_here": worker.here(), "worker_pc": runwords.worker_pc(),
+            "timezones": ["America/New_York", "America/Chicago", "America/Denver", "America/Phoenix", "America/Los_Angeles",
+                          "America/Anchorage", "Pacific/Honolulu", "Europe/London", "Europe/Berlin", "Asia/Tokyo", "Australia/Sydney", "UTC"]}
+
+
+def _game_cfg_root(cfg: dict, gid: str) -> str | None:
+    try:
+        return games.game_cfg(cfg, gid).get("game_root")
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def make_server(cfg: dict, port: int = PORT):

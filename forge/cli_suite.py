@@ -13,6 +13,12 @@
     python -m forge orders add --for "<name>" --title "…" [--detail "…"] [--priority now|soon|someday] [--object <ref>]
     python -m forge orders list [--for "<name>"] [--all]      the work orders a session starts from
     python -m forge orders done <id> [--note "…"] [--drop]
+    python -m forge provide list                            the forge pool: pictures the owner is asked to provide (provide.py)
+    python -m forge provide add --title "…" --why "what was tried, how it failed" --helps "what picture would help"
+                               [--count n] [--kind image|sheet|any] [--goes-to <folder in the game>] [--priority now|soon|someday]
+                               [--hold "until …"]        (on hold = listed, not yet a task)
+    python -m forge provide sync                            file the open requests as task cards for the owner (the suite does it too)
+    python -m forge provide open|hold|withdraw <id>
     python -m forge away [--who "<name>"] [--since <time>] [--mark]   what everyone else did since <name> last worked
                                                              → journal/DIGEST_for_<group>.md; --mark starts a new session
     python -m forge music board [--state needed] [--singer Sarah]   the Music board: counts, next most useful, the slots
@@ -21,6 +27,13 @@
     python -m forge music answer <slot> <yes|"yes, but…"|no|"I'll write this one"|"not yet"> [--note "…"]   (a person only)
     python -m forge music deliver <slot> --file track.ogg | --inbox name.ogg [--loop-start s] [--loop-end s] [--trim-db d]
     python -m forge music sheets | sheet <id>                the style sheets (profiles) and one of them as text
+    python -m forge rulings search ["words"] [--kind answer|marked|recorded] [--limit 20]   the rulings book (BUILD 17)
+    python -m forge rulings check "the question you're about to ask"     → the rulings that already answer it (exit 1 if any)
+    python -m forge rulings record "the ruling" --by "<whose>" --source "where/when they said it" [--question "…"]
+                                   [--file data/x.json --pointer /a/b --value '"json"']      (pinned: warns when the data differs)
+    python -m forge rulings retire <id> --why "…"            (a person only) · rulings conflicts   data that contradicts a ruling
+    python -m forge idea "one line" [--at <address>]         the idea box · idea list [--sorted|--all] · idea sort <id> --to task|note|letter|file|kept|dropped [--where …]
+    python -m forge playtest list | in [--to "<name>"]       the game's playtest notes; `in` routes the new ones and writes the letters
   Every command takes --game <id> (default: local/suite.json) and signs as --who / --from / --by, else FORGE_IDENTITY.
 """
 from __future__ import annotations
@@ -231,7 +244,7 @@ def cmd_mail(cfg: dict, args: list[str]) -> int:
             print("usage: mail send --to \"<name>\" --subject \"…\" (--body … | --body-file …)")
             return 2
         l = mail.send(root, frm, opts["to"], opts["subject"], _body(opts), questions=_json_file(opts, "questions"),
-                      attachments=opts.get("attach"))
+                      attachments=opts.get("attach"), adp=adp)
         print(f"sent: mail/{l.folder}/{l.id}.md")
         return 0
     if len(pos) < 2:
@@ -274,6 +287,45 @@ def cmd_orders(cfg: dict, args: list[str]) -> int:
     o = orders.close(root, pos[1], _who(opts, "who", "by"), note=str(opts.get("note") or "") if opts.get("note") is not True else "",
                      status="dropped" if opts.get("drop") else "done")
     print(f"{o['status']}: {o['title']}")
+    return 0
+
+
+def cmd_provide(cfg: dict, args: list[str]) -> int:
+    """The forge pool (User Needs To Provide Image). Works without the game's folder, except `sync`."""
+    from . import config as cfgmod
+    from .suite import provide
+    pos, opts = _args(args)
+    if not pos or pos[0] not in ("list", "add", "sync", "open", "hold", "withdraw"):
+        print(__doc__)
+        return 2
+    gid = opts.get("game") if isinstance(opts.get("game"), str) else cfgmod.default_game(cfg)
+    s = lambda k, d="": str(opts[k]) if isinstance(opts.get(k), str) else d
+    if pos[0] == "list":
+        rows = provide.load(cfg, gid)
+        print(f"{gid} — pictures to provide: {len(rows)} in the pool ({provide.path(cfg, gid)})")
+        for r in rows:
+            print(f"  [{r.get('status'):<9}] {r['title']}  — {r.get('count', 1)} {r.get('kind', 'image')}(s) → {r.get('goes_to')}  [{r['id']}]")
+            print(f"              why: {r.get('why')}\n              helps: {r.get('helps')}")
+        return 0
+    if pos[0] == "add":
+        r = provide.add(cfg, gid, _who(opts, "by", "who"), s("title"), s("why"), s("helps"), kind=s("kind", "image"),
+                        count=int(s("count", "1") or 1), goes_to=s("goes-to") or None, priority=s("priority", "soon"),
+                        effort=s("effort") or None, status="on_hold" if opts.get("hold") else "open",
+                        hold_until=s("hold") or None)
+        print(f"in the pool ({r['status']}): {r['title']}  [{r['id']}]")
+        return 0
+    if pos[0] == "sync":
+        r = provide.sync(cfg, gid)
+        if r.get("unreachable"):
+            print(f"the game folder for '{gid}' is not reachable — nothing filed (the suite files them when it can reach it)")
+            return 1
+        print(f"filed {len(r['filed'])} new task card(s)" + (": " + ", ".join(r["filed"]) if r["filed"] else ""))
+        return 0
+    if len(pos) < 2:
+        print(f"usage: provide {pos[0]} <id>")
+        return 2
+    r = provide.set_status(cfg, gid, pos[1], {"open": "open", "hold": "on_hold", "withdraw": "withdrawn"}[pos[0]])
+    print(f"{r['id']}: {r['status']}")
     return 0
 
 
@@ -355,5 +407,116 @@ def cmd_music(cfg: dict, args: list[str]) -> int:
         print(f"refused: {e}")
         return 1
 
+def cmd_rulings(cfg: dict, args: list[str]) -> int:
+    """The rulings book (BUILD 17) — search it before asking anything."""
+    from .suite import rulings
+    pos, opts = _args(args)
+    if not pos or pos[0] not in ("search", "check", "record", "retire", "conflicts"):
+        print(__doc__)
+        return 2
+    gid, root, adp = _game(cfg, opts)
+    if pos[0] == "search":
+        q = " ".join(pos[1:])
+        kinds = [opts["kind"]] if isinstance(opts.get("kind"), str) else None
+        rows = rulings.search(root, q, adp, limit=int(opts.get("limit") or 20) if opts.get("limit") is not True else 20, kinds=kinds)
+        s = rulings.summary(root, adp)
+        print(f"{gid} — the rulings book: {s['count']} ruling(s) {s['by_kind']}" + (f"; {len(rows)} match “{q}”" if q else ""))
+        for r in rows:
+            print(f"\n[{r['kind']}] {r.get('when') or 'undated'} · {r['where']}  ({r['id']})")
+            print("  " + r["text"][:700])
+        return 0
+    if pos[0] == "check":
+        q = " ".join(pos[1:])
+        hits = rulings.check(root, q, adp)
+        if not hits:
+            print("Not in the book — nothing already answers it. Ask away.")
+            return 0
+        print(f"ALREADY RULED — {len(hits)} ruling(s) answer this; don't ask it again (or say why, with asked_again):")
+        for r in hits:
+            print(f"\n[{r['kind']}] {r.get('when') or 'undated'} · {r['where']}  (score {r['score']})\n  {r['text'][:700]}")
+        return 1
+    if pos[0] == "record":
+        who = _who(opts, "who")
+        at = None
+        if isinstance(opts.get("file"), str):
+            at = {"file": opts["file"], "pointer": str(opts.get("pointer") or "")}
+        val = opts.get("value")
+        if isinstance(val, str):
+            try:
+                val = json.loads(val)
+            except ValueError:
+                pass
+        e = rulings.record(root, who, " ".join(pos[1:]), by=opts.get("by") if isinstance(opts.get("by"), str) else None,
+                           source=str(opts.get("source") or "") if opts.get("source") is not True else "",
+                           question=str(opts.get("question") or "") if opts.get("question") is not True else "",
+                           applies_to=at, value=val if at else None)
+        print(f"in the book: {e['id']} — {e['text'][:200]}")
+        return 0
+    if pos[0] == "retire":
+        if len(pos) < 2:
+            print("usage: rulings retire <id> --why \"…\"")
+            return 2
+        rulings.retire(root, _who(opts, "who"), pos[1], str(opts.get("why") or "") if opts.get("why") is not True else "")
+        print(f"marked as no longer holding: {pos[1]}")
+        return 0
+    cs = rulings.conflicts(root, adp)
+    print(f"{gid} — {len(cs)} data field(s) contradict a ruling")
+    for c in cs:
+        print(f"  {c['message']}\n    ruling {c['ruling']['id']}: {c['ruling']['text'][:200]}")
+    return 1 if cs else 0
+
+
+def cmd_idea(cfg: dict, args: list[str]) -> int:
+    """The idea box (BUILD 17): one line, filed with the date and who."""
+    from .suite import ideas
+    pos, opts = _args(args)
+    if not pos:
+        print(__doc__)
+        return 2
+    gid, root, _adp = _game(cfg, opts)
+    if pos[0] == "list":
+        state = "sorted" if opts.get("sorted") else "all" if opts.get("all") else "open"
+        rows = ideas.listing(root, state)
+        print(f"{gid} — the idea box ({state}): {len(rows)}")
+        for i in rows:
+            s = i.get("sorted")
+            print(f"  {i['time'][:16].replace('T', ' ')}  {i['who']:<12} {i['text']}" + (f"\n      (looking at {i.get('label') or i.get('at')})" if i.get("at") or i.get("label") else "")
+                  + (f"\n      → {s['to']}: {s.get('where', '')}" if s else "") + f"\n      {i['id']}")
+        return 0
+    if pos[0] == "sort":
+        if len(pos) < 2 or not isinstance(opts.get("to"), str):
+            print("usage: idea sort <id> --to task|note|letter|file|kept|dropped [--where …] [--note …]")
+            return 2
+        ideas.sort(root, pos[1], _who(opts, "who"), opts["to"], str(opts.get("where") or "") if opts.get("where") is not True else "",
+                   str(opts.get("note") or "") if opts.get("note") is not True else "")
+        print(f"sorted → {opts['to']}")
+        return 0
+    words = pos[1:] if pos[0] == "add" else pos
+    i = ideas.add(root, _who(opts, "who"), " ".join(words), at=opts.get("at") if isinstance(opts.get("at"), str) else None)
+    print(f"in the idea box: {i['id']}")
+    return 0
+
+
+def cmd_playtest(cfg: dict, args: list[str]) -> int:
+    """Playtest notes (BUILD 17): list them, or take the new ones in."""
+    from .suite import playtest
+    pos, opts = _args(args)
+    if not pos or pos[0] not in ("list", "in"):
+        print(__doc__)
+        return 2
+    gid, root, adp = _game(cfg, opts)
+    if pos[0] == "list":
+        d = playtest.inbox(root, adp)
+        print(f"{gid} — {len(d['notes'])} playtest note(s), {d['new']} not taken in · {d['by_category']}")
+        for n in d["notes"]:
+            print(f"  {'·' if n['routed'] else '●'} {n['time'][:16].replace('T', ' ')} [{n['category']}] {n['text']}  — {n['where']}"
+                  + (f"\n      → {n['routed']['where']}" if n["routed"] else ""))
+        return 0
+    r = playtest.take_in(cfg, gid, _who(opts, "who"), to=opts["to"] if isinstance(opts.get("to"), str) else "Claude")
+    print(r["message"])
+    return 0
+
+
 COMMANDS = {"suite": cmd_suite, "identity": cmd_identity, "journal": cmd_journal, "suite-check": cmd_suite_check,
-            "mail": cmd_mail, "orders": cmd_orders, "away": cmd_away, "music": cmd_music}
+            "mail": cmd_mail, "orders": cmd_orders, "provide": cmd_provide, "away": cmd_away, "music": cmd_music,
+            "rulings": cmd_rulings, "idea": cmd_idea, "playtest": cmd_playtest}

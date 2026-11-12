@@ -214,4 +214,12 @@ def edit(adp, rel: str, changes, who: str, expected_hash: str | None = None, rea
             journal.write_view(adp.root)
         except OSError:
             pass
+        # BUILD 17: a change that makes the data say something other than a ruling pinned to it — saved (the person may
+        # mean it), but warned about and journalled, so it never passes silently
+        from . import rulings
+        fps = [_field_pointer(c) for c in changes]
+        touched = lambda p: any(p == f or p.startswith(f + "/") or f.startswith(p + "/") for f in fps)
+        warns = rulings.after_edit(adp, rel, who, touched)
+        if warns:
+            r = {**r, "warnings": [w["message"] for w in warns], "ruling_conflicts": warns}
     return {"ok": True, **r}

@@ -6,13 +6,89 @@
 --ok:#46c776;--no:#e5584f;--warn:#f0b040;--accent:#f0b040;--story:#7aa7ff;--lock:#b48cff;--unk:#8a7fd0;--radius:12px}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
 body{background:radial-gradient(1200px 600px at 10% -10%,#1f1b14 0%,transparent 60%),radial-gradient(900px 500px at 110% 0%,#141a26 0%,transparent 55%),var(--bg);
-color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;flex-direction:row;overflow:hidden}
 button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid #3a3a48;border-radius:8px;padding:8px 14px;cursor:pointer;transition:.15s}
 button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}button:disabled{opacity:.38;cursor:not-allowed}
 button.go{background:linear-gradient(180deg,#2c5a3a,#244a30);border-color:#3f9a5c}button.warn{background:linear-gradient(180deg,#5a4a22,#4a3c1c);border-color:#b08a30}
 button.ghost{background:transparent}
-header{display:flex;align-items:center;gap:18px;padding:12px 22px;border-bottom:1px solid var(--line);background:rgba(18,18,23,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
-.logo{font-weight:700;font-size:20px;letter-spacing:.6px;white-space:nowrap}.logo b{color:var(--accent)}
+/* ---------- BUILD 26: one sidebar of areas, the way ATK has them */
+#side{width:236px;flex:none;height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#14141a,#111116);border-right:1px solid var(--line);z-index:10}
+#side .brand{padding:16px 16px 10px}.logo{font-weight:700;font-size:20px;letter-spacing:.6px;white-space:nowrap}.logo b{color:var(--accent)}
+#side .tagline{color:var(--faint);font-size:12px;margin-top:2px}
+#side .picker{margin:4px 12px 10px}#side .picker select{min-width:0;width:100%}
+.wbtn{margin:0 12px 12px;padding:10px 12px;font-weight:650;text-align:left;display:flex;align-items:center;gap:9px;border-radius:10px}
+.wbtn.start{background:linear-gradient(180deg,#2c5a3a,#244a30);border-color:#3f9a5c}.wbtn.stop{background:linear-gradient(180deg,#4a2a28,#3a2220);border-color:#8a4a40}
+.wbtn.unknown{background:#1f1f28;color:var(--dim)}.wbtn i{width:10px;height:10px;border-radius:50%;flex:none;background:var(--faint)}
+.wbtn .wl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wbtn.unknown .wl{white-space:normal;font-size:12.5px;line-height:1.35}
+#areas{flex:1;overflow-y:auto;padding:4px 8px 10px}
+.arow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:0;background:transparent;color:var(--dim);padding:9px 12px;border-radius:9px;margin-bottom:2px;position:relative}
+.arow:hover:not(:disabled){transform:none;background:rgba(255,255,255,.035);color:var(--ink)}
+.arow .ai{width:22px;text-align:center;font-size:16px;flex:none}.arow .an{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow.on{background:var(--panel2);color:var(--ink)}.arow.on:before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:2px;background:var(--ac,var(--accent))}
+.arow .ab{font-size:11.5px;font-weight:700;border-radius:9px;padding:0 7px;background:var(--story);color:#0d1424}.arow .ab.tasks{background:#ff8a4c;color:#1e0f05}.arow .ab.over{background:var(--warn);color:#1e1505}
+.arow .ab.soft{background:#2c2c38;color:var(--dim);font-weight:600}
+#side .foot{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+#side .foot .who{justify-content:space-between}
+@media(max-width:1100px){#side{width:62px}#side .brand .tagline,#side .picker,.arow .an,.wbtn .wl,#side .foot .clock{display:none}
+  #side .brand{padding:14px 8px}#side .logo{font-size:0}#side .logo b{font-size:20px}.arow{justify-content:center;padding:10px 6px}
+  .arow .ab{position:absolute;top:2px;right:2px;padding:0 5px;font-size:10px}.wbtn{margin:0 8px 10px;justify-content:center}#side .foot .who{font-size:0;padding:6px}#side .foot .who:after{content:"✎";font-size:14px}}
+.col{flex:1;min-width:0;height:100vh;display:flex;flex-direction:column}
+.ahead{padding:14px 26px 0;border-bottom:1px solid var(--line);background:rgba(18,18,23,.6)}
+.ahead .at{display:flex;align-items:center;gap:12px}.ahead h1{margin:0;font-size:21px;font-weight:650;display:flex;align-items:center;gap:10px}
+.ahead h1 .ai{color:var(--ac,var(--accent))}
+.atabs{display:flex;gap:2px;margin-top:10px;flex-wrap:wrap}.atabs button{border:0;border-radius:8px 8px 0 0;background:transparent;color:var(--dim);padding:8px 16px;position:relative}
+.atabs button:hover:not(:disabled){transform:none;color:var(--ink);background:rgba(255,255,255,.03)}
+.atabs button.on{color:var(--ink);background:var(--panel)}.atabs button.on:after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--ac,var(--accent))}
+.atabs button.planned{color:var(--faint);font-style:italic}.atabs button .tb{margin-left:6px;font-size:11px;padding:0 6px;border-radius:8px;background:#2c2c38;color:var(--dim);font-style:normal}
+.needsl{font-size:12.5px;color:var(--faint);padding:6px 26px;border-bottom:1px solid #202028;background:rgba(18,18,23,.4)}
+.needsl.ok b{color:var(--ok)}.needsl.no{color:#f0b8b0}.needsl.no b{color:var(--no)}.needsl.pl b{color:var(--faint)}
+.planned-page{max-width:820px}.planned-page .big{font-size:22px;font-weight:650;margin:0 0 8px}.planned-page ul{color:#cfccc5}
+/* ---------- BUILD 07b: People, Quests, Voice sheets, Find & replace */
+.wb{display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;max-width:1500px;align-items:start}@media(max-width:1000px){.wb{grid-template-columns:1fr}}
+.wbl{display:flex;flex-direction:column;gap:4px;max-height:calc(100vh - 190px);overflow:auto;padding-right:4px}.wbl input,.wbl select{margin-bottom:6px}
+.wbi{padding:8px 10px;border-radius:9px;cursor:pointer;border:1px solid transparent}.wbi:hover{background:rgba(255,255,255,.03)}.wbi.sel{background:var(--panel2);border-color:var(--line);box-shadow:inset 3px 0 0 var(--story)}
+.wbi b{display:block;font-weight:600}.wbi span{font-size:12px;color:var(--faint)}
+.fl{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:8px 12px;align-items:start;padding:6px 0;border-bottom:1px solid #24242d}.fl code{color:var(--dim)}
+.fl .v{white-space:pre-wrap;word-break:break-word}.br3 .fl{grid-template-columns:minmax(0,1fr) auto}.br3 .fl code{display:none}.fl textarea,.fl input{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--story);border-radius:8px;padding:6px 8px}
+.ln{padding:7px 10px;border-bottom:1px solid #24242d;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.ln .t{font-size:14.5px}.ln .m{font-size:12px;color:var(--faint)}
+.br3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:1000px){.br3{grid-template-columns:1fr}}
+.br3 .card h2{margin-bottom:6px}.br3 .t{font-size:14.5px;line-height:1.5;min-height:48px}
+.vs textarea{width:100%;min-height:70px;font:inherit;color:var(--ink);background:#121217;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.vs .by{font-size:12px;color:var(--faint);margin:4px 0 12px}.never{background:#3a1f1f;color:#ff9a8f;border-radius:6px;padding:0 5px}
+.vpanel{background:#16161c;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:12px}.vpanel summary{cursor:pointer;color:var(--story)}
+.fhit{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;padding:8px 10px;border-bottom:1px solid #24242d}.fhit.locked{opacity:.55}
+.fhit del{background:#3a1f1f;color:#ffb4ad;text-decoration:line-through}.fhit ins{background:#1f3a2a;color:#9fe0a8;text-decoration:none}
+/* ---------- Status tiles */
+.st-top{display:flex;gap:14px;align-items:center;margin-bottom:16px;flex-wrap:wrap}.st-top .n3{display:flex;gap:10px}
+.st-top .n3 div{padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel)}.st-top .n3 b{font-size:26px;display:block;line-height:1.1}
+.st-row{margin-bottom:18px}.st-row h3{margin:0 0 8px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);display:flex;gap:8px;align-items:center}
+.st-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.st-small{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tile2{border-radius:12px;padding:12px 14px;border:1px solid var(--line);cursor:pointer;background:var(--panel);border-left:6px solid #55535f;transition:.12s}
+.tile2:hover{transform:translateY(-1px);border-color:#55556a}.tile2 .tl{font-size:12.5px;color:var(--dim)}.tile2 .tv{font-size:28px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.tile2 .td{font-size:12px;color:var(--faint);margin-top:3px;line-height:1.35}
+.tile2.met{border-left-color:var(--ok);background:linear-gradient(90deg,#173022,var(--panel) 60%)}.tile2.met .tv{color:#8fe8ac}
+.tile2.partly{border-left-color:var(--warn);background:linear-gradient(90deg,#33290f,var(--panel) 60%)}.tile2.partly .tv{color:#ffd27a}
+.tile2.not{border-left-color:var(--no);background:linear-gradient(90deg,#3a1a1a,var(--panel) 60%)}.tile2.not .tv{color:#ff9d95}
+.tile2.none .tv,.tile2.planned .tv{color:var(--faint)}
+.chip2{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);cursor:pointer}
+.chip2 i{width:8px;height:8px;border-radius:50%;background:#55535f}.chip2.met i{background:var(--ok)}.chip2.not i{background:var(--no)}.chip2.not{color:#ffc2bd;border-color:#5a2a28}.chip2.planned{font-style:italic}
+/* ---------- Tasks: a checklist, not an inbox */
+.tk-top{display:flex;gap:14px;align-items:baseline;margin-bottom:12px;flex-wrap:wrap}.tk-top b.big{font-size:30px}
+.tk-h{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);margin:18px 0 8px}
+.tcard{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:start;background:linear-gradient(180deg,var(--panel),#1a1a21);border:1px solid var(--line);border-left:5px solid #ff8a4c;border-radius:12px;padding:12px 14px;margin-bottom:10px;max-width:1100px}
+.tcard.unblocks{border-left-color:var(--no)}.tcard.overdue{border-left-color:var(--warn);background:linear-gradient(90deg,#2e2512,#1a1a21 50%)}
+.tchk{display:flex;align-items:center;justify-content:center}.tchk input{width:26px;height:26px;accent-color:var(--ok);cursor:pointer}
+.tcard .tt{font-size:15.5px;font-weight:600;line-height:1.4}.tcard .tm{font-size:12.5px;color:var(--faint);margin-top:3px}.tcard .tm b{color:var(--warn);font-weight:600}
+.tcard .tdet{font-size:13px;color:#cfccc5;margin-top:4px}.tcard .tw{font-size:12.5px;color:#cdd6ea;margin-top:6px}.tcard .tstep{font-size:12.5px;color:var(--warn);margin-top:6px}
+.tact{display:flex;flex-direction:column;gap:6px}.tact button{padding:6px 14px}
+.pv-req{background:var(--panel);border:1px solid var(--line);border-left:5px solid #f0b040;border-radius:12px;padding:10px 14px;margin-bottom:8px;max-width:1100px}.pv-req.hold{border-left-color:#7a7a8a;opacity:.85}.pv-req.gone{opacity:.45;text-decoration:line-through}.pv-req .why{margin-top:6px;color:var(--dim);font-size:13px;white-space:pre-wrap}
+.tdrop{margin-top:8px;border:2px dashed #4a4a5a;border-radius:10px;padding:10px 12px;color:var(--dim);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tdrop.over{border-color:var(--ok);background:#16241a;color:var(--ink)}.tdrop button{padding:4px 10px;font-size:12.5px}
+.tprog{height:8px;border-radius:4px;background:#2a2a34;overflow:hidden;margin-top:8px;display:none}.tprog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3d9a5e,var(--ok))}
+.tin{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.tin .f{font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:var(--panel2);display:flex;gap:8px;align-items:center}
+.tin img{height:56px;border-radius:6px}.tin audio{height:30px}
+details.tg{max-width:1100px;margin-bottom:8px}details.tg summary{cursor:pointer;color:var(--dim);padding:6px 0}
+.dl{list-style:none;padding:0;margin:0;max-width:1100px}.dl li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.dl .t{color:var(--faint);margin-right:8px;font-variant-numeric:tabular-nums}
 .picker{position:relative}.picker select{appearance:none;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 34px 8px 30px;min-width:240px;cursor:pointer}
 .picker:before{content:"";position:absolute;left:12px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:var(--gdot,var(--faint))}
 .picker:after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
@@ -21,11 +97,7 @@ header{display:flex;align-items:center;gap:18px;padding:12px 22px;border-bottom:
 .tabs button.on{background:var(--panel2);color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}.tabs button.on.story{box-shadow:inset 0 -2px 0 var(--story)}
 .spacer{flex:1}.who{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel);cursor:pointer;color:var(--dim)}
 .who b{color:var(--ink);font-weight:600}.clock{color:var(--faint);font-variant-numeric:tabular-nums;font-size:13px}
-.body{flex:1;display:flex;min-height:0}
-nav{width:200px;padding:18px 10px;border-right:1px solid var(--line);background:rgba(23,23,29,.6)}
-nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--dim);padding:9px 12px;border-radius:8px;margin-bottom:2px}
-nav button.on{background:var(--panel2);color:var(--ink)}nav .soon{font-size:12px;color:var(--faint);padding:14px 12px 4px;line-height:1.45}
-main{flex:1;overflow:auto;padding:22px 26px 40px}
+main{flex:1;overflow:auto;padding:22px 26px 40px;min-height:0}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;max-width:1400px}
 .card{background:linear-gradient(180deg,var(--panel),#1a1a21);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden}
 .s8{grid-column:span 8}.s4{grid-column:span 4}.s6{grid-column:span 6}.s12{grid-column:span 12}.s3{grid-column:span 3}
@@ -49,7 +121,7 @@ h2{margin:0 0 12px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .links{display:flex;flex-direction:column;gap:8px;margin-top:6px}.links button{text-align:left}
 .chips span{display:inline-block;padding:2px 9px;margin:3px 6px 0 0;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--dim)}
-iframe{width:100%;height:calc(100vh - 140px);border:1px solid var(--line);border-radius:var(--radius);background:#16161b}
+iframe{width:100%;height:calc(100vh - 200px);border:1px solid var(--line);border-radius:var(--radius);background:#16161b}
 .hero{display:flex;align-items:center;gap:16px;margin-bottom:18px}.hero h1{margin:0;font-size:26px;font-weight:650}.hero .tag{color:var(--story);border:1px solid #3a4a70;background:#1a2235;padding:3px 10px;border-radius:12px;font-size:12px}
 .note{border-left:3px solid var(--story);background:#1a2030;padding:12px 16px;border-radius:8px;color:#cdd6ea;margin-bottom:18px;max-width:900px}
 .tile b{display:block;font-size:30px;font-weight:650;font-variant-numeric:tabular-nums}.tile .lbl{color:var(--dim);font-size:13px;margin-bottom:10px}
@@ -69,8 +141,9 @@ iframe{width:100%;height:calc(100vh - 140px);border:1px solid var(--line);border
 #toast.no{background:#3a1f22;border-color:#a0443c}
 
 /* ---------- the Mail */
-main.flush{padding:0}
-.mail{display:grid;grid-template-columns:230px minmax(300px,380px) 1fr;height:calc(100vh - 67px)}
+main.flush{padding:0;overflow:hidden}
+.mail{display:grid;grid-template-columns:230px minmax(300px,380px) 1fr;height:100%}.mail .mlist,.mail .mread{overflow:auto}
+.mfold .fb{display:none!important}
 .mfold{border-right:1px solid var(--line);padding:16px 12px;background:rgba(23,23,29,.55);display:flex;flex-direction:column;gap:6px}
 .mfold .compose{width:100%;padding:11px;font-weight:600;margin-bottom:10px}
 .mfold .fb{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--dim);padding:8px 12px;border-radius:8px}
@@ -127,7 +200,7 @@ main.flush{padding:0}
 .tabs button .badge{background:var(--story);color:#0d1424;border-radius:9px;padding:0 7px;font-size:11.5px;margin-left:6px;font-weight:700}
 .fsel{font:inherit;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:#121217;color:var(--ink)}.cmp .fsel{width:100%;margin-bottom:10px}
 /* ---------- BUILD 04: sprite intake and characters */
-.hero .tag.art{color:var(--accent);border-color:#6a5326;background:#2a2316}
+.hero .tag{display:none}.hero .tag.art{color:var(--accent);border-color:#6a5326;background:#2a2316}
 .note.art{border-left-color:var(--accent);background:#221d14;color:#e6dcc6}
 .setup{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr)) 2fr;gap:16px;align-items:start;max-width:1400px}
 @media(max-width:1100px){.setup{grid-template-columns:1fr 1fr}}
@@ -159,7 +232,7 @@ main.flush{padding:0}
 .fbox.guess{border-color:var(--warn);border-style:dotted}.fbox.guess .tg{color:var(--warn)}.stage.mark,.stage.mark .fbox{cursor:crosshair}
 .lbox{position:absolute;border:1px dashed var(--no);border-radius:4px;pointer-events:none}
 .lbox span{position:absolute;left:0;top:-17px;font-size:10.5px;color:#ff9d95;white-space:nowrap}
-.side{position:sticky;top:76px;display:flex;flex-direction:column;gap:14px}
+.side{position:sticky;top:12px;display:flex;flex-direction:column;gap:14px}
 .fig{display:flex;gap:12px;align-items:flex-start}.fig canvas{background:#0e0e12;border-radius:8px;border:1px solid var(--line);flex:none}
 .fig h3{margin:0 0 4px;font-size:17px}.fig .meta{line-height:1.45}
 .compass{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
@@ -223,7 +296,7 @@ pre.out{background:#0f0f13;border:1px solid var(--line);border-radius:8px;paddin
 .wt b{display:block;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:16px}
 .wt .ln{color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wt .dot2{position:absolute;right:9px;top:10px;width:9px;height:9px;border-radius:50%}
 .wt .tag{display:inline-block;margin-top:4px;font-size:11px;padding:0 7px;border-radius:8px;border:1px solid var(--line);color:var(--dim)}
-.selpanel{position:sticky;top:76px}.selpanel .big{font-size:28px;font-weight:650}.kv2{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:10px 0}.kv2 dt{color:var(--dim)}.kv2 dd{margin:0}
+.selpanel{position:sticky;top:12px}.selpanel .big{font-size:28px;font-weight:650}.kv2{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:10px 0}.kv2 dt{color:var(--dim)}.kv2 dd{margin:0}
 .diskbar{height:10px;border-radius:5px;background:#2a2a34;overflow:hidden;position:relative;margin:6px 0}.diskbar i{display:block;height:100%;background:var(--ok)}.diskbar i.need{background:var(--warn);position:absolute;top:0}.diskbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--no)}
 .rlay{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;max-width:1600px;align-items:start}@media(max-width:1100px){.rlay{grid-template-columns:1fr}}
 .rlist{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 150px);overflow:auto;padding-right:4px}
@@ -285,40 +358,51 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
 .rt-line .mark{color:var(--warn);font-size:12px}.rt-line textarea{width:100%;font:15px/1.5 inherit;color:var(--ink);background:var(--panel);border:1px solid var(--story);border-radius:8px;padding:6px 8px}
 .rt-st{font-size:11.5px;font-weight:650;padding:1px 8px;border-radius:9px;white-space:nowrap}.rt-st.approved{background:#1f3a2a;color:#7fe0a0}.rt-st.flagged{background:#3a1f1f;color:#ff9a8f}.rt-st.draft{background:#26262e;color:var(--dim)}
 .rt-sheet{background:#16161c;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}.rt-sheet div{margin:3px 0}.rt-sheet b{color:var(--dim);font-weight:500}
+/* ---------- BUILD 17: team memory — the rulings book, the idea box, playtest notes, where the game stands */
+.mem{max-width:1150px}.mem .mbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.mem .mbar input{flex:1;min-width:260px}
+.mchips{display:flex;gap:6px;flex-wrap:wrap}.mchips button{padding:4px 12px;border-radius:14px;font-size:12.5px;background:transparent}.mchips button.on{background:var(--panel2);border-color:var(--ac,var(--accent));color:var(--ink)}
+.rul{border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 10px;background:var(--panel)}.rul.retired{opacity:.5}.rul.retired .rt{text-decoration:line-through}
+.rul .rh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:var(--faint);margin-bottom:4px}.rul .rt{color:#ece6d6;line-height:1.55}
+.rul mark{background:#4a3c14;color:#ffe3a0;border-radius:3px;padding:0 2px}.kchip{font-size:11px;padding:1px 8px;border-radius:9px;border:1px solid var(--line);color:var(--dim)}
+.kchip.answer{color:#9cc1ff;border-color:#2e4470}.kchip.marked{color:#ffd27a;border-color:#6a5326}.kchip.recorded{color:#8fe8ac;border-color:#2b5a3a}
+.conf{border-left:3px solid var(--no);background:#2a1c1e;padding:10px 14px;border-radius:8px;color:#ffd0cb;margin:0 0 10px}
+.ruled{border-left:3px solid var(--warn);background:#2a2416;padding:10px 14px;border-radius:8px;color:#f3dfb0;margin:10px 0;font-size:13px}
+.idea{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 9px;background:var(--panel)}
+.idea .it{flex:1;min-width:0}.idea .it b{font-weight:600;color:var(--ink)}.idea .ia{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:470px}.idea .ia button{padding:4px 10px;font-size:12.5px}
+.ptn{display:flex;gap:14px;border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:0 0 10px;background:var(--panel)}
+.ptn img{width:220px;height:124px;object-fit:cover;border-radius:6px;background:#0d0d11;flex:none;cursor:zoom-in}.ptn .noshot{width:220px;height:124px;border-radius:6px;background:#17171d;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12px;flex:none}
+.cat{font-size:11.5px;font-weight:650;padding:1px 9px;border-radius:9px;background:#2c2c38}.cat.Art{background:#3a2e14;color:#ffd27a}.cat.Writing{background:#1a2440;color:#9cc1ff}.cat.Bug{background:#3a1c1c;color:#ff9d95}.cat.Music{background:#2c1f3a;color:#d6b3ff}.cat.Balance{background:#173024;color:#8fe8ac}
+.stand{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:6px 0 14px}.stand .sx{border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:#191920}
+.stand .sx:hover{border-color:var(--accent)}.stand .sx .l{font-size:12px;color:var(--dim)}.stand .sx .v{font-size:19px;font-weight:650;margin:2px 0 6px}.stand .sx .pb{height:5px;border-radius:3px;background:#2a2a34;overflow:hidden}.stand .sx .pb i{display:block;height:100%;background:var(--warn)}
+.stand .sx.met .pb i{background:var(--ok)}.stand .sx.not .pb i{background:var(--no)}.nx2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.nx2 h3{margin:0 0 6px;font-size:13px;color:var(--dim);font-weight:600}
+.nx2 .nx{margin:6px 0;display:flex;gap:9px;align-items:baseline}.nx2 .nx a{color:var(--ink)}@media(max-width:900px){.nx2{grid-template-columns:1fr}}
+.fp-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.fp-ctl select{min-width:150px}
+.fp-why{color:var(--dim);font-size:13px;margin:4px 0 12px;white-space:pre-wrap;max-width:1100px}
+.fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.fp-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.fp-card img{width:100%;border-radius:8px;display:block;cursor:pointer;image-rendering:pixelated}
+.fp-card .t{display:flex;gap:8px;align-items:center;margin:8px 0 6px;flex-wrap:wrap}.fp-card .t b{flex:1}
+.fp-b{font-size:12px;padding:2px 8px;border-radius:10px;background:#2b4a33;color:#9fe0b0}.fp-b.no{background:#4a2b2b;color:#f0a0a0}.fp-b.ap{background:#4a3f1c;color:#f0d070}.fp-b.ed{background:#2b3a4a;color:#a0c8f0}
+.fp-ed{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.fp-ed canvas{border:1px solid var(--line);border-radius:6px;cursor:crosshair;image-rendering:pixelated;max-width:100%}
+.fp-side{flex:1;min-width:280px;max-width:520px}.fp-pal{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.fp-pal button{display:flex;gap:6px;align-items:center}.fp-pal button.on{outline:2px solid var(--ac,#f0b040)}
+.fp-pal i{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #0006}.fp-probs{font-size:13px;white-space:pre-wrap;margin-top:8px}.fp-probs .ok{color:#9fe0b0}.fp-probs .no{color:#f0a0a0}
 </style></head><body>
-<header>
-  <div class="logo">RPG<b>_</b>Forge</div>
-  <div class="picker" id="picker"><select id="game" title="Which game — everything on the Story side is this game's"></select></div>
-  <div class="tabs"><button id="t-art" class="on">Art</button><button id="t-story" class="story">Story<span class="badge" id="story-badge" style="display:none"></span></button></div>
-  <div class="spacer"></div>
-  <div class="who" id="who" title="Who is using this install — every change is signed with this name">You are <b id="who-name">…</b> ✎</div>
-  <div class="clock" id="clock"></div>
-</header>
-<div class="body">
-  <nav id="nav-art">
-    <button data-s="home" class="on">⌂ Home</button>
-    <button data-s="queue">▦ Queue &amp; pictures</button>
-    <button data-s="wanted">▤ Wanted</button>
-    <button data-s="make">✚ Make a picture</button>
-    <button data-s="review">✓ Review &amp; approve</button>
-    <button data-s="intake">✥ Sprite intake</button>
-    <button data-s="chars">☺ Characters</button>
-    <button data-s="library">❡ Prompt library</button>
-    <button data-s="bakeoffs">⚗ Bake-offs</button>
-    <button data-s="models">▣ Models</button>
-    <button data-s="tools">⇄ Outside tools</button>
-    <div class="soon">Next on this side: wiring day (BUILD 16) — only with the art worker stopped.</div>
-  </nav>
-  <nav id="nav-story" style="display:none">
-    <button data-s="mail" class="on">✉ Mail <span id="nav-unread"></span></button>
-    <button data-s="orders">☑ Work orders</button>
-    <button data-s="overview">◎ Overview</button>
-    <button data-s="read">📖 Read-through</button>
-    <button data-s="music">♪ Music</button>
-    <div class="soon">Next on this side: people, quests and voice sheets (the rest of BUILD 07).</div>
-  </nav>
+<aside id="side">
+  <div class="brand"><div class="logo">RPG<b>_</b>Forge</div><div class="tagline">one workbench for every game</div></div>
+  <div class="picker" id="picker"><select id="game" title="Which game — every area shows this game's work"></select></div>
+  <button class="wbtn unknown" id="wbtn" title="The art worker — shared by every game"><i></i><span class="wl">The art worker…</span></button>
+  <div id="areas"></div>
+  <div class="foot"><div class="who" id="who" title="Who is using this install — every change is signed with this name"><span>You are <b id="who-name">…</b></span> ✎</div>
+    <div class="clock" id="clock"></div></div>
+</aside>
+<div class="col">
+  <div class="ahead" id="ahead"><div class="at"><h1 id="a-title"></h1></div><div class="atabs" id="atabs"></div></div>
+  <div class="needsl" id="needsl"></div>
   <main id="main">
     <section id="v-home" class="grid">
+      <div class="card s12" id="c-stand"><h2>Where the game stands</h2><div id="h-stand" class="meta">…</div></div>
+      <div class="card s8" id="c-needs"><h2>What needs you</h2><div id="h-needs" class="meta">…</div></div>
+      <div class="card s4" id="c-areas"><h2>Waiting in each area</h2><div id="h-areas" class="meta">…</div></div>
+      <div class="card s12" id="c-away" style="display:none"><h2>Since you last looked</h2><div id="h-away"></div></div>
       <div class="card s8" id="c-worker">
         <h2>The art worker <span class="meta" style="text-transform:none;letter-spacing:0">— shared by every game</span></h2>
         <div class="state"><span class="dot" id="w-dot"></span><b id="w-state">…</b><span class="since" id="w-since"></span></div>
@@ -362,7 +446,7 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
       <div class="mlay"><div class="kindl" id="m-kinds"></div><div><div class="card" id="m-form"></div><div class="card" id="m-preview" style="margin-top:14px"></div></div></div>
     </section>
     <section id="v-review" style="display:none">
-      <div class="hero"><h1>Review &amp; approve</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><a href="#" class="meta" onclick="screen='queue';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='queue'));show();return false">the old dashboard (Called out drafts live there)</a></div>
+      <div class="hero"><h1>Review &amp; approve</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><a href="#art/queue" class="meta">the old dashboard (Called out drafts live there)</a></div>
       <div id="r-deliver"></div>
       <div id="r-called"></div>
       <div class="rlay"><div class="rlist" id="r-list"></div><div id="r-detail"><div class="empty">Choose a picture.</div></div></div>
@@ -424,6 +508,22 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
     <section id="v-orders" style="display:none"></section>
     <section id="v-music" style="display:none"></section>
     <section id="v-read" style="display:none"></section>
+    <section id="v-status" style="display:none"></section>
+    <section id="v-people" style="display:none"></section>
+    <section id="v-quests" style="display:none"></section>
+    <section id="v-voices" style="display:none"></section>
+    <section id="v-find" style="display:none"></section>
+    <section id="v-tasks" style="display:none"></section>
+    <section id="v-tasksdone" style="display:none"></section>
+    <section id="v-notesopen" style="display:none"></section>
+    <section id="v-planned" style="display:none"></section>
+    <section id="v-rulings" style="display:none"></section>
+    <section id="v-ideas" style="display:none"></section>
+    <section id="v-provide" style="display:none"></section>
+    <section id="v-floorplans" style="display:none"></section>
+    <section id="v-playtest" style="display:none"></section>
+    <section id="v-settings" style="display:none"></section>
+    <section id="v-about" style="display:none"></section>
     <audio id="mu-audio" preload="none"></audio>
   </main>
 </div>
@@ -447,7 +547,7 @@ const gid=()=>$('#game').value;
 function hue(name){const g=String(name||'?').trim().split(/\s+/)[0].toLowerCase();let h=0;for(const c of g)h=(h*31+c.charCodeAt(0))%360;return h}
 function avatar(name){const ini=String(name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();return `<div class="av" style="background:hsl(${hue(name)},62%,66%)">${esc(ini)}</div>`}
 function md(t){const lines=String(t||'').replace(/\r/g,'').split('\n');let out=[],para=[],list=null;
-  const inl=x=>esc(x).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/~~([^~]+)~~/g,'<del>$1</del>').replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g,'$1<em>$2</em>');
+  const inl=x=>esc(x).replace(/\[([^\]]+)\]\((#[A-Za-z0-9_\-\/%.~:]+)\)/g,'<a href="$2">$1</a>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/~~([^~]+)~~/g,'<del>$1</del>').replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g,'$1<em>$2</em>');
   const flushP=()=>{if(para.length){out.push('<p>'+para.map(inl).join('<br>')+'</p>');para=[]}};
   const flushL=()=>{if(list){out.push('<ul>'+list.map(x=>'<li>'+inl(x)+'</li>').join('')+'</ul>');list=null}};
   for(const l of lines){const m=l.match(/^\s*[-*]\s+(.*)/),h=l.match(/^(#{1,4})\s+(.*)/),n=l.match(/^\s*\d+\.\s+(.*)/);
@@ -463,32 +563,71 @@ function askWho(){const sug=(G.people||[]).filter(n=>n!==G.identity);modal(`<h3>
   setTimeout(()=>$('#m-name').focus(),50);$('#m-name').onkeydown=e=>{if(e.key==='Enter')$('#m-ok').click()};
   $('#m-ok').onclick=async()=>{const r=await post('identity',{name:$('#m-name').value});toast(r.message,r.ok);if(r.ok){G.identity=r.identity;$('#who-name').textContent=r.identity;closeModal();await loadGames(true);show()}}}
 $('#who').onclick=askWho;
-function setSide(s){side=s;$('#t-art').classList.toggle('on',s==='art');$('#t-story').classList.toggle('on',s==='story');
-  $('#nav-art').style.display=s==='art'?'':'none';$('#nav-story').style.display=s==='story'?'':'none';show()}
-$('#t-art').onclick=()=>setSide('art');$('#t-story').onclick=()=>setSide('story');
-$$('#nav-art button[data-s]').forEach(b=>b.onclick=()=>{screen=b.dataset.s;$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x===b));show()});
-function setStory(s){sscreen=s;$$('#nav-story button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s===s));show()}
-$$('#nav-story button[data-s]').forEach(b=>b.onclick=()=>setStory(b.dataset.s));
-function show(){const st=side==='story';$('#v-home').style.display=!st&&screen==='home'?'':'none';$('#v-queue').style.display=!st&&screen==='queue'?'':'none';
-  $('#v-intake').style.display=!st&&screen==='intake'?'':'none';$('#v-chars').style.display=!st&&screen==='chars'?'':'none';if(!st&&screen==='intake')loadIntake();if(!st&&screen==='chars')loadChars();
-  for(const k of ['wanted','make','review','library','bakeoffs','models','tools'])$('#v-'+k).style.display=!st&&screen===k?'':'none';if(!st&&screen==='wanted')loadWanted();if(!st&&screen==='make')loadMake();if(!st&&screen==='review'){loadReview();loadCalled()}
-  if(!st&&screen==='library')loadLibrary();if(!st&&screen==='bakeoffs')loadBakeoffs();if(!st&&screen==='models'&&!MO.data)loadModels(false);if(!st&&screen==='tools')loadTools();
-  $('#v-story').style.display=st&&sscreen==='overview'?'':'none';$('#v-mail').style.display=st&&sscreen==='mail'?'':'none';$('#v-orders').style.display=st&&sscreen==='orders'?'':'none';$('#v-music').style.display=st&&sscreen==='music'?'':'none';$('#v-read').style.display=st&&sscreen==='read'?'':'none';
-  $('#main').classList.toggle('flush',st&&sscreen==='mail');
-  if(!st&&screen==='queue'&&!$('#queue-frame').src)$('#queue-frame').src='/art/queue';
-  if(st&&sscreen==='overview')loadOverview();if(st&&sscreen==='mail')loadMail();if(st&&sscreen==='orders')loadOrders();if(st&&sscreen==='music')loadMusic();if(st&&sscreen==='read')loadRead();if(!st&&screen==='home')loadHome()}
+// ---------- BUILD 26: one sidebar of areas, a tab strip per area, an address for every place (#area/tab/…)
+// `side`, `screen` and `sscreen` are still kept up to date, so every screen's own code works unchanged in its new place.
+let A={areas:[],needs:{},old:{},area:null,tab:null,rest:[],badges:{},last:null,ready:false,needsAt:0};
+const SECTION={home:'v-home',queue:'v-queue',wanted:'v-wanted',make:'v-make',review:'v-review',library:'v-library',bakeoffs:'v-bakeoffs',
+  models:'v-models',tools:'v-tools',intake:'v-intake',chars:'v-chars',mail:'v-mail',orders:'v-orders',overview:'v-story',read:'v-read',
+  music:'v-music',status:'v-status',tasks:'v-tasks',tasksdone:'v-tasksdone',notesopen:'v-notesopen',planned:'v-planned',rulings:'v-rulings',ideas:'v-ideas',provide:'v-provide',floorplans:'v-floorplans',playtest:'v-playtest',settings:'v-settings',about:'v-about',
+  people:'v-people',quests:'v-quests',voices:'v-voices',find:'v-find'};
+const STORY_SCREENS=['mail','orders','overview','read','music'];
+function addrParts(h){return String(h||'').replace(/^#\/?/,'').split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch(e){return x}})}
+function addrOf(...p){return p.filter(x=>x!==undefined&&x!==null&&x!=='').map(x=>encodeURIComponent(String(x))).join('/')}
+function curAddr(){return A.area?addrOf(A.area.id,A.tab.id,...A.rest):''}
+function go(addr){addr=String(addr||'').replace(/^#/,'');if(location.hash.replace(/^#/,'')===addr)route();else location.hash=addr}
+let _placeT;function setAddr(addr){addr=String(addr).replace(/^#/,'');if(location.hash.replace(/^#/,'')===addr)return;history.replaceState(null,'','#'+addr);const p=addrParts(addr);A.rest=p.slice(2);rememberPlace()}
+function rememberPlace(){clearTimeout(_placeT);_placeT=setTimeout(()=>post('place',{game:gid(),addr:location.hash.replace(/^#/,'')}).catch(()=>{}),800)}
+window.addEventListener('hashchange',()=>route());
+async function loadAreas(){const d=await api('/api/suite/areas?id='+encodeURIComponent(gid()));A.areas=d.areas;A.needs=d.needs;A.old=d.old;A.last=d.last;A.needsAt=Date.now();paintAreas();if(A.area)paintFrame()}
+function badgeOf(id){const b=A.badges||{};
+  if(id==='messages'&&b.messages)return `<span class="ab">${b.messages}</span>`;
+  if(id==='tasks'&&b.tasks)return `<span class="ab tasks ${b.overdue?'over':''}" title="${b.tasks} to do${b.overdue?' — '+b.overdue+' overdue':''}">${b.tasks}</span>`;
+  if(id==='music'&&b.music)return `<span class="ab soft" title="slots still needed">${b.music}</span>`;
+  if(id==='art'&&b.art)return `<span class="ab soft" title="pictures waiting for review">${b.art}</span>`;
+  if(id==='notes'&&b.notes)return `<span class="ab soft" title="open notes">${b.notes}</span>`;return ''}
+function paintAreas(){$('#areas').innerHTML=A.areas.map(a=>`<button class="arow ${A.area&&A.area.id===a.id?'on':''}" data-a="${esc(a.id)}" style="--ac:${esc(a.color)}" title="${esc(a.name)}"><span class="ai">${esc(a.icon)}</span><span class="an">${esc(a.name)}</span>${badgeOf(a.id)}</button>`).join('');
+  $$('#areas .arow').forEach(b=>b.onclick=()=>go(b.dataset.a))}
+function paintFrame(){const a=A.area,t=A.tab;if(!a)return;$('#side').style.setProperty('--ac',a.color);$('#ahead').style.setProperty('--ac',a.color);
+  $$('#areas .arow').forEach(b=>b.classList.toggle('on',b.dataset.a===a.id));
+  $('#a-title').innerHTML=`<span class="ai">${esc(a.icon)}</span>${esc(a.name)}`;
+  $('#atabs').innerHTML=a.tabs.map(x=>`<button class="${x.id===t.id?'on':''} ${x.planned?'planned':''}" data-t="${esc(x.id)}" title="${esc((A.needs[a.id+'/'+x.id]||{}).line||'')}">${esc(x.name)}${x.planned?`<span class="tb">BUILD ${String(x.planned).padStart(2,'0')}</span>`:''}</button>`).join('');
+  $$('#atabs button').forEach(b=>b.onclick=()=>go(a.id+'/'+b.dataset.t));
+  const n=A.needs[a.id+'/'+t.id]||{line:'',met:null};const el=$('#needsl');
+  el.className='needsl '+(n.planned?'pl':n.met===true?'ok':n.met===false?'no':'');
+  el.innerHTML=(n.planned||(n.empty||[]).length&&n.met===null?'<b>—</b> ':n.met===true?'<b>✓</b> ':n.met===false?'<b>✗</b> ':'<b>?</b> ')+esc(n.line)}
+function route(){if(!A.areas.length)return;let p=addrParts(location.hash);
+  if(p.length===1&&A.old[p[0]]&&!A.areas.find(x=>x.id===p[0]))p=addrParts(A.old[p[0]]);      // an old screen's name still finds its new home
+  let a=A.areas.find(x=>x.id===p[0]);if(!a){a=A.areas[0];p=[a.id]}
+  const t=a.tabs.find(x=>x.id===p[1])||a.tabs[0];const prev=A.tab;A.area=a;A.tab=t;A.rest=p.slice(2);paintFrame();
+  const sc=t.screen;if(STORY_SCREENS.includes(sc)){side='story';sscreen=sc}else{side='art';screen=sc}
+  for(const id of new Set(Object.values(SECTION)))$('#'+id).style.display='none';
+  $('#'+SECTION[sc]).style.display='';$('#main').classList.toggle('flush',sc==='mail');
+  rememberPlace();if(Date.now()-A.needsAt>120000)loadAreas().catch(()=>{});
+  show(prev)}
+function show(prev){const t=A.tab;if(!t)return;const sc=t.screen,r=A.rest;
+  if(sc==='home')loadHome();else if(sc==='queue'){if(!$('#queue-frame').src)$('#queue-frame').src='/art/queue'}
+  else if(sc==='wanted')loadWanted();else if(sc==='make')loadMake();else if(sc==='review'){loadReview();loadCalled()}
+  else if(sc==='library')loadLibrary();else if(sc==='bakeoffs')loadBakeoffs();else if(sc==='models'){if(!MO.data)loadModels(false)}else if(sc==='tools')loadTools();
+  else if(sc==='intake')loadIntake();else if(sc==='chars'){if(r[0])C.sel=r[0];loadChars()}
+  else if(sc==='overview')loadOverview();else if(sc==='orders')loadOrders();
+  else if(sc==='mail'){const box=t.box||'inbox';if(M.box!==box){M.box=box;M.sel=null;M.q='';$('#msearch').value=''}if(r[0])M.want=r[0];loadMail()}
+  else if(sc==='music'){MU.tab=t.mtab||'board';if(MU.tab==='board'&&r[0])MU.sel=r[0];if(MU.tab==='profiles'&&r[0]&&(!MU.sheet||MU.sheet.id!==r[0]))MU.want=r[0];loadMusic()}
+  else if(sc==='read'){if(r[0]&&r[0]!==RT.place){RT.place=r[0];RT.sel=0}if(r[1])RT.era=r[1];loadRead()}
+  else if(sc==='status')loadStatus(t.id);else if(sc==='tasks')loadTasks();else if(sc==='tasksdone')loadTasksDone();
+  else if(sc==='people')loadPeople(r[0]);else if(sc==='quests')loadQuests(r[0]);else if(sc==='voices')loadVoices(r[0],r[1]);else if(sc==='find')paintFind();
+  else if(sc==='notesopen')loadNotesOpen(r[0]);else if(sc==='planned')paintPlanned();
+  else if(sc==='rulings')loadRulings(r[0]);else if(sc==='ideas')loadIdeas(r[0]);else if(sc==='provide')loadProvide();else if(sc==='floorplans')loadFloorplans(r);else if(sc==='playtest')loadPlaytest();else if(sc==='settings')loadSettings();else if(sc==='about')loadAbout()}
 async function loadGames(keep){G=await api('/api/suite/games');const sel=$('#game');
   sel.innerHTML=G.games.map(g=>`<option value="${esc(g.id)}" ${g.id===G.current?'selected':''}>${esc(g.name)}${g.root_exists?'':' — folder not reachable'}</option>`).join('');
   paintPicker();$('#who-name').textContent=G.identity||'nobody yet';if(!G.identity&&!keep)askWho();return G}
 function paintPicker(){const g=G.games.find(x=>x.id===gid())||{};$('#picker').style.setProperty('--gdot',g.root_exists?(g.adapter?'var(--ok)':'var(--warn)'):'var(--no)');
   $('#game').title=g.root?`${g.name}\n${g.root}${g.adapter?'':'\n(no Story adapter yet)'}`:'';badge(g.unread||0)}
-function badge(n){$('#story-badge').style.display=n?'':'none';$('#story-badge').textContent=n;
-  $('#nav-unread').innerHTML=n?`<span class="badge" style="background:var(--story);color:#0d1424;border-radius:9px;padding:0 7px;font-size:11.5px;font-weight:700">${n}</span>`:'';
-  $('#mb-inbox').style.display=n?'':'none';$('#mb-inbox').textContent=n}
-$('#game').onchange=async e=>{const r=await post('pick',{id:e.target.value});G.current=e.target.value;M.sel=null;O.data=null;Object.assign(I,{view:null,result:null,ch:'',v:'',tool:'',list:null});Object.assign(C,{sel:null,page:null,v:null});Object.assign(W,{data:null,sel:new Set(),plan:null});Object.assign(MK,{data:null,type:null,vals:{},pv:null});Object.assign(RV,{data:null,sel:null,view:null,ab:null});Object.assign(LB,{data:null,shelf:null});MO.data=null;Object.assign(MU,{data:null,sel:null,sheet:null});Object.assign(RT,{towns:null,place:'',data:null,sel:0,cmp:null});paintPicker();if(!r.ok)toast(r.message,false);show()};
+function badge(n){A.badges=Object.assign(A.badges||{},{messages:n});if(A.areas.length)paintAreas();$('#mb-inbox').style.display=n?'':'none';$('#mb-inbox').textContent=n}
+$('#game').onchange=async e=>{const r=await post('pick',{id:e.target.value});G.current=e.target.value;M.sel=null;O.data=null;Object.assign(I,{view:null,result:null,ch:'',v:'',tool:'',list:null});Object.assign(C,{sel:null,page:null,v:null});Object.assign(W,{data:null,sel:new Set(),plan:null});Object.assign(MK,{data:null,type:null,vals:{},pv:null});Object.assign(RV,{data:null,sel:null,view:null,ab:null});Object.assign(LB,{data:null,shelf:null});MO.data=null;Object.assign(MU,{data:null,sel:null,sheet:null});Object.assign(RT,{towns:null,place:'',data:null,sel:0,cmp:null});paintPicker();if(!r.ok)toast(r.message,false);
+  A.badges={};await loadAreas();loadBadges(true);go(A.area?A.area.id+'/'+A.tab.id:'home')};
 // ---------- Home
 const STATE_WORD={rendering:'Rendering',idle:'Idle','stopped':'Stopped','stopped-mid-job':'Stopped mid-job',unknown:"Can't tell"};
-async function loadHome(){if(side!=='art'||screen!=='home')return;try{H=await api('/api/suite/home')}catch(e){$('#w-words').textContent='The suite could not read the forge: '+e;return}
+async function loadHome(){if(side!=='art'||screen!=='home')return;homeExtras();try{H=await api('/api/suite/home')}catch(e){$('#w-words').textContent='The suite could not read the forge: '+e;return}
   const w=H.worker;$('#w-dot').className='dot st-'+w.state;$('#w-state').textContent=STATE_WORD[w.state]||w.state;
   $('#w-since').textContent=w.since?`since ${String(w.since).replace('T',' ').slice(11,16)} — ${w.since_words}`:'';
   $('#w-words').textContent=w.words.charAt(0).toUpperCase()+w.words.slice(1)+'.';
@@ -527,6 +666,7 @@ async function loadMail(){let d,aw=null;const g=encodeURIComponent(gid());
     <div class="sj">${esc(l.subject)}</div><div class="fl">${esc(l.first_line)}</div>
     ${l.n_questions?`<span class="qchip ${l.open_questions?'':'done'}">${l.open_questions?(l.open_questions===l.n_questions?(l.n_questions===1?'1 question':l.n_questions+' questions')+' to answer':l.open_questions+' of '+l.n_questions+' still open'):(l.n_questions===1?'answered':'all '+l.n_questions+' answered')}</span>`:''}</div>`).join('');
   $('#mlist').innerHTML=h;$$('#mlist .row').forEach(r=>r.onclick=()=>openLetter(r.dataset.id));
+  if(M.want){const w=M.want;M.want=null;openLetter(w);return}
   if(M.sel&&d.letters.some(l=>l.id===M.sel))return;
   if(d.letters.length&&M.box==='inbox'&&!M.q){const first=d.letters.find(l=>l.unread)||d.letters[0];openLetter(first.id)}
   else $('#mread').innerHTML='<div class="empty" style="margin-top:20vh">Choose a letter.</div>'}
@@ -535,9 +675,9 @@ function awayCard(a){const parts=a.sections.map(s=>`${s.entries.length} × ${s.t
   return `<div class="away"><b>While you were away</b><div class="ad">Since ${esc(when(a.since)||'the start')}: ${esc(a.people.join(', '))} — ${esc(parts)}.</div>
   <details><summary>Show me</summary><ul style="padding-left:18px;margin:6px 0">${a.sections.map(s=>s.entries.map(e=>`<li><span class="meta">${esc(when(e.time))} · ${esc(e.who)}</span> — ${esc(s.title)}${e.obj?`<br><code>${esc(e.obj)}</code>`:''}${e.diff?`<br>${diffHtml(e.diff)}`:''}${e.note?`<br><span class="meta">${esc(e.note)}</span>`:''}</li>`).join('')).join('')}</ul></details>
   <div style="margin-top:8px"><button class="ghost" style="padding:4px 10px;font-size:12.5px" onclick="awaySeen()">Got it</button></div></div>`}
-async function awaySeen(){const r=await post('away_seen',{game:gid()});if(r.ok)loadMail()}
+async function awaySeen(){const r=await post('away_seen',{game:gid()});if(r.ok){if(screen==='home'&&side==='art')homeExtras();else loadMail()}}
 async function openLetter(id){const l=M.letters.find(x=>x.id===id);if(l&&l.folder==='drafts'){return compose(l)}
-  M.sel=id;$$('#mlist .row').forEach(r=>r.classList.toggle('sel',r.dataset.id===id));
+  M.sel=id;$$('#mlist .row').forEach(r=>r.classList.toggle('sel',r.dataset.id===id));if(A.area&&A.area.id==='messages')setAddr(addrOf('messages',A.tab.id,id));
   let v;try{v=await api(`/api/suite/letter?id=${encodeURIComponent(gid())}&letter=${encodeURIComponent(id)}`)}catch(e){$('#mread').innerHTML=`<div class="err">${esc(e)}</div>`;return}
   M.view=v;renderThread(v);
   let changed=false;for(const c of v.letters)if(c.unread){changed=true;await post('mail_read',{game:gid(),letter:c.id});const row=$(`#mlist .row[data-id="${CSS.escape(c.id)}"]`);if(row)row.classList.remove('unread');const x=M.letters.find(y=>y.id===c.id);if(x)x.unread=false}
@@ -587,12 +727,18 @@ function compose(d){d=d||{};const qs=d.questions||[];modal(`<h3>${d.id?'Your dra
   <input id="c-to" list="c-corr" placeholder="To — a name" value="${esc(d.to&&d.to!=='(nobody yet)'?d.to:'')}"><datalist id="c-corr">${M.corr.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
   <input id="c-subj" placeholder="Subject" value="${esc(d.subject&&d.subject!=='(no subject)'?d.subject:'')}"><textarea id="c-body" style="min-height:180px" placeholder="The letter — what you think, what you'd do, and only the questions you need answered.">${esc(d.body||'')}</textarea>
   <div id="c-qs">${qs.map(q=>qRow(q.question,(q.choices||[]).map(x=>typeof x==='object'?x.label:x).join(', '))).join('')}</div>
-  <button class="linkish" id="c-addq">＋ Ask a question they can answer in place</button></div>
+  <button class="linkish" id="c-addq">＋ Ask a question they can answer in place</button><div id="c-ruled"></div></div>
   <div class="row" style="margin-top:14px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="ghost" id="c-draft">Save draft</button><button class="go" id="c-send">Send</button></div>`,true);
   $('#c-addq').onclick=()=>$('#c-qs').insertAdjacentHTML('beforeend',qRow('',''));
   const gather=()=>({game:gid(),draft_id:d.id||null,to:$('#c-to').value,subject:$('#c-subj').value,body:$('#c-body').value,
     questions:$$('#c-qs .qrow').map(r=>({question:r.children[0].value.trim(),choices:r.children[1].value.split(',').map(x=>x.trim()).filter(Boolean)})).filter(q=>q.question)});
-  $('#c-send').onclick=async()=>{const r=await post('mail_send',gather());toast(r.message,r.ok);if(r.ok){closeModal();loadMail()}};
+  let ruledOk=false;
+  $('#c-send').onclick=async()=>{const g=gather();
+    if(g.questions.length&&!ruledOk){const qs=g.questions.map(q=>'q='+encodeURIComponent(q.question)).join('&');
+      try{const c=await api(`/api/suite/rulecheck?id=${encodeURIComponent(gid())}&${qs}`);const hit=c.checked.filter(x=>x.rulings.length);
+        if(hit.length){ruledOk=true;$('#c-send').textContent='Send anyway';
+          $('#c-ruled').innerHTML=`<div class="ruled"><b>The rulings book already answers ${hit.length===1?'this question':hit.length+' of these questions'}:</b>${hit.map(h=>`<div style="margin-top:6px">“${esc(h.question)}”<br>→ <i>${esc(h.rulings[0].text.slice(0,260))}</i> <span class="meta">(${esc(h.rulings[0].when||'undated')} · ${esc(h.rulings[0].where)})</span></div>`).join('')}<div class="meta" style="margin-top:6px">Take the question out, or press Send anyway if it really needs asking again.</div></div>`;return}}catch(e){}}
+    const r=await post('mail_send',g);toast(r.message,r.ok);if(r.ok){closeModal();loadMail()}};
   $('#c-draft').onclick=async()=>{const r=await post('mail_draft',gather());toast(r.message,r.ok);if(r.ok){closeModal();loadMail()}};
   setTimeout(()=>$(d.to?'#c-body':'#c-to').focus(),50)}
 function qRow(q,c){return `<div class="qrow"><input placeholder="A question" value="${esc(q)}"><input placeholder="Choices, comma-separated (optional)" value="${esc(c)}"><button class="ghost" onclick="this.parentElement.remove()">✕</button></div>`}
@@ -626,7 +772,7 @@ async function openOrder(obj,title){let d=O.data;if(!d){try{d=O.data=await api(`
   ${sel('w-pri','<option value="now">Now</option><option value="soon" selected>Soon</option><option value="someday">Someday</option>')}</div>
   <div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="m-ok">Add to the list</button></div>`,true);
   $('#m-ok').onclick=async()=>{const r=await post('order_add',{game:gid(),for:$('#w-for').value,title:$('#w-title').value,detail:$('#w-detail').value,priority:$('#w-pri').value,object:obj});toast(r.message,r.ok);if(r.ok){closeModal();O.data=null;if(sscreen==='orders'&&side==='story')loadOrders()}}}
-function goLetter(id){M.box='inbox';M.q='';$$('.mfold .fb').forEach(x=>x.classList.toggle('on',x.dataset.box==='inbox'));setStory('mail');setTimeout(()=>openLetter(id),300)}
+function goLetter(id){M.q='';go('messages/inbox/'+id)}
 // ---------- Story
 function statusBar(bs,order){const tot=Object.values(bs||{}).reduce((a,b)=>a+b,0)||1;
   return `<div class="sts">${order.filter(k=>bs[k]).map(k=>`<i class="c-${k}" style="width:${100*bs[k]/tot}%" title="${k}: ${bs[k]}"></i>`).join('')}</div>`+
@@ -773,7 +919,7 @@ function paintResult(){const el=$('#in-result');const r=I.result;if(!r||!I.view)
     <div class="gifs"><figure class="checker" style="padding:6px"><img src="${r.turntable}" alt=""><figcaption>turntable</figcaption></figure>${Object.entries(r.anims||{}).map(([k,u])=>`<figure class="checker" style="padding:6px"><img src="${u}" alt=""><figcaption>walk ${esc(k)}</figcaption></figure>`).join('')}</div>
     ${(r.figures||[]).length?`<table class="t"><tr><th>#</th><th>facing · frame</th><th>rim colour</th><th>at the sheet's edge</th><th>in its cell</th></tr>${r.figures.map(f=>f.used?`<tr><td>${f.n}</td><td>${esc(f.facing)}·${f.frame}${f.flip?' (mirrored)':''}</td><td${f.halo&&f.halo.like_backdrop?' class="bad"':''}><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${esc((f.halo||{}).rim_colour||'#000')};margin-right:6px"></span>${esc((f.halo||{}).rim_colour||'')}${f.halo&&f.halo.like_backdrop?' — like the backdrop (a light fringe)':''}</td><td${(f.sheet_edge||[]).length?' class="bad"':''}>${esc((f.sheet_edge||[]).length?f.sheet_edge.join(', ')+' — may be cut off':'no')}</td><td${(f.placed.notes||[]).length?' class="bad"':''}>${esc((f.placed.notes||[]).join('; ')||'ok')}</td></tr>`:`<tr><td>${f.n}</td><td colspan="4" class="meta">${esc(f.why==='skip'?'left out':f.why)}</td></tr>`).join('')}</table>`:''}
     <div class="links" style="flex-direction:row;flex-wrap:wrap;margin-top:14px"><a href="${r.edges}" target="_blank">Show me the edge report</a> · <a href="${r.numbers}" target="_blank">the numbered sheet</a> · <a href="/out/${encodeURIComponent(r.job)}/report.json" target="_blank">report.json</a> · <a href="/suite/text?what=log" target="_blank">the log</a></div>
-    <div class="note art" style="margin-top:14px;margin-bottom:0">When it looks right, approve job <code>${esc(r.job)}</code> in <a href="#" onclick="screen='queue';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='queue'));show();return false">Queue &amp; pictures</a>${c.id?` as the ${esc(c.name)} field sheet`:''}. The game reads delivered sheets after BUILD 11; Review &amp; approve moves onto this screen with BUILD 12.</div>
+    <div class="note art" style="margin-top:14px;margin-bottom:0">When it looks right, approve job <code>${esc(r.job)}</code> in <a href="#art/queue">Queue &amp; pictures</a>${c.id?` as the ${esc(c.name)} field sheet`:''}. The game reads delivered sheets after BUILD 11; Review &amp; approve moves onto this screen with BUILD 12.</div>
     ${(I.view.results||[]).length>1?`<div class="meta" style="margin-top:12px">Earlier sheets from this mapping: ${I.view.results.slice(1).map(x=>`<a href="${x.sheet}" target="_blank">${esc(String(x.when||x.job).replace('T',' ').slice(5,16))}</a>`).join(' · ')}</div>`:''}</div>`}
 document.addEventListener('keydown',e=>{if(side!=='art'||screen!=='intake'||!I.view||$('#modal').style.display==='flex')return;const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA')return;
   const k=e.key;if(/^[0-9]$/.test(k)&&NUMPAD[k]){e.preventDefault();pick(NUMPAD[k]);return}
@@ -787,7 +933,7 @@ function paintCharList(){const q=C.q.toLowerCase();const ls=C.list.filter(c=>!q|
   const qi=$('#c-q');qi.oninput=()=>{C.q=qi.value;paintCharList();const n=$('#c-q');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
   $$('#c-list .citem').forEach(el=>el.onclick=()=>{C.sel=el.dataset.id;C.v=null;paintCharList();openChar(C.sel)})}
 async function openChar(cid){let p;try{p=await api('/api/suite/character?id='+encodeURIComponent(gid())+'&cid='+encodeURIComponent(cid))}catch(e){$('#c-page').innerHTML=`<div class="err">${esc(e)}</div>`;return}
-  C.page=p;if(!C.v||!p.variants.find(v=>v.name===C.v))C.v=(p.variants.find(v=>v.default)||p.variants[0]||{}).name;paintChar()}
+  C.page=p;if(A.area&&A.area.id==='characters'&&A.tab.id==='characters')setAddr(addrOf('characters','characters',cid));if(!C.v||!p.variants.find(v=>v.name===C.v))C.v=(p.variants.find(v=>v.default)||p.variants[0]||{}).name;paintChar()}
 const blocks=(text,bs)=>{if(!text)return '<span class="meta">none</span>';let i=0;return esc(text).replace(/\{\{\s*([A-Za-z0-9_.\-]+)\s*\}\}/g,(m,ref)=>{const b=bs[i++]||{ref,state:'missing'};
   const tip=b.state==='written'?b.text:(b.state==='placeholder'?'Not written yet: '+b.text:'Not in the prompt library');return `<span class="blk ${b.state}" title="${esc(tip+(b.file?'\n('+b.file+')':''))}">${esc(ref)}</span>`})};
 function paintChar(){const p=C.page;const v=p.variants.find(x=>x.name===C.v)||{};const gidq=encodeURIComponent(gid());
@@ -831,7 +977,7 @@ async function charPlan(){const r=await post('char_plan',{game:gid(),cid:C.page.
     <div style="margin-top:10px"><button class="go" id="c-queue">Queue these ${r.renders.length} render(s)</button></div><div id="c-printed"></div>`;
   $('#c-queue').onclick=()=>confirmAct('Queue the set?',`${r.renders.length} render(s) go into the art queue behind what is already waiting. The worker makes them in its own time; nothing is started or stopped.`,'Queue it',async()=>{
     const q=await post('char_queue',{game:gid(),cid:C.page.id,variant:C.v});toast(q.message,q.ok);$('#c-printed').innerHTML=q.printed?`<pre class="out">${esc(q.printed)}</pre>`:''})}
-function toIntake(){I.ch=C.page.id;I.v=C.v||'';I.view=null;I.result=null;screen='intake';$$('#nav-art button[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s==='intake'));show()}
+function toIntake(){I.ch=C.page.id;I.v=C.v||'';I.view=null;I.result=null;go('characters/intake')}
 // ---------- Wanted (BUILD 12)
 const STATE_LABEL={missing:'missing','stand-in':'stand-in',drafted:'drafted',queued:'queued',rendered:'rendered',approved:'approved',delivered:'delivered'};
 let W={data:null,group:'town',q:'',done:false,off:new Set(),sel:new Set(),plan:null};
@@ -1034,9 +1180,256 @@ async function loadTools(){let d;try{d=await api('/api/suite/handoffs')}catch(e)
     <div class="card" style="max-width:1500px"><h2>The tool register</h2>${d.tools.length?`<table class="t"><tr><th>program</th><th>commercial use</th><th>checked</th></tr>${d.tools.map(t=>`<tr><td>${esc(t.key)}</td><td class="${t.commercial_ok?'g':'r'}">${t.commercial_ok?'permitted':'NOT permitted'}${t.license?`<div class="meta">${esc(t.license)}</div>`:''}</td><td class="meta">${esc(t.checked||'')}</td></tr>`).join('')}</table>`:'<div class="meta">Nothing recorded yet. Every picture an outside program touched needs its licence line here before it can be approved.</div>'}</div>`;
   $$('#t-body [data-open]').forEach(b=>b.onclick=async()=>{const r=await post('fin_open',{game:gid(),path:b.dataset.open});toast(r.message,r.ok)});
   $$('#t-body [data-in]').forEach(b=>b.onclick=()=>{if(!G.identity)return askWho();const tool=$(`#t-body [data-tool="${b.dataset.in}"]`).value;confirmAct('Bring it back?',`What came back in done/ goes through the forge again${tool?' as made with '+tool:''} — a scene gets its kit companions rebuilt.`,'Bring it back',async()=>{const r=await post('fin_handin',{game:gid(),name:b.dataset.in,tool});toast(r.message,r.ok);loadTools()})})}
+
+// ---------- BUILD 07b: People · Quests · Voice sheets · Find & replace · Play from here
+let WB={people:null,pq:'',person:null,quests:null,qf:{q:'',place:'',era:'',status:''},quest:null,voices:null,vk:'person',vid:null,find:null};
+function wbStatus(st){return rtSt(st||'draft')}
+function wbField(f,base){const id='f'+Math.random().toString(36).slice(2,8);const val=f.kind==='data'?JSON.stringify(f.value):String(f.value);
+  return `<div class="fl" data-ref="${esc(base+'#'+f.pointer)}"><code>${esc(f.key)}</code><div class="v" id="${id}">${f.kind==='data'?`<span class="meta">${esc(val.length>240?val.slice(0,240)+'…':val)}</span>`:esc(val)}</div>
+   <div>${f.kind==='text'?`<button class="ghost" style="padding:3px 10px" onclick="wbEdit(this,'text')">✎</button>`:f.kind==='stat'?`<button class="ghost" style="padding:3px 10px" title="a number the game's balance uses" onclick="wbEdit(this,'stat')">✎ …</button>`:''}</div></div>`}
+function wbEdit(btn,kind){const row=btn.closest('.fl'),v=row.querySelector('.v'),old=v.textContent;
+  v.innerHTML=(kind==='stat'?`<input value="${esc(old)}"><label class="chk" style="margin-top:6px"><input type="checkbox" class="imi"><span>I mean it — this changes the game's balance</span></label>`:`<textarea rows="${Math.min(8,Math.max(2,Math.ceil(old.length/70)))}">${esc(old)}</textarea>`)+
+   `<div style="margin-top:6px;display:flex;gap:8px"><button class="go" style="padding:4px 12px">Save</button><button class="ghost" style="padding:4px 12px">Cancel</button></div>`;
+  const [sv,cn]=v.querySelectorAll('button');cn.onclick=()=>{v.textContent=old};
+  sv.onclick=async()=>{if(!G.identity)return askWho();const inp=v.querySelector('textarea,input:not(.imi)');const imi=v.querySelector('.imi');
+    const r=await post('wb_edit',{game:gid(),ref:row.dataset.ref,value:inp.value,i_mean_it:!!(imi&&imi.checked)});toast(r.message,r.ok);if(r.ok)v.textContent=inp.value}}
+function wbLines(ls,showPlace){return ls.length?ls.map(l=>`<div class="ln"><div><div class="t">${esc(l.text)}</div><div class="m">${esc(l.who||'')}${showPlace&&l.place?' · '+esc(l.place):''}${l.era?' · '+esc(l.era):''}${l.when?' · when '+esc(l.when):''}${l.locked?' · 🔒 '+esc(l.lock_reason):''}</div></div><div>${wbStatus(l.status)}</div></div>`).join(''):'<div class="empty">None.</div>'}
+async function wbPlay(body){const r=await post('wb_play',{game:gid(),...body});toast(r.message,r.ok)}
+// People
+async function loadPeople(pid){const v=$('#v-people');if(!WB.people){const r=await api('/api/suite/people?id='+encodeURIComponent(gid()));if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}WB.people=r.people}
+  if(pid)WB.pid=pid;if(!WB.pid&&WB.people.length)WB.pid=WB.people[0].id;
+  v.innerHTML=`<div class="wb"><div class="wbl" id="pp-list"></div><div id="pp-page"><div class="empty">Choose a person.</div></div></div>`;paintPeopleList();if(WB.pid)openPerson(WB.pid)}
+function paintPeopleList(){const q=WB.pq.toLowerCase();$('#pp-list').innerHTML=`<input class="fsel" id="pp-q" placeholder="Find a person" value="${esc(WB.pq)}">`+WB.people.filter(p=>!q||(p.name+' '+p.id).toLowerCase().includes(q)).map(p=>`<div class="wbi ${p.id===WB.pid?'sel':''}" data-id="${esc(p.id)}"><b>${esc(p.name)}</b><span>${esc(p.kind||'')} · ${p.lines} line${p.lines===1?'':'s'}${p.stand_in?' · <span style="color:var(--warn)">sheet wanted</span>':''}</span></div>`).join('');
+  const qi=$('#pp-q');qi.oninput=()=>{WB.pq=qi.value;paintPeopleList();const n=$('#pp-q');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
+  $$('#pp-list .wbi').forEach(e=>e.onclick=()=>{WB.pid=e.dataset.id;paintPeopleList();openPerson(WB.pid)})}
+async function openPerson(pid){const r=await api('/api/suite/person?id='+encodeURIComponent(gid())+'&pid='+encodeURIComponent(pid));const el=$('#pp-page');if(r.error){el.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}
+  WB.person=r;if(A.area&&A.area.id==='story'&&A.tab.id==='people')setAddr(addrOf('story','people',pid));const vo=r.voice||{};
+  el.innerHTML=`<div class="hero" style="margin-bottom:8px"><h1 style="display:block">${esc(r.name)}</h1><span class="meta">${esc(r.kind||'')} · ${r.count} line${r.count===1?'':'s'} · <code>${esc(r.file)}</code></span></div>
+   <div class="card" style="margin-bottom:12px"><h2>Voice sheet <a href="#story/voices/person/${esc(r.id)}" style="text-transform:none;letter-spacing:0;font-size:12.5px">edit →</a></h2>${(vo.talk||{}).value?esc(vo.talk.value):'<span class="meta">Nothing yet.</span>'}${((vo.never||{}).value||[]).length?`<div class="meta" style="margin-top:6px">Never says: ${vo.never.value.map(w=>`<span class="never">${esc(w)}</span>`).join(' ')}</div>`:''}</div>
+   <div class="card" style="margin-bottom:12px"><h2>Sheet and portrait</h2><div>${esc(r.sheet||'—')} ${r.stand_in?'<span class="chip proposed">stand-in — wanted</span>':'<span class="chip delivered">real</span>'} · portrait ${esc(r.portrait||'—')} · <a href="#characters/characters/${esc(r.id)}">the character's art →</a></div></div>
+   <div class="card" style="margin-bottom:12px"><h2>What the game reads</h2>${r.fields.map(f=>wbField(f,r.file)).join('')}</div>
+   <div class="card" style="margin-bottom:12px"><h2>Every line ${esc(r.name)} speaks</h2>${r.places.length?r.places.map(g=>`<h3 style="margin:12px 0 4px;font-size:14px">${g.place?`<a href="#story/read/${esc(g.place)}">${esc(g.name)}</a>`:esc(g.name)} <span class="meta">${g.lines.length}</span></h3>${wbLines(g.lines)}`).join(''):'<div class="empty">No lines yet.</div>'}</div>
+   <div class="card"><h2>Reactions</h2>${r.reactions.length?r.reactions.map(x=>`<div class="fl" data-ref="${esc(x.ref)}"><code>${esc([x.event,x.town,x.era].filter(Boolean).join(' · ')||'reaction')}${x.with?' · with '+esc((x.with||[]).join(', ')):''}</code><div class="v">${esc(x.text)}</div><div><button class="ghost" style="padding:3px 10px" onclick="wbEdit(this,'text')">✎</button></div></div>`).join(''):'<div class="empty">None — or this game\'s adapter doesn\'t list reactions.</div>'}</div>`}
+// Quests
+async function loadQuests(qid){const v=$('#v-quests');const r=await api('/api/suite/quests?id='+encodeURIComponent(gid()));if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}WB.quests=r.quests;
+  if(qid)WB.qid=qid;if(!WB.qid&&WB.quests.length)WB.qid=WB.quests[0].id;const places=[...new Set(WB.quests.map(q=>q.place_name).filter(Boolean))].sort(),eras=[...new Set(WB.quests.map(q=>q.era).filter(Boolean))];
+  v.innerHTML=`<div class="wb"><div class="wbl"><input class="fsel" id="qq-q" placeholder="Find a quest" value="${esc(WB.qf.q)}">
+    <select class="fsel" id="qq-p"><option value="">every town</option>${places.map(x=>`<option ${WB.qf.place===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <select class="fsel" id="qq-e"><option value="">every era</option>${eras.map(x=>`<option ${WB.qf.era===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
+    <select class="fsel" id="qq-s"><option value="">every status</option>${['approved','draft','flagged'].map(x=>`<option ${WB.qf.status===x?'selected':''}>${x}</option>`).join('')}</select><div id="qq-list"></div></div><div id="qq-page"><div class="empty">Choose a quest.</div></div></div>`;
+  for(const [id,k] of [['#qq-q','q'],['#qq-p','place'],['#qq-e','era'],['#qq-s','status']]){$(id)[k==='q'?'oninput':'onchange']=e=>{WB.qf[k]=e.target.value;paintQuestList()}}
+  paintQuestList();if(WB.qid)openQuest(WB.qid)}
+function paintQuestList(){const f=WB.qf,q=f.q.toLowerCase();$('#qq-list').innerHTML=WB.quests.filter(x=>(!q||(x.title+' '+x.id).toLowerCase().includes(q))&&(!f.place||x.place_name===f.place)&&(!f.era||x.era===f.era)&&(!f.status||x.status===f.status))
+  .map(x=>`<div class="wbi ${x.id===WB.qid?'sel':''}" data-id="${esc(x.id)}"><b>${esc(x.title||x.id)}</b><span>${esc(x.place_name||'')}${x.era?' · '+esc(x.era):''} · ${x.steps} step${x.steps===1?'':'s'} · ${esc(x.status)}</span></div>`).join('')||'<div class="empty">No quest matches.</div>';
+  $$('#qq-list .wbi').forEach(e=>e.onclick=()=>{WB.qid=e.dataset.id;paintQuestList();openQuest(WB.qid)})}
+const J=v=>v==null?'—':esc(typeof v==='string'?v:JSON.stringify(v));
+async function openQuest(qid){const r=await api('/api/suite/quest?id='+encodeURIComponent(gid())+'&qid='+encodeURIComponent(qid));const el=$('#qq-page');if(r.error){el.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}
+  WB.quest=r;if(A.area&&A.area.id==='story'&&A.tab.id==='quests')setAddr(addrOf('story','quests',qid));
+  const fld=(ptr,label,val)=>ptr?wbField({key:label,pointer:ptr,kind:'text',value:val},r.file):'';
+  el.innerHTML=`<div class="hero" style="margin-bottom:8px;flex-wrap:wrap"><h1 style="display:block">${esc(r.title)}</h1>${wbStatus(r.status)}<span class="spacer" style="flex:1"></span>
+     ${r.play?`<button onclick="wbPlay({quest:'${esc(r.id)}'})">▶ Play from here</button>`:''}<button onclick="wbQMark('approved')">✦ Approve</button><button onclick="wbQMark('draft')">◆ Draft</button><button onclick="wbQMark('flagged')">⚑ Flag</button></div>
+   <div class="meta" style="margin-bottom:12px">${r.place?`<a href="#story/read/${esc(r.place)}">${esc(r.place_name)}</a>`:'no town'} · ${esc(r.era||'any era')} · given by ${esc(r.giver||'—')} · <code>${esc(r.ref)}</code>${r.approved_by?' · approved by '+esc(r.approved_by):''}</div>
+   <div class="card" style="margin-bottom:12px">${fld(r.title_pointer,'title',r.title)}<h2 style="margin-top:12px">The steps, in order</h2>${r.steps.length?r.steps.map((s,i)=>fld(s.pointer,String(i+1),s.text)).join(''):'<div class="empty">No steps.</div>'}</div>
+   <div class="card" style="margin-bottom:12px"><dl class="kv"><dt>Reward</dt><dd>${J(r.reward)}</dd><dt>Missed when</dt><dd>${J(r.missed)}</dd><dt>Offered when</dt><dd>${J(r.available)}</dd></dl></div>
+   <h2 style="margin:16px 0 8px">Remembered${r.remembered_who?' — '+esc(r.remembered_who):''}</h2>${r.remembered.length?`<div class="br3">${r.remembered.map(b=>`<div class="card"><h2>${esc(b.label)}</h2>${b.pointer?wbField({key:'line',pointer:b.pointer,kind:'text',value:b.line},r.file):'<div class="empty">Not written.</div>'}</div>`).join('')}</div>`:'<div class="empty">This quest has no remembered branches.</div>'}
+   ${r.texts.length?`<div class="card" style="margin-top:12px"><h2>Its other words</h2>${r.texts.map(t=>fld(t.pointer,t.pointer.split('/').slice(-2).join(' '),t.text)).join('')}</div>`:''}
+   <div class="card" style="margin-top:12px"><h2>Lines tied to it</h2>${wbLines(r.lines,true)}</div>`}
+async function wbQMark(st,note){if(!G.identity)return askWho();const q=WB.quest;
+  if(st==='flagged'&&note===undefined){modal(`<h3>Flag “${esc(q.title)}”</h3><p>What's wrong with it? The note goes to Claude with the flag.</p><input id="m-why" placeholder="One line"><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="warn" id="m-ok">Flag it</button></div>`);
+    setTimeout(()=>$('#m-why').focus(),50);$('#m-ok').onclick=()=>{const n=$('#m-why').value.trim();closeModal();wbQMark('flagged',n||null)};return}
+  const r=await post('wb_mark',{game:gid(),ref:q.ref,status:st,hash:q.hash,note:note||null,label:q.title});toast(r.message,r.ok);if(r.ok)openQuest(q.id)}
+// Voice sheets
+async function loadVoices(kind,vid){const v=$('#v-voices');const r=await api('/api/suite/voices?id='+encodeURIComponent(gid()));if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}WB.voices=r;
+  if(kind==='person'||kind==='place')WB.vk=kind;if(vid)WB.vid=vid;const ls=WB.vk==='person'?r.people:r.places;if(!WB.vid||!ls.find(x=>x.id===WB.vid))WB.vid=(ls[0]||{}).id;
+  v.innerHTML=`<div class="wb"><div class="wbl"><div class="seg" style="margin-bottom:8px"><button class="${WB.vk==='person'?'on':''}" onclick="loadVoices('person',null)">People</button><button class="${WB.vk==='place'?'on':''}" onclick="loadVoices('place',null)">Places</button></div>
+   ${ls.map(x=>`<div class="wbi ${x.id===WB.vid?'sel':''}" onclick="loadVoices('${WB.vk}','${esc(x.id)}')"><b>${esc(x.name)}</b><span>${x.filled?x.filled+' of 3 filled':'empty'}</span></div>`).join('')}</div><div id="vs-page"></div></div>`;if(WB.vid)openVoice(WB.vk,WB.vid)}
+async function openVoice(kind,vid){const s=await api(`/api/suite/voice?id=${encodeURIComponent(gid())}&kind=${kind}&vid=${encodeURIComponent(vid)}`);if(A.area&&A.area.id==='story'&&A.tab.id==='voices')setAddr(addrOf('story','voices',kind,vid));
+  const nm=((WB.voices[kind==='person'?'people':'places']||[]).find(x=>x.id===vid)||{}).name||vid;const by=f=>f&&f.by?`written by ${esc(f.by)}${f.at?' · '+esc(when(f.at)):''}`:'empty';
+  $('#vs-page').innerHTML=`<div class="card vs" style="max-width:900px"><h1 style="margin:0 0 4px;font-size:22px">${esc(nm)}</h1><div class="meta" style="margin-bottom:14px">${kind==='person'?'how this person talks':'how this place talks — its people, its signs, its greetings'} · <code>${esc(s.file)}</code> · the read-through shows this beside the lines</div>
+   <h2>How ${kind==='person'?'they':'it'} talk${kind==='person'?'':'s'}</h2><textarea id="vs-talk" placeholder="Rhythm, length, what they reach for, what they avoid…">${esc((s.talk||{}).value||'')}</textarea><div class="by">${by(s.talk)}</div>
+   <h2>Words ${kind==='person'?'they':'its people'}'d never use <span class="meta" style="text-transform:none;letter-spacing:0">— one per line; a line using one is marked in the read-through</span></h2><textarea id="vs-never">${esc(((s.never||{}).value||[]).join('\n'))}</textarea><div class="by">${by(s.never)}</div>
+   <h2>Three lines that are exactly right <span class="meta" style="text-transform:none;letter-spacing:0">— one per line</span></h2><textarea id="vs-exact">${esc(((s.exact||{}).value||[]).join('\n'))}</textarea><div class="by">${by(s.exact)}</div>
+   <button class="go" onclick="saveVoice('${kind}','${esc(vid)}')">Save</button></div>`}
+async function saveVoice(kind,vid){if(!G.identity)return askWho();for(const f of ['talk','never','exact']){const val=$('#vs-'+f).value;const r=await post('wb_voice',{game:gid(),kind,vid,field:f,value:val});if(!r.ok){toast(r.message,false);return}}toast('Saved.');loadVoices(kind,vid)}
+// Find & replace
+function paintFind(){const v=$('#v-find'),F=WB.find||{q:'',repl:'',case:false,word:false,data:null,sel:new Set()};WB.find=F;
+  v.innerHTML=`<div class="note">Every hit across the game's lines, quests and place sheets — previewed before anything changes. Untick any you want left alone. Song words are shown locked and never changed. Lines the owner approved go to them as proposals.</div>
+   <div class="wtools"><input id="fr-q" placeholder="Find" value="${esc(F.q)}" style="min-width:260px"><input id="fr-r" placeholder="Replace with" value="${esc(F.repl)}" style="min-width:260px">
+    <label class="chk" style="margin:0"><input type="checkbox" id="fr-c" ${F.case?'checked':''}><span>match case</span></label><label class="chk" style="margin:0"><input type="checkbox" id="fr-w" ${F.word?'checked':''}><span>whole word</span></label>
+    <button id="fr-find" onclick="runFind()">Find</button></div><div id="fr-out"></div>`;
+  $('#fr-q').onkeydown=e=>{if(e.key==='Enter')runFind()};$('#fr-r').onkeydown=e=>{if(e.key==='Enter')runFind()};if(F.data)paintHits()}
+async function runFind(){const F=WB.find;F.q=$('#fr-q').value;F.repl=$('#fr-r').value;F.case=$('#fr-c').checked;F.word=$('#fr-w').checked;if(!F.q.trim())return;
+  const d=await api(`/api/suite/find?id=${encodeURIComponent(gid())}&q=${encodeURIComponent(F.q)}&repl=${encodeURIComponent(F.repl)}${F.case?'&case=1':''}${F.word?'&word=1':''}`);if(d.error){toast(d.error,false);return}
+  F.data=d;F.sel=new Set(d.hits.filter(h=>!h.locked).map(h=>h.ref));paintHits()}
+function hl(text,F,after){const rx=new RegExp((F.word?"(?<![\\w’'])":'')+F.q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+(F.word?"(?![\\w’'])":''),F.case?'g':'gi');
+  return esc(text).replace(new RegExp(rx.source.replace(/&/g,'&amp;'),rx.flags),m=>after?`<del>${m}</del><ins>${esc(F.repl)}</ins>`:`<del>${m}</del>`)}
+function paintHits(){const F=WB.find,d=F.data;$('#fr-out').innerHTML=`<div class="tk-top"><b class="big">${d.hits.length}</b><span>place${d.hits.length===1?'':'s'} · ${d.total} hit${d.total===1?'':'s'} in ${d.files} file${d.files===1?'':'s'}${d.locked?` · ${d.locked} locked`:''}</span><span class="spacer" style="flex:1"></span>
+    <button class="go" id="fr-go" ${F.sel.size?'':'disabled'}>Replace ${F.sel.size} → “${esc(F.repl)}”</button></div>
+   ${d.hits.map(h=>`<div class="fhit ${h.locked?'locked':''}"><input type="checkbox" data-ref="${esc(h.ref)}" ${F.sel.has(h.ref)?'checked':''} ${h.locked?'disabled':''}><div><div class="meta">${esc(h.label)} · <code>${esc(h.ref)}</code>${h.locked?' · 🔒 '+esc(h.locked):''}</div><div>${hl(h.text,F,true)}</div></div></div>`).join('')||'<div class="empty">Nothing found.</div>'}`;
+  $$('#fr-out input[data-ref]').forEach(c=>c.onchange=()=>{c.checked?F.sel.add(c.dataset.ref):F.sel.delete(c.dataset.ref);$('#fr-go').textContent=`Replace ${F.sel.size} → “${F.repl}”`;$('#fr-go').disabled=!F.sel.size});
+  const g=$('#fr-go');if(g)g.onclick=()=>{if(!G.identity)return askWho();confirmAct('Replace them?',`${F.sel.size} place(s): “${F.q}” → “${F.repl}”. Each one goes through the safe path — checked, backed up, journaled.`,'Replace',async()=>{
+    const r=await post('wb_replace',{game:gid(),q:F.q,repl:F.repl,refs:[...F.sel],case:F.case,word:F.word});toast(r.message,r.ok);runFind()})}}
+// the read-through: voice sheets beside the lines, never-words marked, play from here
+async function rtVoices(){if(!RT.data||!$('#rt-voices'))return;let d;try{d=await api(`/api/suite/voicesfor?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.place)}&era=${encodeURIComponent(RT.era)}`)}catch(e){return}
+  RT.never=d.never_hits||{};const sheets=[{name:RT.data.place.name+' (the place)',kind:'place',id:RT.place,...d.place},...d.people.map(p=>({...p,kind:'person'}))];
+  const filled=sheets.filter(s=>(s.talk||{}).value||((s.never||{}).value||[]).length||((s.exact||{}).value||[]).length);
+  $('#rt-voices').innerHTML=`<details class="vpanel" ${filled.length?'open':''}><summary>Voice sheets — ${filled.length} of ${sheets.length} written${Object.keys(RT.never).length?` · <span class="never">${Object.keys(RT.never).length} line(s) use a never-word</span>`:''}</summary>
+   ${sheets.map(s=>`<div style="margin:8px 0"><a href="#story/voices/${s.kind}/${esc(s.id)}"><b>${esc(s.name)}</b></a> ${(s.talk||{}).value?'— '+esc(s.talk.value):'<span class="meta">— nothing yet</span>'}${((s.never||{}).value||[]).length?` <span class="meta">never: ${s.never.value.map(w=>`<span class="never">${esc(w)}</span>`).join(' ')}</span>`:''}${((s.exact||{}).value||[]).length?`<div class="meta">exactly right: ${s.exact.value.map(x=>'“'+esc(x)+'”').join(' · ')}</div>`:''}</div>`).join('')}</details>`;
+  for(const [ref,ws] of Object.entries(RT.never)){const el=document.querySelector(`.rt-line[data-ref="${CSS.escape(ref)}"] .txt`);if(el)el.insertAdjacentHTML('afterend',`<div class="meta2"><span class="never">never-word: ${esc(ws.join(', '))}</span></div>`)}}
+// ---------- BUILD 26: badges, the worker button, Home's day at a glance
+const AREA_WORD={messages:'unread letter(s)',tasks:'thing(s) to do',music:'music slot(s) still needed',art:'picture(s) waiting for review',notes:'open note(s)'};
+async function loadBadges(fresh){try{A.badges=await api('/api/suite/badges?id='+encodeURIComponent(gid())+(fresh?'&fresh=1':''))}catch(e){return}
+  paintAreas();paintWorkerBtn();if(screen==='home'&&side==='art')paintHomeAreas()}
+function paintWorkerBtn(){const st=(A.badges||{}).worker||'unknown',b=$('#wbtn');
+  if(A.badges&&A.badges.worker_here===false){b.className='wbtn unknown';b.innerHTML=`<i></i><span class="wl">The art worker runs on ${esc(A.badges.worker_pc)}</span>`;b.title='Making pictures needs the PC with the NVIDIA card. Review & approve still works here on whatever is in the folders.';return}
+  const on=st==='rendering'||st==='idle',off=st==='stopped'||st==='stopped-mid-job';
+  b.className='wbtn '+(on?'stop':off?'start':'unknown');
+  b.innerHTML=`<i class="st-${esc(st)}"></i><span class="wl">${on?'■ Stop it <span class="meta">('+(st==='rendering'?'rendering':'idle')+')</span>':off?'▶ Start the art worker':'The art worker — can\'t tell'}</span>`;
+  b.title=on?'The art worker is '+st+'. Stop pauses the queue: the picture being made finishes, nothing is lost; then close the worker window.':off?'The art worker is not running.':'This computer\'s process list can\'t be read — Home says more.'}
+$('#wbtn').onclick=async()=>{const st=(A.badges||{}).worker||'unknown';if(A.badges&&A.badges.worker_here===false){toast(`The art worker runs on ${A.badges.worker_pc} — it can't start on this computer. Everything else works here.`);return}
+  if(st==='stopped'||st==='stopped-mid-job'){let h;try{h=await api('/api/suite/home')}catch(e){toast(String(e),false);return}
+    confirmAct('Start the art worker?',h.actions.start.does,'Start it',async()=>{const r=await post('start');toast(r.message,r.ok);setTimeout(()=>loadBadges(true),2500)})}
+  else if(st==='rendering'||st==='idle')confirmAct('Stop the art worker?','Stopping safely: the waiting jobs are moved to jobs\\paused (the same as pause.bat) — the picture being made now finishes and nothing is cancelled or deleted. When it says idle, close the worker\'s window. Resume puts the jobs back in their old order.','Pause the queue',async()=>{const r=await post('pause');toast(r.message,r.ok);loadBadges(true)});
+  else go('home/today')};
+function paintHomeAreas(){const b=A.badges||{};const rows=Object.keys(AREA_WORD).filter(k=>b[k]).map(k=>{const a=A.areas.find(x=>x.id===k)||{};return `<div style="margin:5px 0"><a href="#${k}">${esc(a.icon||'')} ${esc(a.name||k)}</a> — <b style="color:var(--ink)">${fmt(b[k])}</b> ${esc(AREA_WORD[k])}${k==='tasks'&&b.overdue?` <span style="color:var(--warn)">(${b.overdue} overdue)</span>`:''}</div>`});
+  $('#h-areas').innerHTML=rows.length?rows.join(''):'Nothing waiting anywhere.'}
+async function homeExtras(){paintHomeAreas();const g=encodeURIComponent(gid());loadStanding();
+  api('/api/suite/tasks?id='+g).then(d=>{$('#h-needs').innerHTML=d.next.length?d.next.slice(0,5).map(c=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:baseline"><span style="color:${c.unblocks?'var(--no)':c.overdue?'var(--warn)':'#ff8a4c'}">●</span><span style="flex:1;color:var(--ink)">${esc(c.title)} <span class="meta">· ${esc(c.effort)}</span></span>${c.go?`<a href="#${esc(c.go)}">Go →</a>`:''}</div>`).join('')+(d.count>5?`<div style="margin-top:8px"><a href="#tasks/for-you">All ${d.count} on Tasks →</a></div>`:''):'Nothing is waiting on you. 🎉'}).catch(e=>{$('#h-needs').textContent=String(e)});
+  api('/api/suite/away?id='+g).then(a=>{$('#c-away').style.display=a.count?'':'none';if(a.count)$('#h-away').innerHTML=awayCard(a)}).catch(()=>{})}
+// ---------- Status — met or not met, at a glance
+function tileHtml(t){return `<div class="tile2 ${esc(t.state)}" onclick="${t.go?`go('${esc(t.go)}')`:''}" title="${esc(t.detail)}"><div class="tl">${esc(t.label)}</div><div class="tv">${esc(t.value)}</div><div class="td">${esc(t.detail)}</div></div>`}
+function chipHtml(t){return `<span class="chip2 ${esc(t.state)}" onclick="go('${esc(t.go)}')" title="${esc(t.detail)}"><i></i>${esc(t.label)} ${t.state==='planned'?'· '+esc(t.value):''}</span>`}
+async function loadStatus(tab){const v=$('#v-status');v.innerHTML='<div class="empty">Working it out…</div>';let d;
+  try{d=await api(`/api/suite/status?id=${encodeURIComponent(gid())}&tab=${tab}`)}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const top=t=>`<div class="st-top"><div class="n3"><div><b style="color:#8fe8ac">${t.met}</b>met</div><div><b style="color:#ffd27a">${t.partly}</b>partly</div><div><b style="color:#ff9d95">${t.not}</b>not met</div></div><span class="meta">read at ${esc(d.read_at)} · worked out from the areas' own data each time — nothing typed in by hand</span><span class="spacer" style="flex:1"></span><button class="ghost" onclick="loadStatus('${tab}')">↻ Again</button></div>`;
+  if(tab==='glance'){v.innerHTML=top(d.tally)+d.rows.map(r=>{const big=r.tiles.filter(t=>t.big),small=r.tiles.filter(t=>!t.big);
+      return `<div class="st-row"><h3 style="color:${esc(r.color)}">${esc(r.icon)} <span style="color:var(--dim)">${esc(r.name)}</span></h3>${big.length?`<div class="st-tiles">${big.map(tileHtml).join('')}</div>`:''}${small.length?`<div class="st-small">${small.map(chipHtml).join('')}</div>`:''}</div>`}).join('');return}
+  if(!d.available){v.innerHTML=`<div class="planned-page"><p class="big">This game's adapter has no ${tab==='builds'?'build queue':'completeness checklist'} to read.</p><p class="meta">${tab==='builds'?'Add a builds() hook to the game\'s adapter (games/_example has one) and its queue shows here as tiles.':'Add a completeness() hook to the game\'s adapter and its own checklist shows here.'}</p></div>`;return}
+  if(tab==='builds'){const groups=[['not','Waiting on you'],['partly','Started'],['todo','To do'],['met','Done']];
+    v.innerHTML=top(d.tally)+groups.map(([k,w])=>{const ts=d.tiles.filter(t=>k==='todo'?t.todo:(!t.todo&&t.state===k));return ts.length?`<div class="st-row"><h3>${w} · ${ts.length}</h3><div class="st-tiles">${ts.map(t=>tileHtml({...t,label:t.label+(t.where?' · '+t.where:'')})).join('')}</div></div>`:''}).join('');return}
+  v.innerHTML=top(d.tally)+`<div class="st-tiles">${d.tiles.map(tileHtml).join('')}</div>`}
+// ---------- Tasks — a checklist of everything waiting on you, not an inbox
+let TK={data:null,view:'v-tasks',reload:()=>loadTasks()};
+function ago(days){if(!days)return'';if(days<1)return 'today';const n=Math.round(days);return n===1?'a day old':n+' days old'}
+function cardHtml(c){const w=c.wants;
+  return `<div class="tcard ${c.unblocks?'unblocks':''} ${c.overdue?'overdue':''}" data-id="${esc(c.id)}">
+    <div class="tchk">${c.checkable?`<input type="checkbox" title="Done" onclick="tkTick('${esc(c.id)}',this)">`:''}</div>
+    <div><div class="tt">${esc(c.title)}</div>
+      <div class="tm">${c.from?'from '+esc(c.from)+' · ':''}${esc(c.effort)}${c.age_days?' · '+ago(c.age_days):''}${c.unblocks?' · <b style="color:#ff9d95">unblocks work</b>':''}${c.overdue?' · <b>over a week</b>':''}${c.progress?' · <b style="color:var(--ink)">'+esc(c.progress)+'</b>':''}</div>
+      ${c.detail?`<div class="tdet">${esc(c.detail)}</div>`:''}${c.step?`<div class="tstep">${esc(c.step)}</div>`:''}
+      ${w?`<div class="tw">${esc(c.wants_line||'')}</div><div class="tdrop" data-drop="${esc(c.id)}"><span>Drop the file${w.count>1?'s':''} here, or</span><button class="ghost" onclick="tkChoose('${esc(c.id)}')">Choose a file…</button><input type="file" style="display:none" ${w.count>1?'multiple':''} accept="${esc((w.ext||[]).join(','))}" data-file="${esc(c.id)}"></div><div class="tprog"><i></i></div>`:''}
+      <div class="tin">${(c.received||[]).map(f=>`<span class="f">✓ ${esc(f.name)} · ${fmt(Math.round((f.bytes||0)/1024))} KB</span>`).join('')}</div></div>
+    <div class="tact">${c.go?`<button class="go" onclick="go('${esc(c.go)}')">Go →</button>`:''}<button class="ghost" onclick="tkDismiss('${esc(c.id)}')">Dismiss…</button></div></div>`}
+async function loadTasks(){const v=$('#v-tasks');TK.view='v-tasks';TK.reload=()=>loadTasks();let d;try{d=TK.data=await api('/api/suite/tasks?id='+encodeURIComponent(gid()))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(!d.who){v.innerHTML='<div class="empty">Say who you are first (bottom left) — Tasks gathers what is waiting on you.</div>';return}
+  const AN=Object.fromEntries(A.areas.map(a=>[a.id,a]));
+  let h=`<div class="tk-top"><b class="big">${d.count}</b><span>thing${d.count===1?'':'s'} waiting on you${d.overdue?` · <span style="color:var(--warn)">${d.overdue} over a week old</span>`:''}</span><span class="spacer" style="flex:1"></span><span class="meta">Gathered from the whole game. A card leaves only when it's done or you dismiss it with a reason — reading it changes nothing.</span></div>`;
+  if(!d.count)h+='<div class="empty">Nothing is waiting on you. 🎉</div>';
+  if(d.next.length)h+=`<div class="tk-h">Next</div>`+d.next.map(cardHtml).join('');
+  for(const g of d.groups){const a=AN[g.area]||{name:g.area,icon:''};h+=`<details class="tg"><summary>${esc(a.icon)} ${esc(a.name)} · ${g.cards.length} more</summary>${g.cards.map(cardHtml).join('')}</details>`}
+  v.innerHTML=h;
+  $$('#'+TK.view+' .tdrop').forEach(z=>{z.ondragover=e=>{e.preventDefault();z.classList.add('over')};z.ondragleave=()=>z.classList.remove('over');
+    z.ondrop=e=>{e.preventDefault();z.classList.remove('over');tkUpload(z.dataset.drop,[...e.dataTransfer.files])}});
+  $$('#'+TK.view+' input[data-file]').forEach(i=>i.onchange=()=>tkUpload(i.dataset.file,[...i.files]))}
+function tkCard(id){const d=TK.data;return d?[...d.next,...d.groups.flatMap(g=>g.cards)].find(c=>c.id===id):null}
+function tkEl(id){return document.querySelector(`#${TK.view} .tcard[data-id="${CSS.escape(id)}"]`)}
+function tkChoose(id){const i=document.querySelector(`#${TK.view} input[data-file="${CSS.escape(id)}"]`);if(i)i.click()}
+async function tkTick(id,box){if(!G.identity){box.checked=false;return askWho()}const r=await post('task_tick',{game:gid(),id});toast(r.message,r.ok);
+  if(!r.ok){box.checked=false;return}const el=tkEl(id);if(el){el.style.transition='.4s';el.style.opacity='.3'}setTimeout(()=>{TK.reload();loadBadges(true)},500)}
+function tkDismiss(id){const c=tkCard(id);modal(`<h3>Dismiss this task?</h3><p>${esc(c?c.title:id)}</p><input id="m-why" placeholder="Why — one line (needed)"><div class="row"><button class="ghost" onclick="closeModal()">Cancel</button><button class="warn" id="m-ok">Dismiss it</button></div>`);
+  setTimeout(()=>$('#m-why').focus(),50);$('#m-ok').onclick=async()=>{const why=$('#m-why').value.trim();if(!why){toast('A reason is needed — one line is enough.',false);return}
+    const r=await post('task_dismiss',{game:gid(),id,reason:why});toast(r.message,r.ok);if(r.ok){closeModal();TK.reload();loadBadges(true)}}}
+function tkUploadOne(id,f,prog){return new Promise(res=>{const x=new XMLHttpRequest();
+  x.open('POST',`/api/suite/upload?game=${encodeURIComponent(gid())}&task=${encodeURIComponent(id)}&name=${encodeURIComponent(f.name)}`);
+  x.setRequestHeader('X-Forge','1');x.setRequestHeader('Content-Type','application/octet-stream');
+  x.upload.onprogress=e=>{if(e.lengthComputable&&prog)prog(e.loaded/e.total)};
+  x.onload=()=>{let r;try{r=JSON.parse(x.responseText)}catch(e){r={ok:false,message:'the suite answered '+x.status}}res(r)};
+  x.onerror=()=>res({ok:false,message:'the upload stopped — nothing was delivered'});x.send(f)})}
+async function tkUpload(id,files){if(!files.length)return;if(!G.identity)return askWho();const c=tkCard(id),el=tkEl(id);if(!c||!el)return;const w=c.wants||{};
+  for(const f of files){const ext='.'+(f.name.split('.').pop()||'').toLowerCase();
+    if(w.kind&&w.kind!=='any'&&(w.ext||[]).length&&!w.ext.includes(ext)){toast(`This one wants ${w.kind==='audio'?'audio':w.kind==='image'?'an image':w.kind==='sheet'?'a sprite sheet':w.kind==='text'?'a document':w.kind} — that's a ${ext}. Nothing was sent.`,false);return}}
+  const bar=el.querySelector('.tprog'),fill=bar&&bar.querySelector('i');let last=null;
+  for(let k=0;k<files.length;k++){const f=files[k];if(bar){bar.style.display='block';fill.style.width='0'}
+    const r=await tkUploadOne(id,f,q=>{if(fill)fill.style.width=(100*(k+q)/files.length)+'%'});last=r;toast(r.message,r.ok);if(!r.ok)break;
+    const tin=el.querySelector('.tin'),fi=r.file||{};let pv=`<span class="f">✓ ${esc(fi.name||f.name)} · ${fmt(Math.round((fi.bytes||f.size)/1024))} KB</span>`;
+    if(fi.play)pv=`<span class="f"><audio controls src="${esc(fi.play)}"></audio>${esc(fi.name)}</span>`;
+    else if(fi.thumb_rel)pv=`<span class="f"><img src="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(fi.thumb_rel)}" alt="">${esc(fi.name)}</span>`;
+    if(tin)tin.insertAdjacentHTML('beforeend',pv);
+    if(r.progress){const m=el.querySelector('.tm');if(m)m.insertAdjacentHTML('beforeend',' · <b style="color:var(--ink)">'+esc(r.progress)+'</b>')}
+    if(r.step){const st=el.querySelector('.tstep')||el.querySelector('.tw');if(st)st.insertAdjacentHTML('afterend',`<div class="tstep">${esc(r.step)}${r.go?` — <a href="#${esc(r.go)}">go there</a>`:''}</div>`)}
+    if(r.done)break}
+  if(bar)setTimeout(()=>bar.style.display='none',800);
+  if(last&&last.ok&&last.done&&!last.step){const cb=el.querySelector('.tchk input');if(cb)cb.checked=true;el.style.transition='.6s';el.style.opacity='.35';setTimeout(()=>{TK.reload();loadBadges(true)},1600)}
+  else loadBadges(true)}
+// User Needs To Provide Image (2026-11-11) — the forge pool: pictures the forge can't make well. Open requests are task cards (the same drop zone as Tasks);
+// the whole pool is listed under them, with requests on hold until a bake-off says the forge can't do it either.
+async function loadProvide(){const v=$('#v-provide');let d;try{d=await api('/api/suite/provide?id='+encodeURIComponent(gid()))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  TK.view='v-provide';TK.reload=()=>loadProvide();TK.data={next:d.cards,groups:[]};
+  const open=d.pool.filter(r=>r.state==='waiting on you').length;
+  let h=`<div class="tk-top"><b class="big">${open}</b><span>picture${open===1?'':'s'} the forge needs from you</span><span class="spacer" style="flex:1"></span><span class="meta">Each one says why the forge can't make it and what would help. Drop the file on its card — it goes where the card says. These are on Tasks too.</span></div>`;
+  if(d.unreachable)h+='<div class="err">The game\'s folder isn\'t reachable from this computer, so the requests can\'t become cards here. The pool is listed below.</div>';
+  if(!d.who)h+='<div class="empty">Say who you are first (bottom left) — the cards are gathered for you.</div>';
+  else if(d.cards.length)h+=d.cards.map(cardHtml).join('');else if(!d.unreachable)h+='<div class="empty">Nothing waiting on you here. 🎉</div>';
+  const rest=d.pool.filter(r=>r.state!=='waiting on you');
+  if(rest.length){h+=`<div class="tk-h">The rest of the pool</div>`+rest.map(r=>{const cls=r.status==='withdrawn'?'gone':r.state==='on_hold'?'hold':'';
+    const st=r.state==='on_hold'?`on hold${r.hold_until?' until '+esc(r.hold_until):''}`:esc(String(r.state||'').replace('_',' '));
+    const btn=r.state==='on_hold'?`<button class="go" onclick="pvStatus('${esc(r.id)}','open')">Open it now</button>`:(r.state==='withdrawn'?`<button class="ghost" onclick="pvStatus('${esc(r.id)}','on_hold')">Bring back (on hold)</button>`:'');
+    return `<div class="pv-req ${cls}"><div style="display:flex;gap:10px;align-items:center"><b style="flex:1">${esc(r.title)}</b><span class="meta">${st} · ${esc(r.priority)} · from ${esc(r.by||'')}</span>${btn}${r.state==='on_hold'?`<button class="ghost" onclick="pvStatus('${esc(r.id)}','withdrawn')">Withdraw</button>`:''}</div>
+      <div class="why">Why the forge can't: ${esc(r.why)}\nWhat would help: ${esc(r.helps)}\nGoes to: ${esc(r.goes_to)}/ · wants ${r.count} ${esc(r.kind)}${r.count>1?'s':''}</div>${(r.received||[]).length?`<div class="tin">${r.received.map(f=>`<span class="f">✓ ${esc(f.name)}</span>`).join('')}</div>`:''}</div>`}).join('')}
+  v.innerHTML=h;
+  $$('#v-provide .tdrop').forEach(z=>{z.ondragover=e=>{e.preventDefault();z.classList.add('over')};z.ondragleave=()=>z.classList.remove('over');
+    z.ondrop=e=>{e.preventDefault();z.classList.remove('over');tkUpload(z.dataset.drop,[...e.dataTransfer.files])}});
+  $$('#v-provide input[data-file]').forEach(i=>i.onchange=()=>tkUpload(i.dataset.file,[...i.files]))}
+async function pvStatus(id,status){if(!G.identity)return askWho();const r=await post('provide_status',{game:gid(),id,status});toast(r.message,r.ok);if(r.ok){loadProvide();loadBadges(true)}}
+async function loadTasksDone(){const v=$('#v-tasksdone');let d;try{d=await api('/api/suite/tasksdone?id='+encodeURIComponent(gid()))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  v.innerHTML=`<div class="note">What was done and when — ticked tasks, closed work orders, delivered tracks, answered letters — from the journal, so nothing vanishes without a trace.</div>`+
+    (d.done.length?`<ul class="dl">${d.done.map(e=>`<li><span class="t">${esc(String(e.time||'').replace('T',' ').slice(0,16))}</span><b>${esc(e.who||'')}</b> · ${esc(e.kind)} — ${esc(e.note||e.obj||'')}</li>`).join('')}</ul>`:'<div class="empty">Nothing done yet.</div>')}
+// ---------- Notes → Open notes
+function noteGo(t){const o=String(t.obj||'');if(o.startsWith('music:'))return 'music/needed/'+encodeURIComponent(o.slice(6));if(o.startsWith('place:'))return 'story/read/'+encodeURIComponent(o.slice(6));if(o.startsWith('job:'))return 'art/review';if(o.startsWith('mail:'))return 'messages/inbox/'+encodeURIComponent(o.slice(5).split('#')[0]);return 'story/read'}
+async function loadNotesOpen(want){const v=$('#v-notesopen');let d;try{d=await api('/api/suite/notes?id='+encodeURIComponent(gid())+'&open=1')}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const by={};for(const t of d.threads)(by[t.obj]=by[t.obj]||[]).push(t);
+  v.innerHTML=`<div class="note">Every open note in the game, newest first, grouped by what it's pinned to. Each links to that thing. A note is closed by resolving it where it's pinned.</div>`+
+    (d.threads.length?Object.entries(by).map(([obj,ts])=>`<div class="card" style="margin-bottom:12px;max-width:1100px"><h2 style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)"><a href="#${esc(noteGo(ts[0]))}">${esc(ts[0].label||obj)}</a> <span class="meta">${esc(obj)}</span></h2>${ts.map(t=>`<div id="note-${esc(t.id)}" style="margin:8px 0;padding:8px 10px;border-radius:8px;${t.id===want?'background:#2a2416;border:1px solid #6a5326':''}"><span class="meta">${esc(when(t.time))} · ${esc(t.who)}${t.to?' → '+esc(t.to):''} · ${esc(t.tag)}</span><div>${esc(t.text)}</div>${t.replies.map(r=>`<div style="margin:4px 0 0 18px"><span class="meta">${esc(when(r.time))} · ${esc(r.who)}</span> ${esc(r.text)}</div>`).join('')}</div>`).join('')}</div>`).join(''):'<div class="empty">No open notes.</div>');
+  if(want)setTimeout(()=>{const el=document.getElementById('note-'+want);if(el)el.scrollIntoView({block:'center'})},50)}
+// ---------- a planned tab — what it will hold, which build makes it, what that build needs
+function paintPlanned(){const a=A.area,t=A.tab,n=A.needs[a.id+'/'+t.id]||{};
+  $('#v-planned').innerHTML=`<div class="planned-page card"><p class="big">${esc(t.name)} — coming with BUILD ${String(t.planned).padStart(2,'0')}</p><p>${esc(t.holds)}.</p>
+  <p class="meta">What it will need: ${(n.items||[]).map(i=>`${esc(i.what)} ${i.met===true?'✓':i.met===false?'✗ (not yet)':'?'}`).join(' · ')||'nothing beyond the game'}.</p>
+  <p class="meta">Until then, the nearest thing that exists today: ${a.id==='story'?'<a href="#story/read">Read-through</a> (every line, place by place) and <a href="#story/overview">Overview</a>':'<a href="#notes/open">Open notes</a> and <a href="#messages/inbox">Messages</a>'}.</p></div>`}
+// ---------- Settings
+async function loadSettings(){const v=$('#v-settings');let d;try{d=await api('/api/suite/about')}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const st=d.settings||{},tz=st.timezone||'';
+  v.innerHTML=`<div class="note" style="max-width:900px">Everything on this page is <b>this computer's</b> answer, kept in <code>${esc(d.settings_file)}</code> — never pushed, so another computer (a Mac, too) keeps its own.</div>
+   <div class="card" style="max-width:900px"><h2>Where each game is on this computer</h2>${d.games.map(g=>`<div class="gr" data-g="${esc(g.id)}" style="margin:12px 0 18px">
+     <div><b>${esc(g.name)}</b> <span class="meta">${esc(g.id)}</span> · <span style="color:${g.reachable?'var(--ok)':'var(--no)'}">${g.reachable?'found here':'not on this computer'}</span></div>
+     <div class="meta" style="margin:3px 0 6px">Read from <code>${esc(g.root||'—')}</code>${g.overridden?' (set on this computer)':' (the game\'s own setting: <code>'+esc(g.from_game||'—')+'</code>)'}</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="fsel" style="flex:1;min-width:280px" placeholder="${d.system==='mac'?'/Users/you/Games/The Game':'D:\\\\The Game'}" value="${esc(g.overridden?g.root:'')}">
+       <button onclick="grCheck('${esc(g.id)}',this)">Check</button><button class="go" onclick="grSave('${esc(g.id)}',this)">Save</button>${g.overridden?`<button class="ghost" onclick="grForget('${esc(g.id)}')">Forget</button>`:''}</div>
+     <div class="meta gr-msg" style="margin-top:6px"></div></div>`).join('')}</div>
+   <div class="card" style="max-width:900px;margin-top:14px"><h2>Who you are</h2><div class="state"><b style="font-size:22px">${esc(d.identity||'nobody yet')}</b><button onclick="askWho()">Change…</button></div>
+     <p class="meta">Every change made on this computer is signed with this name.</p></div>
+   <div class="card" style="max-width:900px;margin-top:14px"><h2>This computer</h2><dl class="kv">
+     <dt>System</dt><dd>${esc({windows:'Windows',mac:'macOS',linux:'Linux'}[d.system]||d.system)}</dd>
+     <dt>The art worker</dt><dd>${d.worker_here?'can run here':'runs on '+esc(d.worker_pc)+' — this computer reviews what\'s in the folders'}</dd>
+     <dt>Time zone</dt><dd><select class="fsel" id="set-tz"><option value="">this computer's clock</option>${d.timezones.concat(tz&&!d.timezones.includes(tz)?[tz]:[]).map(z=>`<option ${z===tz?'selected':''}>${esc(z)}</option>`).join('')}</select></dd>
+     <dt>Godot</dt><dd><input class="fsel" id="set-godot" style="width:100%" placeholder="the Godot program, for “play from here”" value="${esc(st.godot||'')}"></dd>
+     <dt>The art worker's PC</dt><dd><input class="fsel" id="set-pc" style="width:100%" placeholder="what to call the PC that makes pictures" value="${esc(st.worker_pc||'')}"></dd></dl>
+     <div style="margin-top:10px"><button class="go" onclick="setSave()">Save these</button></div></div>`}
+async function grCheck(id,btn){const row=btn.closest('.gr'),f=row.querySelector('input').value;const r=await post('game_root_check',{id,folder:f});const m=row.querySelector('.gr-msg');m.textContent=r.message;m.style.color=r.ok?'var(--ok)':'#ffb4ad'}
+async function grSave(id,btn){const row=btn.closest('.gr'),f=row.querySelector('input').value;const r=await post('game_root_set',{id,folder:f});toast(r.message,r.ok);if(r.ok){await loadGames(true);await loadAreas();loadSettings();loadBadges(true)}else{const m=row.querySelector('.gr-msg');m.textContent=r.message;m.style.color='#ffb4ad'}}
+async function grForget(id){const r=await post('game_root_set',{id,folder:''});toast(r.message,r.ok);await loadGames(true);loadSettings()}
+async function setSave(){for(const [k,el] of [['timezone','#set-tz'],['godot','#set-godot'],['worker_pc','#set-pc']]){const r=await post('setting_set',{key:k,value:$(el).value});if(!r.ok){toast(r.message,false);return}}toast('Saved for this computer.');loadBadges(true)}
+async function loadAbout(){const v=$('#v-about');let d;try{d=await api('/api/suite/about')}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  v.innerHTML=`<div class="card" style="max-width:900px"><h2>RPG_Forge</h2><dl class="kv"><dt>Version</dt><dd>${esc(d.version||'(no push recorded yet)')}</dd><dt>The tests</dt><dd>${d.tests?esc(d.tests.line):'no run recorded yet — run_tests.bat records one'}</dd>
+   <dt>The forge</dt><dd><code>${esc(d.forge)}</code></dd><dt>Today's log</dt><dd><code>${esc(d.log)}</code> <button class="ghost" style="padding:2px 10px" data-open2="log">Show me</button></dd></dl></div>`;
+  $$('[data-open2]').forEach(b=>b.onclick=async()=>{const r=await post('open',{what:b.dataset.open2});toast(r.message,r.ok)})}
 // ---------- start
-loadGames().then(g=>{const cur=g.games.find(x=>x.id===g.current);if(cur&&cur.unread&&g.identity)setSide('story');else show();
-  setInterval(()=>{if(side==='art'&&screen==='home')loadHome()},5000)});
+loadGames().then(async g=>{try{await loadAreas()}catch(e){toast('The suite could not read its areas: '+e,false)}
+  const cg=g.games.find(x=>x.id===g.current);
+  if(cg&&!cg.root_exists){history.replaceState(null,'','#settings/computer');setTimeout(()=>toast(`${cg.name}'s folder isn't on this computer — tell the forge where it is (Settings → This computer).`,false),400)}
+  else if(!location.hash||location.hash==='#')history.replaceState(null,'','#'+(A.last||'home/today'));
+  route();loadBadges(true);
+  setInterval(()=>{if(side==='art'&&screen==='home')loadHome()},5000);setInterval(()=>loadBadges(false),30000)});
 setInterval(()=>{const d=new Date();if(!H)$('#clock').textContent=d.toTimeString().slice(0,8)},1000);
 
 // ---------- Music (BUILD 06): the board, delivering, the loop, and the profiles
@@ -1049,24 +1442,23 @@ async function loadMusic(){const v=$('#v-music');try{MU.data=await api(`/api/sui
 function muFiltered(){const f=MU.f,q=f.q.toLowerCase();return MU.data.slots.filter(s=>(!f.state||s.state===f.state||(f.state==='own'&&s.own))&&(!f.place||s.place===f.place)&&(!f.era||s.era===f.era)&&
   (!f.singer||(s.singers||[]).some(g=>g.name===f.singer))&&(!q||(s.id+' '+(s.scene||'')+' '+(s.purpose||'')).toLowerCase().includes(q)))}
 function paintMusic(){const d=MU.data,c=d.counts,v=$('#v-music');
-  const tabs=`<div class="tabs" style="display:inline-flex"><button class="${MU.tab==='board'?'on story':''}" onclick="MU.tab='board';paintMusic()">The board</button><button class="${MU.tab==='profiles'?'on story':''}" onclick="MU.tab='profiles';paintMusic()">Profiles (${d.sheets.length})</button></div>`;
+  const tabs='';
   let h=`<div class="hero"><h1>Music</h1><span class="tag">Story</span>${tabs}<span class="spacer" style="flex:1"></span><button onclick="muOpenSlot()">＋ I've had an idea for a song</button></div>`;
-  if(MU.tab==='profiles'){v.innerHTML=h+muProfiles();return}
+  if(MU.tab==='profiles'){v.innerHTML=h+muProfiles();if(MU.want){const w=MU.want;MU.want=null;muSheet(w)}return}
+  if(MU.tab==='inbox'){v.innerHTML=h+muInbox();return}
+  if(MU.tab==='briefs'){v.innerHTML=h+'<div id="mu-briefs"><div class="empty">Reading the board\'s record…</div></div>';muBriefs();return}
   h+=`<div class="mu-counts">${['needed','proposed','agreed','written','delivered','in game'].map(k=>`<div class="n ${MU.f.state===k?'on':''}" onclick="MU.f.state=MU.f.state==='${k}'?'':'${k}';paintMusic()"><b>${fmt(c[k])}</b>${muChip(k)}</div>`).join('')}
     <div class="n ${MU.f.state==='own'?'on':''}" onclick="MU.f.state=MU.f.state==='own'?'':'own';paintMusic()"><b>${fmt(c.own)}</b><span class="chip bill">${esc(d.owner)}'s own</span></div>
     <div class="n" title="keeps the music already playing — no slot to fill"><b>${fmt(c.inherits)}</b>${muChip('inherits')}</div></div>`;
   if(d.next.length)h+=`<div class="card" style="margin-bottom:14px"><h2>Next most useful</h2>${d.next.map(r=>`<div style="margin:6px 0"><a href="#" onclick="muSelect('${esc(r.id)}');return false">${esc(r.scene)}</a> <span class="meta">— ${esc(r.why)}</span></div>`).join('')}</div>`;
-  const inb=d.inbox.filter(x=>!x.delivered_to);
-  if(d.inbox.length)h+=`<div class="card" style="margin-bottom:14px"><h2>The score inbox <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(d.paths.inbox)}\\ · ${inb.length} not yet delivered</span></h2>
-    ${d.inbox.map(x=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="ghost" onclick="muPlay(null,'${esc(x.name)}')">▶</button><b>${esc(x.name)}</b>
-      ${x.delivered_to?`<span class="meta">delivered to ${esc(x.delivered_to)}</span>`:`${x.guess?`<span class="meta">looks like <a href="#" onclick="muSelect('${esc(x.guess.id)}');return false">${esc(x.guess.scene)}</a> (${Math.round(x.guess.score*100)}%)</span> <button class="go" onclick="muDeliverInbox('${esc(x.name)}','${esc(x.guess.id)}')">Deliver there</button>`:'<span class="meta">no guess — open a row and deliver it from there</span>'}`}</div>`).join('')}</div>`;
+  {const inb=d.inbox.filter(x=>!x.delivered_to);if(inb.length)h+=`<div class="note" style="max-width:none">${inb.length} track(s) in the score inbox not yet delivered — <a href="#music/inbox">Score inbox</a>.</div>`}
   const f=d.filters;
   h+=`<div class="mu-filters"><input placeholder="search" value="${esc(MU.f.q)}" oninput="MU.f.q=this.value;muTable()" style="width:200px">
     <select onchange="MU.f.place=this.value;paintMusic()"><option value="">every town</option>${f.places.map(x=>`<option ${MU.f.place===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
     <select onchange="MU.f.era=this.value;paintMusic()"><option value="">every era</option>${f.eras.map(x=>`<option ${MU.f.era===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
     <select onchange="MU.f.singer=this.value;paintMusic()"><option value="">every voice</option>${f.singers.map(x=>`<option ${MU.f.singer===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
     <span class="meta" id="mu-n"></span><span class="meta">· drop an audio file on a row to deliver it</span></div><div id="mu-table"></div>`;
-  v.innerHTML=h;muTable()}
+  v.innerHTML=h;muTable();if(MU.sel)setTimeout(()=>{const r=document.querySelector(`#mu-table tr[data-id="${CSS.escape(MU.sel)}"]`);if(r)r.scrollIntoView({block:'center'})},60)}
 function muTable(){const rows=muFiltered();$('#mu-n').textContent=`${rows.length} of ${MU.data.slots.length} slots`;
   $('#mu-table').innerHTML=`<table class="mu"><tr><th>State</th><th>What it's for</th><th></th><th>Who sings</th><th>Where</th><th>The game says</th></tr>${rows.map(s=>`<tr class="row ${MU.sel===s.id?'sel':''}" data-id="${esc(s.id)}">
     <td>${muChip(s.state)}${s.own?' <span class="chip bill">'+esc(MU.data.owner)+'\'s</span>':''}${s.cemented?' <span title="cemented — delivered by '+esc(s.delivered.by)+' on '+esc((s.delivered.at||'').slice(0,10))+'">🔒</span>':''}</td>
@@ -1074,10 +1466,18 @@ function muTable(){const rows=muFiltered();$('#mu-n').textContent=`${rows.length
     <td>${(s.singers||[]).map(g=>esc(g.name)+(g.voice==='ask'?' <span style="color:var(--warn)" title="no voice lock written down — asked">(ask)</span>':'')).join(', ')}</td>
     <td>${esc(s.place||'')}${s.era?' · '+esc(s.era):''}</td><td class="meta">${esc(s.game_word||s.game_status||'')}${s.file_exists||s.delivered?` <button class="ghost" style="padding:2px 8px" onclick="event.stopPropagation();muPlay('${esc(s.id)}')">▶</button>`:''}</td></tr>
     ${MU.sel===s.id?`<tr><td colspan="6">${muDetail(s)}</td></tr>`:''}`).join('')}</table>`;
-  $$('#mu-table tr.row').forEach(tr=>{tr.onclick=()=>{MU.sel=MU.sel===tr.dataset.id?null:tr.dataset.id;muTable()};
+  $$('#mu-table tr.row').forEach(tr=>{tr.onclick=()=>{MU.sel=MU.sel===tr.dataset.id?null:tr.dataset.id;setAddr(MU.sel?addrOf('music','needed',MU.sel):'music/needed');muTable()};
     tr.ondragover=e=>{e.preventDefault();tr.classList.add('drop')};tr.ondragleave=()=>tr.classList.remove('drop');
     tr.ondrop=e=>{e.preventDefault();tr.classList.remove('drop');const fl=e.dataTransfer.files[0];if(fl)muDeliverFile(tr.dataset.id,fl)}})}
-function muSelect(id){MU.f={state:'',place:'',era:'',singer:'',q:''};MU.sel=id;MU.tab='board';paintMusic();setTimeout(()=>{const r=document.querySelector(`#mu-table tr[data-id="${CSS.escape(id)}"]`);if(r)r.scrollIntoView({block:'center'})},50)}
+function muInbox(){const d=MU.data;let h='';const inb=d.inbox.filter(x=>!x.delivered_to);
+  if(d.inbox.length)h+=`<div class="card" style="margin-bottom:14px"><h2>The score inbox <span class="meta" style="text-transform:none;letter-spacing:0">— ${esc(d.paths.inbox)}\\ · ${inb.length} not yet delivered</span></h2>
+    ${d.inbox.map(x=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="ghost" onclick="muPlay(null,'${esc(x.name)}')">▶</button><b>${esc(x.name)}</b>
+      ${x.delivered_to?`<span class="meta">delivered to ${esc(x.delivered_to)}</span>`:`${x.guess?`<span class="meta">looks like <a href="#" onclick="muSelect('${esc(x.guess.id)}');return false">${esc(x.guess.scene)}</a> (${Math.round(x.guess.score*100)}%)</span> <button class="go" onclick="muDeliverInbox('${esc(x.name)}','${esc(x.guess.id)}')">Deliver there</button>`:'<span class="meta">no guess — open a row and deliver it from there</span>'}`}</div>`).join('')}</div>`;
+  if(!d.inbox.length)h+=`<div class="empty">The score inbox is empty — finished tracks dropped into ${esc(d.paths.inbox)}\\ in the game folder show here, with the slot each one looks like.</div>`;return h}
+async function muBriefs(){let r;try{r=await api('/api/suite/briefs?id='+encodeURIComponent(gid()))}catch(e){$('#mu-briefs').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  const el=$('#mu-briefs');if(!el)return;if(!r.items.length){el.innerHTML='<div class="empty">No briefs or songs yet — a brief starts on a row of Needed (propose), a song once its brief has a yes.</div>';return}
+  el.innerHTML=`<table class="mu"><tr><th>When</th><th>What</th><th>For</th><th>Who wrote it</th><th></th></tr>${r.items.map(x=>`<tr class="row" onclick="go('music/needed/'+encodeURIComponent('${esc(x.slot)}'))"><td class="meta">${esc(when(x.at))}</td><td><b>${esc(x.what)}</b>${x.title?' · “'+esc(x.title)+'”':''}${x.verdict?` <span class="meta">— answer: ${esc(x.verdict)}</span>`:''}</td><td>${esc(x.scene)}</td><td>${esc(x.by||'')}</td><td onclick="event.stopPropagation()">${x.file?muLink(x.file,'open'):''}</td></tr>`).join('')}</table>`}
+function muSelect(id){if(!(A.area&&A.area.id==='music'&&A.tab.id==='needed')){go(addrOf('music','needed',id));return}setAddr(addrOf('music','needed',id));MU.f={state:'',place:'',era:'',singer:'',q:''};MU.sel=id;MU.tab='board';paintMusic();setTimeout(()=>{const r=document.querySelector(`#mu-table tr[data-id="${CSS.escape(id)}"]`);if(r)r.scrollIntoView({block:'center'})},50)}
 function muLink(rel,label){return `<a href="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(rel)}" target="_blank">${esc(label||rel)}</a>`}
 function muDetail(s){const d=s.delivered,me=G.identity||'',person=!/^claude/i.test(me);let h=`<div class="mu-detail" onclick="event.stopPropagation()">`;
   h+=`<div>${esc(s.purpose||'')}</div><div class="meta">slot <code>${esc(s.id)}</code>${s.track?` · track <code>${esc(s.track)}</code>`:''}${s.file?` · plays <code>${esc(s.file)}</code>`:''}</div>`;
@@ -1133,7 +1533,7 @@ function muFill(btn){const inp=btn.previousElementSibling;if(!inp.value.trim())r
 function muProfiles(){const d=MU.data;if(!d.sheets.length)return `<div class="empty">No profiles yet — they live in ${esc(d.paths.styles)}\\ in the game folder.</div>`;
   let h=`<div style="display:flex;gap:18px;align-items:flex-start"><div style="min-width:230px">${d.sheets.map(x=>`<div style="margin:4px 0"><a href="#" onclick="muSheet('${esc(x.id)}');return false" style="${MU.sheet&&MU.sheet.id===x.id?'color:var(--story)':''}">${esc(x.name)}</a> <span class="meta">${x.songs} songs · ${x.styles} style(s)${x.open?` · <span style="color:var(--warn)">${x.open} open</span>`:''}</span></div>`).join('')}</div><div class="mu-sheet" style="flex:1" id="mu-sheet">`;
   h+=MU.sheet?muSheetHtml(MU.sheet):'<div class="empty">Pick a voice.</div>';return h+'</div></div>'}
-async function muSheet(id){const r=await api(`/api/suite/sheet?id=${encodeURIComponent(gid())}&sheet=${encodeURIComponent(id)}`);if(r.error){toast(r.error,false);return}MU.sheet=r.sheet;MU.tab='profiles';paintMusic()}
+async function muSheet(id){const r=await api(`/api/suite/sheet?id=${encodeURIComponent(gid())}&sheet=${encodeURIComponent(id)}`);if(r.error){toast(r.error,false);return}MU.sheet=r.sheet;MU.tab='profiles';if(A.area&&A.area.id==='music')setAddr(addrOf('music','singers',id));paintMusic()}
 function muSheetHtml(s){const v=s.voice||{};let h=`<h2 style="margin-top:0">${esc(s.name)}</h2><div class="meta">${esc(s.kind)} · made by ${esc(s.made_by||'')} ${esc(s.made||'')} from the evidence listed · ${s._open.length} open spot(s) · ${muLink(MU.data.paths.styles+'/'+s.id+'.md','the .md')}</div>`;
   h+=`<h3>1 · The voice — the constant</h3>`+[['type','Voice type and range'],['delivery','Delivery'],['constant','What stays the same whatever the genre'],['changes','Where it changes over time']].map(([k,l])=>`<div><b>${l}:</b> ${muSpot(v[k],'/voice/'+k)}</div>`).join('');
   (s.styles||[]).forEach((st,i)=>{if(st&&st.open){h+=`<h3>2.${i+1} · Style ${i+1}</h3>${muSpot(st,`/styles/${i}`)}`;return}h+=`<h3>2.${i+1} · Style ${i+1} — ${muSpot(st.name,`/styles/${i}/name`)}</h3>`+[['genre','Genre words'],['instruments','Instruments'],['tempo','Tempo'],['metre','Metre'],['when','When they use it'],['example','Example song']].map(([k,l])=>`<div><b>${l}:</b> ${muSpot(st[k],`/styles/${i}/${k}`)}</div>`).join('')+
@@ -1154,7 +1554,7 @@ function muSheetHtml(s){const v=s.voice||{};let h=`<h2 style="margin-top:0">${es
 let RT={towns:null,place:'',era:'all',data:null,sel:0,editing:null,cmp:null};
 async function loadRead(){const v=$('#v-read');if(!RT.towns){const r=await api(`/api/suite/towns?id=${encodeURIComponent(gid())}`);if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}RT.towns=r.towns;if(!RT.place&&RT.towns.length)RT.place=RT.towns[0].id}
   if(!RT.place){v.innerHTML='<div class="empty">This game has no places yet.</div>';return}
-  const r=await api(`/api/suite/read?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.place)}&era=${encodeURIComponent(RT.era)}`);if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}RT.data=r;
+  const r=await api(`/api/suite/read?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.place)}&era=${encodeURIComponent(RT.era)}`);if(r.error){v.innerHTML=`<div class="err">${esc(r.error)}</div>`;return}RT.data=r;if(A.tab&&A.tab.screen==='read')setAddr(addrOf('story','read',RT.place,RT.era));
   if(RT.cmp){RT.cmp.data=await api(`/api/suite/read?id=${encodeURIComponent(gid())}&place=${encodeURIComponent(RT.cmp.place)}&era=${encodeURIComponent(RT.cmp.era)}`)}
   RT.sel=Math.min(RT.sel,Math.max(0,r.lines.length-1));paintRead()}
 function rtSt(st){st=st||'draft';return `<span class="rt-st ${esc(st)}">${{approved:'✦ approved',flagged:'⚑ flagged',draft:'◆ draft'}[st]||esc(st)}</span>`}
@@ -1162,22 +1562,22 @@ function paintRead(){const d=RT.data,c=d.counts,v=$('#v-read'),eras=['all',...d.
   let h=`<div class="hero"><h1>Read-through</h1><span class="tag">Story</span></div><div class="rt-top">
     <select onchange="RT.place=this.value;RT.sel=0;loadRead()">${RT.towns.map(t=>`<option value="${esc(t.id)}" ${t.id===RT.place?'selected':''}>${esc(t.name)}${t.dev?' (dev)':''} — ${t.lines} lines, ${t.approved} ✦${t.flagged?', '+t.flagged+' ⚑':''}</option>`).join('')}</select>
     <div class="tabs" style="display:inline-flex">${eras.map(e=>`<button class="${RT.era===e?'on story':''}" onclick="RT.era='${e}';RT.sel=0;loadRead()">${e==='all'?'Every era':esc(e[0].toUpperCase()+e.slice(1))}</button>`).join('')}</div>
-    <span class="spacer" style="flex:1"></span><label class="meta">side by side with <select onchange="rtCompare(this.value)"><option value="">—</option>${RT.towns.map(t=>['all',...t.eras].map(e=>`<option value="${esc(t.id)}|${e}" ${RT.cmp&&RT.cmp.place===t.id&&RT.cmp.era===e?'selected':''}>${esc(t.name)} · ${e==='all'?'every era':esc(e)}</option>`).join('')).join('')}</select></label></div>
+    ${d.play?`<button onclick="wbPlay({place:RT.place,era:RT.era})" title="Start the game at this town, in this era">▶ Play from here</button>`:''}<span class="spacer" style="flex:1"></span><label class="meta">side by side with <select onchange="rtCompare(this.value)"><option value="">—</option>${RT.towns.map(t=>['all',...t.eras].map(e=>`<option value="${esc(t.id)}|${e}" ${RT.cmp&&RT.cmp.place===t.id&&RT.cmp.era===e?'selected':''}>${esc(t.name)} · ${e==='all'?'every era':esc(e)}</option>`).join('')).join('')}</select></label></div>
   <div class="meta" style="margin-bottom:6px"><b style="color:var(--ink)">${c.lines} lines</b> · ${c.approved} approved · ${c.flagged} flagged · ${c.draft} draft${c.locked?` · ${c.locked} 🔒 song words`:''} · <span style="color:var(--warn)">${c.meter} for the sameness meter</span>${c.notes?` · ${c.notes} note(s)`:''}</div>
   <div class="rt-keys"><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>A</kbd> approve · <kbd>D</kbd> leave as draft · <kbd>G</kbd> flag as generic (with a note) · <kbd>E</kbd> edit · <kbd>N</kbd> a note for Claude · <kbd>Esc</kbd> stop editing</div>`;
-  h+=`<div class="rt-cols ${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?'two':''}"><div>${rtColumn(d,true)}</div>${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?`<div>${rtColumn(RT.cmp.data,false)}</div>`:''}</div>`;
-  v.innerHTML=h;$$('#v-read .rt-line[data-i]').forEach(el=>el.onclick=e=>{if(e.target.closest('button,textarea'))return;RT.sel=+el.dataset.i;rtPaintSel()});rtPaintSel(false)}
+  h+=`<div id="rt-voices"></div><div class="rt-cols ${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?'two':''}"><div>${rtColumn(d,true)}</div>${RT.cmp&&RT.cmp.data&&!RT.cmp.data.error?`<div>${rtColumn(RT.cmp.data,false)}</div>`:''}</div>`;
+  v.innerHTML=h;$$('#v-read .rt-line[data-i]').forEach(el=>el.onclick=e=>{if(e.target.closest('button,textarea'))return;RT.sel=+el.dataset.i;rtPaintSel()});rtPaintSel(false);rtVoices()}
 function rtColumn(d,main){const m=d.meter;let h='';
   if(!main)h+=`<h2 style="margin:0 0 8px">${esc(d.place.name)} · ${d.era==='all'?'every era':esc(d.era)} <span class="meta">${d.counts.lines} lines</span></h2>`;
   if(d.sheet.length)h+=`<div class="rt-sheet"><div class="meta" style="margin-bottom:4px">${esc(d.place.name)} — its sheet${d.era!=='all'?' in the '+esc(d.era):''}</div>${d.sheet.map((x,i)=>`<div><b>${esc(x.label)}:</b> <span ${main?`onclick="rtEditSheet(${i})" style="cursor:text" title="click to edit"`:''}>${esc(typeof x.text==='string'?x.text:JSON.stringify(x.text))}</span>${x.status?' '+rtSt(x.status):''}</div>`).join('')}</div>`;
   if(main&&(m.never_greet.length||m.greeting))h+=`<div class="meta" style="margin-bottom:8px">The meter (${esc(m.how)}).${m.greeting?` Greeting: “${esc(m.greeting)}”${m.never_greet.length?` — never used by ${esc(m.never_greet.slice(0,6).join(', '))}${m.never_greet.length>6?` and ${m.never_greet.length-6} more`:''}`:''}.`:''}</div>`;
-  h+=d.lines.map((l,i)=>`<div class="rt-line" ${main?`data-i="${i}"`:''} id="${main?'rt-l'+i:''}"><div class="meta">${l.n}</div><div>
+  h+=d.lines.map((l,i)=>`<div class="rt-line" ${main?`data-i="${i}" data-ref="${esc(l.ref)}"`:''} id="${main?'rt-l'+i:''}"><div class="meta">${l.n}</div><div>
     <div class="rt-who">${esc(l.who||'')}${l.locked?' 🔒':''} <span class="meta" style="font-weight:400">${esc(l.source||'')}${l.era?' · '+esc(l.era):''}</span></div>
     <div class="txt" id="${main?'rt-t'+i:''}">${esc(l.text)}</div>
     ${l.when?`<div class="meta2">when ${esc(l.when)}</div>`:''}${l.meter.length?`<div class="mark">◌ ${esc(l.meter.join(' · '))}</div>`:''}${l.locked?`<div class="meta2">${esc(l.lock_reason)}</div>`:''}
     ${main&&l.notes?`<div class="meta2" style="color:var(--story)">✉ ${l.notes} open note(s) <a href="#" onclick="rtNotes(${i});return false">read</a></div>`:''}</div>
     <div style="text-align:right">${rtSt(l.status)}${main?`<div class="rt-acts" style="margin-top:6px;display:none;gap:4px"><button onclick="rtMark('approved')" title="A">✦</button><button onclick="rtMark('draft')" title="D">◆</button><button onclick="rtFlag()" title="G">⚑</button>${l.locked?'':'<button onclick="rtEdit()" title="E">✎</button>'}<button onclick="rtNote()" title="N">✉</button></div>`:''}</div></div>`).join('')||'<div class="empty">No lines in this era.</div>';
-  if(d.quests.length)h+=`<h2 style="margin:18px 0 6px">Quests offered here</h2>${d.quests.map(q=>`<div class="rt-sheet"><b style="color:var(--ink)">${esc(q.title)}</b> ${rtSt(q.status)} <span class="meta">${esc(q.giver||'')}${q.era?' · '+esc(q.era):''}</span>${q.steps.length?`<ol style="margin:6px 0 0 18px;padding:0">${q.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}</div>`).join('')}`;
+  if(d.quests.length)h+=`<h2 style="margin:18px 0 6px">Quests offered here</h2>${d.quests.map(q=>`<div class="rt-sheet"><a href="#story/quests/${encodeURIComponent(q.id)}"><b>${esc(q.title)}</b></a> ${rtSt(q.status)} <span class="meta">${esc(q.giver||'')}${q.era?' · '+esc(q.era):''}</span>${q.steps.length?`<ol style="margin:6px 0 0 18px;padding:0">${q.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}</div>`).join('')}`;
   return h}
 function rtPaintSel(scroll=true){$$('#v-read .rt-line[data-i]').forEach(el=>{const on=+el.dataset.i===RT.sel;el.classList.toggle('sel',on);const a=el.querySelector('.rt-acts');if(a)a.style.display=on?'flex':'none'});
   const el=$('#rt-l'+RT.sel);if(el&&scroll)el.scrollIntoView({block:'nearest'})}
@@ -1215,4 +1615,169 @@ function rtEditSheet(i){const x=RT.data.sheet[i];if(typeof x.text!=='string')ret
 document.addEventListener('keydown',e=>{if(side!=='story'||sscreen!=='read'||!RT.data)return;if($('#modal').style.display==='flex')return;const tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;
   const k=e.key.toLowerCase();if(k==='j'){RT.sel=Math.min(RT.sel+1,RT.data.lines.length-1);rtPaintSel()}else if(k==='k'){RT.sel=Math.max(RT.sel-1,0);rtPaintSel()}
   else if(k==='a')rtMark('approved');else if(k==='d')rtMark('draft');else if(k==='g')rtFlag();else if(k==='e'){e.preventDefault();rtEdit()}else if(k==='n'){e.preventDefault();rtNote()}else return;e.preventDefault()});
+
+// ---------- BUILD 17 · Notes → Rulings: every ruling in one book, searched before anyone asks
+const RB={q:'',kind:'',data:null};
+const KWORD={answer:'answered in the Mail',marked:'✦ in the notes',recorded:'written in the book'};
+function hl(text,words){let t=esc(text);for(const w of (words||[]).filter(x=>x.length>2).sort((a,b)=>b.length-a.length)){try{t=t.replace(new RegExp('\\b('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[a-z]*)','gi'),'<mark>$1</mark>')}catch(e){}}return t}
+function rulWhere(r){if(r.kind==='answer')return `<a href="#messages/inbox/${encodeURIComponent(r.reply||r.letter)}">${esc(r.where)}</a>`;
+  if(r.kind==='marked')return `<a href="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(r.file)}" target="_blank" title="${esc(r.heading||'')}">${esc(r.where)}</a>`;return esc(r.where)}
+function rulCard(r){return `<div class="rul ${r.retired?'retired':''}"><div class="rh"><span class="kchip ${esc(r.kind)}">${esc(KWORD[r.kind]||r.kind)}</span><b style="color:var(--dim)">${esc(r.when||'undated')}</b>${r.when_basis==='file'?'<span title="no date on the line — the file\'s date">≈</span>':''}<span>${rulWhere(r)}</span>${r.by?`<span>by ${esc(r.by)}</span>`:''}${r.recorded_by&&r.recorded_by!==r.by?`<span>written down by ${esc(r.recorded_by)}</span>`:''}${r.applies_to?`<span title="pinned: the book warns when this field says anything else">📌 ${esc(r.applies_to.file)}#${esc(r.applies_to.pointer)} = ${esc(JSON.stringify(r.value))}</span>`:''}<span style="flex:1"></span>${r.retired?`<span>no longer holds — ${esc(r.retired.why)}</span>`:`<button class="linkish" onclick="retireRuling('${esc(r.id)}')">no longer holds…</button>`}</div>
+  ${r.heading&&r.kind==='marked'?`<div class="meta" style="font-size:12px">${esc(r.heading)}</div>`:''}<div class="rt">${hl(r.text,RB.q?r.matched:[])}</div></div>`}
+async function loadRulings(want){const v=$('#v-rulings');if(want!==undefined&&want!==RB.q){RB.q=want}
+  if(!v.querySelector('#rb-q'))v.innerHTML=`<div class="mem"><div class="note">Every ruling in one book: questions answered in the Mail, every line marked ✦ in the game's notes, and rulings written straight in (one given in a chat, say). <b>Search it before asking anything</b> — a session's letter is turned back when the book already answers one of its questions.</div>
+    <div class="mbar"><input id="rb-q" class="fsel" placeholder="Search the book — a town, a person, a word…"><div class="mchips" id="rb-k">${[['','All'],['answer','Answered in the Mail'],['marked','✦ in the notes'],['recorded','Written in']].map(([k,l])=>`<button data-k="${k}">${l}</button>`).join('')}</div><button id="rb-new">✎ Write a ruling down</button></div>
+    <details class="card" style="margin-bottom:14px"><summary style="cursor:pointer">Would this question be asked again? <span class="meta">— paste it and the book says</span></summary><div style="display:flex;gap:8px;margin-top:10px"><input id="rb-cq" class="fsel" style="flex:1" placeholder="The question you're about to ask"><button id="rb-ck">Check</button></div><div id="rb-cr"></div></details>
+    <div id="rb-conf"></div><div id="rb-sum" class="meta" style="margin-bottom:8px"></div><div id="rb-list"><div class="empty">Reading the book…</div></div></div>`;
+  const qi=$('#rb-q');qi.value=RB.q;let t;qi.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{RB.q=qi.value;setAddr(addrOf('notes','rulings',RB.q));paintRulings()},250)};
+  $$('#rb-k button').forEach(b=>{b.classList.toggle('on',b.dataset.k===RB.kind);b.onclick=()=>{RB.kind=b.dataset.k;$$('#rb-k button').forEach(x=>x.classList.toggle('on',x===b));paintRulings()}});
+  $('#rb-new').onclick=()=>recordRuling();$('#rb-ck').onclick=checkQuestion;$('#rb-cq').onkeydown=e=>{if(e.key==='Enter')checkQuestion()};paintRulings()}
+async function paintRulings(){let d;try{d=await api(`/api/suite/rulings?id=${encodeURIComponent(gid())}&q=${encodeURIComponent(RB.q)}&kind=${RB.kind}&retired=1&limit=${RB.q?80:250}`)}catch(e){$('#rb-list').innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(d.error){$('#rb-list').innerHTML=`<div class="err">${esc(d.error)}</div>`;return}RB.data=d;const s=d.summary;
+  $('#rb-conf').innerHTML=d.conflicts.map(c=>`<div class="conf"><b>The data says something else than a ruling.</b> ${esc(c.message)}.<div class="meta" style="color:#e8b0aa">Ruling: ${esc(c.ruling.text.slice(0,240))} — change the data back, or mark the ruling as no longer holding.</div></div>`).join('');
+  $('#rb-sum').textContent=`${s.count} ruling(s) — ${Object.entries(s.by_kind).map(([k,n])=>`${n} ${KWORD[k]||k}`).join(' · ')}${s.retired?` · ${s.retired} no longer hold`:''} · read from ${s.files} file(s), the Mail and the book${RB.q?` · ${d.rulings.length} match “${RB.q}”`:''}`;
+  $('#rb-list').innerHTML=d.rulings.length?d.rulings.map(rulCard).join(''):`<div class="empty">${RB.q?'Nothing in the book matches — that one may really be new.':'The book is empty: no answered questions, no ✦ lines, nothing written in yet.'}</div>`}
+async function checkQuestion(){const q=$('#rb-cq').value.trim();if(!q)return;const c=await api(`/api/suite/rulecheck?id=${encodeURIComponent(gid())}&q=${encodeURIComponent(q)}`);const h=c.checked[0].rulings;
+  $('#rb-cr').innerHTML=h.length?`<div class="ruled"><b>Already ruled — don't ask it again.</b></div>${h.map(rulCard).join('')}`:`<div class="meta" style="margin-top:8px">✓ Not in the book — nothing already answers it. Ask away.</div>`}
+function recordRuling(){modal(`<h3>Write a ruling down</h3><p class="meta">For a ruling that isn't in a letter or a ✦ line — one given in a chat, on the phone, over coffee. It's never edited afterwards; if it stops holding, mark it so.</p>
+  <textarea id="rr-t" class="fsel" style="width:100%;min-height:90px" placeholder="The ruling, in the words it was given"></textarea>
+  <input id="rr-q" class="fsel" style="width:100%;margin-top:8px" placeholder="The question it answers (optional — helps the book catch it being asked again)">
+  <div style="display:flex;gap:8px;margin-top:8px"><input id="rr-by" class="fsel" style="flex:1" placeholder="Whose ruling" value="${esc(G.identity||'')}"><input id="rr-s" class="fsel" style="flex:2" placeholder="Where and when it was said (e.g. in chat, 2026-11-11 15:16)"></div>
+  <details style="margin-top:10px"><summary class="meta" style="cursor:pointer">📌 Pin it to a data field — the book warns whenever the data says anything else</summary><div style="display:flex;gap:8px;margin-top:8px"><input id="rr-f" class="fsel" style="flex:2" placeholder="file (e.g. data/places/x.json)"><input id="rr-p" class="fsel" style="flex:2" placeholder="pointer (e.g. /fate/value)"><input id="rr-v" class="fsel" style="flex:1" placeholder='value (JSON, e.g. "spared")'></div></details>
+  <div class="row" style="margin-top:14px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="rr-ok">Into the book</button></div>`,true);
+  $('#rr-ok').onclick=async()=>{const b={game:gid(),text:$('#rr-t').value,question:$('#rr-q').value,by:$('#rr-by').value,source:$('#rr-s').value};
+    if($('#rr-f').value.trim()){let v=$('#rr-v').value;try{v=JSON.parse(v)}catch(e){}b.applies_to={file:$('#rr-f').value.trim(),pointer:$('#rr-p').value.trim()};b.value=v}
+    const r=await post('rule_record',b);toast(r.message,r.ok);if(r.ok){closeModal();paintRulings()}}}
+function retireRuling(id){modal(`<h3>This ruling no longer holds</h3><p class="meta">It stays in the book, struck through, with your reason — and stops being used to turn questions back.</p><input id="rt-why" class="fsel" style="width:100%" placeholder="Why — what replaced it"><div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="warn" id="rt-ok">Mark it</button></div>`);
+  $('#rt-ok').onclick=async()=>{const r=await post('rule_retire',{game:gid(),id,why:$('#rt-why').value});toast(r.message,r.ok);if(r.ok){closeModal();paintRulings()}}}
+// ---------- BUILD 17 · Notes → Idea box: one key (I), one line, filed with what you were looking at
+const IB={state:'open'};
+function placeLabel(){const a=A.area,t=A.tab;if(!a)return'';return [a.name,t.name,...(A.rest||[])].join(' › ')}
+function ideaKey(){if($('#modal').style.display==='flex')return;const at=curAddr(),label=placeLabel();
+  modal(`<h3>💡 An idea</h3><input id="id-t" class="fsel" style="width:100%" placeholder="One line — a song, a town, a joke for later…" maxlength="2000"><p class="meta" style="margin:8px 0 0">Filed with today's date, your name, and what you're looking at: <b>${esc(label||'Home')}</b>. Enter files it, Esc forgets it.</p>`);
+  const i=$('#id-t');setTimeout(()=>i.focus(),30);i.onkeydown=async e=>{if(e.key==='Escape'){closeModal();return}if(e.key!=='Enter'||!i.value.trim())return;e.preventDefault();
+    const r=await post('idea_add',{game:gid(),text:i.value,at,label});toast(r.ok?'💡 In the idea box.':r.message,r.ok);if(r.ok){closeModal();loadBadges(true);if(A.tab&&A.tab.screen==='ideas')loadIdeas()}}}
+document.addEventListener('keydown',e=>{if(e.key!=='i'&&e.key!=='I')return;const tg=e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||e.target.isContentEditable||e.ctrlKey||e.metaKey||e.altKey)return;
+  if($('#modal').style.display==='flex')return;e.preventDefault();ideaKey()});
+async function loadIdeas(want){const v=$('#v-ideas');let d;try{d=await api(`/api/suite/ideas?id=${encodeURIComponent(gid())}&state=${IB.state}`)}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(d.error){v.innerHTML=`<div class="err">${esc(d.error)}</div>`;return}const c=d.counts;
+  v.innerHTML=`<div class="mem"><div class="note">Press <b>I</b> anywhere in the forge to drop an idea here — one line, filed with the date and whatever you were looking at. Ideas stay until someone sorts them: into a task, a note pinned where it belongs, a letter, or a file — and then each says where it went.</div>
+    <div class="mbar"><input id="ib-new" class="fsel" placeholder="Or type one here and press Enter"><div class="mchips" id="ib-s">${[['open',`To sort (${c.open})`],['sorted',`Sorted (${c.sorted})`],['all',`All (${c.all})`]].map(([k,l])=>`<button data-s="${k}" class="${IB.state===k?'on':''}">${l}</button>`).join('')}</div></div>
+    ${d.ideas.length?d.ideas.map(i=>`<div class="idea" id="idea-${esc(i.id)}" style="${i.id===want?'border-color:#6a5326':''}"><div class="it"><div><b>${esc(i.text)}</b></div><div class="meta">${esc(when(i.time))} · ${esc(i.who)}${i.at||i.label?` · while looking at <a href="#${esc(i.at||'')}">${esc(i.label||i.at)}</a>`:''}</div>
+      ${i.sorted?`<div class="meta" style="color:${i.open?'var(--warn)':'var(--ok)'}">→ ${esc(i.sorted.to)}${i.sorted.where?': '+esc(i.sorted.where):''} <span style="color:var(--faint)">(${esc(i.sorted.who)}, ${esc(when(i.sorted.time))})</span>${i.sorted.note?' — '+esc(i.sorted.note):''}</div>`:''}</div>
+      ${i.open?`<div class="ia"><button onclick="ideaTask('${esc(i.id)}','Claude')">→ Task for Claude</button><button onclick="ideaTask('${esc(i.id)}','${esc(G.identity||'')}')">→ Task for me</button>${i.obj||i.at?`<button onclick="ideaNote('${esc(i.id)}')" title="pin it as a note on what you were looking at">→ Note there</button>`:''}<button onclick="ideaFiled('${esc(i.id)}')">Filed…</button><button class="ghost" onclick="ideaSort('${esc(i.id)}','dropped')">Drop</button></div>`:''}</div>`).join(''):`<div class="empty">${IB.state==='open'?'Nothing to sort — press I anywhere to add one.':'None yet.'}</div>`}</div>`;
+  $$('#ib-s button').forEach(b=>b.onclick=()=>{IB.state=b.dataset.s;loadIdeas()});
+  const n=$('#ib-new');n.onkeydown=async e=>{if(e.key==='Enter'&&n.value.trim()){const r=await post('idea_add',{game:gid(),text:n.value,at:'notes/ideas',label:'Notes › Idea box'});toast(r.message,r.ok);if(r.ok){loadIdeas();loadBadges(true)}}};
+  if(want)setTimeout(()=>{const el=document.getElementById('idea-'+want);if(el)el.scrollIntoView({block:'center'})},50)}
+async function ideaTask(id,who){const r=await post('idea_task',{game:gid(),id,for:who});toast(r.message,r.ok);if(r.ok){loadIdeas();loadBadges(true)}}
+async function ideaNote(id){const i=(await api(`/api/suite/ideas?id=${encodeURIComponent(gid())}&state=all`)).ideas.find(x=>x.id===id);if(!i)return;
+  const at=String(i.at||''),p=addrParts(at);let obj=i.obj||(p[0]==='story'&&p[1]==='read'&&p[2]?'place:'+p[2]:p[0]==='music'&&p[2]?'music:'+p[2]:'at:'+at);
+  const r=await post('idea_note',{game:gid(),id,obj,label:i.label||at});toast(r.message,r.ok);if(r.ok){loadIdeas();loadBadges(true)}}
+function ideaFiled(id){modal(`<h3>Where did it go?</h3><input id="if-w" class="fsel" style="width:100%" placeholder="e.g. 06_Games_II_III_Seeds.md, or a letter's subject"><div class="mchips" style="margin-top:10px">${['file','letter','kept'].map(k=>`<button data-k="${k}" class="${k==='file'?'on':''}">${k==='kept'?'kept for later':'into a '+k}</button>`).join('')}</div><div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModal()">Cancel</button><button class="go" id="if-ok">Done</button></div>`);
+  let to='file';$$('#mbox .mchips button').forEach(b=>b.onclick=()=>{to=b.dataset.k;$$('#mbox .mchips button').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#if-ok').onclick=async()=>{const r=await post('idea_sort',{game:gid(),id,to,where:$('#if-w').value});toast(r.message,r.ok);if(r.ok){closeModal();loadIdeas();loadBadges(true)}}}
+async function ideaSort(id,to){const r=await post('idea_sort',{game:gid(),id,to});toast(r.message,r.ok);if(r.ok){loadIdeas();loadBadges(true)}}
+// ---------- BUILD 17 · Notes → Playtest notes: the game's note key, taken in to where each can be worked on
+const ROUTE_WORD={art:'→ Art redo drafts (Called out)',writing:'→ a note on the lines',music:'→ a note on the place, for the music',task:'→ a work order'};
+async function loadPlaytest(){const v=$('#v-playtest');let d;try{d=await api('/api/suite/playtest?id='+encodeURIComponent(gid()))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(d.error){v.innerHTML=`<div class="err">${esc(d.error)}</div>`;return}
+  v.innerHTML=`<div class="mem"><div class="note">Notes taken while playing — the game's note key, anywhere in the game, with a screenshot and where you were. <b>Take in</b> sends each where it can be worked on: Art → the forge's redo drafts; Writing → a note on the lines it's about; Music → a note on the place; Bugs, Balance and the rest → work orders. Each category also arrives as a letter in Messages, screenshots attached.</div>
+    <div class="mbar"><div class="mchips">${Object.entries(d.by_category).map(([k,n])=>`<span class="cat ${esc(k)}" style="padding:4px 11px">${esc(k)} ${n}</span>`).join('')}</div><span style="flex:1"></span><span class="meta">from <code>${esc(d.folder)}/notes.jsonl</code></span><button class="go" id="pt-in" ${d.new?'':'disabled'}>⇩ Take in ${d.new} new note(s)</button></div>
+    ${d.notes.length?d.notes.map(n=>`<div class="ptn">${n.shot?`<img loading="lazy" src="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(n.shot)}" onclick="window.open(this.src)">`:'<div class="noshot">no screenshot</div>'}
+      <div style="flex:1;min-width:0"><div style="display:flex;gap:9px;align-items:baseline;flex-wrap:wrap"><span class="cat ${esc(n.category)}">${esc(n.category)}</span><span class="meta">${esc(when(n.time))} · ${esc(n.tester||'tester')}${n.build?' · '+esc(n.build):''}</span></div>
+      <div style="margin:6px 0;color:var(--ink)">${n.text?esc(n.text):'<i class="meta">no words — the screenshot says it</i>'}</div><div class="meta">${esc(n.where)}${n.place?` · <a href="#story/read/${encodeURIComponent(n.place)}">read ${esc(n.place)}</a>`:''}</div>
+      <div class="meta" style="margin-top:4px;color:${n.routed?'var(--ok)':'var(--warn)'}">${n.routed?'✓ '+esc(n.routed.where)+` <span style="color:var(--faint)">(${esc(n.routed.who)}, ${esc(when(n.routed.time))})</span>`:esc(ROUTE_WORD[n.route]||n.route)+' — not taken in yet'}</div></div></div>`).join(''):`<div class="empty">${d.has_file?'The notes file is empty.':'No playtest notes yet — press the game\'s note key while playing and they arrive here.'}</div>`}</div>`;
+  const b=$('#pt-in');if(b)b.onclick=async()=>{b.disabled=true;const r=await post('playtest_in',{game:gid(),to:'Claude'});toast(r.message,r.ok);loadPlaytest();loadBadges(true)}}
+// ---------- BUILD 17 · Home → where the game stands, and the next most useful thing for each of us
+async function loadStanding(){const el=$('#h-stand');let d;try{d=await api('/api/suite/standing?id='+encodeURIComponent(gid()))}catch(e){el.textContent='';return}
+  if(!d.available){el.innerHTML=`<span class="meta">${esc(d.why||'')}</span>`;return}
+  const nx=(xs,empty)=>xs.length?xs.map(x=>`<div class="nx"><span style="color:var(--warn)">●</span><span style="flex:1"><a href="#${esc(x.go)}">${esc(x.title)}</a> <span class="meta">· ${esc(x.why)}</span></span></div>`).join(''):`<div class="meta">${empty}</div>`;
+  const m=d.memory||{};
+  el.innerHTML=`<div class="stand">${d.tiles.map(t=>`<div class="sx ${esc(t.state)}" onclick="go('${esc(t.go)}')" title="${esc(t.detail)}"><div class="l">${esc(t.label)}</div><div class="v">${t.have.toLocaleString()} <span class="meta" style="font-size:13px">of ${t.of.toLocaleString()}</span></div><div class="pb"><i style="width:${Math.min(100,t.pct)}%"></i></div></div>`).join('')}</div>
+   <div class="nx2"><div><h3>Next for you${d.who?' ('+esc(d.who)+')':''}</h3>${nx(d.next_me,'Nothing waiting on you.')}</div><div><h3>Next for Claude</h3>${nx(d.next_ai,'Nothing queued for Claude.')}</div></div>
+   <div class="meta" style="margin-top:10px">Team memory: <a href="#notes/rulings">${m.rulings??'?'} ruling(s)</a>${m.conflicts?` · <span style="color:var(--no)">${m.conflicts} contradicted by the data</span>`:''} · <a href="#notes/ideas">${m.ideas_open||0} idea(s) to sort</a> · <a href="#notes/playtest">${m.playtest_new||0} playtest note(s) not taken in</a> · press <b>I</b> anywhere for a new idea</div>`}
+
+// ---------- BUILD 29b: Art → Floor plans — the generator in the suite: four candidates side by side, paint on the grid, approve
+let FP={d:null,place:null,era:'war',aid:'',size:'',open:null,map:null,set:null,rows:null,undo:[],edits:[],brush:'wall',cell:14,chkT:null,probs:null};
+const FP_SEM={'.':'ground','=':'road','_':'path','-':'floor','#':'wall','R':'roof','~':'water','D':'door',',':'rubble','"':'field','|':'fence','^':'rock','*':'glass','b':'bridge','v':'drop','V':'vehicle','f':'furniture'};
+async function loadFloorplans(r){const v=$('#v-floorplans');r=r||[];
+  if(r[0]==='open'&&r.length>1)return fpOpen(r.slice(1).join('/'),FP.open===r.slice(1).join('/')?FP.map:null);
+  FP.open=null;let d;try{d=await api('/api/suite/floorplans?id='+encodeURIComponent(gid()))}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(d.error){v.innerHTML=`<div class="empty">${esc(d.error)}</div>`;return}FP.d=d;
+  if(!FP.place||!d.sheets.find(s=>s.id===FP.place))FP.place=(d.sheets.find(s=>(s.archetypes[FP.era]||{}).ids?.length)||d.sheets[0]||{}).id;
+  fpPaintList()}
+function fpSheet(){return (FP.d.sheets||[]).find(s=>s.id===FP.place)||{archetypes:{}}}
+function fpPaintList(){const d=FP.d,v=$('#v-floorplans'),sh=fpSheet(),ar=(sh.archetypes||{})[FP.era]||{ids:[],why:[],how:''};
+  const sug=ar.ids||[];if(!FP.aid||!d.archetypes.find(a=>a.id===FP.aid))FP.aid=sug[0]||'';
+  const opts=[...sug.map(id=>d.archetypes.find(a=>a.id===id)).filter(Boolean),...d.archetypes.filter(a=>!sug.includes(a.id))];
+  const cands=d.candidates.filter(c=>c.place===FP.place&&c.era===FP.era);
+  let h=`<div class="tk-top"><b class="big">${cands.length}</b><span>candidate${cands.length===1?'':'s'} for ${esc(sh.name||FP.place||'')} (${esc(FP.era)})</span><span style="flex:1"></span><span class="meta">Each is laid out from the town's own sheet. Nothing reaches the game until you approve one.</span></div>
+  <div class="fp-ctl"><label>Town <select id="fp-place">${d.sheets.map(s=>`<option value="${esc(s.id)}" ${s.id===FP.place?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+   <label>Era <select id="fp-era"><option value="war" ${FP.era==='war'?'selected':''}>War</option><option value="after" ${FP.era==='after'?'selected':''}>After</option></select></label>
+   <label>Archetype <select id="fp-aid">${opts.map(a=>`<option value="${esc(a.id)}" ${a.id===FP.aid?'selected':''}>${esc(a.name)}${sug.includes(a.id)?' — '+(ar.how||'suggested'):''}</option>`).join('')}</select></label>
+   <label>Size <select id="fp-size">${Object.entries(d.sizes||{}).map(([k,v])=>`<option value="${k}" ${(FP.size||sh.size||'town')===k?'selected':''}>${k} (${v[0]}×${v[1]} tiles)</option>`).join('')}</select></label>
+   <button class="go" onclick="fpGenerate(4)">Generate 4</button><button class="ghost" onclick="fpGenerate(1)" title="one more candidate, the next seed">Reroll (one more)</button></div>`;
+  const a=d.archetypes.find(x=>x.id===FP.aid);
+  const look=(sh.look||{})[FP.era],mus=(sh.music||{})[FP.era];
+  if(look||mus)h+=`<div class="fp-why"><b>${esc(sh.name||'')} in the ${esc(FP.era)}</b>${look?' — its look: '+esc(look):''}${mus?'\nIts theme music: '+esc(mus)+' (the map carries it; its music slot is on Music → Needed once approved)':''}</div>`;
+  h+=`<div class="fp-why">${a?`<b>${esc(a.mark)} ${esc(a.name)}</b> — ${esc(a.pitch)}\nStory element: ${esc((a.story||{})[FP.era]||'')} · upgrades: ${esc((a.upgrade||{})[FP.era]||'')} · accessories: ${esc((a.accessory||{})[FP.era]||'')}\n`:''}${(ar.why||[]).length?'Why suggested: '+esc(ar.why.join(' · '))+'\n':''}${(sh.unknowns||[]).length?'Unknown on the sheet: '+esc(sh.unknowns.join(' · ')):''}</div>`;
+  h+=cands.length?`<div class="fp-grid">${cands.map(fpCard).join('')}</div>`:`<div class="empty">No candidates yet for this town and era — Generate 4.</div>`;
+  v.innerHTML=h;
+  $('#fp-place').onchange=e=>{FP.place=e.target.value;FP.aid='';fpPaintList()};$('#fp-era').onchange=e=>{FP.era=e.target.value;FP.aid='';fpPaintList()};$('#fp-aid').onchange=e=>{FP.aid=e.target.value;fpPaintList()};$('#fp-size').onchange=e=>{FP.size=e.target.value}}
+function fpImg(c,w){return `/suite/layoutimg?id=${encodeURIComponent(gid())}&f=${encodeURIComponent(c.folder)}&file=${encodeURIComponent(c.guide)}${w?'&w='+w:''}`}
+function fpCard(c){const bad=c.problems.length+c.game_problems.length;const a=(FP.d.archetypes.find(x=>x.id===c.archetype)||{}).name||c.archetype;
+  return `<div class="fp-card"><img src="${fpImg(c,480)}" onclick="go('art/floorplans/open/${c.folder.split('/').map(encodeURIComponent).join('/')}')" title="open it">
+   <div class="t"><b>${esc(a)} · seed ${c.seed}</b>${c.approved_by?`<span class="fp-b ap">approved by ${esc(c.approved_by)}</span>`:''}${c.edited?'<span class="fp-b ed">edited</span>':''}<span class="fp-b ${bad?'no':''}">${bad?bad+' problem'+(bad>1?'s':''):'clean'}</span></div>
+   <div class="meta">${c.maps} maps (the town and the rooms behind its doors)${c.unknowns.length?' · '+c.unknowns.length+' unknown'+(c.unknowns.length>1?'s':''):''}</div>
+   <div class="t"><button class="go" onclick="go('art/floorplans/open/${c.folder.split('/').map(encodeURIComponent).join('/')}')">Open</button>${c.approved_by?'':`<button onclick="fpApprove('${esc(c.folder)}')">Approve</button>`}<button class="ghost" onclick="fpSend('${esc(c.folder)}')">Send to ${esc((FP.d&&FP.d.owner)||'the owner')}</button></div></div>`}
+async function fpGenerate(n){if(!G.identity)return askWho();toast('Laying out '+n+' candidate'+(n>1?'s':'')+' …');
+  const r=await post('floorplan_generate',{game:gid(),place:FP.place,era:FP.era,archetype:FP.aid,count:n,size:FP.size||($('#fp-size')||{}).value||''});toast(r.message,r.ok);if(r.ok)loadFloorplans([])}
+async function fpApprove(f){if(!G.identity)return askWho();if(!confirm('Approve this floor plan? Its maps go into the game (never over a map it already has), its paint guide becomes what the scene kit paints over, and the production plan is remade.'))return;
+  const r=await post('floorplan_approve',{game:gid(),folder:f});toast(r.message,r.ok);if(r.ok&&r.result&&(r.result.after||[]).length)setTimeout(()=>toast(r.result.after.join(' · ')),6500);if(r.ok)FP.open?fpOpen(FP.open,FP.map):loadFloorplans([])}
+async function fpSend(f){if(!G.identity)return askWho();const q=prompt('Your question with it (blank: "is this the right layout?")','');if(q===null)return;
+  const r=await post('floorplan_send',{game:gid(),folder:f,question:q});toast(r.message,r.ok)}
+async function fpOpen(rel,map){const v=$('#v-floorplans');let d;
+  try{d=await api(`/api/suite/floorplan?id=${encodeURIComponent(gid())}&f=${encodeURIComponent(rel)}${map?'&map='+encodeURIComponent(map):''}`)}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  if(d.error){v.innerHTML=`<div class="err">${esc(d.error)}</div>`;return}
+  if(!FP.d){try{FP.d=await api('/api/suite/floorplans?id='+encodeURIComponent(gid()))}catch(e){}}
+  FP.open=rel;FP.map=d.map.id;FP.set=d;FP.rows=d.map.rows.map(r=>r.split(''));FP.edits=[];FP.undo=[];FP.probs={problems:d.problems,game:d.game_problems};
+  const s=d.summary,a=(FP.d&&FP.d.archetypes.find(x=>x.id===s.archetype)||{}).name||s.archetype;
+  FP.cell=Math.max(6,Math.min(18,Math.floor(Math.min(900,(v.clientWidth||1200)-560)/d.map.w)));
+  const pal=(FP.d&&FP.d.brush||['wall','floor','door','road','path','ground','story']).map(b=>`<button class="${b===FP.brush?'on':''}" data-b="${b}"><i style="background:${b==='story'?'#ff00ff':(FP.d.paint[b]||'#888')}"></i>${b}</button>`).join('');
+  v.innerHTML=`<div class="tk-top"><button class="ghost" onclick="go('art/floorplans')">← All candidates</button><b>${esc(((FP.d&&FP.d.sheets||[]).find(x=>x.id===s.place)||{}).name||s.place)} · ${esc(s.era)} · ${esc(a)} · seed ${s.seed}</b>${s.approved_by?`<span class="fp-b ap">approved by ${esc(s.approved_by)}</span>`:''}${s.edited?`<span class="fp-b ed">edited: ${esc(s.edited)}</span>`:''}</div>
+   <div class="fp-ctl"><label>Map <select id="fp-map">${d.maps.map(m=>`<option value="${esc(m.id)}" ${m.id===d.map.id?'selected':''}>${esc(m.kind==='town'?'the town':m.kind==='level'?'the level below':m.name)} (${esc(m.id)})</option>`).join('')}</select></label>
+    ${s.approved_by?'':`<button class="go" onclick="fpSave()">Save edits</button><button class="ghost" onclick="fpUndo()">Undo</button><button class="ghost" onclick="fpOpen(FP.open,FP.map)">Discard</button><button onclick="fpApprove(FP.open)">Approve</button>`}
+    <button class="ghost" onclick="fpSend(FP.open)">Send to ${esc((FP.d&&FP.d.owner)||'the owner')}</button>
+    <a class="ghost" href="${fpImg({folder:rel,guide:d.map.id+'_paintguide.png'})}" target="_blank">Paint guide</a></div>
+   <div class="fp-ed"><canvas id="fp-cv" width="${d.map.w*FP.cell}" height="${d.map.h*FP.cell}"></canvas>
+    <div class="fp-side">${s.approved_by?'<div class="meta">Approved — its maps are in the game. Edit it there, or reroll a new one here.</div>':`<div class="meta">Paint with a brush: click or drag. <b>story</b> moves the story element. The checks run as you paint; nothing is saved until you press Save edits.</div><div class="fp-pal">${pal}</div>`}
+     <div id="fp-probs" class="fp-probs"></div>
+     <div class="tk-h">Why it is the way it is</div><div class="meta" style="white-space:pre-wrap">${esc((d.map.notes||[]).join('\n'))}${d.map.story?'\nStory element: '+esc(d.map.story.what):''}</div>
+     <div class="tk-h">Buildings</div><div class="meta">${(d.map.buildings||[]).filter(b=>b.label).map(b=>esc(b.label)+(b.upgrades&&b.upgrades.length?' ('+esc(b.upgrades.join(', '))+(b.tier?' · tier '+esc(JSON.stringify(b.tier)):'')+')':'')).join(' · ')||'—'}</div></div></div>`;
+  $('#fp-map').onchange=e=>fpOpen(FP.open,e.target.value);
+  $$('#v-floorplans .fp-pal button').forEach(b=>b.onclick=()=>{FP.brush=b.dataset.b;$$('#v-floorplans .fp-pal button').forEach(x=>x.classList.toggle('on',x===b))});
+  fpDraw();fpProbs();if(!s.approved_by)fpMouse()}
+function fpDraw(){const cv=$('#fp-cv');if(!cv)return;const g=cv.getContext('2d'),c=FP.cell,m=FP.set.map,P=FP.d?FP.d.paint:{};
+  for(let y=0;y<m.h;y++)for(let x=0;x<m.w;x++){g.fillStyle=P[FP_SEM[FP.rows[y][x]]]||'#555';g.fillRect(x*c,y*c,c,c)}
+  const st=m.story;if(st){g.fillStyle='#ff00ff';g.fillRect(st.x*c,st.y*c,st.w*c,st.h*c)}
+  g.font=`bold ${Math.max(8,c-4)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';
+  for(const e of m.entities){const cx=e.x*c+c/2,cy=e.y*c+c/2;if(e.type==='spawn'&&e.name==='start'){g.fillStyle='#fff';g.fillText('S',cx,cy)}
+    else if(e.type==='upgrade'){g.fillStyle='#fff';g.fillText('U',cx,cy)}else if(e.type==='npc'){g.fillStyle='#ffe';g.beginPath();g.arc(cx,cy,c/4,0,7);g.fill()}
+    else if(e.type==='door'){g.strokeStyle='#000';g.lineWidth=1;g.strokeRect(e.x*c+1,e.y*c+1,c-2,c-2)}}
+  if(c>=8){g.strokeStyle='rgba(0,0,0,.18)';g.lineWidth=1;for(let x=0;x<=m.w;x++){g.beginPath();g.moveTo(x*c+.5,0);g.lineTo(x*c+.5,m.h*c);g.stroke()}for(let y=0;y<=m.h;y++){g.beginPath();g.moveTo(0,y*c+.5);g.lineTo(m.w*c,y*c+.5);g.stroke()}}}
+function fpProbs(){const el=$('#fp-probs');if(!el)return;const p=FP.probs||{problems:[],game:[]};const all=[...(p.problems||[]),...(p.game||[]).map(x=>'the game: '+x)];
+  el.innerHTML=(FP.edits.length?`<div class="meta">${FP.edits.length} cell${FP.edits.length>1?'s':''} painted, not saved</div>`:'')+(all.length?`<div class="no">✗ ${all.length} problem${all.length>1?'s':''}:\n${esc(all.slice(0,12).join('\n'))}</div>`:'<div class="ok">✓ every check passes — reachable, no dead ends, the story element in view, every door leads somewhere</div>')}
+function fpMouse(){const cv=$('#fp-cv');let down=false,stroke=[];
+  const at=e=>{const r=cv.getBoundingClientRect(),k=cv.width/r.width;return [Math.floor((e.clientX-r.left)*k/FP.cell),Math.floor((e.clientY-r.top)*k/FP.cell)]};
+  const paint=e=>{const [x,y]=at(e),m=FP.set.map;if(x<0||y<0||x>=m.w||y>=m.h)return;
+    if(FP.brush==='story'){if(!m.story)return;stroke.push({x,y,story:{...m.story}});m.story={...m.story,x,y};FP.edits.push([x,y,'story'])}
+    else{const glyph=Object.keys(FP_SEM).find(k=>FP_SEM[k]===FP.brush);if(!glyph||FP.rows[y][x]===glyph)return;stroke.push({x,y,was:FP.rows[y][x]});FP.rows[y][x]=glyph;FP.edits.push([x,y,FP.brush])}
+    fpDraw()};
+  cv.onmousedown=e=>{down=true;stroke=[];paint(e)};cv.onmousemove=e=>{if(down&&FP.brush!=='story')paint(e)};
+  window.onmouseup=()=>{if(!down)return;down=false;if(stroke.length){FP.undo.push(stroke);fpLive()}}}
+function fpUndo(){const st=FP.undo.pop();if(!st)return;for(const c of st.reverse()){if(c.story)FP.set.map.story=c.story;else FP.rows[c.y][c.x]=c.was;FP.edits.pop()}fpDraw();fpLive()}
+function fpLive(){clearTimeout(FP.chkT);FP.chkT=setTimeout(async()=>{const r=await post('floorplan_check',{game:gid(),folder:FP.open,map:FP.map,edits:FP.edits});
+  FP.probs={problems:r.problems||[],game:[]};fpProbs()},300);fpProbs()}
+async function fpSave(){if(!G.identity)return askWho();if(!FP.edits.length)return toast('Nothing painted yet.');
+  const r=await post('floorplan_save',{game:gid(),folder:FP.open,map:FP.map,edits:FP.edits});toast(r.message,r.ok);if(r.ok)fpOpen(FP.open,FP.map)}
 </script></body></html>

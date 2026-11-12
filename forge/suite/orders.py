@@ -32,7 +32,12 @@ def _write(p: Path, d: dict) -> None:
 
 
 def add(root: Path, by: str, for_name: str, title: str, detail: str = "", priority: str = "soon",
-        obj: str | None = None, when: datetime | None = None) -> dict:
+        obj: str | None = None, when: datetime | None = None, wants: dict | None = None, goes_to: str | None = None,
+        effort: str | None = None, extra: dict | None = None) -> dict:
+    """`wants` (BUILD 26): {"kind": audio|image|sheet|text|any, "count": n} — the card on Tasks takes the file(s) right
+    there; `goes_to` says where they go: a folder in the game, "music:<slot>", "sprite:<character>[/<variant>]", or
+    "attach" (kept with this order). `effort`: "a minute" | "ten minutes" | "a sitting". `extra`: more fields to keep on
+    the order (e.g. `{"provide": <request id>}` from the forge pool, provide.py) — they never replace the fields above."""
     if not by:
         raise ValueError("a work order is signed — set who you are first")
     if not str(title).strip():
@@ -50,6 +55,16 @@ def add(root: Path, by: str, for_name: str, title: str, detail: str = "", priori
     d = {"id": p.stem, "for": for_name, "group": g, "title": " ".join(str(title).split()), "detail": detail.strip(),
          "priority": priority, "object": obj or None, "by": by, "created": when.isoformat(timespec="seconds"),
          "status": "open"}
+    if wants:
+        k = str(wants.get("kind") or "any")
+        if k not in ("audio", "image", "sheet", "text", "any"):
+            raise ValueError("wants.kind is audio, image, sheet, text or any")
+        d["wants"] = {"kind": k, "count": max(1, int(wants.get("count") or 1))}
+        d["goes_to"] = str(goes_to or "attach")
+    if effort:
+        d["effort"] = str(effort)
+    for k, v in (extra or {}).items():
+        d.setdefault(str(k), v)
     _write(p, d)
     journal.append(root, by, "order", obj or f"work_orders/for_{g}/{p.name}", note=f"for {for_name} ({priority}): {d['title']}", when=when)
     return d

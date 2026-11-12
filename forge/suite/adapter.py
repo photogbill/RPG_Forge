@@ -229,6 +229,18 @@ class GameAdapter:
     def people(self) -> list[Person]:
         return []
 
+    # ---------- floor plans (BUILD 29, all optional): the generator's input and the game's map format
+    def town_sheets(self) -> list[dict]:
+        """One sheet per place the generator may lay out (forge/layout/__init__.py says the shape): id, name, size,
+        terrain, required buildings, upgrade tiers, the suggested archetypes per era with why, and unknowns —
+        listed, never guessed. Default: none (the generator works from a sheet typed in)."""
+        return []
+
+    # layout_map(plan, top, interiors, sheet) -> dict | None   a plan as one of the game's own maps (None = generic)
+    # layout_check(maps: dict) -> list[str]                    the game's own rules for maps, in plain words
+    # layout_install(maps: dict, folder, who) -> list[str]     write approved maps into the game; never over another
+    # layout_tile_image() -> callable(semantic, px) | None     the game's placeholder tiles for the greybox
+
     # ---------- music (BUILD 06): where the board, sheets, briefs, songs and inbox live; where a delivered track goes
     @property
     def owner(self) -> str:

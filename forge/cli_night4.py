@@ -398,6 +398,15 @@ def cmd_deliver(cfg: dict, args: list[str]) -> int:
 
 def cmd_housekeeping(cfg: dict, args: list[str]) -> int:
     from .night4 import housekeeping
+    if "--prune-comfy" in args or "--dedupe" in args:
+        if "--prune-comfy" in args:
+            n, b = housekeeping.prune_comfy(cfg, float(_opt(args, "--older-min", "20")))
+            print(f"ComfyUI's duplicate copies: deleted {n} file(s), {b / 1e9:.2f} GB (the forge's own copies are untouched)")
+        if "--dedupe" in args:
+            r = housekeeping.dedupe(cfg)
+            print(f"bake-off trees: {r['linked']} copies turned into links ({r['freed'] / 1e9:.2f} GB freed), "
+                  f"{r['already']} already links, {r['skipped']} left as they were")
+        return 0
     p, rep = housekeeping.report(cfg, int(_opt(args, "--days", "14")))
     print(f"could be archived: {rep['gb']} GB — bake-off {rep['bakeoff']}, failed {rep['failed']}, other {rep['other_old']} "
           f"folder(s). Nothing was moved. Report: {p}")

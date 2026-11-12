@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from forge import cli_suite
-from forge.suite import journal, mail, music, server, settings
+from forge.suite import areas, journal, mail, music, server, settings
 from test_suite_build01 import REPO, world  # noqa: F401 — the shared throwaway world
 
 T = datetime(2026, 11, 11, 6, 0, 0)
@@ -221,7 +221,7 @@ def test_the_suite_app_and_command_line(m, capsys):
         sh = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{port}/api/suite/sheet?id=_example&sheet=wren").read())
         assert sh["sheet"]["name"] == "Wren" and sh["md"].startswith("# Wren")
         html = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode("utf-8")
-        assert 'data-s="music"' in html and "function loadMusic" in html
+        assert "music/needed" in areas.addresses() and "function loadMusic" in html      # BUILD 26: Music is its own area
     finally:
         srv.shutdown()
     assert cli_suite.cmd_music(cfg, ["board", "--game", "_example"]) == 0

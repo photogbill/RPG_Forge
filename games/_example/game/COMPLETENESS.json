@@ -1,0 +1,9 @@
+{
+ "notes": "The example game's own checklist, as a game's report would write it.",
+ "items": [
+  {"item": "Places with a map", "have": 3, "of": 3},
+  {"item": "Quests approved", "have": 1, "of": 2},
+  {"item": "Music slots with audio", "have": 0, "of": 3, "go": "music/needed"},
+  {"item": "Title screen", "met": false, "detail": "not made yet"}
+ ]
+}

@@ -342,14 +342,25 @@ def normalise_questions(questions) -> list[dict]:
 
 def send(root: Path, frm: str, to: str, subject: str, body: str, questions=None, answers=None, thread_id: str | None = None,
          in_reply_to: str | None = None, attachments=None, when: datetime | None = None, draft: bool = False,
-         log_it: bool = True) -> Letter:
-    """Write a letter (or a draft). The one function the GUI, `mail.bat` and sessions all use."""
+         log_it: bool = True, adp=None) -> Letter:
+    """Write a letter (or a draft). The one function the GUI, `mail.bat` and sessions all use.
+
+    BUILD 17: an assistant's questions are checked against the rulings book first (rulings.check_questions — `adp` says
+    which files hold the game's rulings); a question the book already answers is refused (rulings.AlreadyRuled) unless
+    it carries `asked_again` — why it is being asked once more."""
     if not frm or not to:
         raise ValueError("a letter needs a sender and a recipient")
     if not str(subject).strip():
         raise ValueError("a letter needs a subject")
     when = when or settings.now()
     questions = normalise_questions(questions)
+    if questions and not draft and settings.is_assistant(frm):
+        from . import rulings
+        hits = rulings.check_questions(root, questions, adp)
+        if hits:
+            journal.append(root, frm, "refused", "rulings", note="a letter's question was already ruled on: " +
+                           "; ".join(f"{h['id']} ↔ {h['rulings'][0]['id']}" for h in hits), when=when)
+            raise rulings.AlreadyRuled(hits)
     folder = "drafts" if draft else folder_for(to)
     lid = _new_id(root, folder, when, frm, subject)
     headers = {"from": frm, "to": to, "subject": subject, "date": when.isoformat(timespec="seconds"),
@@ -501,9 +512,9 @@ def save_draft(root: Path, frm: str, to: str, subject: str, body: str, questions
 
 
 def send_edited_draft(root: Path, draft_id: str, frm: str, to: str, subject: str, body: str, questions=None,
-                      when: datetime | None = None) -> Letter:
+                      when: datetime | None = None, adp=None) -> Letter:
     """Send what the draft now says, and put the draft away under drafts/_sent/ (never deleted)."""
-    sent = send(root, frm, to, subject, body, questions, when=when)
+    sent = send(root, frm, to, subject, body, questions, when=when, adp=adp)
     p = mail_dir(root) / "drafts" / f"{draft_id}.md"
     if p.exists():
         done = mail_dir(root) / "drafts" / "_sent" / p.name

@@ -93,3 +93,40 @@ def now(path: Path | None = None) -> datetime:
         except Exception:  # noqa: BLE001 — an unknown zone falls back to the machine's clock
             pass
     return datetime.now()
+
+
+# ---------------------------------------------------------------- BUILD 27: this computer's answers (Settings → This computer)
+KEYS = ("timezone", "godot", "worker_pc")
+
+
+def set_game_root(game_id: str, folder: str | None, path: Path | None = None) -> dict:
+    """Where a game's folder is on *this* computer ('' or None forgets it, back to forge.game.json's answer)."""
+    d = load(path)
+    roots = dict(d.get("game_roots") or {})
+    folder = str(folder or "").strip().strip('"')
+    if folder:
+        roots[str(game_id)] = folder
+    else:
+        roots.pop(str(game_id), None)
+    d["game_roots"] = roots
+    save(d, path)
+    return roots
+
+
+def set_value(key: str, value: str | None, path: Path | None = None) -> dict:
+    if key not in KEYS:
+        raise ValueError(f"no setting called {key}")
+    value = str(value or "").strip()
+    if key == "timezone" and value:
+        try:
+            from zoneinfo import ZoneInfo
+            ZoneInfo(value)
+        except Exception:  # noqa: BLE001
+            raise ValueError(f"'{value}' isn't a time zone this computer knows (try e.g. America/New_York)")
+    d = load(path)
+    if value:
+        d[key] = value
+    else:
+        d.pop(key, None)
+    save(d, path)
+    return d

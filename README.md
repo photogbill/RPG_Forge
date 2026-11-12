@@ -20,13 +20,43 @@ RPG_Forge is a development suite for every RPG you make, not one game's tool. **
 - **A game picker** first. Each game is a folder `games/<id>/` (git-ignored) with `forge.game.json` → `game_root` (where
   the game's own folder is) and, for its Story side, a `workbench_adapter.py`. `games/_example/` is a tiny made-up game
   the suite always opens; every test runs on it.
-- **Art | Story.** Art's **Home** shows whether the art worker is running, what it is making, how much is left and how
-  long, how much disk is free against the guard — with three safe buttons: *Start worker* (opens `run_worker.bat`'s own
-  window), *Pause after this job* (the same as `pause.bat`), *Resume*. **Queue & pictures** is the dashboard `ui.bat` has
-  always shown, served by the same code. Story shows what the suite reads from the chosen game until the Mail (BUILD 03)
-  and the Workbench (BUILD 07) arrive.
+- **One sidebar of areas** (BUILD 26, the way ATK is organised): Home · Status · Messages · Tasks · Story · Music · Art ·
+  Characters · Workshop · Notes · Settings, each a row with its own count badge, and a strip of **tabs** across the top of
+  each area. Every area and tab has an address (`#music/needed`, `#messages/inbox/<letter>`) — reload keeps your place,
+  Back works, a letter can link straight to a tab — and one quiet line under the tabs says **what that tab needs** and
+  whether it has it (a tab that isn't built yet says which build brings it). The art worker's button sits under the game
+  picker in every area (▶ Start / ■ Stop, which pauses the queue safely). **Home** is the day at a glance: what needs
+  you, what's waiting in each area, what changed since you last looked, the worker, the queue and the disk.
+  **Tasks** is a checklist, not an inbox: every thing in the game waiting on you (work orders, letters with open
+  questions, music briefs, songs waiting for their track, profiles with open spots, pictures to review, builds waiting on
+  you, notes addressed to you), one card each, the ones that unblock work first; a card leaves only when it's done or
+  you dismiss it with a reason. A task that wants a file takes it **on the card** — drop it or *Choose a file…* — and the
+  file goes through its area's own delivery (a track is delivered and cemented, a sheet goes into Sprite intake). A work
+  order asks for one with `wants` (audio · image · sheet · text · any, and how many) and `goes_to` (a folder in the game,
+  `music:<slot>`, `sprite:<character>`). **Status** shows every requirement and task as met / partly / not met in big
+  colour-coded tiles, plus the game's build queue and its own completeness checklist (the adapter's optional `builds()`
+  and `completeness()` hooks). **Queue & pictures** (Art) is the dashboard `ui.bat` has always shown.
+- **Team memory** (Notes, BUILD 17) — **Rulings**: every answer you've given, in one searchable book (questions answered in the Mail, every ✦ line in the game's notes, rulings written straight in); a session's letter is turned back when the book already answers one of its questions, and data that contradicts a pinned ruling shows red. **Idea box**: press **I** anywhere — one line, filed with the date and what you were looking at, sorted later into a task, a note, a letter or a file. **Playtest notes**: the game's note key, taken in — art to Called out, writing to the lines, the rest to work orders — and a letter per category. **Home** opens with *where the game stands*: n of m, and the next most useful thing for you and for Claude.
+- **Floor plans** (BUILD 29) — a town's own sheet
+  (fate, culture, era, what it sells) + an **archetype** + a seed → a map the game loads, its greybox, and a **paint guide**
+  (flat colour regions, the story element in magenta) for the scene kit to repaint over, so a painting keeps the one
+  thing the scene is about. Districts first, then lots and buildings (doors on streets, every door joined to the street),
+  then interiors from a kit library (ruined or underground as the archetype says), then WFC texture on the empty ground.
+  **Art → Floor plans** (BUILD 29b): four candidates side by side, paint on the grid with the checks live, approve into
+  the game (the paint guide becomes what the scene kit paints over), reroll, or send one to the owner by mail.
+  Fifteen archetypes, each with a War and an After version — the Buried Town, the Purity Town, the Congregation of the
+  Machine, the Ledger Town, the Wall of Names, the Swollen City, the Toll Kingdom, the Moving Town, the Pretend Town, the
+  Quarantine, the Salvage Republic, the Sanctuary, the Fortress Farm, the Ghost Town That Isn't, the Glass Field — and
+  every plan reserves its upgrade places (weapon/armor, accessory) at the tier the town sells. Same sheet and seed, same
+  bytes; nothing goes into the game until a person approves it, and an approved or hand-edited plan is never written
+  over. `floor_plans.bat` · `python -m forge layout sheets|generate|show|check|approve` · docs/FLOOR_PLANS.md.
+- **Tiles** (BUILD 30, first part) — the materials bake-off (`bakeoff_materials.bat`: SDXL ArtUniverse vs FLUX.2 Klein
+  4B vs Filter Forge, one flat seamless tile per material per source; contact sheets, scores and a verdict draft, the
+  pick is yours) and the autotile builder (`python -m forge tiles build`): the 47-tile blob set or the 16 corner set of
+  one material on another, wall faces, variants that keep their borders, decals, normals for every tile, and world
+  textures at the material's full resolution with mask-only tiles for the sharpest result. docs/TILES.md.
 - **Who you are.** The first time it opens it asks your name; every change made through the suite is signed with it.
-- **The Mail** (Story, BUILD 03) — the screen to open first each day. Letters between you and the assistants working on
+- **The Mail** (Messages, BUILD 03) — the screen to open first each day. Letters between you and the assistants working on
   the game: Inbox · Sent · Drafts · Archive, threads, search. A letter's questions are answered in place — pick, type, or
   "talk to me about this one" — and **Send** puts your reply in the game's `mail\` folder for the next session. Where a
   question says which data field it sets, picking an answer changes it through the safe path (checked, backed up,
@@ -41,7 +71,7 @@ RPG_Forge is a development suite for every RPG you make, not one game's tool. **
   this town, a speaker who never uses its greeting — and says it is mechanical. **Side by side** puts another town (or
   this one in another era) next to it. If a session changed the file while you were reading, nothing is overwritten:
   you see both versions and choose. Everything lands in the journal, so the next session's digest has it.
-- **Music** (Story, BUILD 06) — every music slot the game has as one board, each with a coloured state (needed →
+- **Music** (its own area, BUILD 06; Needed · Singers · Score inbox · Briefs & songs since BUILD 26) — every music slot the game has as one board, each with a coloured state (needed →
   proposed → agreed → written → delivered → in game), filterable by town, era, voice and state, with the gaps counted on
   top and the next most useful piece of work. **Drop a finished track on its row** (or deliver one from the score inbox,
   which guesses the slot): it is copied into the game under the slot's file name, the game's music data points at it,
@@ -100,6 +130,25 @@ Under it, the pieces every later screen uses (`forge/suite/`):
 
 Commands: `python -m forge suite | identity [name] | journal add|show | mail list|read|send|reply | orders add|list|done | away | suite-check` (`mail.bat` for the Mail) (`suite-check` loads and saves every
 data file of every game with no edit and confirms the bytes are identical). `run_tests.bat` runs the forge's tests (safe while the worker renders).
+
+## On a Mac (BUILD 27)
+
+The suite (everything but making pictures) runs on a Mac too. On the Mac:
+
+1. Python 3.11 or newer from <https://www.python.org/downloads/macos/> (the official installer).
+2. This repository (GitHub → Code → Download ZIP, or `git clone`), and a copy of the game's folder.
+3. Double-click **`install_mac.command`** once, then **`forge.command`** to start the suite. If Finder says it can't open
+   them, open Terminal in this folder and run `chmod +x *.command` once.
+4. The first time, the suite asks who you are and where the game's folder is on this Mac (Settings → This computer →
+   *Check*, *Save*). That answer stays on this Mac (`local/suite.json`, never pushed).
+
+Making pictures needs the art worker, which runs on the Windows PC with the NVIDIA card; on a Mac its button says so.
+Messages, Tasks, Story, Music, Characters, Notes and Review & approve all work. Keeping two copies of a game folder in
+step, and mail between two installs, come with BUILD 23. From Terminal, `./forge.command <words>` runs any forge command
+(`./forge.command handoff in <name>` is `handoff_in.bat <name>` on Windows).
+
+The suite's tests run on Windows, macOS and Linux at every push (`.github/workflows/suite.yml`):
+![suite tests](https://github.com/photogbill/RPG_Forge/actions/workflows/suite.yml/badge.svg)
 
 ## Why a folder queue
 
@@ -192,7 +241,7 @@ out/              results, one folder per job id
 models/           weights (ignored) + models.json registry with licences
 palettes/         master palettes (.hex, Lospec format)
 games/            per-game config and batches — git-ignored, one folder per game; games/_example is the template
-docs/             PROTOCOL.md · JOB_TYPES.md · CLAUDE.md · LICENSING.md · ROADMAP.md
+docs/             PROTOCOL.md · JOB_TYPES.md · CLAUDE.md · LICENSING.md · ROADMAP.md · FLOOR_PLANS.md · TILES.md
 tests/            pytest (CPU side; 24 tests)
 ```
 

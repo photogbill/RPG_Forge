@@ -177,6 +177,23 @@ class Queue:
             n += 1
         return n
 
+    def release(self, job_id: str, note: str = "", count: bool = True) -> bool:
+        """Put ONE claimed job back in pending/ untouched by failure (ComfyUI went away mid-run — not the job's fault).
+        Counts it in `comfy_waits` so a job that keeps taking ComfyUI down is failed after COMFY_RELEASES tries."""
+        p = self.jobs / "running" / f"{job_id}.json"
+        if not p.exists():
+            return False
+        job = self._read(p)
+        job.pop("started_at", None)
+        if count:
+            job["comfy_waits"] = int(job.get("comfy_waits", 0)) + 1
+        if note:
+            job["last_wait"] = note
+        self._write_atomic(p, job)
+        os.replace(p, self.jobs / "pending" / p.name)
+        log.warning("released %s back to pending (%s)", job_id, note or "engine away")
+        return True
+
     def requeue_running(self) -> int:
         """After a crash: move running/ jobs back to pending/. Returns how many."""
         n = 0
@@ -205,6 +222,36 @@ class Queue:
 
 
 GUARD_EVERY_SEC = 300.0
+COMFY_RELEASES = 2           # a job that loses ComfyUI this many times is failed for real (it may be what crashes it)
+COMFY_WAIT_LOG_SEC = 60.0
+
+
+def _engine_away(e: Exception) -> bool:
+    """ComfyUI stopped answering (crashed, closed, still starting) — the job itself is not at fault."""
+    msg = f"{type(e).__name__}: {e}"
+    return ("ComfyUI is not reachable" in msg or isinstance(e, (ConnectionResetError, ConnectionRefusedError, ConnectionAbortedError))
+            or "WinError 10054" in msg or "WinError 10061" in msg or "Connection refused" in msg)
+
+
+def _wait_for_engine(ctx, poll: float = 15.0) -> None:
+    """Block until ComfyUI answers again, logging once a minute (2026-11-11: a ComfyUI crash at 19:17 made the worker
+    fail ~240 queued jobs in seconds, each with 'not reachable'; now the queue waits instead of burning)."""
+    comfy = getattr(ctx, "comfy", None)
+    if comfy is None:
+        return
+    t0 = last = time.time()
+    log.warning("ComfyUI is not answering at %s — the queue waits for it (restart it with start_comfy.bat)", getattr(comfy, "url", "?"))
+    while True:
+        try:
+            if comfy.is_up():
+                log.info("ComfyUI is back after %.0f s — carrying on", time.time() - t0)
+                return
+        except Exception:  # noqa: BLE001
+            pass
+        if time.time() - last >= COMFY_WAIT_LOG_SEC:
+            log.warning("still waiting for ComfyUI (%.0f min)", (time.time() - t0) / 60)
+            last = time.time()
+        time.sleep(poll)
 
 
 def _guard(cfg) -> None:
@@ -215,6 +262,20 @@ def _guard(cfg) -> None:
         guard.check(cfg)
     except Exception as e:  # noqa: BLE001
         log.warning("disk guard check failed (the worker carries on): %s", e)
+
+
+PRUNE_EVERY_SEC = 600.0
+
+
+def _prune(cfg) -> None:
+    """2026-11-11: ComfyUI's own copy of each picture (out/_comfy) is never read again — delete those older than 20 min."""
+    try:
+        from .night4 import housekeeping
+        n, b = housekeeping.prune_comfy(cfg, 20.0)
+        if n:
+            log.info("deleted %d of ComfyUI's duplicate picture(s) in out/_comfy (%.2f GB)", n, b / 1e9)
+    except Exception as e:  # noqa: BLE001
+        log.warning("pruning out/_comfy failed (the worker carries on): %s", e)
 
 
 def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_sec: float = 2.0, cfg=None) -> int:
@@ -246,10 +307,14 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
     ran = 0
     idle_logged = False
     last_guard = 0.0
+    last_prune = time.time()
     while True:
         if cfg is not None and time.time() - last_guard >= GUARD_EVERY_SEC:
             _guard(cfg)
             last_guard = time.time()
+        if cfg is not None and gpu and time.time() - last_prune >= PRUNE_EVERY_SEC:
+            _prune(cfg)
+            last_prune = time.time()
         hmap = current()
         claimed = queue.claim(accept)
         if claimed is None:
@@ -270,5 +335,11 @@ def run_worker(queue: Queue, handlers, ctx, gpu: bool, once: bool = False, poll_
             result["seconds"] = round(time.time() - t0, 1)
             queue.finish(job_id, result=result)
         except Exception as e:  # noqa: BLE001 — every failure is recorded, never swallowed
+            # down before the job started (never its fault) → always back to pending; lost mid-render → at most COMFY_RELEASES times
+            before = "ComfyUI is not reachable" in str(e)
+            if gpu and _engine_away(e) and (before or int(job.get("comfy_waits", 0) or 0) < COMFY_RELEASES):
+                queue.release(job_id, f"{type(e).__name__}: {e}"[:300], count=not before)
+                _wait_for_engine(ctx)
+                continue
             queue.finish(job_id, error=f"{type(e).__name__}: {e}", tb=traceback.format_exc())
         ran += 1
