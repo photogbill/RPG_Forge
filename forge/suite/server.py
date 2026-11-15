@@ -29,6 +29,9 @@ from . import approval, areas, away, osopen, runwords, cast, finishing, games, h
 from . import ideas, playtest, rulings, standing   # BUILD 17: team memory
 from . import floorplans   # BUILD 29b: Art → Floor plans (the generator in the suite)
 from . import provide   # User Needs To Provide Image (2026-11-11): the forge pool of pictures the forge can't make
+from . import threed   # BUILD 36: the 3D area (picture -> body -> skeleton -> motions)
+from . import world3d  # BUILD 39: the world list and its queue
+from . import profiles  # BUILD 42: Characters -> Profiles (the cast as editable pages, a board of what's missing)
 
 log = get("suite")
 HOST, PORT = "127.0.0.1", 8770
@@ -104,6 +107,49 @@ def act_floorplan(cfg: dict, action: str, body: dict, who) -> dict:
             return {"ok": True, "message": f"Sent to {r['to']} — it's in the Mail.", **r}
     except floorplans.FloorPlanRefused as e:
         return {"ok": False, "message": str(e)}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def act_threed(cfg: dict, action: str, body: dict, who) -> dict:
+    """The 3D area (BUILD 36). Making is anyone's (signed); approving, delivering, installing and overnight runs are a person's."""
+    gid = str(body.get("game") or current_game(cfg))
+    tid = str(body.get("try") or "")
+    if action.startswith("threed_world_"):
+        return world3d.act(cfg, gid, action, body, who)
+    try:
+        if action == "threed_pictures":
+            return threed.new_try(cfg, gid, body, who)
+        if action == "threed_body":
+            return threed.make_body(cfg, gid, tid, body.get("pick"), who)
+        if action == "threed_skeleton":
+            return threed.add_skeleton(cfg, gid, tid, body.get("kind"), who)
+        if action == "threed_motions":
+            return threed.fit(cfg, gid, tid, who)
+        if action == "threed_never":
+            return threed.set_never(cfg, gid, str(body.get("who") or ""), body.get("never") or [], who,
+                                    body.get("height_m"), body.get("rig_kind"))
+        if action == "threed_review":
+            return threed.send_review(cfg, gid, tid, who, str(body.get("note") or ""))
+        if action == "threed_decide":
+            return threed.decide(cfg, gid, tid, str(body.get("verdict") or ""), who, str(body.get("note") or ""))
+        if action == "threed_deliver":
+            return threed.deliver(cfg, gid, who, dry=bool(body.get("dry", True)))
+        if action == "threed_grow":
+            return threed.grow(cfg, gid, body, who)
+        if action == "threed_species":
+            return threed.save_species(cfg, gid, body.get("sheet") or {}, who)
+        if action == "threed_runlist":
+            return threed.run_list(cfg, gid, str(body.get("file") or ""), who)
+        if action == "threed_block":
+            return threed.save_block(cfg, gid, str(body.get("block") or ""), str(body.get("text") or ""), who)
+        if action == "threed_install":
+            return threed.install_start(cfg, who, dry=bool(body.get("dry")))
+    except threed.ThreeDRefused as e:
+        return {"ok": False, "message": str(e)}
+    except Exception as e:  # noqa: BLE001 — the page always gets words back
+        if type(e).__name__ in ("FinishRefused",):
+            return {"ok": False, "message": str(e)}
+        raise
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -192,6 +238,10 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         return act_memory(cfg, action, body, who)
     if action.startswith("floorplan_"):
         return act_floorplan(cfg, action, body, who)
+    if action.startswith("threed_"):
+        return act_threed(cfg, action, body, who)
+    if action.startswith("profile_"):
+        return act_profiles(cfg, action, body, who)
     if action == "open":
         what = str(body.get("what") or "")
         paths = {"log": cfgmod.path_of(cfg, "logs"), "jobs": cfgmod.path_of(cfg, "jobs"), "out": cfgmod.path_of(cfg, "out")}
@@ -209,6 +259,75 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "message": f"couldn't open it ({e}); it is at {p}"}
         return {"ok": True, "message": f"opened {p}"}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def profiles_view(cfg: dict, what: str, q: dict) -> dict:
+    """Characters -> Profiles (BUILD 42): the board, one page, and "find it in the songs". Read-only."""
+    gid = q.get("id", [current_game(cfg)])[0]
+    one = lambda k, d="": q.get(k, [d])[0]
+    if not games.has_adapter(cfg, gid):
+        return {"error": f"{gid} has no Story adapter yet, so the suite can't find its profiles"}
+    adp = games.adapter(cfg, gid)
+    try:
+        if what == "profiles":
+            if not profiles.has_schema(adp):
+                return {"error": f"this game has no profiles yet — {profiles.rel_dir(adp)}/_schema.json is missing", "missing": True,
+                        "folder": profiles.rel_dir(adp), "can_fill": callable(getattr(adp, "profile_seeds", None))}
+            return profiles.board(adp)
+        if what == "profile":
+            return profiles.page(adp, one("p"))
+        return profiles.find_in_songs(adp, one("p"))
+    except profiles.ProfileRefused as e:
+        return {"error": str(e)}
+
+
+def act_profiles(cfg: dict, action: str, body: dict, who: str | None) -> dict:
+    """Edits to a profile — every one signed, safely saved, journalled; the same functions as `python -m forge profiles`."""
+    if not who:
+        return {"ok": False, "message": "set who you are first (bottom left) — everything here is signed"}
+    gid = str(body.get("game") or current_game(cfg))
+    if not games.has_adapter(cfg, gid):
+        return {"ok": False, "message": f"{gid} has no Story adapter yet"}
+    adp = games.adapter(cfg, gid)
+    pid = str(body.get("p") or "")
+    sec, row, eid = str(body.get("section") or ""), str(body.get("row") or ""), str(body.get("eid") or "")
+    exp = body.get("hash") or None
+    try:
+        if action == "profile_add":
+            return profiles.add(adp, str(body.get("name") or ""), who)
+        if action == "profile_set":
+            return profiles.set_field(adp, pid, sec, str(body.get("field") or ""), body.get("value"), who, exp)
+        if action == "profile_entry_add":
+            return profiles.add_entry(adp, pid, sec, row, body.get("entry") or {}, who, exp)
+        if action == "profile_entry_edit":
+            return profiles.edit_entry(adp, pid, sec, row, eid, body.get("changes") or {}, who, exp)
+        if action == "profile_entry_confirm":
+            return profiles.confirm_entry(adp, pid, sec, row, eid, who, exp)
+        if action == "profile_entry_remove":
+            return profiles.remove_entry(adp, pid, sec, row, eid, who, exp)
+        if action == "profile_none":
+            return profiles.set_none(adp, pid, sec, row, str(body.get("reason") or ""), who, body.get("ruling") or None, exp)
+        if action == "profile_none_clear":
+            return profiles.clear_none(adp, pid, sec, row, who, exp)
+        if action == "profile_q_add":
+            return profiles.add_question(adp, pid, str(body.get("text") or ""), who, exp)
+        if action == "profile_q_close":
+            return profiles.close_question(adp, pid, str(body.get("qid") or ""), who, str(body.get("note") or ""))
+        if action == "profile_q_mail":
+            return profiles.mail_question(adp, pid, str(body.get("qid") or ""), who)
+        if action == "profile_order":
+            return profiles.work_order(adp, pid, sec, row, eid, who)
+        if action == "profile_undo":
+            return profiles.undo(adp, pid, who)
+        if action == "profile_fill":
+            return profiles.fill(adp, who, dry=bool(body.get("dry")))
+    except profiles.ProfileRefused as e:
+        return {"ok": False, "message": str(e)}
+    except FileNotFoundError as e:
+        return {"ok": False, "message": f"not found: {e}"}
+    finally:
+        areas._badge_cache.pop(gid, None)
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -856,6 +975,13 @@ class SuiteHandler(ui.Handler):
                     logs = sorted(cfgmod.path_of(self.cfg, "logs").glob("forge_*.log"))
                     body = _tail(logs[-1]) if logs else "(no log yet)"
                 self._send(200, body.encode("utf-8"), "text/plain; charset=utf-8")
+            elif u.path in ("/api/suite/profiles", "/api/suite/profile", "/api/suite/profilesongs"):
+                self._json(profiles_view(self.cfg, u.path.rsplit("/", 1)[-1], q))
+            elif u.path == "/suite/profiles.js":
+                self._send(200, (Path(__file__).parent / "profiles.js").read_bytes(), "text/javascript; charset=utf-8")
+            elif u.path.startswith("/api/suite/threed") or u.path in ("/suite/3dfile", "/suite/viewer", "/suite/threed.js") \
+                    or u.path.startswith("/suite/vendor/three/"):
+                self._threed_get(u, q)
             else:
                 super().do_GET()
         except FileNotFoundError:
@@ -863,6 +989,60 @@ class SuiteHandler(ui.Handler):
         except Exception:  # noqa: BLE001
             log.error("suite GET %s: %s", self.path, traceback.format_exc())
             self._send(500, b"error - see the forge log", "text/plain")
+
+    def _threed_get(self, u, q):
+        """The 3D area's pages and files (BUILD 36)."""
+        gid = q.get("id", [current_game(self.cfg)])[0]
+        one = lambda k, d="": q.get(k, [d])[0]
+        here = Path(__file__).resolve().parent
+        try:
+            if u.path == "/api/suite/threed":
+                self._json(threed.view(self.cfg, gid))
+            elif u.path == "/api/suite/threed/try":
+                self._json(threed.try_view(self.cfg, gid, one("t")))
+            elif u.path == "/api/suite/threed/tries":
+                self._json({"tries": threed.tries(self.cfg, gid, one("who") or None)})
+            elif u.path == "/api/suite/threed/runs":
+                self._json(threed.runs(self.cfg, gid))
+            elif u.path == "/api/suite/threed/world":
+                self._json(world3d.view(self.cfg, gid))
+            elif u.path == "/api/suite/threed/models":
+                self._json({"models": threed.models(self.cfg, gid)})
+            elif u.path == "/api/suite/threed/review":
+                self._json(threed.review_list(self.cfg, gid))
+            elif u.path == "/api/suite/threed/check":
+                self._json(threed.check(self.cfg, fresh=bool(one("fresh"))))
+            elif u.path == "/api/suite/threed/trees":
+                self._json({"jobs": threed.tree_jobs(self.cfg, gid)})
+            elif u.path == "/api/suite/threed/chips":
+                self._json(threed.chips(one("text"), one("kind", "body")))
+            elif u.path == "/api/suite/threed/stage":
+                self._json({"stage": threed.stage_of(self.cfg, gid, one("who"))})
+            elif u.path == "/suite/3dfile":
+                f = threed.safe_file(self.cfg, one("p"))
+                types = {".glb": "model/gltf-binary", ".gltf": "model/gltf+json", ".png": "image/png", ".jpg": "image/jpeg",
+                         ".jpeg": "image/jpeg", ".json": "application/json", ".txt": "text/plain; charset=utf-8",
+                         ".log": "text/plain; charset=utf-8"}
+                w = one("w")
+                if f.suffix.lower() in (".png", ".jpg", ".jpeg") and w.isdigit():
+                    body, ctype = picture_bytes(f, int(w))
+                    self._send(200, body, ctype)
+                else:
+                    self._send(200, f.read_bytes(), types[f.suffix.lower()])
+            elif u.path == "/suite/viewer":
+                self._send(200, (here / "viewer.html").read_bytes(), "text/html; charset=utf-8")
+            elif u.path == "/suite/threed.js":
+                self._send(200, (here / "threed.js").read_bytes(), "text/javascript; charset=utf-8")
+            elif u.path.startswith("/suite/vendor/three/"):
+                base = (here / "vendor" / "three").resolve()
+                f = (base / u.path[len("/suite/vendor/three/"):]).resolve()
+                if base not in f.parents or not f.is_file() or f.suffix not in (".js",):
+                    raise FileNotFoundError(u.path)
+                self._send(200, f.read_bytes(), "text/javascript; charset=utf-8")
+            else:
+                raise FileNotFoundError(u.path)
+        except threed.ThreeDRefused as e:
+            self._json({"error": str(e)}, 404)
 
     def _send_file_ranged(self, p: Path, ctype: str):
         """An audio file, with byte ranges (a browser's player seeks with them — the loop-seam button needs that)."""

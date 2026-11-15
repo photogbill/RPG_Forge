@@ -1,0 +1,24 @@
+{
+ "_comment": "Made-up song words for the example game (BUILD 42's 'find it in the songs').",
+ "songs": [
+  {
+   "song": "The Toll",
+   "singer": "Wren",
+   "lines": [
+    "Coin for the crossing, coin for the day",
+    "I keep a boat hook for the ones who will not pay",
+    "The river is older than the bridge",
+    "and older than the knife the Miller keeps"
+   ]
+  },
+  {
+   "song": "Flour and Water",
+   "singer": "The Miller",
+   "lines": [
+    "Everything is weighed",
+    "the grain, the man, the stone",
+    "I never carried a sling"
+   ]
+  }
+ ]
+}

@@ -86,6 +86,52 @@ map, so the painting brief and the town's music slot carry that town's look and 
 `{"id", "name", "tile_size": 32, "legend": {glyph: semantic tile}, "rows": [...], "entities": [...]}` with the
 semantic tiles of `tiles.py` and the entities of `plan.py` (spawn, door, upgrade, npc, story, label).
 
+## The map camera and block-outs (`forge/layout/oblique.py`, BUILD 33)
+
+A generated floor plan is flat: seen from straight above. A painting a person will want to look at is not, and a model
+asked to paint a flat plan drifts to its own idea of the room. A **block-out** is the plan stood up at one fixed
+camera — the one a game's art bible fixes for every walkable map:
+
+    high above, looking north, no vanishing points
+    screen_x = x * tile        screen_y = (y - z * height_scale) * tile       (x east, y south, z up; tiles)
+
+The ground is to scale (a square tile stays square), height stands straight up the picture, walls that face the camera
+are whole, walls on the sides and the south are cut to stubs. Because the floor is plan-true, **a point on the floor is
+the same pixel in the plan and in the painting**: the walk area, doors and spawns come from the plan and nothing is
+traced by hand.
+
+A *scene plan* is JSON in the game's folder (`games/<game>/scenes/<map>.plan.json`): `ground` (rects, ellipses, polys
+of a material), `solids` (boxes and cylinders with a height; `face` items on a box's front — windows, doors, pictures;
+`over: true` for what stands above the actors), `anchors` (named floor points), optional `materials`, `blocks`.
+The module's header is the full format. From a plan:
+
+| | |
+|---|---|
+| `render(plan)` → `.guide` | flat colour per surface — the `init` a model paints over |
+| `.depth` | nearness to the camera, white = near — a ControlNet `depth` image (`"preprocessed": true`) |
+| `.lines` | every surface's edges, white on black — a ControlNet `lineart` image (`"preprocessed": true`) |
+| `.over` | white where something stands above the actors — cut the painting with it for the over plane |
+| `.normal`, `.glow` | exact normals (OpenGL) and the light-giving surfaces, for a 2D-lit game |
+| `render(plan, textures={…})` | the same guide with its surfaces filled from tiling pictures at a true scale (`{"plank": {"image": …, "tiles": 1.7, "turn": 90, "tint": […], "gain": 1.1}}`; a plan may carry its own `"textures"`). Floors are mapped by where they lie, fronts by width and height. Depth, lines, normals and the floor do not change. With `lit()` on top this is a finished-looking place made from a plan and a texture library alone — no model — and the gentlest thing a model can be asked to paint over (denoise 0.35–0.5) |
+| `lit(blockout)` | the guide with the plan's `"lighting"` painted on it — lamps (each may be walled in with `within`), an ambient per area, shade at the foot of things and under what hangs overhead, a spill from glowing surfaces. The `init` to use when the light is part of the design: a flat guide leaves a model to invent the light |
+| `walk_rings(plan, start=…)` | the floor as nested polygons in pixels: ground of a walkable material, minus every solid's footprint and the strip its height hides, kept to what `start` can reach |
+| `anchors_px(plan)`, `reaches(plan, a, b)` | named points in pixels; can an actor walk from one to the other |
+| `agreement(painting, blockout)` | does a painting hold the plan: the share of the plan's line work that is an edge in the painting, corrected for chance (0 = luck, 1 = all of it) |
+| `check(plan)` | what is wrong with a plan, in words |
+
+A plan may carry `"lighting": {"ambient": [r, g, b], "zones": [{"rect", "ambient"}], "lights": [{"at", "z",
+"colour", "power", "radius", "within"}], "contact", "bloom", "grain"}` (0..1 colours or "rrggbb"); `lit()` reads it.
+A big place is also painted a room at a time at the game's own tile size: cut the same rectangle from the lit
+guide, the depth (stretched to the room's own range) and the lines (the first game's `scene_guides.py` does this).
+
+A repaint job over a block-out: `"init": <guide or lit guide>`, `"denoise": [0.8, 1.0]` (0.5–0.7 over a lit guide), and `"control": {"type": "depth", "image":
+<depth>, "preprocessed": true, "strength": 0.6}` (or `"lineart"` with the lines). Which control and strength hold a plan
+best is a game's own test (its verdict lives with the game, in `local/<game>/docs/`).
+
+Not yet joined: the generator above still writes its flat paint guide. Turning a generated town into a scene plan
+(each building a box with a roof, each door a face item) is the next step, so that a generated town paints at the same
+camera as a hand-planned room.
+
 ## Art → Floor plans (BUILD 29, second part)
 
 In the suite (`forge.bat` → Art → **Floor plans**):

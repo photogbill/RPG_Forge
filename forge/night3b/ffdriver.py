@@ -143,7 +143,13 @@ def library_dirs(cfg: dict | None = None) -> list[tuple[str, Path]]:
         base = os.environ.get(env)
         if not base:
             continue
-        for sub in ("Filter Forge 9", "Filter Forge"):
+        # every Filter Forge data folder there is (9, 15, ...), newest first: a newer version keeps its own library
+        try:
+            found = [d.name for d in Path(base).glob("Filter Forge*") if d.is_dir()]
+        except OSError:
+            found = []
+        found.sort(key=lambda n: int("".join(ch for ch in n if ch.isdigit()) or 0), reverse=True)
+        for sub in found or ("Filter Forge 9", "Filter Forge"):
             for leaf in ("System/Library", "My Filters", "Library"):
                 dirs.append((f"your library (%{env}%\\{sub}\\{leaf})", Path(base) / sub / leaf))
     seen, out = set(), []

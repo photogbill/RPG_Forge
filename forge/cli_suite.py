@@ -34,6 +34,11 @@
     python -m forge rulings retire <id> --why "…"            (a person only) · rulings conflicts   data that contradicts a ruling
     python -m forge idea "one line" [--at <address>]         the idea box · idea list [--sorted|--all] · idea sort <id> --to task|note|letter|file|kept|dropped [--where …]
     python -m forge playtest list | in [--to "<name>"]       the game's playtest notes; `in` routes the new ones and writes the letters
+    python -m forge profiles board | show <id> | songs <id>   Characters -> Profiles (BUILD 42): the board, one page, its lyric lines
+    python -m forge profiles fill [--dry]                    the first fill from the game's own sources — safe to run again;
+                                                             never overwrites a field or entry a person wrote
+    python -m forge profiles add "<name>" · profiles note <id> "…" · profiles propose <id> <row> "what" [--where "…"]
+    python -m forge profiles question <id> "…" [--mail]      an open question on the page (--mail sends it as a letter)
   Every command takes --game <id> (default: local/suite.json) and signs as --who / --from / --by, else FORGE_IDENTITY.
 """
 from __future__ import annotations
@@ -517,6 +522,71 @@ def cmd_playtest(cfg: dict, args: list[str]) -> int:
     return 0
 
 
+def cmd_profiles(cfg: dict, args: list[str]) -> int:
+    """Character profiles (BUILD 42) — the same functions as Characters -> Profiles."""
+    from .suite import profiles
+    pos, opts = _args(args)
+    if not pos or pos[0] not in ("board", "show", "songs", "fill", "add", "note", "propose", "question"):
+        print(__doc__)
+        return 2
+    gid, root, adp = _game(cfg, opts)
+    if adp is None:
+        print(f"{gid} has no adapter")
+        return 1
+    try:
+        if pos[0] == "board":
+            b = profiles.board(adp)
+            rows = b["rows"]
+            print(f"{gid} — {len(b['lines'])} profile(s) · " + " · ".join(f"{b['schema']['states'][k]['label']} {v}" for k, v in b["counts"].items()))
+            if b["header"]:
+                print(f"  ({b['header']})")
+            for l in b["lines"]:
+                cells = "  |  ".join(f"{r['label']}: [{l['cells'][r['id']]['state']}] {l['cells'][r['id']]['text'] or '—'}" for r in rows)
+                print(f"  {l['name']:<22} {cells}" + ("  ⚑ differs" if "differs" in l["flags"] else ""))
+            return 0
+        if pos[0] == "show":
+            d = profiles.page(adp, pos[1])
+            print(json.dumps({k: d[k] for k in ("name", "file", "differs", "voice", "links")}, ensure_ascii=False, indent=1))
+            print(json.dumps(d["profile"], ensure_ascii=False, indent=1))
+            return 0
+        if pos[0] == "songs":
+            r = profiles.find_in_songs(adp, pos[1])
+            print(f"{len(r['hits'])} line(s) from {r['songs']} song(s) for {' / '.join(r['names'])}")
+            for h in r["hits"]:
+                print(f"  “{h['song']}” ({h['singer']}; {h['why']}): {h['line']}")
+            return 0
+        who = _who(opts, "who")
+        if pos[0] == "fill":
+            r = profiles.fill(adp, who, dry=bool(opts.get("dry")))
+            print(r["message"])
+            for x in r["skipped"]:
+                print("  left alone: " + x)
+            return 0
+        if pos[0] == "add":
+            print(profiles.add(adp, " ".join(pos[1:]), who)["message"])
+            return 0
+        if pos[0] == "note":
+            p, _ = profiles.read(adp, pos[1])
+            cur = ((p.get("notes") or {}).get("notes") or "").rstrip()
+            add = " ".join(pos[2:])
+            print(profiles.set_field(adp, pos[1], "notes", "notes", (cur + "\n\n" if cur else "") + add, who)["message"])
+            return 0
+        if pos[0] == "propose":
+            sec = profiles.rows_section(profiles.load_schema(adp))["id"]
+            r = profiles.add_entry(adp, pos[1], sec, pos[2], {"what": " ".join(pos[3:]), "state": "proposed",
+                                                               "source": {"kind": "doc", "where": str(opts.get("where") or "")}}, who)
+            print(r["message"])
+            return 0
+        r = profiles.add_question(adp, pos[1], " ".join(pos[2:]), who)
+        print(r["message"])
+        if opts.get("mail"):
+            print(profiles.mail_question(adp, pos[1], r["question"]["id"], who)["message"])
+        return 0
+    except profiles.ProfileRefused as e:
+        print(f"refused: {e}")
+        return 1
+
+
 COMMANDS = {"suite": cmd_suite, "identity": cmd_identity, "journal": cmd_journal, "suite-check": cmd_suite_check,
             "mail": cmd_mail, "orders": cmd_orders, "provide": cmd_provide, "away": cmd_away, "music": cmd_music,
-            "rulings": cmd_rulings, "idea": cmd_idea, "playtest": cmd_playtest}
+            "rulings": cmd_rulings, "idea": cmd_idea, "playtest": cmd_playtest, "profiles": cmd_profiles}

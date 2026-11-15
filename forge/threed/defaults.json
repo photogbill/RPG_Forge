@@ -1,0 +1,27 @@
+{
+ "_comment": "The forge's standing words for 3D pictures (BUILD 36): the 'always' block goes after every description, the negative with it. They are the words the 2026-11-13 runs were made with. A game keeps its own as named blocks in its prompt library (pose.threed_body / neg.threed_body, layout.threed_thing / neg.threed_thing); these are used only where a game has none, and the 3D tabs say so. BUILD 39: a body's picture carries a relaxed, kind expression with the mouth closed — a smile in the picture is a smile forever (expression belongs to animation and portraits).",
+ "_routes": "BUILD 40, from the launch-site comparison (out/trellis/silo_compare_models_1/_review/compare_vehicles.jpg): vehicles and large hard-surface things go to TRELLIS.2 — its trucks sat level and square and its missile had four even fins, where Pixal3D's trucks leant 10.8 and 13.5 degrees, sat turned, filled an empty truck bed with invented cargo and bent the missile. A vehicle is a 'prop' of tier large_prop, so it takes the prop model below. Buildings stay with Pixal3D (it alone takes a back picture: Pixal3DMultiViewConditioning; TRELLIS.2's conditioning takes one). TRELLIS.2's one weakness here, glass baked as a white mirror, is put right by the queue (checks.fix_glass).",
+ "blocks": {
+  "pose.threed_body": "A full-body character reference picture for a 3D modeller: one figure alone, seen straight from the front at eye level, standing upright and symmetrical in a relaxed A-pose, a relaxed, kind expression with the mouth closed, both arms held straight and well away from the body at about forty-five degrees, hands open with the fingers together, legs straight and a little apart, feet flat. The whole figure from the top of the head to the soles of the feet is inside the frame with a margin all round. Plain light grey background, nothing else in the picture, no floor, no cast shadow, soft even studio light from the front. A clean 3D game character render, clear readable shapes, crisp detail.",
+  "neg.threed_body": "text, letters, watermark, signature, logo, blurry, low quality, several people, cropped, cut off at the legs, a room, a landscape, floor, ground, cast shadow, dramatic lighting, side view, back view, three-quarter view, crossed arms, hands on hips, hands touching the body, arms behind the back, holding a weapon, holding an object, cape, wings",
+  "layout.threed_thing": "One object alone, centred, the whole object inside the frame with a margin around it, seen from a three-quarter view from slightly above. Plain light grey background, nothing else in the picture, no floor, no cast shadow, soft even studio light from all sides. Matte surfaces with no glossy highlights, worn and used, clear readable shapes, crisp detail.",
+  "neg.threed_thing": "people, person, text, letters, numbers, watermark, signature, logo, blurry, low quality, several objects, a room, a landscape, floor, ground, cast shadow, dramatic lighting, glossy reflections"
+ },
+ "kinds": {
+  "body": {
+   "always": "pose.threed_body",
+   "negative": "neg.threed_body",
+   "model": "trellis2"
+  },
+  "prop": {
+   "always": "layout.threed_thing",
+   "negative": "neg.threed_thing",
+   "model": "trellis2"
+  },
+  "building": {
+   "always": "layout.threed_thing",
+   "negative": "neg.threed_thing",
+   "model": "pixal3d"
+  }
+ }
+}

@@ -1,0 +1,6 @@
+# words 'Find it in the songs' looks for near a character's name — one per line; add any
+hook
+knife
+sling
+staff
+bow

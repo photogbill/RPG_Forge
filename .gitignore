@@ -72,6 +72,14 @@ games/*
 /bakeoff_new_models.bat
 /bakeoff_styles.bat
 /test_tools.bat
+/bakeoff_klein_finish.bat
+/bakeoff_next_tests.bat
+/bakeoff_samplers_tonight.bat
+/first_place*.bat
+/materials_round2.bat
+/ff_palette.bat
+/ff_picks.bat
+/ff_picks_third_look.bat
 # BUILD 01: the suite's run-state inside the example game (journal, proposals, backups, temp) — and its per-install settings live in /local/ (ignored above)
 games/_example/game/journal/
 games/_example/game/proposals/
@@ -95,3 +103,10 @@ _xfer/
 
 # BUILD 27: the Mac's own Python environment (install_mac.command makes it)
 venv-mac/
+
+# The Blender MCP add-on (Blender Lab, GPL): a download kept here by hand, not part of the forge - never pushed
+/mcp-1.0.3/
+/mcp-1.0.3.zip
+
+# TRELLIS.2 trials (a session's own .bat files until a build makes them the forge's) - never pushed
+/trellis_*.bat

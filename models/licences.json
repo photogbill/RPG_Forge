@@ -3,5 +3,14 @@
   "license": "CreativeML Open RAIL++-M (SDXL 1.0)",
   "commercial_ok": true,
   "checked": "2026-11-09 — William checked the Civitai v8 page 2026-11-09: no additional restrictions; licence text in docs/model_licences/CreativeML_Open_RAIL++-M_SDXL_1.0.txt"
+ },
+ "Filter Forge 15.001": {
+  "kind": "outside tool",
+  "tool": "Filter Forge",
+  "version": "15.001",
+  "license": "Filter Forge 15 Professional, licensed to William — rendered results may be used commercially; the filters themselves are never copied or redistributed (Filter Forge EULA)",
+  "commercial_ok": true,
+  "licence_condition": "rendered results only — filters are used from their own folder, never copied or redistributed",
+  "checked": "2026-11-14 — William in chat, 14:10: \"I HAVE the license installed on filter forge 15. I assure you, we're good.\" FF15 also renders the FF9 library it imported"
  }
 }

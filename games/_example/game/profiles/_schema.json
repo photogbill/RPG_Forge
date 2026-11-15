@@ -1,0 +1,116 @@
+{
+ "_comment": "The example game's profile page (BUILD 42). The forge draws Characters -> Profiles from this file: change the sections, fields and rows to suit a game; no forge code changes. Kinds: fields (text, longtext, list, choice, multi), rows (the board's cells; each entry carries one of the five states), links, voice, questions.",
+ "schema": 1,
+ "owner": "Bill",
+ "states": {
+  "owner": {
+   "label": "Bill's word"
+  }
+ },
+ "board": {
+  "section": "arms",
+  "header": "Everyone in the example has something to hand, close or far; say so when they don't."
+ },
+ "sections": [
+  {
+   "id": "who",
+   "label": "Who",
+   "fields": [
+    {
+     "id": "name",
+     "label": "Name",
+     "kind": "text"
+    },
+    {
+     "id": "other_names",
+     "label": "Other names",
+     "kind": "list"
+    },
+    {
+     "id": "kind",
+     "label": "Kind",
+     "kind": "choice",
+     "choices": [
+      "human",
+      "other"
+     ]
+    },
+    {
+     "id": "games",
+     "label": "In games",
+     "kind": "multi",
+     "choices": [
+      "I"
+     ]
+    },
+    {
+     "id": "first",
+     "label": "First appears",
+     "kind": "text"
+    },
+    {
+     "id": "line",
+     "label": "Who they are, in one line",
+     "kind": "text"
+    }
+   ]
+  },
+  {
+   "id": "arms",
+   "label": "Arms",
+   "kind": "rows",
+   "rows": [
+    {
+     "id": "close",
+     "label": "Up close"
+    },
+    {
+     "id": "range",
+     "label": "At range"
+    },
+    {
+     "id": "other",
+     "label": "Other",
+     "hint": "a knack that is not a weapon"
+    }
+   ]
+  },
+  {
+   "id": "body",
+   "label": "Body and movement",
+   "kind": "links"
+  },
+  {
+   "id": "voice",
+   "label": "Voice",
+   "kind": "voice"
+  },
+  {
+   "id": "ties",
+   "label": "Ties",
+   "fields": [
+    {
+     "id": "ties",
+     "label": "Bound to",
+     "kind": "longtext"
+    }
+   ]
+  },
+  {
+   "id": "notes",
+   "label": "Notes",
+   "fields": [
+    {
+     "id": "notes",
+     "label": "Notes",
+     "kind": "longtext"
+    }
+   ]
+  },
+  {
+   "id": "questions",
+   "label": "Open questions",
+   "kind": "questions"
+  }
+ ]
+}

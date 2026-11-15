@@ -84,7 +84,7 @@
   "tools": {
     "filter_forge": {
       "_comment": "Optional (Night 3B, G14): Filter Forge's command-line renderer for the filter_forge job type. Remove or leave empty if you do not have it — doctor then says 'not installed'. library_dirs: extra folders of .ffxml filters to list (your own library is found under %APPDATA% automatically). Filters are used by path and never copied.",
-      "exe": "C:\\Program Files\\Filter Forge 9\\Bin\\FFXCmdRenderer-x64.exe",
+      "exe": "C:\\Program Files\\Filter Forge 15\\Bin\\FFXCmdRenderer-x64.exe",
       "library_dirs": []
     }
   }

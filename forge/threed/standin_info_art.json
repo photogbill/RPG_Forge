@@ -1,0 +1,1463 @@
+{
+ "ApplyTextureToMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "base_color": [
+     "IMAGE",
+     {}
+    ],
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "metallic": [
+     "IMAGE",
+     {}
+    ],
+    "normal_map": [
+     "IMAGE",
+     {}
+    ],
+    "occlusion": [
+     "IMAGE",
+     {}
+    ],
+    "roughness": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "base_color",
+    "metallic",
+    "roughness",
+    "occlusion",
+    "normal_map"
+   ]
+  },
+  "name": "ApplyTextureToMesh",
+  "output": [
+   "MESH"
+  ]
+ },
+ "BakeAmbientOcclusion": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "bias": [
+     "FLOAT",
+     {}
+    ],
+    "high_poly": [
+     "MESH",
+     {}
+    ],
+    "low_poly": [
+     "MESH",
+     {}
+    ],
+    "max_distance": [
+     "FLOAT",
+     {}
+    ],
+    "resolution": [
+     "INT",
+     {}
+    ],
+    "samples": [
+     "INT",
+     {}
+    ],
+    "strength": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "low_poly",
+    "high_poly",
+    "resolution",
+    "samples",
+    "max_distance",
+    "strength",
+    "bias"
+   ]
+  },
+  "name": "BakeAmbientOcclusion",
+  "output": [
+   "IMAGE"
+  ]
+ },
+ "BakeNormalMapFromMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "cage_distance": [
+     "FLOAT",
+     {}
+    ],
+    "high_poly": [
+     "MESH",
+     {}
+    ],
+    "ignore_backfaces": [
+     "BOOLEAN",
+     {}
+    ],
+    "low_poly": [
+     "MESH",
+     {}
+    ],
+    "resolution": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "low_poly",
+    "high_poly",
+    "resolution",
+    "cage_distance",
+    "ignore_backfaces"
+   ]
+  },
+  "name": "BakeNormalMapFromMesh",
+  "output": [
+   "IMAGE"
+  ]
+ },
+ "BakeTextureFromVoxel": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "reference_mesh": [
+     "MESH",
+     {}
+    ],
+    "texture_size": [
+     "INT",
+     {}
+    ],
+    "voxel_colors": [
+     "VOXEL",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "voxel_colors",
+    "texture_size",
+    "reference_mesh"
+   ]
+  },
+  "name": "BakeTextureFromVoxel",
+  "output": [
+   "IMAGE",
+   "IMAGE",
+   "IMAGE"
+  ]
+ },
+ "CFGOverride": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "cfg": [
+     "INT",
+     {}
+    ],
+    "end_percent": [
+     "INT",
+     {}
+    ],
+    "model": [
+     "MODEL",
+     {}
+    ],
+    "start_percent": [
+     "FLOAT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model",
+    "cfg",
+    "start_percent",
+    "end_percent"
+   ]
+  },
+  "name": "CFGOverride",
+  "output": [
+   "MODEL"
+  ]
+ },
+ "CLIPVisionLoader": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "clip_name": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "clip_name"
+   ]
+  },
+  "name": "CLIPVisionLoader",
+  "output": [
+   "CLIP_VISION"
+  ]
+ },
+ "ComfySwitchNode": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "on_false": [
+     "*",
+     {}
+    ],
+    "on_true": [
+     "*",
+     {}
+    ],
+    "switch": [
+     "BOOLEAN",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "switch",
+    "on_false",
+    "on_true"
+   ]
+  },
+  "name": "ComfySwitchNode",
+  "output": [
+   "*"
+  ]
+ },
+ "DecimateMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "placement_mode": [
+     "STRING",
+     {}
+    ],
+    "target_face_count": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "target_face_count",
+    "placement_mode"
+   ]
+  },
+  "name": "DecimateMesh",
+  "output": [
+   "MESH"
+  ]
+ },
+ "EmptyTrellis2LatentStructure": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "batch_size": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "batch_size"
+   ]
+  },
+  "name": "EmptyTrellis2LatentStructure",
+  "output": [
+   "LATENT"
+  ]
+ },
+ "GetMeshInfo": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh"
+   ]
+  },
+  "name": "GetMeshInfo",
+  "output": [
+   "MESH",
+   "STRING"
+  ]
+ },
+ "ImageCropToMask": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "background": [
+     "STRING",
+     {}
+    ],
+    "grow_mask": [
+     "INT",
+     {}
+    ],
+    "height": [
+     "INT",
+     {}
+    ],
+    "images": [
+     "IMAGE",
+     {}
+    ],
+    "masks": [
+     "MASK",
+     {}
+    ],
+    "pad_factor": [
+     "FLOAT",
+     {}
+    ],
+    "width": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "images",
+    "masks",
+    "width",
+    "height",
+    "pad_factor",
+    "grow_mask",
+    "background"
+   ]
+  },
+  "name": "ImageCropToMask",
+  "output": [
+   "IMAGE"
+  ]
+ },
+ "KSampler": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "cfg": [
+     "INT",
+     {}
+    ],
+    "denoise": [
+     "INT",
+     {}
+    ],
+    "latent_image": [
+     "LATENT",
+     {}
+    ],
+    "model": [
+     "MODEL",
+     {}
+    ],
+    "negative": [
+     "CONDITIONING",
+     {}
+    ],
+    "positive": [
+     "CONDITIONING",
+     {}
+    ],
+    "sampler_name": [
+     "STRING",
+     {}
+    ],
+    "scheduler": [
+     "STRING",
+     {}
+    ],
+    "seed": [
+     "INT",
+     {}
+    ],
+    "steps": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model",
+    "seed",
+    "steps",
+    "cfg",
+    "sampler_name",
+    "scheduler",
+    "positive",
+    "negative",
+    "latent_image",
+    "denoise"
+   ]
+  },
+  "name": "KSampler",
+  "output": [
+   "LATENT"
+  ]
+ },
+ "LoadBackgroundRemovalModel": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "bg_removal_name": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "bg_removal_name"
+   ]
+  },
+  "name": "LoadBackgroundRemovalModel",
+  "output": [
+   "BACKGROUND_REMOVAL"
+  ]
+ },
+ "LoadImage": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "image": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "image"
+   ]
+  },
+  "name": "LoadImage",
+  "output": [
+   "IMAGE",
+   "MASK"
+  ]
+ },
+ "LoadMoGeModel": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "model_name": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model_name"
+   ]
+  },
+  "name": "LoadMoGeModel",
+  "output": [
+   "MOGE_MODEL"
+  ]
+ },
+ "MaskPreview": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mask": [
+     "MASK",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mask"
+   ]
+  },
+  "name": "MaskPreview",
+  "output": [
+   "MASK"
+  ]
+ },
+ "MeshSmoothNormals": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "crease_angle": [
+     "INT",
+     {}
+    ],
+    "mesh": [
+     "MESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "crease_angle"
+   ]
+  },
+  "name": "MeshSmoothNormals",
+  "output": [
+   "MESH"
+  ]
+ },
+ "MeshToFile3D": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh"
+   ]
+  },
+  "name": "MeshToFile3D",
+  "output": [
+   "FILE_3D_GLB"
+  ]
+ },
+ "MoGeGeometryToFOV": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "axis": [
+     "STRING",
+     {}
+    ],
+    "moge_geometry": [
+     "MOGE_GEOMETRY",
+     {}
+    ],
+    "unit": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "moge_geometry",
+    "axis",
+    "unit"
+   ]
+  },
+  "name": "MoGeGeometryToFOV",
+  "output": [
+   "FLOAT",
+   "FLOAT"
+  ]
+ },
+ "MoGeInference": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "apply_mask": [
+     "BOOLEAN",
+     {}
+    ],
+    "batch_size": [
+     "INT",
+     {}
+    ],
+    "force_projection": [
+     "BOOLEAN",
+     {}
+    ],
+    "fov_x_degrees": [
+     "INT",
+     {}
+    ],
+    "image": [
+     "IMAGE",
+     {}
+    ],
+    "moge_model": [
+     "MOGE_MODEL",
+     {}
+    ],
+    "refine_steps": [
+     "INT",
+     {}
+    ],
+    "resolution_level": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "moge_model",
+    "image",
+    "resolution_level",
+    "fov_x_degrees",
+    "batch_size",
+    "force_projection",
+    "apply_mask",
+    "refine_steps"
+   ]
+  },
+  "name": "MoGeInference",
+  "output": [
+   "MOGE_GEOMETRY"
+  ]
+ },
+ "ModelSamplingSD3": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "model": [
+     "MODEL",
+     {}
+    ],
+    "shift": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model",
+    "shift"
+   ]
+  },
+  "name": "ModelSamplingSD3",
+  "output": [
+   "MODEL"
+  ]
+ },
+ "PaintMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "voxel_colors": [
+     "VOXEL",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "voxel_colors"
+   ]
+  },
+  "name": "PaintMesh",
+  "output": [
+   "MESH"
+  ]
+ },
+ "Pixal3DConditioning": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "camera_angle_x": [
+     "INT",
+     {}
+    ],
+    "clip_vision_model": [
+     "CLIP_VISION",
+     {}
+    ],
+    "image": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "clip_vision_model",
+    "image",
+    "camera_angle_x"
+   ]
+  },
+  "name": "Pixal3DConditioning",
+  "output": [
+   "CONDITIONING",
+   "CONDITIONING"
+  ]
+ },
+ "Preview3DAdvanced": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "camera_info": [
+     "LOAD3D_CAMERA",
+     {}
+    ],
+    "model_3d": [
+     "FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+     {}
+    ],
+    "model_3d_info": [
+     "LOAD3D_MODEL_INFO",
+     {}
+    ],
+    "w0": [
+     "STRING",
+     {}
+    ],
+    "w1": [
+     "INT",
+     {}
+    ],
+    "w2": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model_3d",
+    "model_3d_info",
+    "camera_info",
+    "w0",
+    "w1",
+    "w2"
+   ]
+  },
+  "name": "Preview3DAdvanced",
+  "output": [
+   "FILE_3D",
+   "LOAD3D_MODEL_INFO",
+   "LOAD3D_CAMERA",
+   "INT",
+   "INT"
+  ]
+ },
+ "PreviewImage": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "images": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "images"
+   ]
+  },
+  "name": "PreviewImage",
+  "output": [
+   "IMAGE"
+  ]
+ },
+ "PrimitiveBoolean": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "value": [
+     "BOOLEAN",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "value"
+   ]
+  },
+  "name": "PrimitiveBoolean",
+  "output": [
+   "BOOLEAN"
+  ]
+ },
+ "PrimitiveInt": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "value": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "value"
+   ]
+  },
+  "name": "PrimitiveInt",
+  "output": [
+   "INT"
+  ]
+ },
+ "RemeshMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "band": [
+     "INT",
+     {}
+    ],
+    "drop_small_components": [
+     "FLOAT",
+     {}
+    ],
+    "fix_poles": [
+     "BOOLEAN",
+     {}
+    ],
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "precluster_max_verts": [
+     "INT",
+     {}
+    ],
+    "project_back": [
+     "INT",
+     {}
+    ],
+    "resolution": [
+     "INT",
+     {}
+    ],
+    "sign_mode": [
+     "COMFY_DYNAMICCOMBO_V3",
+     {
+      "options": [
+       {
+        "inputs": {
+         "required": {
+          "fill": [
+           "INT",
+           {}
+          ],
+          "qef": [
+           "BOOLEAN",
+           {}
+          ]
+         }
+        },
+        "key": "solid"
+       }
+      ]
+     }
+    ],
+    "smooth_iters": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "resolution",
+    "sign_mode",
+    "band",
+    "project_back",
+    "fix_poles",
+    "smooth_iters",
+    "drop_small_components",
+    "precluster_max_verts"
+   ]
+  },
+  "name": "RemeshMesh",
+  "output": [
+   "MESH"
+  ]
+ },
+ "RemoveBackground": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "bg_removal_model": [
+     "BACKGROUND_REMOVAL",
+     {}
+    ],
+    "image": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "bg_removal_model",
+    "image"
+   ]
+  },
+  "name": "RemoveBackground",
+  "output": [
+   "MASK"
+  ]
+ },
+ "RenderUVAtlas": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "w0": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "w0"
+   ]
+  },
+  "name": "RenderUVAtlas",
+  "output": [
+   "IMAGE"
+  ]
+ },
+ "RescaleCFG": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "model": [
+     "MODEL",
+     {}
+    ],
+    "multiplier": [
+     "FLOAT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model",
+    "multiplier"
+   ]
+  },
+  "name": "RescaleCFG",
+  "output": [
+   "MODEL"
+  ]
+ },
+ "Save3DAdvanced": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "filename_prefix": [
+     "STRING",
+     {}
+    ],
+    "height": [
+     "INT",
+     {}
+    ],
+    "model_3d": [
+     "FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+     {}
+    ],
+    "viewport_state": [
+     "STRING",
+     {}
+    ],
+    "width": [
+     "INT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "model_3d",
+    "filename_prefix",
+    "viewport_state",
+    "width",
+    "height"
+   ]
+  },
+  "name": "Save3DAdvanced",
+  "output": [
+   "FILE_3D",
+   "LOAD3D_MODEL_INFO",
+   "LOAD3D_CAMERA",
+   "INT",
+   "INT"
+  ]
+ },
+ "Trellis2Conditioning": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "clip_vision_model": [
+     "CLIP_VISION",
+     {}
+    ],
+    "image": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "clip_vision_model",
+    "image"
+   ]
+  },
+  "name": "Trellis2Conditioning",
+  "output": [
+   "CONDITIONING",
+   "CONDITIONING"
+  ]
+ },
+ "Trellis2ShapeStage": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "negative": [
+     "CONDITIONING",
+     {}
+    ],
+    "positive": [
+     "CONDITIONING",
+     {}
+    ],
+    "voxel": [
+     "VOXEL",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "positive",
+    "negative",
+    "voxel"
+   ]
+  },
+  "name": "Trellis2ShapeStage",
+  "output": [
+   "CONDITIONING",
+   "CONDITIONING",
+   "LATENT"
+  ]
+ },
+ "Trellis2TextureStage": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "negative": [
+     "CONDITIONING",
+     {}
+    ],
+    "positive": [
+     "CONDITIONING",
+     {}
+    ],
+    "shape_latent": [
+     "LATENT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "positive",
+    "negative",
+    "shape_latent"
+   ]
+  },
+  "name": "Trellis2TextureStage",
+  "output": [
+   "CONDITIONING",
+   "CONDITIONING",
+   "LATENT"
+  ]
+ },
+ "Trellis2UpsampleStage": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "negative": [
+     "CONDITIONING",
+     {}
+    ],
+    "positive": [
+     "CONDITIONING",
+     {}
+    ],
+    "shape_latent": [
+     "LATENT",
+     {}
+    ],
+    "target_resolution": [
+     "INT",
+     {}
+    ],
+    "vae": [
+     "VAE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "positive",
+    "negative",
+    "shape_latent",
+    "vae",
+    "target_resolution"
+   ]
+  },
+  "name": "Trellis2UpsampleStage",
+  "output": [
+   "CONDITIONING",
+   "CONDITIONING",
+   "LATENT"
+  ]
+ },
+ "UNETLoader": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "unet_name": [
+     "STRING",
+     {}
+    ],
+    "weight_dtype": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "unet_name",
+    "weight_dtype"
+   ]
+  },
+  "name": "UNETLoader",
+  "output": [
+   "MODEL"
+  ]
+ },
+ "UnwrapMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "mesh": [
+     "MESH",
+     {}
+    ],
+    "padding": [
+     "INT",
+     {}
+    ],
+    "resolution": [
+     "INT",
+     {}
+    ],
+    "segmenter": [
+     "STRING",
+     {}
+    ],
+    "weld_distance": [
+     "FLOAT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "mesh",
+    "segmenter",
+    "resolution",
+    "padding",
+    "weld_distance"
+   ]
+  },
+  "name": "UnwrapMesh",
+  "output": [
+   "MESH"
+  ]
+ },
+ "VAELoader": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "vae_name": [
+     "STRING",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "vae_name"
+   ]
+  },
+  "name": "VAELoader",
+  "output": [
+   "VAE"
+  ]
+ },
+ "VaeDecodeShapeTrellis": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "samples": [
+     "LATENT",
+     {}
+    ],
+    "vae": [
+     "VAE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "samples",
+    "vae"
+   ]
+  },
+  "name": "VaeDecodeShapeTrellis",
+  "output": [
+   "MESH",
+   "SHAPE_SUBDIVIDES"
+  ]
+ },
+ "VaeDecodeStructureTrellis2": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "resolution": [
+     "STRING",
+     {}
+    ],
+    "samples": [
+     "LATENT",
+     {}
+    ],
+    "vae": [
+     "VAE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "samples",
+    "vae",
+    "resolution"
+   ]
+  },
+  "name": "VaeDecodeStructureTrellis2",
+  "output": [
+   "VOXEL"
+  ]
+ },
+ "VaeDecodeTextureTrellis": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "samples": [
+     "LATENT",
+     {}
+    ],
+    "shape_subdivides": [
+     "SHAPE_SUBDIVIDES",
+     {}
+    ],
+    "vae": [
+     "VAE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "samples",
+    "vae",
+    "shape_subdivides"
+   ]
+  },
+  "name": "VaeDecodeTextureTrellis",
+  "output": [
+   "VOXEL"
+  ]
+ },
+ "VoxelToMesh": {
+  "category": "stand-in",
+  "input": {
+   "optional": {},
+   "required": {
+    "voxel": [
+     "VOXEL",
+     {}
+    ],
+    "w0": [
+     "STRING",
+     {}
+    ],
+    "w1": [
+     "FLOAT",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "voxel",
+    "w0",
+    "w1"
+   ]
+  },
+  "name": "VoxelToMesh",
+  "output": [
+   "MESH"
+  ]
+ }
+}

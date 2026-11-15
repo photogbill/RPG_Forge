@@ -1,0 +1,19 @@
+{
+ "_comment": "What the example game's own data gives each character (made up; read by profile_game_view).",
+ "wren": {
+  "close": [
+   {
+    "id": "boat_hook",
+    "name": "Boat hook"
+   }
+  ]
+ },
+ "miller": {
+  "close": [
+   {
+    "id": "flail",
+    "name": "Threshing flail"
+   }
+  ]
+ }
+}

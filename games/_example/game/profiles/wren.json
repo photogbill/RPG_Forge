@@ -1,0 +1,51 @@
+{
+ "id": "wren",
+ "who": {
+  "name": "Wren",
+  "other_names": [],
+  "kind": "human",
+  "games": [
+   "I"
+  ],
+  "first": "",
+  "line": "The toll-singer at Ember Crossing (made up for the example)."
+ },
+ "arms": {
+  "close": {
+   "entries": [
+    {
+     "id": "ex1",
+     "what": "boat hook",
+     "state": "songs",
+     "source": {
+      "kind": "lyric",
+      "text": "I keep a boat hook for the ones who will not pay",
+      "song": "The Toll",
+      "singer": "Wren"
+     },
+     "seen_in": "The Toll",
+     "game_id": "boat_hook",
+     "by": "Claude Opus",
+     "time": "2026-11-14T15:00:00"
+    }
+   ],
+   "none": null
+  },
+  "range": {
+   "entries": [],
+   "none": null
+  },
+  "other": {
+   "entries": [],
+   "none": null
+  }
+ },
+ "ties": {
+  "ties": ""
+ },
+ "notes": {
+  "notes": ""
+ },
+ "questions": [],
+ "_marks": {}
+}

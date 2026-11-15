@@ -65,7 +65,7 @@ def _upload(port, task, name, body: bytes | Path):
 def test_every_area_and_tab_has_an_address_a_screen_and_a_needs_line(w):
     cfg, a, _ = w
     ids = [x["id"] for x in areas.AREAS]
-    assert ids == ["home", "status", "messages", "tasks", "story", "music", "art", "characters", "workshop", "notes", "settings"]
+    assert ids == ["home", "status", "messages", "tasks", "story", "music", "art", "characters", "3d", "workshop", "notes", "settings"]   # BUILD 36 added 3D
     music_tabs = [t["name"] for t in next(x for x in areas.AREAS if x["id"] == "music")["tabs"]]
     assert music_tabs == ["Needed", "Singers", "Score inbox", "Briefs & songs"]
     nd = areas.needs(cfg, "_example")

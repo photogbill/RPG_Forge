@@ -319,6 +319,95 @@ Dashboard: a **Report** link, kit-check colours on kit cards, an **A/B** view, a
 
 Session hand-offs and plans are per game, in `local/<game>/` (never pushed).
 
+## The 3D workshop (BUILD 36, 2026-11-14) — a character in words → a walking 3D body, by hand
+
+`forge.bat` → **3D** (its own area): **Bodies** (describe someone, *Make 4 pictures*, pick one, *Make the body*; *Try again
+with changes* fills the card in; tick two tries for **side by side** with the words that changed) · **Skeleton & motions**
+(*Add a skeleton* — people get Make-It-Animatable with finger bones, animals get their seams welded then UniRig — then
+*Fit motions*; the viewer plays walk, run, standing and every motion, with each one's ground speed; a tick-list of motions
+a character never does) · **Props & buildings** (the same, at a real size in metres, loose scraps removed; TRELLIS.2 for
+things, Pixal3D for buildings) · **Trees** (a species sheet as sliders, a seed, bare or in leaf, *Grow 4*) · **Viewer**
+(every model the forge has made, on a floor in metres with a 1.75 m figure, day or night light) · **Runs** (what's running,
+what waits for the graphics card, logs, reports, *Run a whole list overnight* with an estimate first).
+
+Every button is a job in the queue (`model_3d`, `rig_body`, `fit_motions`, `grow_tree`, `line_3d` — `docs/JOB_TYPES.md`);
+the art worker does the work, and **one card lock** keeps the art ComfyUI and the rigging ComfyUI from holding the card at
+once. What you keep goes to Art → Review & approve (its **3D models** section); approving is yours, after the licence check
+of every tool that touched the model; *Deliver* copies the .glb, its motion sheet and its provenance into the game and
+records it in `delivered.json`. The rigging pack's Mixamo test dances can never reach a game.
+
+Install and check: Settings → This computer → **3D tools** (`python -m forge 3d check | install`), everything on this drive.
+From a command line: `python -m forge 3d line <list.json> [--estimate]` (the whole line for a list, unattended),
+`3d lock`, `3d info <model.glb>`, `3d grow <species>`, `3d standin` (a stand-in ComfyUI for trying it with no card).
+Code: `forge/threed/` (game-neutral; the viewer's three.js is kept in `forge/suite/vendor/three`, MIT).
+
+## The world queue (BUILD 39, 2026-11-14) — what the world needs, made whenever the machine is free
+
+A standing list per game, `games/<id>/wanted_3d/*.json`: one entry per thing — its **kind** (body, prop, building, panel,
+tree), its **size tier** (principal, named, crowd · large, small, hand prop: faces and texture size), its **real size in
+metres**, where it **first appears** (which orders the list) — and anyone may add to it at any time. One launcher,
+**`make_what_we_need.bat`**, takes the next thing, makes it, checks it, reports it and goes on until stopped; it reads the
+list again before every thing, so it is never edited, and closing its window loses at most the thing in hand. It waits
+whenever the graphics card is someone else's. `forge.bat` → **3D → World list** shows the whole list (made, held back and
+why, next), with *Start the world queue* / *Stop after this one*, and the hours left at today's speed (also in **3D → Runs**).
+
+**The checks after every model**, each one plain line in the report and a picture of what it saw: *sits level* (the plane
+it rests on and the way its own walls stand must agree — Pixal3D leans nearly every building 3–14°; a thing that leans as
+a whole is straightened by the queue up to 15°, losslessly), *loose pieces* (floating, or below the floor), *blank glass*
+(a white perfect mirror: renders blank white), *thin parts* (holes in the model's outline where the picture is filled — a
+fence that lost its mesh). A failed check holds the thing back; *Straighten*, *Make again* or (the person's) *Let it
+through anyway*. What passes goes to Art → Review & approve with its checks beside it; approving stays yours.
+
+See-through things (chain-link, netting, grilles) are **flat cut-out panels**, never image-to-3D, standing in the posts and
+rails the model kept. Every thing arrives at its **true scale** (one node above the mesh; the mesh untouched). A body's
+picture says *relaxed, kind expression, mouth closed* and loses any smile words (a smile in the picture is a smile
+forever). Also in the list: a wreck made from the intact model plus damage (`wreck_of`), a crowd body as its own head on a
+shared body (`shared_body` + `head_words`, joined at the collar in Blender), a glow layer the game can brighten (`glow`),
+and a model made before the queue existed, checked and sized but never remade (`adopt`).
+
+`python -m forge 3d world run | status | stop | add <file>`, `3d checks <model.glb> [--picture p.png]`, `3d wreck`,
+`3d glow`, `3d heads`. Code: `forge/threed/world.py`, `checks.py`, `panels.py`, `damage.py`, `heads.py`, `meshio.py` and
+`raster.py` (numpy and Pillow only — the checks run on any computer), `forge/suite/world3d.py`.
+
+## Character profiles (BUILD 42, 2026-11-14) — the whole cast on one board, a page per character
+
+`forge.bat` → **Characters → Profiles**: a board of a game's cast (up close · at range · other), every entry coloured by
+how it is known — *in the songs* (quoted), *the owner's word*, *proposed*, *open*, *none on purpose* — and a page per
+character that saves as you leave each field (Undo is there). *Find it in the songs* shows every lyric line near the
+character's name with a weapon word in it, for the overlooked-weapon problem; *differs from the game's data* flags what
+the game gives a character that the page doesn't (and the other way round); an open question mails with one click; a
+confirmed weapon the game lacks becomes a work order. Anything a person types is theirs, with the date, and goes into the
+rulings book. The pages and their schema live in the game's folder; the forge names no game (`forge/suite/profiles.py`,
+`profiles.js`; `python -m forge profiles board | show | songs | fill | add | note | propose | question`).
+
+## What the second run taught (BUILD 40, 2026-11-14) — colours that hold, a look at the picture before the body
+
+**Colours hold**, a fifth check: every model's colour texture, seen from its picture's own view, against the picture
+(ComfyUI's bake writes the colours with no colour step; the launch-site models came out about half as bright). The fix
+matches the stored colours to the picture with one smooth curve per channel: the queue does it by itself for bodies (the
+body as made kept beside it); for props and buildings the matched version is offered (*Use the matched colours*). White-
+mirror **glass** is painted dark glass. **Vehicles** go to TRELLIS.2; buildings to Pixal3D, which alone can take a **back
+picture** (`back_image` / `back_words`). Review's card asks *Seen from behind?*.
+
+**The picture gate** looks at a body's picture before four minutes go into the body: how many arms and at what angle (an
+A-pose, or a T-pose when one was asked), and the head's size for the age in the words (cartoon children are caught). On a
+miss the world queue paints it again with a new seed, three times, then holds it with the tries side by side (*Make the
+body from this picture anyway* is yours); in the Bodies form it is a warning. Standing words: children and teenagers
+start "Hyperrealistic" with real proportions; no lettering or badges on clothes. Seated bodies and bodies on a cane get a
+skeleton and no walk motions. **Flames**: crossed flame cards where a model's own colours burn (`flame`), glowing in the
+viewer at night. `python -m forge 3d gate <picture.png> --words "…"`. Code: `forge/threed/gate.py`, `checks.py`,
+`rules.py`, `damage.py`.
+
+## Places (BUILD 34, started 2026-11-14) — a town plan becomes a 3D stage
+
+A **place plan** (`<id>.place.json`: ground, road type, the walls and furniture the forge models, every generated thing
+with a footprint, facing and real size, lamps, anchors) compiles into the stage model (Blender, no graphics card), the
+list of what stands where (grey boxes of the right size until each model is delivered) and the place's entries on the
+world list — anything nobody has described waits, held, with no look guessed. A town from the floor-plan generator is
+written out as a place plan with `3d place from-town`. `python -m forge 3d place compile | check`, or the queue's
+`compile_place` job. The game's half (walking a stage, the door rule, dust) is the next session's. Code:
+`forge/threed/place.py`, `forge/threed/blender/build_stage.py`.
+
 ## Licence
 
 MIT (code). Models and palettes carry their own licences — `docs/LICENSING.md` and `models/models.json`.

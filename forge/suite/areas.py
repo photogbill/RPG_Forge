@@ -38,6 +38,12 @@ NEEDS: dict[str, tuple[str, str]] = {
     "places": ("the game's places and lines", "the game's adapter lists them (places(), lines())"),
     "settings": ("this computer's settings (local/suite.json)", "they are written the first time you say who you are"),
     "playtest": ("the game's playtest notes", "they appear with the first note taken while playing (the game's note key)"),
+    "threed_rig": ("the rigging ComfyUI (engines/rig)", "Settings → This computer → 3D tools → Install"),
+    "profiles": ("the game's character profiles (profiles/_schema.json in the game folder)",
+                 "Characters → Profiles → Make the first pages (the game's adapter fills them from its own sources), or copy the "
+                 "example game's profiles/_schema.json"),
+    "blender": ("Blender (inside the rigging ComfyUI's environment, or forge.json threed.blender_exe)",
+                "Settings → This computer → 3D tools → Install"),
 }
 
 
@@ -89,8 +95,26 @@ AREAS: list[dict] = [
         _t("provide", "User Needs To Provide Image", "provide", ("game",),
            holds="pictures the forge can't make well — each says why and what would help; drop the file on its card")]},
     {"id": "characters", "icon": "☺", "name": "Characters", "color": "#e98aa8", "tabs": [
+        _t("profiles", "Profiles", "profiles", ("adapter", "profiles"),          # BUILD 42: the cast as editable pages
+           holds="every character on one page you edit in place — arms up close, at range and other, coloured by how each is known; "
+                 "a board of what's missing; find it in the songs"),
         _t("characters", "Characters", "chars", ("characters",)),
         _t("intake", "Sprite intake", "intake", ("characters",))]},
+    {"id": "3d", "icon": "◈", "name": "3D", "color": "#5fc4e8", "tabs": [            # BUILD 36: the 3D workshop
+        _t("bodies", "Bodies", "threed", ("worker",), t3="bodies",
+           holds="a character in words → four pictures → pick one → the 3D body; try again with changes, side by side"),
+        _t("skeleton", "Skeleton & motions", "threed", ("worker", "threed_rig", "blender"), t3="skeleton",
+           holds="a body → its skeleton → the motion library fitted to it; watch it walk, run and stand"),
+        _t("things", "Props & buildings", "threed", ("worker",), t3="things",
+           holds="things in words → pictures → a model at its real size in metres, loose scraps removed"),
+        _t("trees", "Trees", "threed", ("blender",), t3="trees",
+           holds="trees grown by rule from a species sheet and a seed — never guessed from a picture"),
+        _t("world", "World list", "threed", ("worker",), t3="world",          # BUILD 39: the world queue
+           holds="everything the world still needs, in the order it first appears; made whenever the machine is free, checked, held back with the reason"),
+        _t("viewer", "Viewer", "threed", ("out",), t3="viewer",
+           holds="any model the forge has made, on a floor with a figure for scale, in day or night light"),
+        _t("runs", "Runs", "threed", (), t3="runs",
+           holds="what is running, what waits for the graphics card, each log and report; a whole list overnight")]},
     {"id": "workshop", "icon": "⚗", "name": "Workshop", "color": "#8fd0c0", "tabs": [
         _t("library", "Prompt library", "library"),
         _t("bakeoffs", "Bake-offs", "bakeoffs"),
@@ -178,6 +202,9 @@ def _check(cfg: dict, gid: str, need: str, cache: dict) -> tuple[bool | None, st
                 r = ((root / "music").is_dir(), "music/")
         elif need == "characters":
             r = ((games.games_dir(cfg) / gid / "characters").is_dir() if gid else False, "")
+        elif need == "profiles":
+            from . import profiles as _pr
+            r = (bool(adp) and _pr.has_schema(adp), f"{_pr.rel_dir(adp)}/_schema.json" if adp else "")
         elif need == "notes":
             r = (has_root and notes.path(root).is_file(), "")
         elif need == "builds_hook":
@@ -192,6 +219,15 @@ def _check(cfg: dict, gid: str, need: str, cache: dict) -> tuple[bool | None, st
             r = (has_root and (playtest.folder(root, adp) / "notes.jsonl").is_file(), playtest._dir_rel(adp) + "/notes.jsonl")
         elif need == "settings":
             r = (settings.PATH.is_file(), str(settings.PATH))
+        elif need in ("threed_rig", "blender"):
+            from ..threed.env import from_cfg
+            e = from_cfg(cfg)
+            if need == "threed_rig":
+                r = (e.installed(), str(e.rig))
+            else:
+                from ..threed.env import settings as t3settings
+                r = (e.env_python.exists() or bool(e.blender_exe and Path(e.blender_exe).exists()) or bool(t3settings(cfg).get("blender_python")),
+                     str(e.env_python) if e.env_python.exists() else (e.blender_exe or "not found"))
         else:
             r = (None, f"unknown need {need}")
     except Exception as e:  # noqa: BLE001 — a need that can't be worked out says so; it never breaks the page

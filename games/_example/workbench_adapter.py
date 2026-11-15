@@ -191,3 +191,44 @@ class Adapter(GameAdapter):
                 p.write_text(json.dumps(m, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
                 done.append(f"data/maps/{mid}.json")
         return done
+
+    # ---------- character profiles (BUILD 42) — the model for a game's profile hooks (all optional)
+    # The pages live in <game>/profiles/<id>.json beside profiles/_schema.json (the game's own page layout).
+    def profiles_dir(self) -> str:
+        return "profiles"
+
+    def profile_lyrics(self) -> list[dict]:
+        """What "find it in the songs" searches: [{song, singer, lines, file}]. Here: data/lyrics.json."""
+        p = self.root / "data" / "lyrics.json"
+        if not p.is_file():
+            return []
+        return [{**s, "file": "data/lyrics.json"} for s in self.load("data/lyrics.json").get("songs") or []]
+
+    def profile_game_view(self, pid: str) -> dict | None:
+        """What the game's own data gives a character, row by row ({row: [{id, name}]}) — for 'differs'."""
+        arms = self.load("data/arms.json") if (self.root / "data" / "arms.json").is_file() else {}
+        in_data = pid in self.load("data/characters.json")
+        return {"in_data": in_data, "file": "data/arms.json", "rows": dict(arms.get(pid) or {})}
+
+    def profile_links(self, pid: str) -> list[dict]:
+        """Read-only pointers: the art registry entry, the sprite sheet."""
+        chars = self.load("data/characters.json")
+        out = []
+        if pid in chars:
+            out.append({"label": "sprite sheet", "path": chars[pid].get("sheet") or "", "exists": False,
+                        "note": "the example game has no pictures"})
+        return out
+
+    def profile_voice(self, pid: str) -> dict | None:
+        """The voice as the music profile has it (music/styles/<id>.json); None → the page says 'ask <owner>'."""
+        p = self.root / "music" / "styles" / f"{pid}.json"
+        if not p.is_file():
+            return None
+        v = (self.load(f"music/styles/{pid}.json").get("voice") or {}).get("type") or {}
+        return {"text": v.get("value") or "", "address": f"music/singers/{pid}"} if v.get("value") else None
+
+    def profile_seeds(self) -> list[dict]:
+        """The first fill: one seed per character in data/characters.json (names and kinds only — the example guesses
+        nothing else)."""
+        return [{"id": k, "who": {"name": c.get("name", k), "kind": c.get("kind") or ""}}
+                for k, c in self.load("data/characters.json").items()]

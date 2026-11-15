@@ -1,0 +1,1024 @@
+{
+ "MIAAutoRig": {
+  "category": "UniRig/MIA",
+  "description": "",
+  "display_name": "MIA: Auto Rig",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "fbx_name": [
+     "STRING",
+     {
+      "default": "",
+      "multiline": false,
+      "tooltip": "Custom filename for saved FBX (without extension). If empty, uses auto-generated name."
+     }
+    ],
+    "no_fingers": [
+     "BOOLEAN",
+     {
+      "default": true,
+      "tooltip": "Merge finger weights to hand bone. Enable if model doesn't have separate fingers."
+     }
+    ],
+    "reset_to_rest": [
+     "BOOLEAN",
+     {
+      "default": true,
+      "tooltip": "Transform output to T-pose rest position for animation compatibility."
+     }
+    ],
+    "use_normal": [
+     "BOOLEAN",
+     {
+      "default": false,
+      "tooltip": "Use surface normals for better skinning weights. Helps when limbs are close together."
+     }
+    ]
+   },
+   "required": {
+    "model": [
+     "MIA_MODEL",
+     {
+      "tooltip": "Pre-loaded MIA model (from MIALoadModel)"
+     }
+    ],
+    "trimesh": [
+     "TRIMESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [
+    "fbx_name",
+    "no_fingers",
+    "use_normal",
+    "reset_to_rest"
+   ],
+   "required": [
+    "trimesh",
+    "model"
+   ]
+  },
+  "is_input_list": false,
+  "name": "MIAAutoRig",
+  "output": [
+   "STRING"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "fbx_output_path"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "MIALoadModel": {
+  "category": "UniRig/MIA",
+  "description": "",
+  "display_name": "MIA: (Down)Load Model",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "attn_backend": [
+     "COMBO",
+     {
+      "default": "auto",
+      "multiselect": false,
+      "options": [
+       "auto",
+       "flash_attn",
+       "sdpa"
+      ],
+      "tooltip": "Attention backend. auto: best available (flash_attn > sdpa). flash_attn requires flash-attn package."
+     }
+    ],
+    "precision": [
+     "COMBO",
+     {
+      "default": "auto",
+      "multiselect": false,
+      "options": [
+       "auto",
+       "bf16",
+       "fp16",
+       "fp32"
+      ],
+      "tooltip": "Model precision. auto: best for your GPU (bf16 on Ampere+, fp16 on Volta/Turing, fp32 on older)."
+     }
+    ]
+   },
+   "required": {}
+  },
+  "input_order": {
+   "optional": [
+    "precision",
+    "attn_backend"
+   ],
+   "required": []
+  },
+  "is_input_list": false,
+  "name": "MIALoadModel",
+  "output": [
+   "MIA_MODEL"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "model"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "SaveImage": {
+  "category": "image",
+  "input": {
+   "optional": {},
+   "required": {
+    "filename_prefix": [
+     "STRING",
+     {
+      "default": "ComfyUI"
+     }
+    ],
+    "images": [
+     "IMAGE",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [],
+   "required": [
+    "images",
+    "filename_prefix"
+   ]
+  },
+  "name": "SaveImage",
+  "output": [],
+  "output_node": true
+ },
+ "UniRigApplyAnimation": {
+  "category": "UniRig/Animation",
+  "description": "",
+  "display_name": "UniRig: Apply Animation",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "optional": {
+    "output_name": [
+     "STRING",
+     {
+      "default": "",
+      "multiline": false,
+      "tooltip": "Custom output filename (without extension). If empty, auto-generates name."
+     }
+    ]
+   },
+   "required": {
+    "animation_file": [
+     "COMBO",
+     {
+      "default": "Breakdance.fbx",
+      "multiselect": false,
+      "options": [
+       "Breakdance.fbx",
+       "Capoeira.fbx",
+       "Dying.fbx",
+       "Hip_Hop_Dancing.fbx",
+       "Mma_Kick.fbx"
+      ],
+      "tooltip": "Animation file to apply. Add more animations to input/animation_templates/<type>/"
+     }
+    ],
+    "animation_type": [
+     "COMBO",
+     {
+      "default": "mixamo",
+      "multiselect": false,
+      "options": [
+       "mixamo",
+       "smpl"
+      ],
+      "tooltip": "Animation format: mixamo (FBX) or smpl (NPZ). Refresh node after changing."
+     }
+    ],
+    "model_fbx_path": [
+     "STRING",
+     {
+      "default": "",
+      "multiline": false,
+      "tooltip": "Path to the rigged model FBX file (from UniRig: Apply Skinning output)"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "optional": [
+    "output_name"
+   ],
+   "required": [
+    "model_fbx_path",
+    "animation_type",
+    "animation_file"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigApplyAnimation",
+  "output": [
+   "STRING"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "animated_fbx_path"
+  ],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigApplySkinningMLNew": {
+  "category": "UniRig",
+  "description": "",
+  "display_name": "UniRig: Apply Skinning ML",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "debug": [
+     "BOOLEAN",
+     {
+      "default": false,
+      "tooltip": "Enable detailed debug logging for skinning."
+     }
+    ],
+    "fbx_name": [
+     "STRING",
+     {
+      "default": "",
+      "multiline": false,
+      "tooltip": "Custom filename for saved FBX (without extension). If empty, uses rigged_<timestamp>.fbx"
+     }
+    ],
+    "num_samples": [
+     "INT",
+     {
+      "default": 32768,
+      "max": 131072,
+      "min": 8192,
+      "step": 8192,
+      "tooltip": "Number of surface samples for weight calculation. Higher = more accurate, slower. Default: 32768"
+     }
+    ],
+    "vertex_samples": [
+     "INT",
+     {
+      "default": 8192,
+      "max": 32768,
+      "min": 2048,
+      "step": 2048,
+      "tooltip": "Number of vertex samples. Higher = more accurate vertex processing. Default: 8192"
+     }
+    ],
+    "voxel_grid_size": [
+     "INT",
+     {
+      "default": 196,
+      "max": 512,
+      "min": 64,
+      "step": 64,
+      "tooltip": "Voxel grid resolution for spatial weight distribution. Higher = better quality, more VRAM. Default: 196 (model trained with this)"
+     }
+    ],
+    "voxel_mask_power": [
+     "FLOAT",
+     {
+      "default": 0.5,
+      "max": 5.0,
+      "min": 0.1,
+      "step": 0.1,
+      "tooltip": "Power for voxel mask weight sharpness (alpha). Lower = smoother transitions. Default: 0.5 (model trained with this)"
+     }
+    ]
+   },
+   "required": {
+    "normalized_mesh": [
+     "TRIMESH",
+     {}
+    ],
+    "skeleton": [
+     "SKELETON",
+     {}
+    ],
+    "skinning_model": [
+     "UNIRIG_SKINNING_MODEL",
+     {
+      "tooltip": "Pre-loaded skinning model (from UniRigLoadSkinningModel) - REQUIRED"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [
+    "fbx_name",
+    "voxel_grid_size",
+    "num_samples",
+    "vertex_samples",
+    "voxel_mask_power",
+    "debug"
+   ],
+   "required": [
+    "normalized_mesh",
+    "skeleton",
+    "skinning_model"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigApplySkinningMLNew",
+  "output": [
+   "STRING",
+   "IMAGE"
+  ],
+  "output_is_list": [
+   false,
+   false
+  ],
+  "output_name": [
+   "fbx_output_path",
+   "texture_preview"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigAutoRig": {
+  "category": "UniRig",
+  "description": "",
+  "display_name": "UniRig: Auto Rig",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "debug": [
+     "BOOLEAN",
+     {
+      "default": false,
+      "tooltip": "Enable detailed debug logging for the entire rigging pipeline."
+     }
+    ],
+    "fbx_name": [
+     "STRING",
+     {
+      "default": "",
+      "multiline": false,
+      "tooltip": "Custom filename for saved FBX (without extension). If empty, uses auto-generated name."
+     }
+    ],
+    "skeleton_template": [
+     "COMBO",
+     {
+      "default": "mixamo",
+      "multiselect": false,
+      "options": [
+       "mixamo",
+       "articulationxl"
+      ],
+      "tooltip": "Skeleton template. 'mixamo' remaps to Mixamo bone names (humanoids). 'articulationxl' outputs native skeleton (any 3D asset)."
+     }
+    ],
+    "target_face_count": [
+     "INT",
+     {
+      "default": 50000,
+      "max": 500000,
+      "min": 10000,
+      "step": 10000,
+      "tooltip": "Target face count for mesh decimation. Warning: changing from default may reduce quality."
+     }
+    ]
+   },
+   "required": {
+    "model": [
+     "UNIRIG_MODEL",
+     {
+      "tooltip": "Pre-loaded UniRig model (from UniRigLoadModel)"
+     }
+    ],
+    "trimesh": [
+     "TRIMESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [
+    "skeleton_template",
+    "fbx_name",
+    "target_face_count",
+    "debug"
+   ],
+   "required": [
+    "trimesh",
+    "model"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigAutoRig",
+  "output": [
+   "STRING"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "fbx_output_path"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigCompareSkeletons": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: Compare Skeletons",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "required": {
+    "fbx_path_left": [
+     "STRING",
+     {
+      "multiline": false,
+      "tooltip": "Path to left skeleton FBX file (from output directory or absolute path)"
+     }
+    ],
+    "fbx_path_right": [
+     "STRING",
+     {
+      "multiline": false,
+      "tooltip": "Path to right skeleton FBX file (from output directory or absolute path)"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "required": [
+    "fbx_path_left",
+    "fbx_path_right"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigCompareSkeletons",
+  "output": [],
+  "output_is_list": [],
+  "output_name": [],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigDebugSkeleton": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: Debug Skeleton",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "required": {
+    "fbx_path": [
+     "STRING",
+     {
+      "multiline": false,
+      "tooltip": "Path to FBX file (from output directory or absolute path)"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "required": [
+    "fbx_path"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigDebugSkeleton",
+  "output": [],
+  "output_is_list": [],
+  "output_name": [],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigExportPosedFBX": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: Export Posed FBX",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "optional": {
+    "bone_transforms_json": [
+     "STRING",
+     {
+      "default": "{}",
+      "multiline": true,
+      "tooltip": "JSON string containing bone transforms (name -> {position, quaternion, scale})"
+     }
+    ]
+   },
+   "required": {
+    "output_filename": [
+     "STRING",
+     {
+      "default": "posed_export.fbx",
+      "multiline": false,
+      "tooltip": "Output filename for the posed FBX"
+     }
+    ],
+    "rigged_mesh": [
+     "RIGGED_MESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "optional": [
+    "bone_transforms_json"
+   ],
+   "required": [
+    "rigged_mesh",
+    "output_filename"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigExportPosedFBX",
+  "output": [
+   "STRING"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "filepath"
+  ],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigExtractSkeletonNew": {
+  "category": "UniRig",
+  "description": "",
+  "display_name": "UniRig: Extract Skeleton",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "debug": [
+     "BOOLEAN",
+     {
+      "default": false,
+      "tooltip": "Enable detailed debug logging for skeleton extraction."
+     }
+    ],
+    "skeleton_template": [
+     "COMBO",
+     {
+      "default": "mixamo",
+      "multiselect": false,
+      "options": [
+       "vroid",
+       "mixamo",
+       "smpl",
+       "articulationxl"
+      ],
+      "tooltip": "Skeleton template: vroid (52 bones), mixamo (Mixamo-compatible 52 bones), smpl (22 joints, SMPL-compatible for direct motion application), articulationxl (generic/flexible)"
+     }
+    ],
+    "target_face_count": [
+     "INT",
+     {
+      "default": 50000,
+      "max": 500000,
+      "min": 10000,
+      "step": 10000,
+      "tooltip": "Target face count for mesh decimation. Higher = preserve more detail, slower. Default: 50000"
+     }
+    ]
+   },
+   "required": {
+    "seed": [
+     "INT",
+     {
+      "default": 42,
+      "max": 4294967295,
+      "min": 0,
+      "tooltip": "Random seed for skeleton generation variation"
+     }
+    ],
+    "skeleton_model": [
+     "UNIRIG_SKELETON_MODEL",
+     {
+      "tooltip": "Pre-loaded skeleton model (from UniRigLoadSkeletonModel) - REQUIRED"
+     }
+    ],
+    "trimesh": [
+     "TRIMESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [
+    "skeleton_template",
+    "target_face_count",
+    "debug"
+   ],
+   "required": [
+    "trimesh",
+    "skeleton_model",
+    "seed"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigExtractSkeletonNew",
+  "output": [
+   "TRIMESH",
+   "SKELETON",
+   "IMAGE"
+  ],
+  "output_is_list": [
+   false,
+   false,
+   false
+  ],
+  "output_name": [
+   "normalized_mesh",
+   "skeleton",
+   "texture_preview"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigLoadMesh": {
+  "category": "UniRig/IO",
+  "description": "",
+  "display_name": "UniRig: Load Mesh",
+  "has_intermediate_output": false,
+  "input": {
+   "required": {
+    "file_path": [
+     "COMBO",
+     {
+      "multiselect": false,
+      "options": [],
+      "tooltip": "Mesh file to load. Refresh the node after changing source_folder."
+     }
+    ],
+    "source_folder": [
+     "COMBO",
+     {
+      "default": "input",
+      "multiselect": false,
+      "options": [
+       "input",
+       "output"
+      ],
+      "tooltip": "Source folder to load mesh from (ComfyUI input or output directory)"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "required": [
+    "source_folder",
+    "file_path"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigLoadMesh",
+  "output": [
+   "TRIMESH"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "mesh"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigLoadModel": {
+  "category": "UniRig",
+  "description": "",
+  "display_name": "UniRig: (Down)Load Model",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "attn_backend": [
+     "COMBO",
+     {
+      "default": "auto",
+      "multiselect": false,
+      "options": [
+       "auto",
+       "flash_attn",
+       "sdpa"
+      ],
+      "tooltip": "Attention backend. auto: best available (flash_attn > sdpa). flash_attn requires flash-attn package."
+     }
+    ],
+    "precision": [
+     "COMBO",
+     {
+      "default": "auto",
+      "multiselect": false,
+      "options": [
+       "auto",
+       "bf16",
+       "fp16",
+       "fp32"
+      ],
+      "tooltip": "Model precision. auto: best for your GPU (bf16 on Ampere+, fp16 on Volta/Turing, fp32 on older)."
+     }
+    ]
+   },
+   "required": {}
+  },
+  "input_order": {
+   "optional": [
+    "precision",
+    "attn_backend"
+   ],
+   "required": []
+  },
+  "is_input_list": false,
+  "name": "UniRigLoadModel",
+  "output": [
+   "UNIRIG_MODEL"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "model"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigLoadRiggedMesh": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: Load Rigged Mesh",
+  "has_intermediate_output": false,
+  "input": {
+   "required": {
+    "fbx_file": [
+     "COMBO",
+     {
+      "multiselect": false,
+      "options": [
+       "3d/mixamo.fbx",
+       "3d/rigged_human.fbx",
+       "animation_characters/mixamo.fbx",
+       "animation_templates/mixamo/Breakdance.fbx",
+       "animation_templates/mixamo/Capoeira.fbx",
+       "animation_templates/mixamo/Dying.fbx",
+       "animation_templates/mixamo/Hip_Hop_Dancing.fbx",
+       "animation_templates/mixamo/Mma_Kick.fbx"
+      ]
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "required": [
+    "fbx_file"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigLoadRiggedMesh",
+  "output": [
+   "STRING",
+   "STRING"
+  ],
+  "output_is_list": [
+   false,
+   false
+  ],
+  "output_name": [
+   "fbx_output_path",
+   "info"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigOrientationCheck": {
+  "category": "UniRig/Utils",
+  "description": "",
+  "display_name": "UniRig: Orientation Check",
+  "has_intermediate_output": false,
+  "input": {
+   "optional": {
+    "max_height": [
+     "INT",
+     {
+      "default": 512,
+      "max": 1024,
+      "min": 256,
+      "step": 64,
+      "tooltip": "Maximum height of each mesh render"
+     }
+    ]
+   },
+   "required": {
+    "mesh": [
+     "TRIMESH",
+     {
+      "tooltip": "Input mesh to check orientation"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "optional": [
+    "max_height"
+   ],
+   "required": [
+    "mesh"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigOrientationCheck",
+  "output": [
+   "IMAGE"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "comparison"
+  ],
+  "output_node": false,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigPreviewRiggedMesh": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: Preview Rigged Mesh",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "required": {
+    "fbx_output_path": [
+     "STRING",
+     {
+      "multiline": false,
+      "tooltip": "FBX filename from output directory (from UniRigApplySkinningMLNew or UniRigLoadRiggedMesh)"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "required": [
+    "fbx_output_path"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigPreviewRiggedMesh",
+  "output": [],
+  "output_is_list": [],
+  "output_name": [],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigSaveMesh": {
+  "category": "UniRig/IO",
+  "description": "",
+  "display_name": "UniRig: Save Mesh",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "required": {
+    "file_path": [
+     "STRING",
+     {
+      "default": "output.obj",
+      "multiline": false
+     }
+    ],
+    "trimesh": [
+     "TRIMESH",
+     {}
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "required": [
+    "trimesh",
+    "file_path"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigSaveMesh",
+  "output": [
+   "STRING"
+  ],
+  "output_is_list": [
+   false
+  ],
+  "output_name": [
+   "status"
+  ],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ },
+ "UniRigViewRigging": {
+  "category": "unirig",
+  "description": "",
+  "display_name": "UniRig: View Rigging",
+  "has_intermediate_output": false,
+  "input": {
+   "hidden": {
+    "extra_pnginfo": "EXTRA_PNGINFO",
+    "prompt": "PROMPT"
+   },
+   "required": {
+    "fbx_output_path": [
+     "STRING",
+     {
+      "multiline": false,
+      "tooltip": "FBX filename from output directory"
+     }
+    ]
+   }
+  },
+  "input_order": {
+   "hidden": [
+    "prompt",
+    "extra_pnginfo"
+   ],
+   "required": [
+    "fbx_output_path"
+   ]
+  },
+  "is_input_list": false,
+  "name": "UniRigViewRigging",
+  "output": [],
+  "output_is_list": [],
+  "output_name": [],
+  "output_node": true,
+  "python_module": "custom_nodes.ComfyUI-UniRig",
+  "search_aliases": []
+ }
+}

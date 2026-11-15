@@ -101,6 +101,28 @@ game's characters or story.
 A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (default), `flux2_klein` (FLUX.2 [klein] 4B — `forge/engines/flux2_graph.py`) or `flux1` (FLUX.1 dev/schnell and fine-tunes — `forge/engines/flux1_graph.py`). For FLUX the job's `checkpoint` is the diffusion-model file; text encoder and VAE default from `forge.json → comfy.flux2 / comfy.flux1`. A FLUX suite may **discover** its checkpoints instead of listing them: `checkpoint_dirs` (folders), `base_filter` (`flux1`), `checkpoint_include` / `checkpoint_exclude` (regexes on the name), `base_override` (pin the architecture when the header scan cannot tell). LoRA compatibility is checked by detected base (SDXL LoRAs never go on FLUX, FLUX.1 LoRAs never on klein); `lora_base_override` pins a LoRA with no metadata. Model folders: `forge.json → model_dirs` (William's collections: `sdmodels`, `lora models`, `flux_models`, `flux_lora`); after adding a folder run `python -m forge comfy-paths` and restart ComfyUI. Licences: klein 4B and FLUX.1 schnell are Apache-2.0; FLUX.1 dev and most Civitai FLUX fine-tunes are **non-commercial** — `models/models.json` flags them and `prov.json` records the flag; never put one in a shipped-asset job. Reading: `docs/NEXT_MODELS.md`, the bake-off verdicts in `local/<game>/docs/`.
 
 
+## The map camera and block-outs (BUILD 33, 2026-11-12) — read before painting anything an actor walks on
+
+- **A walkable map is painted from one fixed camera**, which the game's art bible states (for the first game: high above,
+  looking north, no vanishing points; back walls whole, side and south walls cut low). The cinematic eye-level pictures
+  the place bake-offs judged are scene cards, not maps. Never paint a map from a prompt alone and hope the floor matches.
+- **Draw the plan first.** `games/<game>/scenes/<map>.plan.json` → `forge/layout/oblique.py` (`docs/FLOOR_PLANS.md` has
+  the table): guide, depth, lines, over, normal, glow, walk rings, anchors. Look at the guide yourself before anything
+  is queued — it costs nothing and it is where a room is designed. `check(plan)` and `reaches(plan, "start", anchor)`
+  must be clean.
+- **Build it from the texture library first.** `render(plan, textures=…)` fills every surface with a tiling picture
+  (a texture bake-off's winners, a procedural texture tool's renders) at a true scale. Lit, that is already a place:
+  the plan owns the layout, the library owns the surfaces, and a model is asked only for single objects and a gentle
+  pass over the whole (denoise 0.35–0.5). Reach for a from-nothing painting only when this is not enough.
+- **Light it before it is painted.** Give the plan a `"lighting"` block and use `oblique.lit(blockout)` as the `init`:
+  where the lamps are and what colour the night is are design decisions, and a flat guide hands them to the model.
+- **Paint over it** with `repaint` (`init` = the guide or the lit guide; `control` = the plan's depth or lines, `preprocessed: true`).
+  Score what comes back with `oblique.agreement` and then with your eyes: is the hearth where the plan put it, is the
+  door a door.
+- **Put it in the game from the plan**, not by tracing: a game keeps a small installer beside its plans (the first
+  game's is `games/<game>/scene_install.py`) that writes the painted map's size, walk rings, entity pixels, lights and
+  over plane. The painting itself goes in by the owner's approval, as always.
+
 ## Painted backgrounds, the manifest and approval (2026-11-09, Night 2)
 
 - **Paint:** `scene_paint` (prompt → 1344×768 render → RealESRGAN → cover-fit to `target`, default 1920×1080 → `refine`
@@ -364,3 +386,114 @@ leaves a generated report out), and rulings written straight in (`<game_root>/ru
   test them only as a control. Schnell and distilled klein: their trained 4 steps, euler. Klein's graph uses
   Flux2Scheduler (no scheduler choice); klein base cfg 5.
 
+
+
+## The 3D workshop (BUILD 36, 2026-11-14) — picture → body → skeleton → motions, and trees
+
+- **The methods live in `forge/threed/`** (game-neutral): `bodies` (a list → FLUX.2 klein pictures → TRELLIS.2 / Pixal3D
+  models through ComfyUI's own MIT template, `template.py`; resumable, steps down the resolutions only for memory or time),
+  `rig` (the rigging ComfyUI, engines/rig port 8189, started and stopped by the step itself), `motions` (the Quaternius
+  library fitted under Blender, with each motion's ground speed), `tidy` (weld, loose scraps off, real size in metres,
+  on the floor), `trees` (grown by rule from a species sheet), `line` (the whole line for a list, one report). The list
+  files are the same format the first game's 2026-11-13 scripts read; those scripts stay as they are until the new code
+  has made the same bodies from the same list on the real card, then become thin callers.
+- **Job types** `model_3d`, `rig_body` (GPU), `fit_motions`, `grow_tree` (CPU, Blender), `line_3d` — a plug-in
+  (`forge/plugins/threed.py`), so a running worker learns them without a restart. Each writes run.log, prov.json (with the
+  licence line of every tool, `threed/licences.py`) and report.json. **The card lock** (`threed/cardlock.py`,
+  `out/3d/_card.lock`): every step that puts work on the card through a ComfyUI takes it; it also still looks at both
+  ComfyUIs the way the old scripts did, so it never lands on top of one. `python -m forge 3d lock` says who has it.
+- **Never from a session against William's live queue:** the 3D tabs' buttons queue real GPU work. Test against the
+  stand-in instead: `forge/threed/standin.py` answers like ComfyUI (art: the image-to-3D nodes, built from two real
+  requests; rig: the rigging pack's real node list) and writes the files a real run would, with planted failures
+  (`PLANT_FAIL`, `PLANT_OOM`, `PLANT_OOM_ONCE`, `PLANT_HANG`, `PLANT_NOFILE`, `PLANT_SLOW` anywhere in a request).
+  `tests/fixtures/threed/fake_blender.py` stands in for Blender's Python; set `FORGE_TEST_BPY_PYTHON` to a Python with
+  `bpy` (pip `bpy==4.2.0` on Python 3.11) to run the Blender scripts for real.
+- **The suite's 3D area** is `forge/suite/threed.py` + `threed.js` (+ `viewer.html`, three.js in `vendor/three`). A *try*
+  is one attempt at one character or thing (`games/<id>/threed/tries/<who>/<try>.json`): its words, four pictures, the
+  pick, body, skeleton, motions, review. Approving and delivering are the person's; a session refuses itself. The rules
+  learned the hard way are `threed/rules.py`: shown as warnings (A-pose, long coats / skirts / capes / wings / tails /
+  loose hair, shiny cloth, hip gear, height in metres) — never refusals. The standing picture words are the game's
+  prompt blocks `pose.threed_body` / `neg.threed_body` / `layout.threed_thing` / `neg.threed_thing`, else the forge's
+  (`threed/defaults.json`). The 3D tabs queue at priority 5 (a whole-list run at 2), ahead of bulk queues at 0 — a person
+  is waiting at the screen (forge.json `threed.priority` / `threed.line_priority`).
+
+## The world queue (BUILD 39, 2026-11-14) — the standing list, the one launcher, the checks after every model
+
+- **The list** is `games/<id>/wanted_3d/*.json` (a file holds one entry, a list, or `{"defaults", "entries"}`); the queue's
+  own record of each thing is `wanted_3d/_state/<id>.json` — never edit those by hand, use the actions. Entry fields:
+  `id, kind (body|prop|building|panel|tree), tier, words | image | adopt, real_size_m, first {where, order}, rank, hold`,
+  plus `wreck_of`, `shared_body` + `head_words`, `glow`, `panel {...}`, `skip_motions`, `no_straighten`. Add things with
+  `python -m forge 3d world add <file>` or the World list's form (signed). **The order of need when two things tie (`rank`),
+  letting a held thing through and starting the launcher are the person's.** Approving is in Review, as ever.
+- **Never start the launcher from a session** while a run or the art worker is using the card: `make_what_we_need.bat` is
+  the person's. Test with `world.run(..., check_machine=False)` against the stand-in ComfyUI (`tests/test_world_build39.py`).
+  Things that need no card (adopted models, panels, wrecks from intact models, trees) are made without asking for it.
+- **The checks** (`forge/threed/checks.py`; every number in `forge.json` → `threed.checks`): *level* = the resting plane
+  (widest contact patch, nearest vertical) and the structure's own up must agree before a lean is called; a lean up to
+  `straighten_up_to_deg` (15) is straightened by the queue, more is held. *Loose* = pieces not joined to the main body
+  that float or poke below its floor (the floor is fitted to the joined assembly only). *Glass* = flat near-white + metal 1
+  + roughness 0. *Thin* = enclosed holes in the model's outline minus the picture's (limit 0.2). Validated on 85 models of
+  the 2026-11-13/14 runs: every fault a person had found, plus several nobody had; no false hold on a body. Run them on any
+  model: `python -m forge 3d checks <model.glb> --picture <png> --draw out.png`.
+- **meshio / raster** read and write .glb and draw pictures without Blender; `meshio.place()` gives real size, floor and an
+  optional straightening as **one node above the mesh** (the mesh is never rewritten). glb.info's size is conservative for
+  rotated nodes; use `Glb.load(p).bounds()` for the exact one.
+
+
+## What the second run taught (BUILD 40, 2026-11-14) — colours that hold, the picture gate, vehicles, flames
+
+- **Colours** (`checks.check_colour`, on every kind): the colour texture as stored, seen from the picture's own view, against
+  the picture — brightness, contrast and (bodies) the head. The cause is in ComfyUI's core bake (`BakeTextureFromVoxel` →
+  `ApplyTextureToMesh` → `Save3DAdvanced` embeds the voxel colours with no colour-space step; no setting fixes it), so the fix
+  is a **tone-curve match** (`tone_curves`: quantile match per channel, smoothed, never falling, slope capped at 3; not a
+  fixed gamma). Bodies are put right by the queue (the body as made kept as `__as_made.glb`, the curves applied to the
+  moving copy too); props and buildings are held with the matched version offered (`threed_world_colours`, the person's),
+  because a prop's picture carries studio light the texture rightly doesn't. Validated on the 90 models of the two runs
+  (`out/3d/world/_b40_validation/`). A body is always seen from the front half (40 of 40 face azimuth 0).
+- **Glass**: `checks.fix_glass` paints the white-mirror panes (grown from the faces the check finds into touching near-white
+  near-mirror faces) dark glass, roughness 0.18, metal 0; the queue applies it before the checks run again.
+- **The picture gate** (`forge/threed/gate.py`, numpy only, numbers in `forge.json` → `threed.gate`): before a body is made
+  from its picture — arm count (held out, hanging against the body, or a stump by reach), the pose from the hand's drop below
+  the shoulder joint (A-pose 32–76°, T-pose 66–115°), head height over figure height by age band read from the words
+  (child 0.135–0.19, teen 0.11–0.15, adult 0.10–0.165). Entry fields: `expects {arms}`, `age`, `seated`, `carried_object`,
+  `gate` (false = off), `gate_tries` (3). On a miss the world queue paints again with a new seed (seed + 7919·n), keeps
+  every try (`pictures/<id>__try<n>.png`, `<id>.gate.json`) and after three holds the thing with the tries side by side;
+  `world.gate_anyway` / "Make the body from this picture anyway" is the person's. In the Bodies form it is a warning only.
+  Validated read-only on the 40 body pictures: catches Kim's two arms (and both redo Kims), the A-pose drawn for a T-pose,
+  the two cartoon children; no good picture caught. The stand-in ComfyUI paints a good A-pose figure (`standin.png`, with
+  `arm_deg / arms / head / forearm` for tests).
+- **Standing words** (`rules.standing_check` for the Bodies form, `rules.body_word_rules` in the queue): children and
+  teenagers start "Hyperrealistic" and name real proportions; a missing limb gets its own pose words (but the picture model
+  painted two arms under both wordings tried — a missing limb is made by cutting the finished body, `damage.py` is the
+  place, not yet written); clothes get "no lettering, no badges, no logos, no name tapes".
+- **Seated and standing-aid bodies** (`seated: true`, `carried_object: "cane"`): a skeleton, no motion fitting, said in the
+  report (`motion_note`); Review shows the motions step as skipped.
+- **Flames** (`damage.flame`, entry `flame {texture, source, width_share, min_val, scale}`): crossed cards stood where the
+  model's own colours burn (flame-coloured, bright: sites gathered per fire, per candle), the flame picture's brightness as
+  its alpha, emissive and unlit; the Viewer flickers them and opens night light for things with flame or glow.
+- **Vehicles** go to TRELLIS.2 (`defaults.json` `_routes`); buildings stay with Pixal3D, which alone can take **a back
+  picture** (`back_image` or `back_words`; `template.add_back_view` swaps in `Pixal3DMultiViewConditioning`). TRELLIS.2's
+  conditioning takes one picture, so a body's back is never seen: Review's card asks "Seen from behind?".
+
+## Places — towns as 3D stages (BUILD 34, started 2026-11-14) — the forge's half
+
+- **A place plan** (`<id>.place.json`, `forge/threed/place.py`, game-neutral): the stage proof's scene plan grown up —
+  metres, x east, y south, up z; `ground`, `solids` (plan-built, the proof's format), `things` (generated: building ·
+  prop · vehicle · tree · panel · body, each with `at` or `footprint`, `size_m`, `turn`, `enter plan-built|shell|closed`,
+  `door`/`front`, `closed_line`, `words`, `model` to share one world-list model), `road {type dirt|gravel|street}`,
+  `lighting.lights`, `anchors`. `place.check()` says what is wrong in words.
+- **Compiling** (`python -m forge 3d place compile <place.json> --game <id>`): (a) `<id>.stage.glb` — the plan-built solids
+  modelled by `forge/threed/blender/build_stage.py` (moved from the game's `stage_proof\blender\`, prints `STAGE {...}`)
+  in the rigging tools' Blender, no card; floors and lights stay the engine's, read from the plan as the proof does;
+  (b) `games/<id>/wanted_3d/<place>.json` — every generated thing in story order with tier and real size; a thing nobody
+  has described is written with `needs_words` and held (the world queue never makes it; no look is guessed); compiling
+  again keeps what a person wrote and holds, never drops, a thing gone from the plan; (c) `<id>.things.json` — what stands
+  where: world-list id, at, turn, real size and the grey box's size, dust by road type, the lamps.
+- **A town's layout** becomes a place plan: `place.from_town(layout_record, grid, sheet, metres_per_tile, entities)` /
+  `3d place from-town <plan set folder> [--sheet s.json]` — roads by the sheet's road type, buildings as things facing
+  their streets, fences as plan-built solids, spawns and doors as anchors; what the sheet doesn't say is listed to ask.
+- Tests: `tests/test_place_build34.py` (the stand-in Blender, and for real when `import bpy` works — `pip install bpy`
+  gives Blender 5.3 as a module in the session's container).
+- **Not yet (the game's half, next sessions):** the stage map kind in `project\` (the proof's loader, saves, cues,
+  dialogue, fights), the one camera, doors that open (plan-built: roof and near walls give way; shells: question 1),
+  dust, people at real size, Linden Mills court's place plan, 3D → Places, the frame rate.

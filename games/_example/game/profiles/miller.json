@@ -1,0 +1,35 @@
+{
+ "id": "miller",
+ "who": {
+  "name": "The Miller",
+  "other_names": [],
+  "kind": "human",
+  "games": [
+   "I"
+  ],
+  "first": "",
+  "line": "Weighs everything that comes through Millstone (made up for the example)."
+ },
+ "arms": {
+  "close": {
+   "entries": [],
+   "none": null
+  },
+  "range": {
+   "entries": [],
+   "none": null
+  },
+  "other": {
+   "entries": [],
+   "none": null
+  }
+ },
+ "ties": {
+  "ties": ""
+ },
+ "notes": {
+  "notes": "Made up for the example — a page with nothing known yet, so the board shows open cells."
+ },
+ "questions": [],
+ "_marks": {}
+}

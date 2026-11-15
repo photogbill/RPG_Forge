@@ -437,6 +437,12 @@ def cmd_doctor(cfg: dict, args: list[str]) -> int:
     from . import doctor
     for line in doctor.report(cfg, c):
         print(line)
+    try:                                              # BUILD 36: the 3D workshop — the rigging ComfyUI, model files, Blender
+        from .threed import install as _threed_install
+        for line in _threed_install.doctor_lines(cfg):
+            print(line)
+    except Exception as e:  # noqa: BLE001 - doctor must always finish
+        print(f"· 3D check skipped ({e})")
     try:                                              # Night 3B (G14): optional outside renderer
         from .night3b import ffdriver
         for line in ffdriver.doctor_lines(cfg):
@@ -750,6 +756,11 @@ from .cli_layout import COMMANDS as _LAYOUT  # BUILD 29: the floor-plan generato
 COMMANDS.update(_LAYOUT)
 from .cli_tiles import COMMANDS as _TILES  # BUILD 30: the materials bake-off and the autotile builder (forge/cli_tiles.py)
 COMMANDS.update(_TILES)
+try:                                          # BUILD 36: the 3D workshop (forge/cli_threed.py); never stops the rest starting
+    from .cli_threed import COMMANDS as _THREED
+    COMMANDS.update(_THREED)
+except Exception as _e:  # noqa: BLE001
+    print(f"(the 3D commands did not load: {_e})", file=sys.stderr)
 
 
 def main(argv: list[str] | None = None) -> int:

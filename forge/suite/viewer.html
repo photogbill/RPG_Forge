@@ -1,0 +1,181 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>3D viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- BUILD 36: the 3D workshop's viewer. three.js is kept inside the forge (vendor/three, MIT) — nothing is fetched from
+     the internet. Query: ?u=<model url>&sheet=<motion sheet url>&play=<motion>&light=day|night&label=<words>&figure=1.75 -->
+<style>
+:root{--bg:#121217;--panel:#1d1d24;--line:#2e2e3a;--ink:#ebe8e2;--dim:#9a98a6;--faint:#6b6977;--ok:#46c776;--warn:#f0b040;--no:#e5584f}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif;overflow:hidden}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bar{position:absolute;left:8px;right:8px;bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:rgba(20,20,26,.82);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.top{position:absolute;left:8px;right:8px;top:8px;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+.top .lab{background:rgba(20,20,26,.82);border:1px solid var(--line);border-radius:9px;padding:4px 9px;pointer-events:auto;max-width:70%}
+.top .lab b{font-weight:650}.top .lab small{display:block;color:var(--dim)}
+button,select{font:inherit;color:var(--ink);background:#23232c;border:1px solid #3a3a48;border-radius:7px;padding:4px 9px;cursor:pointer}
+button.on{border-color:var(--warn);color:var(--warn)}select{max-width:230px}
+.sp{flex:1}.meta{color:var(--dim);font-size:12px}.err{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f0b8b0;padding:30px;text-align:center}
+.load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim)}
+input[type=range]{width:90px;vertical-align:middle}
+</style>
+<script type="importmap">{"imports":{"three":"/suite/vendor/three/three.module.min.js"}}</script>
+</head><body>
+<canvas id="c"></canvas>
+<div class="top"><div class="lab" id="lab"><b>…</b></div><span class="sp"></span><div class="lab" id="size" style="text-align:right"></div></div>
+<div class="load" id="load">Loading the model…</div>
+<div class="bar" id="bar" style="display:none">
+  <select id="clip" title="Motions in this model"></select>
+  <button id="pp" title="Play / pause">❚❚</button>
+  <label class="meta">speed <input type="range" id="spd" min="0.1" max="2" step="0.05" value="1"></label>
+  <button id="walk" title="Move it across the floor at the speed its feet move (from the motion sheet)">walk across</button>
+  <span class="meta" id="clipinfo"></span><span class="sp"></span>
+  <button id="light" title="Day or night light">☀ day</button>
+  <button id="fig" class="on" title="A 1.75 m figure for scale">figure</button>
+  <button id="reset" title="Look at it from the front again">front</button>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '/suite/vendor/three/loaders/GLTFLoader.js';
+import { OrbitControls } from '/suite/vendor/three/controls/OrbitControls.js';
+
+const q = new URLSearchParams(location.search);
+const url = q.get('u'), sheetUrl = q.get('sheet');
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+$('#lab').innerHTML = `<b>${esc(q.get('label') || (url || '').split('/').pop().split('?')[0])}</b>` + (q.get('sub') ? `<small>${esc(q.get('sub'))}</small>` : '');
+
+const canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 2000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+// the floor: 1 m squares, and a figure 1.75 m tall for scale
+const grid = new THREE.GridHelper(40, 40, 0x555566, 0x2c2c38);
+scene.add(grid);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: 0.32 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const FIG = parseFloat(q.get('figure') || '1.75');
+const figure = new THREE.Group();
+{
+  const m = new THREE.MeshStandardMaterial({ color: 0x8a8a96, roughness: 0.9, transparent: true, opacity: 0.55 });
+  const head = new THREE.Mesh(new THREE.SphereGeometry(FIG * 0.065, 16, 12), m); head.position.y = FIG - FIG * 0.065;
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(FIG * 0.09, FIG * 0.46, 6, 12), m); body.position.y = FIG * 0.57;
+  const legs = new THREE.Mesh(new THREE.CapsuleGeometry(FIG * 0.07, FIG * 0.32, 6, 12), m); legs.position.y = FIG * 0.23;
+  figure.add(head, body, legs);
+}
+scene.add(figure);
+
+// light: day (sun and sky) or night (moonlight and one warm lamp)
+const hemi = new THREE.HemisphereLight(0xdfe8ff, 0x3a3028, 1.1);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.4); sun.position.set(4, 8, 6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = sun.shadow.camera.bottom = -8; sun.shadow.camera.right = sun.shadow.camera.top = 8;
+const moon = new THREE.DirectionalLight(0x7f96d8, 0.55); moon.position.set(-4, 7, 3); moon.castShadow = true;
+const lamp = new THREE.PointLight(0xffb36b, 18, 12, 1.6); lamp.position.set(1.6, 2.2, 1.6); lamp.castShadow = true;
+const nightAmb = new THREE.AmbientLight(0x1a2240, 0.6);
+let day = q.get('light') !== 'night';
+function setLight() {
+  for (const l of [hemi, sun, moon, lamp, nightAmb]) scene.remove(l);
+  if (day) { scene.add(hemi, sun); scene.background = new THREE.Color(0x2a2c33); }
+  else { scene.add(moon, lamp, nightAmb); scene.background = new THREE.Color(0x07080d); }
+  $('#light').textContent = day ? '☀ day' : '☾ night';
+}
+setLight();
+$('#light').onclick = () => { day = !day; setLight(); };
+$('#fig').onclick = () => { figure.visible = !figure.visible; $('#fig').classList.toggle('on', figure.visible); };
+
+let mixer = null, actions = {}, current = null, model = null, box = null, sheet = null, walking = false, paused = false;
+const clock = new THREE.Clock();
+
+function frame(obj) {
+  box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3()), mid = box.getCenter(new THREE.Vector3());
+  const h = Math.max(size.y, FIG), r = Math.max(size.x, size.z, h * 0.6);
+  figure.position.set(box.max.x + Math.max(0.35, size.x * 0.25) + FIG * 0.12, 0, 0);
+  const fit = Math.max(h, (size.x + FIG) * 0.75, size.z * 0.75) * 0.62 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  camera.position.set(mid.x + fit * 0.18, Math.max(h * 0.58, 0.4), mid.z + size.z / 2 + fit);
+  controls.target.set(mid.x + (figure.visible ? 0.2 : 0), h * 0.5, mid.z);
+  camera.near = Math.max(r / 500, 0.005); camera.far = r * 200; camera.updateProjectionMatrix();
+  controls.update();
+  return size;
+}
+
+function playClip(name) {
+  if (!mixer || !actions[name]) return;
+  if (current) current.fadeOut(0.25);
+  current = actions[name];
+  current.reset().setEffectiveTimeScale(parseFloat($('#spd').value)).fadeIn(0.25).play();
+  $('#clip').value = name;
+  const m = sheet && sheet.motions && sheet.motions[name];
+  $('#clipinfo').textContent = m ? `${m.seconds.toFixed(2)} s${m.loop ? ', loops' : ''}${m.speed ? `, ground ${m.speed.toFixed(2)} m/s` : ', on the spot'}`
+                                 : `${current.getClip().duration.toFixed(2)} s`;
+  $('#walk').disabled = !(m && m.speed);
+  if (!(m && m.speed)) { walking = false; $('#walk').classList.remove('on'); if (model) model.position.x = 0; }
+  try { parent.postMessage({ viewer: 'playing', clip: name }, '*'); } catch (e) {}
+}
+
+function resize() {
+  const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+const flames = [];
+function loop() {
+  requestAnimationFrame(loop);
+  const dt = clock.getDelta();
+  if (flames.length) { const t = clock.elapsedTime; for (let i = 0; i < flames.length; i++) { const f = flames[i]; f.userData.base = f.userData.base || f.emissiveIntensity || 1; f.emissiveIntensity = f.userData.base * (0.82 + 0.12 * Math.sin(t * 9.1 + i) + 0.06 * Math.sin(t * 23.7 + 2 * i)); } }
+  if (mixer && !paused) mixer.update(dt);
+  if (walking && model && current && !paused) {
+    const m = sheet && sheet.motions && sheet.motions[$('#clip').value];
+    if (m && m.speed) {
+      model.position.x += m.speed * parseFloat($('#spd').value) * dt;
+      if (model.position.x > 4) model.position.x = -4;
+    }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+async function start() {
+  if (!url) { $('#load').className = 'err'; $('#load').textContent = 'No model was named.'; return; }
+  if (sheetUrl) { try { sheet = await (await fetch(sheetUrl, { cache: 'no-store' })).json(); } catch (e) { sheet = null; } }
+  new GLTFLoader().load(url, gltf => {
+    model = gltf.scene;
+    model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material) o.material.side = THREE.DoubleSide;
+      // BUILD 40: flame cards glow, cast no shadow, and flicker (the game does its own)
+      if (o.material && o.material.name === 'forge_flame') { o.castShadow = false; o.receiveShadow = false; o.material.depthWrite = false; o.renderOrder = 2; flames.push(o.material); }
+    } });
+    scene.add(model);
+    const size = frame(model);
+    let tris = 0; model.traverse(o => { if (o.isMesh && o.geometry) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
+    $('#size').innerHTML = `<b>${size.y.toFixed(2)} m</b> tall<small>${size.x.toFixed(2)} × ${size.z.toFixed(2)} m · ${Math.round(tris).toLocaleString()} triangles` +
+      (gltf.animations.length ? ` · ${gltf.animations.length} motions` : '') + `</small>`;
+    $('#load').remove();
+    $('#bar').style.display = '';
+    if (gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(model);
+      for (const c of gltf.animations) actions[c.name] = mixer.clipAction(c);
+      const names = gltf.animations.map(c => c.name).sort();
+      $('#clip').innerHTML = names.map(n => `<option>${esc(n)}</option>`).join('');
+      const want = q.get('play');
+      playClip(names.includes(want) ? want : ['Walk_Loop', 'Idle_Loop', 'Jog_Fwd_Loop'].find(n => names.includes(n)) || names[0]);
+    } else {
+      $('#clip').style.display = 'none'; $('#pp').style.display = 'none'; $('#walk').style.display = 'none';
+      $('#spd').parentElement.style.display = 'none'; $('#clipinfo').textContent = 'no motions (turn it with the mouse)';
+    }
+    try { parent.postMessage({ viewer: 'loaded', motions: gltf.animations.map(c => c.name), size: [size.x, size.y, size.z] }, '*'); } catch (e) {}
+  }, ev => { if (ev.total) $('#load').textContent = `Loading the model… ${Math.round(ev.loaded / ev.total * 100)}%`; },
+  err => { $('#load').className = 'err'; $('#load').textContent = 'The model did not load: ' + (err && err.message || err); });
+}
+$('#clip').onchange = e => playClip(e.target.value);
+$('#pp').onclick = () => { paused = !paused; $('#pp').textContent = paused ? '▶' : '❚❚'; };
+$('#spd').oninput = e => { if (current) current.setEffectiveTimeScale(parseFloat(e.target.value)); };
+$('#walk').onclick = () => { walking = !walking; $('#walk').classList.toggle('on', walking); if (!walking && model) model.position.x = 0; };
+$('#reset').onclick = () => { if (model) { model.position.x = 0; frame(model); } };
+addEventListener('message', e => { const d = e.data || {}; if (d.play) playClip(d.play); if (d.light) { day = d.light !== 'night'; setLight(); } });
+start(); loop();
+</script>
+</body></html>
