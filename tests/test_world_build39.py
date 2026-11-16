@@ -338,20 +338,20 @@ def test_the_queue_makes_checks_sizes_and_sends_to_review_with_no_terminal(tmp_p
     hist = [(e["id"], e["st"]["started"]) for e in world.merged(cfg, "g1")[0]]
     assert hist[0][0] == "booth" and hist[0][1] <= hist[1][1]
     # the picture of the booth was painted with the building words, the barrier with the thing words, and at the tier's size
-    reqs = [json.loads(p.read_text()) for p in sorted((tmp_path / "out3d" / "world" / "g1" / "barrier" / "prompts").glob("*.json"))]
+    reqs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((tmp_path / "out3d" / "world" / "g1" / "barrier" / "prompts").glob("*.json"))]
     assert any(any(n.get("inputs", {}).get("target_face_num") == 40000 or n.get("inputs", {}).get("face_count") == 40000
                    or 40000 in n.get("inputs", {}).values() for n in r.values()) for r in reqs)
     # in Review & approve, with the checks and the licence lines of every tool behind it
     tries = list((tmp_path / "games" / "g1" / "threed" / "tries").glob("*/*.json"))
     assert len(tries) == 2
-    tr = json.loads(next(p for p in tries if "barrier" in p.name).read_text())
+    tr = json.loads(next(p for p in tries if "barrier" in p.name).read_text(encoding="utf-8"))
     assert tr["review"]["state"] == "waiting" and tr["from"] == "world" and "trellis2" in tr["licence_keys"]
     assert tr["steps"]["body"]["model"] == st["model"] and tr["checks"] == st["checks"]
-    rep = (tmp_path / "out3d" / "world" / "g1" / "REPORT.txt").read_text()
+    rep = (tmp_path / "out3d" / "world" / "g1" / "REPORT.txt").read_text(encoding="utf-8")
     assert "2 made" in rep and "barrier" in rep
-    beat = json.loads((tmp_path / "out3d" / "world" / "g1" / "_launcher.json").read_text())
+    beat = json.loads((tmp_path / "out3d" / "world" / "g1" / "_launcher.json").read_text(encoding="utf-8"))
     assert beat["step"] == "stopped" and not world.launcher_state(cfg, "g1")["running"]
-    assert "world queue for g1 started" in (tmp_path / "out3d" / "world" / "g1" / "world.log").read_text()
+    assert "world queue for g1 started" in (tmp_path / "out3d" / "world" / "g1" / "world.log").read_text(encoding="utf-8")
 
 
 def test_the_list_is_read_again_before_every_item(tmp_path, art, monkeypatch):
@@ -368,7 +368,7 @@ def test_the_list_is_read_again_before_every_item(tmp_path, art, monkeypatch):
     monkeypatch.setattr(world, "make", make_and_add)
     t = world.run(cfg, "g1", until_empty=True, poll=0.05, check_machine=False)
     assert t["made"] == 2 and world.read_state(cfg, "g1", "added_meanwhile")["state"] == "made"
-    assert json.loads((tmp_path / "games" / "g1" / "wanted_3d" / "added_meanwhile.json").read_text())["added"]["by"] == "Bill"
+    assert json.loads((tmp_path / "games" / "g1" / "wanted_3d" / "added_meanwhile.json").read_text(encoding="utf-8"))["added"]["by"] == "Bill"
 
 
 def test_stop_waits_for_the_machine_and_failures_wait_their_turn(tmp_path, art):
@@ -381,7 +381,7 @@ def test_stop_waits_for_the_machine_and_failures_wait_their_turn(tmp_path, art):
     try:
         t = world.run(cfg, "g1", once=True, poll=0.05)
         assert t["stopped_by"] == "busy"
-        assert "another run" in json.loads((tmp_path / "out3d" / "world" / "g1" / "_launcher.json").read_text())["waiting"]
+        assert "another run" in json.loads((tmp_path / "out3d" / "world" / "g1" / "_launcher.json").read_text(encoding="utf-8"))["waiting"]
         assert world.machine_busy(cfg).startswith("another run has the graphics card")
     finally:
         lock.release()
@@ -470,7 +470,7 @@ def test_a_person_can_let_a_held_thing_through(tmp_path):
     r = world.let_through(cfg, "g1", "comms", "Bill")
     assert r["ok"]
     st = world.read_state(cfg, "g1", "comms")
-    t = json.loads(next((tmp_path / "games" / "g1" / "threed" / "tries").glob("*/*.json")).read_text())
+    t = json.loads(next((tmp_path / "games" / "g1" / "threed" / "tries").glob("*/*.json")).read_text(encoding="utf-8"))
     assert st["state"] == "made" and "let through by a person" in t["review"]["note"]
 
 
@@ -490,7 +490,7 @@ def test_a_body_gets_its_skeleton_and_motions_and_no_smile(tmp_path, art):
     painted = [p for p in si.seen if any(isinstance(n, dict) and "smile" in json.dumps(n).lower() for n in p.values())]
     sent = json.dumps(si.seen).lower()
     assert "always with a smile" not in sent and "mouth closed" in sent and not painted
-    tr = json.loads(next((tmp_path / "games" / "g1" / "threed" / "tries").glob("*/*.json")).read_text())
+    tr = json.loads(next((tmp_path / "games" / "g1" / "threed" / "tries").glob("*/*.json")).read_text(encoding="utf-8"))
     assert tr["kind"] == "body" and tr["steps"]["motions"]["moves"] == st["model"]
     assert {"mia", "quaternius_ual"} <= set(tr["licence_keys"])
 

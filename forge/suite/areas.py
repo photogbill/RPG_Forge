@@ -115,6 +115,12 @@ AREAS: list[dict] = [
            holds="any model the forge has made, on a floor with a figure for scale, in day or night light"),
         _t("runs", "Runs", "threed", (), t3="runs",
            holds="what is running, what waits for the graphics card, each log and report; a whole list overnight")]},
+    {"id": "mocap", "icon": "🎥", "name": "Motion capture", "color": "#ff7aa8", "tabs": [   # 2026-11-15 (William: "so we don't forget")
+        _t("takes", "Takes to film", "mocap", ("game",), mc="takes",
+           holds="every movement that has to be filmed for motion — for which character, performed by whom, where it is used, "
+                 "what to do and the marks; where each has got to (needed, filmed, turned into motion, in the game)"),
+        _t("howto", "How to film", "mocap", (), mc="howto",
+           holds="the camera, lens, distance and settings that make footage the motion tools can read; the clap, the still start")]},
     {"id": "workshop", "icon": "⚗", "name": "Workshop", "color": "#8fd0c0", "tabs": [
         _t("library", "Prompt library", "library"),
         _t("bakeoffs", "Bake-offs", "bakeoffs"),

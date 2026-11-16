@@ -119,8 +119,13 @@ def set_value(key: str, value: str | None, path: Path | None = None) -> dict:
     value = str(value or "").strip()
     if key == "timezone" and value:
         try:
-            from zoneinfo import ZoneInfo
+            from zoneinfo import ZoneInfo, available_timezones
+            if not available_timezones():
+                raise ValueError("this computer's Python has no list of time zones yet — run install.bat once "
+                                 "(it adds the tzdata package), then set it again")
             ZoneInfo(value)
+        except ValueError:
+            raise
         except Exception:  # noqa: BLE001
             raise ValueError(f"'{value}' isn't a time zone this computer knows (try e.g. America/New_York)")
     d = load(path)

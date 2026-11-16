@@ -3,3 +3,5 @@ Pillow>=10.0
 numpy>=1.26
 huggingface_hub>=0.24
 pytest>=8.0
+# Windows has no time-zone list of its own; Python's zoneinfo needs this one there (Settings -> time zone)
+tzdata>=2024.1; sys_platform == "win32"

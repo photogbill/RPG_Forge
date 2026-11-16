@@ -32,6 +32,7 @@ from . import provide   # User Needs To Provide Image (2026-11-11): the forge po
 from . import threed   # BUILD 36: the 3D area (picture -> body -> skeleton -> motions)
 from . import world3d  # BUILD 39: the world list and its queue
 from . import profiles  # BUILD 42: Characters -> Profiles (the cast as editable pages, a board of what's missing)
+from . import mocap  # 2026-11-15: Motion capture (what has to be filmed, and how)
 
 log = get("suite")
 HOST, PORT = "127.0.0.1", 8770
@@ -153,6 +154,34 @@ def act_threed(cfg: dict, action: str, body: dict, who) -> dict:
     return {"ok": False, "message": f"unknown action {action}"}
 
 
+def act_mocap(cfg: dict, action: str, body: dict, who: str) -> dict:
+    """Motion capture: add a take; change its status, priority, footage or notes. Signed, journaled."""
+    gid = str(body.get("game") or current_game(cfg))
+    if not who:
+        return {"ok": False, "message": "set who you are first (bottom left) — everything here is signed"}
+    try:
+        if action == "mocap_add":
+            t = body.get("take") or {}
+            ln = t.get("length_sec")
+            row = mocap.add(cfg, gid, by=who, title=str(t.get("title") or ""), who=str(t.get("who") or ""),
+                            perform=str(t.get("perform") or ""), where=str(t.get("where") or ""),
+                            performer=str(t.get("performer") or ""), partner=str(t.get("partner") or ""),
+                            song=str(t.get("song") or ""), marks=str(t.get("marks") or ""),
+                            length_sec=float(ln) if ln not in (None, "") else None,
+                            priority=str(t.get("priority") or "soon"), notes=str(t.get("notes") or ""))
+            _journal(cfg, "mocap", f"mocap:{row['id']}", f"{who} added the take '{row['title']}'")
+            return {"ok": True, "message": f"Added: {row['title']}.", "take": row}
+        if action == "mocap_set":
+            row = mocap.set_field(cfg, gid, str(body.get("id") or ""), str(body.get("field") or ""), body.get("value"), who)
+            _journal(cfg, "mocap", f"mocap:{row['id']}", f"{who} set {body.get('field')} on '{row['title']}'")
+            return {"ok": True, "message": "Saved.", "take": row}
+    except FileNotFoundError:
+        return {"ok": False, "message": "that take isn't on the list"}
+    except (mocap.MocapRefused, ValueError) as e:
+        return {"ok": False, "message": str(e)}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
 def act(cfg: dict, action: str, body: dict) -> dict:
     who = settings.identity()
     if action == "identity":
@@ -242,6 +271,8 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         return act_threed(cfg, action, body, who)
     if action.startswith("profile_"):
         return act_profiles(cfg, action, body, who)
+    if action.startswith("mocap_"):
+        return act_mocap(cfg, action, body, who)
     if action == "open":
         what = str(body.get("what") or "")
         paths = {"log": cfgmod.path_of(cfg, "logs"), "jobs": cfgmod.path_of(cfg, "jobs"), "out": cfgmod.path_of(cfg, "out")}
@@ -979,6 +1010,10 @@ class SuiteHandler(ui.Handler):
                 self._json(profiles_view(self.cfg, u.path.rsplit("/", 1)[-1], q))
             elif u.path == "/suite/profiles.js":
                 self._send(200, (Path(__file__).parent / "profiles.js").read_bytes(), "text/javascript; charset=utf-8")
+            elif u.path == "/api/suite/mocap":
+                self._json(mocap.view(self.cfg, q.get("id", [current_game(self.cfg)])[0]))
+            elif u.path == "/suite/mocap.js":
+                self._send(200, (Path(__file__).parent / "mocap.js").read_bytes(), "text/javascript; charset=utf-8")
             elif u.path.startswith("/api/suite/threed") or u.path in ("/suite/3dfile", "/suite/viewer", "/suite/threed.js") \
                     or u.path.startswith("/suite/vendor/three/"):
                 self._threed_get(u, q)

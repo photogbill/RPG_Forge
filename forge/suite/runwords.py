@@ -42,6 +42,10 @@ TABLE: dict[str, tuple[str, str]] = {
     "pull_flux": ("pc", "a model download"), "pull_model": ("pc", "a model download"), "pull_quality": ("pc", "a model download"),
     "filter_forge": ("pc", "Filter Forge"), "filter_forge_proof": ("pc", "Filter Forge"), "push": ("pc", "pushing to GitHub"),
     "publish": ("pc", "publishing"), "test_tools": ("pc", "the tools test"),
+    "finale_overnight": ("pc", "the opera finale's overnight run (Blender and ComfyUI on the Windows PC)"),
+    "finale_needs": ("pc", "the opera finale's overnight run"), "opera_finale": ("pc", "the opera finale in Blender"),
+    "opera_house": ("pc", "the opera house in Blender"), "ff_picks_third_look": ("pc", "Filter Forge"),
+    "opera_ceiling": ("pc", "the opera house's painted dome (ComfyUI on the Windows PC)"),
 }
 BAT = re.compile(r"\b([A-Za-z0-9_]+)\.bat\b")
 DEFAULT_PC = "the Windows PC with the art worker"

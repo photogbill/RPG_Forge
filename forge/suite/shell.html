@@ -524,6 +524,7 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
     <section id="v-floorplans" style="display:none"></section>
     <section id="v-threed" style="display:none"></section>
     <section id="v-profiles" style="display:none"></section>
+    <section id="v-mocap" style="display:none"></section>
     <section id="v-playtest" style="display:none"></section>
     <section id="v-settings" style="display:none"></section>
     <section id="v-about" style="display:none"></section>
@@ -571,7 +572,7 @@ $('#who').onclick=askWho;
 let A={areas:[],needs:{},old:{},area:null,tab:null,rest:[],badges:{},last:null,ready:false,needsAt:0};
 const SECTION={home:'v-home',queue:'v-queue',wanted:'v-wanted',make:'v-make',review:'v-review',library:'v-library',bakeoffs:'v-bakeoffs',
   models:'v-models',tools:'v-tools',intake:'v-intake',chars:'v-chars',mail:'v-mail',orders:'v-orders',overview:'v-story',read:'v-read',
-  music:'v-music',status:'v-status',tasks:'v-tasks',tasksdone:'v-tasksdone',notesopen:'v-notesopen',planned:'v-planned',rulings:'v-rulings',ideas:'v-ideas',provide:'v-provide',floorplans:'v-floorplans',threed:'v-threed',profiles:'v-profiles',playtest:'v-playtest',settings:'v-settings',about:'v-about',
+  music:'v-music',status:'v-status',tasks:'v-tasks',tasksdone:'v-tasksdone',notesopen:'v-notesopen',planned:'v-planned',rulings:'v-rulings',ideas:'v-ideas',provide:'v-provide',floorplans:'v-floorplans',threed:'v-threed',profiles:'v-profiles',mocap:'v-mocap',playtest:'v-playtest',settings:'v-settings',about:'v-about',
   people:'v-people',quests:'v-quests',voices:'v-voices',find:'v-find'};
 const STORY_SCREENS=['mail','orders','overview','read','music'];
 function addrParts(h){return String(h||'').replace(/^#\/?/,'').split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch(e){return x}})}
@@ -619,7 +620,7 @@ function show(prev){const t=A.tab;if(!t)return;const sc=t.screen,r=A.rest;
   else if(sc==='status')loadStatus(t.id);else if(sc==='tasks')loadTasks();else if(sc==='tasksdone')loadTasksDone();
   else if(sc==='people')loadPeople(r[0]);else if(sc==='quests')loadQuests(r[0]);else if(sc==='voices')loadVoices(r[0],r[1]);else if(sc==='find')paintFind();
   else if(sc==='notesopen')loadNotesOpen(r[0]);else if(sc==='planned')paintPlanned();
-  else if(sc==='rulings')loadRulings(r[0]);else if(sc==='ideas')loadIdeas(r[0]);else if(sc==='provide')loadProvide();else if(sc==='floorplans')loadFloorplans(r);else if(sc==='threed'&&window.loadThreeD)loadThreeD(t.t3||'bodies',r);else if(sc==='profiles'&&window.loadProfiles)loadProfiles(r);else if(sc==='playtest')loadPlaytest();else if(sc==='settings')loadSettings();else if(sc==='about')loadAbout()}
+  else if(sc==='rulings')loadRulings(r[0]);else if(sc==='ideas')loadIdeas(r[0]);else if(sc==='provide')loadProvide();else if(sc==='floorplans')loadFloorplans(r);else if(sc==='threed'&&window.loadThreeD)loadThreeD(t.t3||'bodies',r);else if(sc==='profiles'&&window.loadProfiles)loadProfiles(r);else if(sc==='mocap'&&window.loadMocap)loadMocap(t.mc||'takes',r);else if(sc==='playtest')loadPlaytest();else if(sc==='settings')loadSettings();else if(sc==='about')loadAbout()}
 async function loadGames(keep){G=await api('/api/suite/games');const sel=$('#game');
   sel.innerHTML=G.games.map(g=>`<option value="${esc(g.id)}" ${g.id===G.current?'selected':''}>${esc(g.name)}${g.root_exists?'':' — folder not reachable'}</option>`).join('');
   paintPicker();$('#who-name').textContent=G.identity||'nobody yet';if(!G.identity&&!keep)askWho();return G}
@@ -1783,5 +1784,5 @@ function fpLive(){clearTimeout(FP.chkT);FP.chkT=setTimeout(async()=>{const r=awa
   FP.probs={problems:r.problems||[],game:[]};fpProbs()},300);fpProbs()}
 async function fpSave(){if(!G.identity)return askWho();if(!FP.edits.length)return toast('Nothing painted yet.');
   const r=await post('floorplan_save',{game:gid(),folder:FP.open,map:FP.map,edits:FP.edits});toast(r.message,r.ok);if(r.ok)fpOpen(FP.open,FP.map)}
-</script><script src="/suite/threed.js"></script><script src="/suite/profiles.js"></script>
+</script><script src="/suite/threed.js"></script><script src="/suite/profiles.js"></script><script src="/suite/mocap.js"></script>
 </body></html>
