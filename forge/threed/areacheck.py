@@ -6,6 +6,10 @@ reviews and approves." ✦ 14:56: "What can you code, for real."
     areacheck.check(cfg, gid, place_id)   -> the report (and out/areas/<game>/<place>/report.json + report.md)
 
 Built so far (Checklist A, BUILD 83 §B1):
+  6  Repeats     — the same dressing model more than the limit in one map-camera view, or twice side by side
+                   (forge/threed/areacheck_dressing.py; built by BUILD 97 Part 5 / BUILD 98, 2026-11-21)
+  7  Dressing    — things per 100 m² a zone (kerb, front yard, back yard, porch, shop front, interior, open lot) against
+                   its kind's target, and the largest empty stretch (the same file; targets in area_rules.json)
   8  Delivered   — every thing the place puts on the world list is delivered into the game; nothing is still a stand-in
   10 People      — the place's people are described (<game folder>/data/people/<place>.json, BUILD_RULES)
 Every other check is listed as "not built yet", never as a pass. Nothing here names a game, and nothing is changed but
@@ -18,8 +22,29 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-NOT_BUILT = ["1 scale", "2 stretch", "3 grounding", "4 clipping", "5 sharpness", "6 repeats", "7 dressing",
+NOT_BUILT = ["1 scale", "2 stretch", "3 grounding", "4 clipping", "5 sharpness",
              "9 the look holds", "10 signature and music (people is built)"]
+
+
+def check_dressing_and_repeats(cfg, gid: str, pid: str, game_root=None) -> list[dict]:
+    """Checks 6 and 7 (forge/threed/areacheck_dressing.py), from the place plan, the dresser's output beside it, the world
+    lists' sizes and the game's area_rules.json. A failure is a line that says so, never a pass."""
+    try:
+        from ..suite import places3d
+        from . import areacheck_dressing as ad, world
+        gdir = places3d.places_dir(cfg, gid)
+        rules = ad.load_rules(gdir.parent / "area_rules.json")
+        if ad.place_rules(rules, pid).get("skip"):
+            why = ad.place_rules(rules, pid).get("_why") or "skipped by the rules"
+            return [{"id": "repeats", "ok": None, "line": f"Repeats: not an area to dress ({why})."},
+                    {"id": "dressing", "ok": None, "line": f"Dressing: not an area to dress ({why})."}]
+        stage = Path(game_root) / "project" / "data" / "stage.json" if game_root else None
+        r = ad.check_place(gdir, pid, rules, ad.load_sizes(world.list_dir(cfg, gid)), ad.camera_view(stage, rules),
+                           report_dir(cfg, gid, pid).parent, picture=True)
+        return r["checks"]
+    except Exception as ex:  # noqa: BLE001
+        return [{"id": "repeats", "ok": None, "line": f"Repeats: could not be measured ({type(ex).__name__}: {ex})."},
+                {"id": "dressing", "ok": None, "line": f"Dressing: could not be measured ({type(ex).__name__}: {ex})."}]
 
 
 def report_dir(cfg, gid: str, pid: str) -> Path:
@@ -66,7 +91,7 @@ def check(cfg, gid: str, pid: str, status: dict | None = None, game_root=None, w
             game_root = games.game_root(cfg, gid)
         except Exception:  # noqa: BLE001
             game_root = None
-    checks = [check_delivered(things), check_people(game_root, pid)]
+    checks = check_dressing_and_repeats(cfg, gid, pid, game_root) + [check_delivered(things), check_people(game_root, pid)]
     rep = {"place": pid, "game": gid, "at": datetime.now().isoformat(timespec="seconds"), "checks": checks,
            "passed": sum(1 for c in checks if c["ok"] is True), "flagged": sum(1 for c in checks if c["ok"] is False),
            "not_built_yet": NOT_BUILT, "fable_review": "Checklist B (Fable's eyes) and approval: BUILD 83 Part C, not built yet"}
@@ -80,7 +105,10 @@ def check(cfg, gid: str, pid: str, status: dict | None = None, game_root=None, w
                                                              for c in checks]
         for c in checks:
             for f in c.get("flags") or []:
-                md.append(f"    - {f['id']} ({f.get('kind')}): {f.get('now')}" + (f" — {f['why']}" if f.get("why") else ""))
+                if "now" in f:
+                    md.append(f"    - {f['id']} ({f.get('kind')}): {f.get('now')}" + (f" — {f['why']}" if f.get("why") else ""))
+                else:
+                    md.append(f"    - {c['id']}: {f.get('why')}" + (f" at {f['at']}" if f.get("at") else ""))
         md += ["", "Not built yet: " + ", ".join(NOT_BUILT) + ".", rep["fable_review"]]
         (d / "report.md").write_text("\n".join(md) + "\n", encoding="utf-8")
         rep["report"] = str(d / "report.md")

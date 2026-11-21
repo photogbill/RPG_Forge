@@ -1,0 +1,46 @@
+{
+ "name": "purple_leaf_plum",
+ "about": "A purple-leaf plum, the ornamental every subdivision planted: small, rounded, dense, its leaves deep maroon-purple all summer.",
+ "numbers": {
+  "height": 5.0,
+  "trunk_radius": 0.14,
+  "fork_height": 1.0,
+  "limbs": 5,
+  "limb_tilt": [
+   30,
+   58
+  ],
+  "crown_centre_z": 3.3,
+  "crown_radius": 2.4,
+  "crown_half_height": 1.8,
+  "crown_floor": 1.1,
+  "masses": 14,
+  "mass_radius": [
+   0.7,
+   1.1
+  ],
+  "attractors": 4200,
+  "step": 0.22,
+  "reach": 2.0,
+  "close": 0.3,
+  "twig_radius": 0.01,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.32,
+   0.5
+  ],
+  "cards_per_twig": 4,
+  "leaf": "oval",
+  "bark": [
+   0.3,
+   0.24,
+   0.22
+  ],
+  "leaf_tint": [
+   0.95,
+   0.42,
+   0.6
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

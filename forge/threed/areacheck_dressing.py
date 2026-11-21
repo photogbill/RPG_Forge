@@ -40,7 +40,7 @@ CELL = 0.5                                       # metres a grid cell
 Z_OUT, Z_ROAD, Z_BUILDING, Z_KERB, Z_FRONT, Z_BACK, Z_SHOP, Z_OPEN, Z_INTERIOR, Z_EXCLUDED = range(10)
 ZONE_NAMES = {Z_OUT: "outside the plan", Z_ROAD: "road", Z_BUILDING: "building", Z_KERB: "kerb strip",
               Z_FRONT: "front yard", Z_BACK: "back / side yard", Z_SHOP: "shop front", Z_OPEN: "open lot",
-              Z_INTERIOR: "interior", Z_EXCLUDED: "not dressed (fixed by William)"}
+              Z_INTERIOR: "interior", Z_EXCLUDED: "not dressed here (William's, or measured as its own place)"}
 ZONE_KEYS = {Z_KERB: "kerb", Z_FRONT: "front_yard", Z_BACK: "back_yard", Z_SHOP: "shop_front", Z_OPEN: "open_lot",
              Z_INTERIOR: "interior"}
 ZONE_COLOURS = {Z_OUT: (30, 30, 34), Z_ROAD: (62, 64, 70), Z_BUILDING: (190, 178, 160), Z_KERB: (150, 150, 146),
@@ -100,6 +100,9 @@ def box_of(t: dict, sizes: dict, rules: dict, pid: str = "") -> tuple[float, flo
             return float(b[0]), float(b[1])
     if isinstance(t.get("footprint"), (list, tuple)) and len(t["footprint"]) == 4:
         return float(t["footprint"][2]), float(t["footprint"][3])
+    sm = t.get("size_m")
+    if isinstance(sm, dict) and sm.get("width") and sm.get("depth"):
+        return float(sm["width"]), float(sm["depth"])     # the plan's own measure, when it gives both
     words = " ".join(str(t.get(k) or "") for k in ("id", "model", "label", "family")).lower()
     defaults = rules.get("default_box_m") or {}
     guess = None
@@ -200,6 +203,8 @@ def distance(mask_occupied: np.ndarray, cell: float) -> np.ndarray:
 def building_kind(t: dict, rules: dict, prules: dict) -> str:
     if t.get("zone_kind"):
         return str(t["zone_kind"])
+    if (prules.get("buildings") or {}).get(str(t.get("id"))):
+        return str(prules["buildings"][str(t.get("id"))])
     if prules.get("kind"):
         return str(prules["kind"])
     words = " ".join(str(t.get(k) or "") for k in ("id", "label", "model")).lower()
@@ -300,7 +305,7 @@ def zones(place: dict, rules: dict, sizes: dict | None = None) -> dict:
         half = max(abs((px - cx) * ux + (py - cy) * uy) for px, py in b["pts"])
         along = (g.X - cx) * ux + (g.Y - cy) * uy
         front = cells & (along > half - 0.25)
-        if b["kind"] in ("shop", "bar"):
+        if b["kind"] in ("shop", "bar", "civic"):
             depth = float(rules.get("shop_front_depth_m", 4.0))
             Z[front & (along <= half + depth)] = Z_SHOP
             Z[front & (along > half + depth)] = Z_OPEN
@@ -314,9 +319,10 @@ def zones(place: dict, rules: dict, sizes: dict | None = None) -> dict:
     Z[road] = Z_ROAD
     Z[bmask] = Z_BUILDING
     # interiors of buildings the player enters
+    open_rooms = set(prules.get("open_rooms") or [])     # a fuel canopy: a roof, not a room — its ground is a forecourt
     for i, b in enumerate(blds):
         for r in b["rooms"] or []:
-            Z[g.rect(r)] = Z_INTERIOR
+            Z[g.rect(r)] = Z_SHOP if b["id"] in open_rooms else Z_INTERIOR
             lot[g.rect(r)] = i
     # what William fixed: whole lots (his yard), or rectangles
     excl = np.zeros(g.X.shape, bool)
@@ -325,8 +331,8 @@ def zones(place: dict, rules: dict, sizes: dict | None = None) -> dict:
             if b["id"] == bid:
                 excl |= (lot == i) & (Z != Z_ROAD) & ((Z != Z_KERB) | bool(prules.get("exclude_kerb_too")))
                 excl |= per_b[i]
-    for r in prules.get("exclude_rects") or []:
-        excl |= g.rect(r)
+    for r in (prules.get("exclude_rects") or []) + (prules.get("held_rects") or []):
+        excl |= g.rect(r)                        # held: another place inside this one, measured on its own
     Z[excl & (Z != Z_ROAD)] = Z_EXCLUDED
     return {"grid": g, "Z": Z, "lot": lot, "buildings": blds, "road": road, "excluded": excl, "place": pid}
 
@@ -404,6 +410,12 @@ def check_dressing(place: dict, extra: list | None, rules: dict, sizes: dict | N
         kind_key = name
         if zk == Z_INTERIOR and 0 <= li < len(blds):
             kind_key = f"interior_{blds[li]['kind']}"
+        if zk == Z_SHOP and 0 <= li < len(blds) and blds[li]["id"] in (place_rules(rules, zz["place"]).get("open_rooms") or []) \
+                and targets.get("forecourt"):
+            kind_key = "forecourt"               # under a fuel canopy: pumps and the lanes cars drive — kept open
+        if zk == Z_BACK and 0 <= li < len(blds) and blds[li]["kind"] in ("shop", "bar", "civic") \
+                and targets.get("service_back"):
+            kind_key = "service_back"            # behind a shop: bins, pallets, the condenser — not a yard
         prules = place_rules(rules, zz["place"])
         if prules.get("era") in ("war", "after", "ruin") and zk in (Z_FRONT, Z_BACK, Z_OPEN, Z_KERB):
             kind_key = "ruin"
@@ -470,6 +482,9 @@ def check_dressing(place: dict, extra: list | None, rules: dict, sizes: dict | N
             n = math.hypot(vx, vy) or 1.0
             half = max(abs((px - cx) * vx / n + (py - cy) * vy / n) for px, py in b["pts"])
             fp = (cx + vx / n * (half + 1.0), cy + vy / n * (half + 1.0))
+        c_fp = _cell_of(g, fp)
+        if c_fp and bool(zz["excluded"][c_fp]):
+            continue                              # the porch is in held ground: measured where it is its own place
         k = sum(1 for t in things if math.hypot(t["at"][0] - fp[0], t["at"][1] - fp[1]) <= pr)
         row = {"zone": "porch / step", "rule": "porch", "lot": b["id"], "things": k, "at": [round(fp[0], 1), round(fp[1], 1)],
                "target": f"{tp['each'][0]}–{tp['each'][1]} a porch", "ok": k >= int(tp["each"][0])}

@@ -188,6 +188,35 @@ def wanted_entries(place: dict, start_order: float = 0.0) -> list[dict]:
     return out
 
 
+def with_dressing_out(place: dict, place_path) -> dict:
+    """BUILD 97 Part 2 / BUILD 98: the dresser's things (`<id>.dressing_out.json` beside the plan, written by
+    forge/threed/dresser.py) stand on the stage like the plan's own: a grey box until each model is delivered. Their models
+    are on the kit's own world list, so none is added to the place's list. The plan itself is never changed."""
+    p = Path(place_path).with_name(f"{place['id']}.dressing_out.json")
+    if not p.exists():
+        return place
+    try:
+        items = json.loads(p.read_text(encoding="utf-8")).get("items") or []
+    except (OSError, ValueError) as e:
+        log.warning("dressing_out for %s can't be read (%s): the stage is compiled without it", place["id"], e)
+        return place
+    have = {t.get("id") for t in place.get("things") or []}
+    extra = []
+    for it in items:
+        if not isinstance(it, dict) or it.get("id") in have or not it.get("model") or not it.get("at"):
+            continue
+        kind = it.get("kind") if it.get("kind") in WORLD_KIND else "prop"
+        w, d = (list(it.get("box_m") or [1.0, 1.0]) + [1.0])[:2]
+        extra.append({"id": it["id"], "kind": kind, "model": it["model"], "at": it["at"], "turn": float(it.get("turn") or 0),
+                      "size_m": {"width": float(w), "depth": float(d)}, "label": it.get("label") or it["id"],
+                      "listed_in": "dressing kit", "by": "dresser"})
+    if not extra:
+        return place
+    out = dict(place)
+    out["things"] = list(place.get("things") or []) + extra
+    return out
+
+
 def things_list(place: dict) -> dict:
     """What stands where on the stage: the game reads this beside the compiled model."""
     rows = []
@@ -216,6 +245,18 @@ def write_wanted(games_root: Path, gid: str, place: dict, start_order: float = 0
         except (OSError, ValueError):
             old = {}
     fresh = wanted_entries(place, start_order)
+    # BUILD 98: a model already on another of the game's world lists (a hand-placed pass, a dressing kit) is not listed
+    # again here: the list read first would win, and a held copy here would stop the real one being made.
+    elsewhere = set()
+    for q in sorted((Path(games_root) / gid / "wanted_3d").glob("*.json")):
+        if q.name == p.name or q.name.startswith("_"):
+            continue
+        try:
+            elsewhere |= {e["id"] for e in json.loads(q.read_text(encoding="utf-8")).get("entries") or []
+                          if isinstance(e, dict) and e.get("id")}
+        except (OSError, ValueError, AttributeError):
+            continue
+    fresh = [e for e in fresh if e["id"] not in elsewhere]
     out = []
     for e in fresh:
         if hold and not e.get("hold"):
@@ -384,7 +425,7 @@ def compile_place(cfg: dict | None, gid: str, place_path, out_dir, env=None, pyt
                             f"{len(plan['solids'])} plan-built solids.")
     else:
         rep["lines"].append("No plan-built solids: the stage is its ground and its generated things.")
-    tl = things_list(place)
+    tl = things_list(with_dressing_out(place, place_path))
     things.write_text(json.dumps(tl, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     plan_copy = out / f"{place['id']}.place.json"
     if land is not None:

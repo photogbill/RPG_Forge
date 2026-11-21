@@ -1,0 +1,41 @@
+{
+ "name": "river_birch",
+ "about": "A river birch: salmon-and-cream bark peeling in curls, a light airy crown of small leaves on arching branches.",
+ "numbers": {
+  "height": 12,
+  "trunk_radius": 0.22,
+  "fork_height": 1.2,
+  "limbs": 5,
+  "limb_tilt": [
+   18,
+   40
+  ],
+  "crown_centre_z": 7.6,
+  "crown_radius": 3.6,
+  "crown_half_height": 4.2,
+  "crown_floor": 2.6,
+  "masses": 18,
+  "mass_radius": [
+   0.9,
+   1.4
+  ],
+  "attractors": 5000,
+  "step": 0.28,
+  "reach": 2.8,
+  "close": 0.38,
+  "twig_radius": 0.01,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.4,
+   0.62
+  ],
+  "cards_per_twig": 4,
+  "leaf": "delta",
+  "bark": [
+   0.66,
+   0.52,
+   0.44
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

@@ -1,0 +1,46 @@
+{
+ "name": "eastern_red_cedar",
+ "about": "An eastern red cedar: a narrow dark column of scaly evergreen sprays from the ground up, the fence-row tree of every old Virginia field.",
+ "numbers": {
+  "height": 10,
+  "trunk_radius": 0.2,
+  "fork_height": 0.4,
+  "limbs": 10,
+  "limb_tilt": [
+   25,
+   55
+  ],
+  "crown_centre_z": 5.2,
+  "crown_radius": 1.6,
+  "crown_half_height": 4.9,
+  "crown_floor": 0.3,
+  "masses": 22,
+  "mass_radius": [
+   0.6,
+   0.9
+  ],
+  "attractors": 5400,
+  "step": 0.22,
+  "reach": 1.8,
+  "close": 0.28,
+  "twig_radius": 0.009,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.36,
+   0.56
+  ],
+  "cards_per_twig": 5,
+  "leaf": "scale",
+  "bark": [
+   0.44,
+   0.32,
+   0.26
+  ],
+  "leaf_tint": [
+   0.78,
+   0.86,
+   0.72
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

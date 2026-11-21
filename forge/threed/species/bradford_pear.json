@@ -1,0 +1,46 @@
+{
+ "name": "bradford_pear",
+ "about": "A Bradford pear, the subdivision tree: a tight upright egg-shaped crown of glossy leaves, all the limbs leaving the trunk at one point.",
+ "numbers": {
+  "height": 9,
+  "trunk_radius": 0.22,
+  "fork_height": 1.6,
+  "limbs": 8,
+  "limb_tilt": [
+   18,
+   38
+  ],
+  "crown_centre_z": 5.6,
+  "crown_radius": 2.8,
+  "crown_half_height": 3.4,
+  "crown_floor": 1.8,
+  "masses": 18,
+  "mass_radius": [
+   0.8,
+   1.2
+  ],
+  "attractors": 5000,
+  "step": 0.26,
+  "reach": 2.2,
+  "close": 0.34,
+  "twig_radius": 0.011,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.4,
+   0.62
+  ],
+  "cards_per_twig": 4,
+  "leaf": "oval",
+  "bark": [
+   0.36,
+   0.33,
+   0.3
+  ],
+  "leaf_tint": [
+   0.85,
+   0.98,
+   0.84
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

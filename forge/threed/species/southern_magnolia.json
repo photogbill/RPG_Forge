@@ -1,0 +1,46 @@
+{
+ "name": "southern_magnolia",
+ "about": "A southern magnolia: a dense dark-green pyramid of huge glossy leaves right to the ground, smooth grey bark.",
+ "numbers": {
+  "height": 12,
+  "trunk_radius": 0.3,
+  "fork_height": 0.8,
+  "limbs": 9,
+  "limb_tilt": [
+   55,
+   82
+  ],
+  "crown_centre_z": 6.0,
+  "crown_radius": 4.0,
+  "crown_half_height": 5.8,
+  "crown_floor": 0.6,
+  "masses": 24,
+  "mass_radius": [
+   1.0,
+   1.6
+  ],
+  "attractors": 6000,
+  "step": 0.3,
+  "reach": 2.8,
+  "close": 0.4,
+  "twig_radius": 0.014,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.7,
+   1.1
+  ],
+  "cards_per_twig": 4,
+  "leaf": "oval",
+  "bark": [
+   0.48,
+   0.46,
+   0.42
+  ],
+  "leaf_tint": [
+   0.65,
+   0.8,
+   0.62
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

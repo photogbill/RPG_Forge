@@ -1,0 +1,46 @@
+{
+ "name": "loblolly_pine",
+ "about": "A loblolly pine: a tall straight trunk with plated red-brown bark, bare for most of its height, a small open crown of long needles at the top.",
+ "numbers": {
+  "height": 22,
+  "trunk_radius": 0.38,
+  "fork_height": 13,
+  "limbs": 7,
+  "limb_tilt": [
+   55,
+   85
+  ],
+  "crown_centre_z": 18,
+  "crown_radius": 4.0,
+  "crown_half_height": 4.0,
+  "crown_floor": 13,
+  "masses": 16,
+  "mass_radius": [
+   1.2,
+   1.8
+  ],
+  "attractors": 5000,
+  "step": 0.4,
+  "reach": 3.6,
+  "close": 0.5,
+  "twig_radius": 0.016,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.6,
+   0.9
+  ],
+  "cards_per_twig": 4,
+  "leaf": "feather",
+  "bark": [
+   0.4,
+   0.28,
+   0.22
+  ],
+  "leaf_tint": [
+   0.82,
+   0.95,
+   0.78
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

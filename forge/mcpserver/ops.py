@@ -877,6 +877,25 @@ def _with_key(c: Ctx, key: str, name: str, inp: dict, run) -> dict:
     return ans
 
 
+# ------------------------------------------------------------------------------------------------ more operations
+def _load_more_ops() -> None:
+    """Operations kept in their own files beside this one (forge/mcpserver/ops_*.py; BUILD 98 Part 12). Each has
+    install(ns) and registers through this module's own @op, so it works whether this runs as a module or as __main__.
+    A file that fails to load is logged and skipped: the other operations still answer."""
+    import importlib
+    here = Path(__file__).resolve().parent
+    me = sys.modules[__name__]
+    for f in sorted(here.glob("ops_*.py")):
+        try:
+            mod = importlib.import_module(f"forge.mcpserver.{f.stem}")
+            mod.install(me)
+        except Exception:  # noqa: BLE001
+            log.exception("mcp: could not load the operations in %s", f.name)
+
+
+_load_more_ops()
+
+
 # ------------------------------------------------------------------------------------------------ one request
 def handle(req: dict, cfg: dict | None = None) -> dict:
     name = str(req.get("op") or "")

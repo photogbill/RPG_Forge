@@ -1,0 +1,41 @@
+{
+ "name": "white_oak",
+ "about": "A white oak: a broad spreading crown on a thick trunk with pale scaly bark, heavy limbs going out wide.",
+ "numbers": {
+  "height": 18,
+  "trunk_radius": 0.7,
+  "fork_height": 3.0,
+  "limbs": 7,
+  "limb_tilt": [
+   50,
+   76
+  ],
+  "crown_centre_z": 11,
+  "crown_radius": 8.0,
+  "crown_half_height": 6.0,
+  "crown_floor": 4.2,
+  "masses": 28,
+  "mass_radius": [
+   1.8,
+   2.8
+  ],
+  "attractors": 7600,
+  "step": 0.4,
+  "reach": 4.5,
+  "close": 0.6,
+  "twig_radius": 0.02,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.8,
+   1.2
+  ],
+  "cards_per_twig": 4,
+  "leaf": "lance",
+  "bark": [
+   0.5,
+   0.48,
+   0.44
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

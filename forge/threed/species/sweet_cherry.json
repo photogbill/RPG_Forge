@@ -1,0 +1,41 @@
+{
+ "name": "sweet_cherry",
+ "about": "A fruiting sweet cherry (\u2726 William's list): taller and more upright than the flowering kind, a straight trunk with shiny banded red-grey bark, an oval crown.",
+ "numbers": {
+  "height": 8.5,
+  "trunk_radius": 0.24,
+  "fork_height": 1.8,
+  "limbs": 5,
+  "limb_tilt": [
+   25,
+   50
+  ],
+  "crown_centre_z": 5.6,
+  "crown_radius": 3.0,
+  "crown_half_height": 2.9,
+  "crown_floor": 2.2,
+  "masses": 16,
+  "mass_radius": [
+   0.9,
+   1.4
+  ],
+  "attractors": 5000,
+  "step": 0.28,
+  "reach": 2.6,
+  "close": 0.36,
+  "twig_radius": 0.012,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.42,
+   0.64
+  ],
+  "cards_per_twig": 4,
+  "leaf": "lance",
+  "bark": [
+   0.42,
+   0.3,
+   0.28
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

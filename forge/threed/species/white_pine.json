@@ -1,0 +1,46 @@
+{
+ "name": "white_pine",
+ "about": "An eastern white pine: soft blue-green needles in level layered tiers, a straight trunk, a slightly ragged crown.",
+ "numbers": {
+  "height": 18,
+  "trunk_radius": 0.4,
+  "fork_height": 2.5,
+  "limbs": 12,
+  "limb_tilt": [
+   70,
+   92
+  ],
+  "crown_centre_z": 10,
+  "crown_radius": 4.6,
+  "crown_half_height": 8.0,
+  "crown_floor": 2.4,
+  "masses": 24,
+  "mass_radius": [
+   1.1,
+   1.7
+  ],
+  "attractors": 6000,
+  "step": 0.34,
+  "reach": 3.2,
+  "close": 0.44,
+  "twig_radius": 0.014,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.6,
+   0.9
+  ],
+  "cards_per_twig": 4,
+  "leaf": "feather",
+  "bark": [
+   0.34,
+   0.31,
+   0.29
+  ],
+  "leaf_tint": [
+   0.8,
+   0.95,
+   0.92
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

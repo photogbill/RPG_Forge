@@ -1,0 +1,46 @@
+{
+ "name": "american_holly",
+ "about": "An American holly: a dense dark evergreen pyramid branching to the ground, glossy spiny leaves, smooth pale-grey bark.",
+ "numbers": {
+  "height": 8,
+  "trunk_radius": 0.18,
+  "fork_height": 0.6,
+  "limbs": 9,
+  "limb_tilt": [
+   60,
+   85
+  ],
+  "crown_centre_z": 4.0,
+  "crown_radius": 2.4,
+  "crown_half_height": 3.9,
+  "crown_floor": 0.4,
+  "masses": 22,
+  "mass_radius": [
+   0.7,
+   1.1
+  ],
+  "attractors": 5600,
+  "step": 0.24,
+  "reach": 2.0,
+  "close": 0.3,
+  "twig_radius": 0.01,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.36,
+   0.56
+  ],
+  "cards_per_twig": 4,
+  "leaf": "oval",
+  "bark": [
+   0.55,
+   0.53,
+   0.5
+  ],
+  "leaf_tint": [
+   0.62,
+   0.78,
+   0.62
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

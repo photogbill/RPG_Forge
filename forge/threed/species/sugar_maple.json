@@ -1,0 +1,41 @@
+{
+ "name": "sugar_maple",
+ "about": "A sugar maple: a dense rounded crown, furrowed grey bark, the big shade tree of an old farmhouse yard.",
+ "numbers": {
+  "height": 17,
+  "trunk_radius": 0.45,
+  "fork_height": 3.0,
+  "limbs": 6,
+  "limb_tilt": [
+   38,
+   62
+  ],
+  "crown_centre_z": 10.5,
+  "crown_radius": 6.0,
+  "crown_half_height": 6.2,
+  "crown_floor": 4.0,
+  "masses": 24,
+  "mass_radius": [
+   1.6,
+   2.4
+  ],
+  "attractors": 6800,
+  "step": 0.38,
+  "reach": 4.0,
+  "close": 0.56,
+  "twig_radius": 0.018,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.7,
+   1.1
+  ],
+  "cards_per_twig": 4,
+  "leaf": "delta",
+  "bark": [
+   0.38,
+   0.35,
+   0.31
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

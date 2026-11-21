@@ -156,3 +156,16 @@ def test_compiler_places_the_dressers_things(tmp_path):
     row = [t for t in tl["things"] if t["id"] == "dz_001_pot"][0]
     assert row["model"] == "lm_pot" and row["at"] == [12.0, 11.0]
     assert all(e["id"] != "lm_pot" for e in placemod.wanted_entries(merged))     # its model is on the kit's own list
+
+
+def test_compile_never_lists_a_model_another_list_already_has(tmp_path):
+    from forge.threed import place as placemod
+    games = tmp_path / "games"
+    w = games / "g" / "wanted_3d"
+    w.mkdir(parents=True)
+    (w / "t_street_hand_pass.json").write_text(json.dumps({"entries": [{"id": "lm_bed", "kind": "prop", "words": "x"}]}))
+    pl = _street_place([{"id": "bed", "kind": "prop", "model": "lm_bed", "at": [5, 25], "words": "x A bed."},
+                        {"id": "pot", "kind": "prop", "model": "lm_pot2", "at": [8, 25], "words": "x A pot."}])
+    out = placemod.write_wanted(games, "g", pl, hold=True)
+    ids = {e["id"] for e in json.loads(out.read_text())["entries"]}
+    assert "lm_bed" not in ids and "lm_pot2" in ids

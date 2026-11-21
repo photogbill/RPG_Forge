@@ -12,6 +12,9 @@ rules — every change goes through a forge function William's own .bat files us
     tools.list                                        every outside tool: where, version, licence, the doctor's check
     library.search · library.import                   the Libraries shelf (forge/library.py), licence kept with each
     areas.board · slice.board                         checks 6 and 7 on every place; the slice and how far it is
+    scans.list · scans.intake                         William's R5 photos onto the shelf (forge/scans.py)
+    studio.run · studio.schema                        William's Photographic Studio through its own command line
+    look.lut                                          William's .cube grade for a town into Godot (forge/look_lut.py)
 """
 from __future__ import annotations
 
@@ -225,3 +228,95 @@ def install(ns) -> None:
                                               "life (Part 6)", "sound (Part 10)", "vista (Part 5)", "hero things (Part 2)",
                                               "William has played it"]})
         return done({"slice": name, "places": rows})
+
+    # -------------------------------------------------------------------------------------------- William's camera
+    @op("scans.list", "read", "William's R5 photos waiting in scans/incoming/<date>_<subject>/: texture or scan, raw or "
+        "developed, and what each became.")
+    def _scans_list(c, inp):
+        from .. import scans
+        return done({"folders": [scans.state(f) for f in scans.folders(c.cfg)]})
+
+    def _scans_dry(c, inp):
+        from .. import scans
+        todo = [scans.state(f) for f in scans.folders(c.cfg) if not scans.state(f)["done"]]
+        return {"status": "dry_run", "would": f"take in {len(todo)} folders: " + ", ".join(t["folder"] for t in todo)[:400],
+                "files_written": 0}
+
+    @op("scans.intake", "change", "Take in William's photos: develop (his Studio), make a texture seamless with every map "
+        "and put it on the Libraries shelf as his own; a scan waits for RealityScan. One folder, or all waiting.",
+        {"folder": "optional: a folder name under scans/incoming"}, dry=_scans_dry)
+    def _scans_intake(c, inp):
+        from .. import scans
+        f = (scans.incoming_dir(c.cfg) / str(inp["folder"])) if inp.get("folder") else None
+        return done({"results": scans.intake(f, c.cfg, c.who)})
+
+    # -------------------------------------------------------------------------------------------- William's Studio
+    STUDIO_CMDS = ("edit", "clean", "relight", "colourize", "restore", "jpeg-repair", "descreen", "negative", "infrared",
+                   "match", "look-profile", "depth", "cutout", "find", "stack", "dualpixel", "schema", "looks", "batch")
+
+    def _studio_cli():
+        import os
+        d = os.environ.get("STUDIO_DIR") or r"D:\Analyst_Toolkit\Photographic Denoiser"
+        return Path(d) / "studio-cli.bat"
+
+    def _studio_dry(c, inp):
+        cli = _studio_cli()
+        return {"status": "dry_run", "would": f"{cli} {inp.get('command')} " + " ".join(map(str, inp.get("args") or [])),
+                "files_written": 0, "studio_found": cli.exists()}
+
+    @op("studio.run", "change", "Run one command of William's Photographic Studio (its own command line, as a separate "
+        "program: the Studio is GPL, the forge MIT): edit, clean, match (colour match to a reference or a look profile), "
+        "look-profile, depth (maps, normals, parallax layers), cutout, relight, restore, find, stack, dualpixel, batch. "
+        "Results are new files named NAME_Studio.ext (it never overwrites); outputs go under out/studio/ unless --out is given. "
+        "studio.schema lists every setting.",
+        {"command": "required: one of " + ", ".join(STUDIO_CMDS), "args": "optional: a list of arguments (inputs first)",
+         "minutes": "optional: how long to wait (default 20)"}, dry=_studio_dry)
+    def _studio_run(c, inp):
+        import subprocess
+        from .. import config as cfgmod
+        cmd = str(inp["command"])
+        if cmd not in STUDIO_CMDS:
+            return error("invalid_input", f"no Studio command {cmd!r}", "one of " + ", ".join(STUDIO_CMDS))
+        cli = _studio_cli()
+        if not cli.exists():
+            return error("not_found", f"the Studio's command line is not at {cli}", "set STUDIO_DIR, or ask William where it is")
+        args = [str(a) for a in (inp.get("args") or [])]
+        if cmd not in ("schema", "looks", "find", "look-profile") and "--out" not in args:
+            out = cfgmod.path_of(c.cfg, "out") / "studio" / cmd
+            out.mkdir(parents=True, exist_ok=True)
+            args += ["--out", str(out)]
+        if "--json" not in args:
+            args.append("--json")
+        p = subprocess.run([str(cli), cmd] + args, capture_output=True, text=True, timeout=float(inp.get("minutes") or 20) * 60)
+        line = next((ln for ln in reversed((p.stdout or "").strip().splitlines()) if ln.startswith("{")), "")
+        try:
+            res = json.loads(line) if line else {"ok": False, "problems": [{"text": (p.stderr or "")[-1500:]}]}
+        except ValueError:
+            res = {"ok": False, "problems": [{"text": line[:1500]}]}
+        res["exit"] = p.returncode
+        return done(res, "the Studio's own JSON: read the output paths from 'outputs'")
+
+    @op("studio.schema", "read", "Every setting, choice and command of William's Photographic Studio, from its own code "
+        "(studio-cli.bat schema). Give 'part' for one part, e.g. light or light.shadows.", {"part": "optional"})
+    def _studio_schema(c, inp):
+        return _studio_run(c, {"command": "schema", "args": ([str(inp["part"])] if inp.get("part") else []), "minutes": 3})
+
+    # -------------------------------------------------------------------------------------------- the grade
+    @op("look.lut", "change", "A town's colour grade into the game (BUILD 98 Part 9): William's .cube LUT (exported from "
+        "Photoshop after grading the town's stills) becomes a PNG of slices and a Godot .import that imports it as a 3D "
+        "texture for the Environment's colour correction. Writes into out/looks/<town>/.",
+        {"cube": "required: the .cube file (absolute, or inside the forge folder)", "town": "required: e.g. linden_mills"})
+    def _look_lut(c, inp):
+        from .. import look_lut
+        root = Path(__file__).resolve().parents[2]
+        src = Path(str(inp["cube"]))
+        if not src.is_absolute():
+            src = root / src
+        if not src.exists():
+            return refused(f"no .cube at {src}")
+        town = "".join(ch for ch in str(inp["town"]).lower() if ch.isalnum() or ch == "_") or "town"
+        try:
+            meta = look_lut.make(src, root / "out" / "looks" / town, town, f"look/luts/{town}")
+        except look_lut.LutError as ex:
+            return refused(str(ex))
+        return done(meta, "copy the PNG and its .import into the game's look/luts/<town>/ folder; Godot imports it as a 3D texture")

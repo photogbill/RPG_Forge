@@ -1,0 +1,41 @@
+{
+ "name": "sycamore",
+ "about": "An American sycamore: a big white-and-tan mottled trunk shedding its bark in plates, crooked pale upper limbs, a broad open crown.",
+ "numbers": {
+  "height": 20,
+  "trunk_radius": 0.6,
+  "fork_height": 3.5,
+  "limbs": 6,
+  "limb_tilt": [
+   35,
+   65
+  ],
+  "crown_centre_z": 13,
+  "crown_radius": 7.5,
+  "crown_half_height": 6.6,
+  "crown_floor": 5.0,
+  "masses": 24,
+  "mass_radius": [
+   1.7,
+   2.6
+  ],
+  "attractors": 7000,
+  "step": 0.42,
+  "reach": 4.6,
+  "close": 0.62,
+  "twig_radius": 0.021,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.9,
+   1.3
+  ],
+  "cards_per_twig": 4,
+  "leaf": "delta",
+  "bark": [
+   0.72,
+   0.68,
+   0.58
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

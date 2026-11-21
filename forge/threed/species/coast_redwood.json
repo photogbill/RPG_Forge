@@ -1,0 +1,48 @@
+{
+ "name": "coast_redwood",
+ "about": "A coast redwood (\u2726 William's list) as planted in a Virginia yard thirty years ago: a tall straight cinnamon-red fibrous trunk, a dense dark-green spire of flat needles, branches drooping then turning up at the tips.",
+ "numbers": {
+  "height": 22,
+  "trunk_radius": 0.55,
+  "fork_height": 2.5,
+  "limbs": 10,
+  "limb_tilt": [
+   75,
+   92
+  ],
+  "crown_centre_z": 12.0,
+  "crown_radius": 3.6,
+  "crown_half_height": 10.2,
+  "crown_floor": 2.2,
+  "masses": 30,
+  "mass_radius": [
+   1.0,
+   1.5
+  ],
+  "attractors": 7200,
+  "step": 0.34,
+  "reach": 2.8,
+  "close": 0.4,
+  "twig_radius": 0.013,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.55,
+   0.85
+  ],
+  "cards_per_twig": 4,
+  "leaf": "feather",
+  "bark": [
+   0.52,
+   0.3,
+   0.21
+  ],
+  "leaf_tint": [
+   0.72,
+   0.86,
+   0.7
+  ],
+  "flare": 2.2,
+  "flare_height": 1.6
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

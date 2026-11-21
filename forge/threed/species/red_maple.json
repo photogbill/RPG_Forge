@@ -1,0 +1,46 @@
+{
+ "name": "red_maple",
+ "about": "A red maple, the commonest tree in Northern Virginia: smooth grey bark, an oval upright crown, red leaf stems.",
+ "numbers": {
+  "height": 13,
+  "trunk_radius": 0.3,
+  "fork_height": 2.4,
+  "limbs": 6,
+  "limb_tilt": [
+   30,
+   55
+  ],
+  "crown_centre_z": 8.2,
+  "crown_radius": 4.2,
+  "crown_half_height": 4.6,
+  "crown_floor": 3.0,
+  "masses": 20,
+  "mass_radius": [
+   1.1,
+   1.7
+  ],
+  "attractors": 5200,
+  "step": 0.32,
+  "reach": 3.0,
+  "close": 0.42,
+  "twig_radius": 0.014,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.5,
+   0.8
+  ],
+  "cards_per_twig": 4,
+  "leaf": "delta",
+  "bark": [
+   0.48,
+   0.46,
+   0.44
+  ],
+  "leaf_tint": [
+   1.0,
+   0.98,
+   0.9
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

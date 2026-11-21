@@ -1,0 +1,46 @@
+{
+ "name": "weeping_willow",
+ "about": "A weeping willow by a wet ditch: a short thick trunk, a huge wide crown of long narrow leaves.",
+ "numbers": {
+  "height": 12,
+  "trunk_radius": 0.5,
+  "fork_height": 2.2,
+  "limbs": 6,
+  "limb_tilt": [
+   45,
+   75
+  ],
+  "crown_centre_z": 7.0,
+  "crown_radius": 6.5,
+  "crown_half_height": 5.0,
+  "crown_floor": 1.2,
+  "masses": 26,
+  "mass_radius": [
+   1.4,
+   2.2
+  ],
+  "attractors": 7200,
+  "step": 0.34,
+  "reach": 3.6,
+  "close": 0.5,
+  "twig_radius": 0.012,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.8,
+   1.2
+  ],
+  "cards_per_twig": 4,
+  "leaf": "lance",
+  "bark": [
+   0.38,
+   0.34,
+   0.3
+  ],
+  "leaf_tint": [
+   1.0,
+   1.06,
+   0.82
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

@@ -1,0 +1,46 @@
+{
+ "name": "apple",
+ "about": "An old backyard apple tree (\u2726 William's list): a short leaning trunk with rough grey-brown bark, low wide limbs, a rounded spreading crown of oval leaves.",
+ "numbers": {
+  "height": 5.2,
+  "trunk_radius": 0.18,
+  "fork_height": 1.1,
+  "limbs": 5,
+  "limb_tilt": [
+   45,
+   72
+  ],
+  "crown_centre_z": 3.4,
+  "crown_radius": 3.0,
+  "crown_half_height": 1.9,
+  "crown_floor": 1.2,
+  "masses": 14,
+  "mass_radius": [
+   0.9,
+   1.3
+  ],
+  "attractors": 4200,
+  "step": 0.24,
+  "reach": 2.2,
+  "close": 0.32,
+  "twig_radius": 0.011,
+  "pipe": 2.35,
+  "leaf_card": [
+   0.36,
+   0.56
+  ],
+  "cards_per_twig": 4,
+  "leaf": "oval",
+  "bark": [
+   0.4,
+   0.36,
+   0.31
+  ],
+  "leaf_tint": [
+   0.95,
+   1.02,
+   0.9
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

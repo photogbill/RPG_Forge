@@ -1,0 +1,41 @@
+{
+ "name": "black_walnut",
+ "about": "A black walnut: a tall dark-barked trunk with diamond ridges, an open airy crown of long compound leaves.",
+ "numbers": {
+  "height": 18,
+  "trunk_radius": 0.45,
+  "fork_height": 4.5,
+  "limbs": 5,
+  "limb_tilt": [
+   30,
+   58
+  ],
+  "crown_centre_z": 11.5,
+  "crown_radius": 6.0,
+  "crown_half_height": 6.0,
+  "crown_floor": 5.0,
+  "masses": 20,
+  "mass_radius": [
+   1.8,
+   2.6
+  ],
+  "attractors": 6000,
+  "step": 0.42,
+  "reach": 4.6,
+  "close": 0.64,
+  "twig_radius": 0.02,
+  "pipe": 2.35,
+  "leaf_card": [
+   1.0,
+   1.4
+  ],
+  "cards_per_twig": 4,
+  "leaf": "lance",
+  "bark": [
+   0.26,
+   0.23,
+   0.21
+  ]
+ },
+ "_by": "BUILD 98 Part 7, Claude Opus 2026-11-21 (\u25c6 numbers: Fable or William tune them in the Trees tab; every species is shown on one sheet beside its real reference before it is used)"
+}

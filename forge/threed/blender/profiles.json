@@ -126,7 +126,7 @@
     "bl_ext.blender_org.f2",
     "bl_ext.blender_org.snap_utilities_line",
     "bl_ext.blender_org.tissue",
-    "node_arrange",
+    "bl_ext.blender_org.node_arrange",
     "bl_ext.blender_org.nd",
     "bl_ext.blender_org.looptools",
     "bl_ext.blender_org.EdgeFlow",

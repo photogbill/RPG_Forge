@@ -1,20 +1,165 @@
 {
  "_comment": "Every outside tool the forge drives or hands off to (BUILD 98 Part 1: 'every tool gets a home in the forge, a doctor check, a licence line and a connector op'). Claude Opus, 2026-11-21. A tool is found by the first of its 'paths' that exists (a path starting with a drive letter is absolute; anything else is inside the forge folder; %VAR% is expanded). forge.json -> tools -> <id> -> exe overrides. 'op' names the connector operation that drives it; 'by_hand' says what William does himself. Nothing here names a game.",
  "tools": [
-  {"id": "blender", "name": "Blender 5.3 (with add-on profiles)", "paths": ["C:\\Program Files\\Blender Foundation\\Blender 5.3\\blender.exe"], "version_args": ["--version"], "licence": "GPL-3.0 (the program; what it makes is ours). Add-ons: docs\\BLENDER_ADDONS.md", "for": "house kit, trees, bakes, retopology, export to Godot, vistas' base renders", "op": "blender.run, blender.profiles, blender.status"},
-  {"id": "comfyui", "name": "ComfyUI (the art engine: FLUX.2 klein, TRELLIS.2, Pixal3D)", "paths": ["engines\\ComfyUI\\main.py"], "licence": "GPL-3.0 (program); FLUX.2 klein 4B Apache-2.0; TRELLIS.2 MIT", "for": "every picture and generated model", "op": "jobs.submit, world.add"},
-  {"id": "filter_forge", "name": "Filter Forge 15", "paths": ["C:\\Program Files\\Filter Forge 15\\Bin\\FFXCmdRenderer-x64.exe"], "licence": "William's own licence (commercial use of rendered output allowed)", "for": "material channels (BUILD 87)", "op": "jobs.submit (filter_forge)"},
-  {"id": "material_maker", "name": "Material Maker", "paths": ["engines\\material_maker\\material_maker.exe"], "licence": "MIT", "for": "seamless materials, every channel (BUILD 87), William's scans made seamless (Part 3)", "op": "jobs.submit (material_maker)"},
-  {"id": "godot", "name": "Godot 4.7.2", "paths": ["D:\\Turing Accords Game\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64.exe", "D:\\Turing Accords Game\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe"], "licence": "MIT", "for": "the game; its still mode takes the area pictures", "op": "places.take_pictures"},
-  {"id": "photographic_studio", "name": "Photographic Studio By Bill (raw development, denoise)", "paths": ["D:\\Analyst_Toolkit\\Photographic Denoiser\\studio_cli.bat", "D:\\Analyst_Toolkit\\Photographic Denoiser"], "licence": "William's own", "for": "R5 raws to linear TIFFs for textures and scans (Part 3)", "op": "scans.intake"},
-  {"id": "realityscan", "name": "RealityScan (photogrammetry)", "paths": ["C:\\Program Files\\Epic Games\\RealityScan_2.0\\RealityScan.exe", "C:\\Program Files\\Epic Games\\RealityScan\\RealityScan.exe", "C:\\Program Files\\Capturing Reality\\RealityCapture\\RealityCapture.exe"], "licence": "Free under US$1M a year revenue (Epic); output is ours", "for": "William's object scans to models (Part 3)", "op": "scans.intake", "install": "Epic Games Launcher -> RealityScan (William's Epic account)"},
-  {"id": "effekseer", "name": "Effekseer (effects editor) + its Godot 4 plug-in", "paths": ["engines\\effekseer\\Effekseer.exe"], "licence": "MIT", "for": "smoke, steam, fire, sparks (Part 6) — first check it loads on Godot 4.7", "op": "effects.list", "install": "github.com/effekseer/Effekseer releases (MIT): asks William before fetching"},
-  {"id": "whisper", "name": "faster-whisper", "paths": ["engines\\whisper\\venv\\Scripts\\python.exe", "local\\whisper\\venv\\Scripts\\python.exe"], "licence": "MIT", "for": "word times for spoken lines", "op": "(get_whisper.bat)"},
-  {"id": "gigapixel", "name": "Topaz Gigapixel", "paths": ["C:\\Program Files\\Topaz Labs LLC\\Topaz Gigapixel AI\\Topaz Gigapixel AI.exe", "C:\\Program Files\\Topaz Labs LLC\\Topaz Gigapixel\\Topaz Gigapixel.exe"], "licence": "William's own licence", "for": "upscaling soft textures (area check 5)", "by_hand": "William runs its batches; the forge writes the list"},
-  {"id": "photoshop", "name": "Adobe Photoshop", "paths": ["C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe", "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe"], "licence": "William's own licence", "for": "the town's colour grade, exported as a .cube LUT (Part 9)", "by_hand": "William grades the stills the forge renders and exports File -> Export -> Color Lookup Tables (.cube)", "op": "look.lut"},
-  {"id": "polyhaven", "name": "Poly Haven (textures, skies, models)", "paths": [], "online": "https://polyhaven.com", "licence": "CC0", "for": "the Libraries shelf", "op": "library.search, library.import"},
-  {"id": "ambientcg", "name": "ambientCG (textures)", "paths": [], "online": "https://ambientcg.com", "licence": "CC0", "for": "the Libraries shelf", "op": "library.search, library.import"},
-  {"id": "megascans_fab", "name": "Megascans on Fab", "paths": ["library\\incoming\\fab"], "online": "https://www.fab.com", "licence": "Fab Standard Licence (any engine)", "for": "scanned ground, rocks, plants", "by_hand": "William claims them with his Epic account and downloads into library\\incoming\\fab", "op": "library.import (source fab)"},
-  {"id": "blenderkit", "name": "BlenderKit (free tier)", "paths": [], "licence": "CC0 or BlenderKit Royalty-Free (never shipped loose)", "for": "the Libraries shelf, from inside Blender", "op": "library.import (source blenderkit, the asset's own licence line kept)"}
+  {
+   "id": "blender",
+   "name": "Blender 5.3 (with add-on profiles)",
+   "paths": [
+    "C:\\Program Files\\Blender Foundation\\Blender 5.3\\blender.exe"
+   ],
+   "version_args": [
+    "--version"
+   ],
+   "licence": "GPL-3.0 (the program; what it makes is ours). Add-ons: docs\\BLENDER_ADDONS.md",
+   "for": "house kit, trees, bakes, retopology, export to Godot, vistas' base renders",
+   "op": "blender.run, blender.profiles, blender.status"
+  },
+  {
+   "id": "comfyui",
+   "name": "ComfyUI (the art engine: FLUX.2 klein, TRELLIS.2, Pixal3D)",
+   "paths": [
+    "engines\\ComfyUI\\main.py"
+   ],
+   "licence": "GPL-3.0 (program); FLUX.2 klein 4B Apache-2.0; TRELLIS.2 MIT",
+   "for": "every picture and generated model",
+   "op": "jobs.submit, world.add"
+  },
+  {
+   "id": "filter_forge",
+   "name": "Filter Forge 15",
+   "paths": [
+    "C:\\Program Files\\Filter Forge 15\\Bin\\FFXCmdRenderer-x64.exe"
+   ],
+   "licence": "William's own licence (commercial use of rendered output allowed)",
+   "for": "material channels (BUILD 87)",
+   "op": "jobs.submit (filter_forge)"
+  },
+  {
+   "id": "material_maker",
+   "name": "Material Maker",
+   "paths": [
+    "engines\\material_maker\\material_maker.exe"
+   ],
+   "licence": "MIT",
+   "for": "seamless materials, every channel (BUILD 87), William's scans made seamless (Part 3)",
+   "op": "jobs.submit (material_maker)"
+  },
+  {
+   "id": "godot",
+   "name": "Godot 4.7.2",
+   "paths": [
+    "D:\\Turing Accords Game\\engine\\win64\\Godot_v4.7.2-stable_win64.exe",
+    "D:\\Turing Accords Game\\engine\\win64\\Godot_v4.7.2-stable_win64_console.exe"
+   ],
+   "licence": "MIT",
+   "for": "the game; its still mode takes the area pictures",
+   "op": "places.take_pictures"
+  },
+  {
+   "id": "photographic_studio",
+   "name": "Photographic Studio By Bill (raw development, denoise)",
+   "paths": [
+    "D:\\Analyst_Toolkit\\Photographic Denoiser\\studio-cli.bat"
+   ],
+   "licence": "GPL-3.0 (William's own; the forge runs it as a separate program, never imports it)",
+   "for": "raw development for William's R5 textures and scans; colour match to a look profile, depth maps and parallax layers, cut-outs, clean, relight (its docs/CLI.md)",
+   "op": "studio.run, studio.schema, scans.intake"
+  },
+  {
+   "id": "realityscan",
+   "name": "RealityScan (photogrammetry)",
+   "paths": [
+    "C:\\Program Files\\Epic Games\\RealityScan_2.0\\RealityScan.exe",
+    "C:\\Program Files\\Epic Games\\RealityScan\\RealityScan.exe",
+    "C:\\Program Files\\Capturing Reality\\RealityCapture\\RealityCapture.exe"
+   ],
+   "licence": "Free under US$1M a year revenue (Epic); output is ours",
+   "for": "William's object scans to models (Part 3)",
+   "op": "scans.intake",
+   "install": "Epic Games Launcher -> RealityScan (William's Epic account)"
+  },
+  {
+   "id": "effekseer",
+   "name": "Effekseer (effects editor) + its Godot 4 plug-in",
+   "paths": [
+    "engines\\effekseer\\Effekseer.exe"
+   ],
+   "licence": "MIT",
+   "for": "smoke, steam, fire, sparks (Part 6) — first check it loads on Godot 4.7",
+   "op": "effects.list",
+   "install": "github.com/effekseer/Effekseer releases (MIT): asks William before fetching"
+  },
+  {
+   "id": "whisper",
+   "name": "faster-whisper",
+   "paths": [
+    "engines\\whisper\\venv\\Scripts\\python.exe",
+    "local\\whisper\\venv\\Scripts\\python.exe"
+   ],
+   "licence": "MIT",
+   "for": "word times for spoken lines",
+   "op": "(get_whisper.bat)"
+  },
+  {
+   "id": "gigapixel",
+   "name": "Topaz Gigapixel",
+   "paths": [
+    "C:\\Program Files\\Topaz Labs LLC\\Topaz Gigapixel AI\\Topaz Gigapixel AI.exe",
+    "C:\\Program Files\\Topaz Labs LLC\\Topaz Gigapixel\\Topaz Gigapixel.exe"
+   ],
+   "licence": "William's own licence",
+   "for": "upscaling soft textures (area check 5)",
+   "by_hand": "William runs its batches; the forge writes the list"
+  },
+  {
+   "id": "photoshop",
+   "name": "Adobe Photoshop",
+   "paths": [
+    "C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe",
+    "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe"
+   ],
+   "licence": "William's own licence",
+   "for": "the town's colour grade, exported as a .cube LUT (Part 9)",
+   "by_hand": "William grades the stills the forge renders and exports File -> Export -> Color Lookup Tables (.cube)",
+   "op": "look.lut"
+  },
+  {
+   "id": "polyhaven",
+   "name": "Poly Haven (textures, skies, models)",
+   "paths": [],
+   "online": "https://polyhaven.com",
+   "licence": "CC0",
+   "for": "the Libraries shelf",
+   "op": "library.search, library.import"
+  },
+  {
+   "id": "ambientcg",
+   "name": "ambientCG (textures)",
+   "paths": [],
+   "online": "https://ambientcg.com",
+   "licence": "CC0",
+   "for": "the Libraries shelf",
+   "op": "library.search, library.import"
+  },
+  {
+   "id": "megascans_fab",
+   "name": "Megascans on Fab",
+   "paths": [
+    "library\\incoming\\fab"
+   ],
+   "online": "https://www.fab.com",
+   "licence": "Fab Standard Licence (any engine)",
+   "for": "scanned ground, rocks, plants",
+   "by_hand": "William claims them with his Epic account and downloads into library\\incoming\\fab",
+   "op": "library.import (source fab)"
+  },
+  {
+   "id": "blenderkit",
+   "name": "BlenderKit (free tier)",
+   "paths": [],
+   "licence": "CC0 or BlenderKit Royalty-Free (never shipped loose)",
+   "for": "the Libraries shelf, from inside Blender",
+   "op": "library.import (source blenderkit, the asset's own licence line kept)"
+  }
  ]
 }
