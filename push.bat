@@ -110,7 +110,7 @@ del "%MSGFILE%"
 :done
 echo.
 echo Pushed. Latest commits:
-git log --oneline -n 5
+git --no-pager log --oneline -n 5
 pause
 exit /b
 
