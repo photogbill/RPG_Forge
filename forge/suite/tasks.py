@@ -13,6 +13,10 @@ at this install, one card per thing to do:
 - builds marked waiting on them in the game's build queue (the adapter's optional `builds()` hook);
 - open notes addressed to them (a note with `to`, or a question an assistant pinned).
 
+**Don't wait for me** (nowait.py, 2026-11-17): with the person's standing instruction on, an open question takes its
+sender's default or is left to a named assistant, so its letter's card never forms (or leaves). A question left to an
+assistant is that assistant's work order ("Your call: …"), not the person's task.
+
 A card leaves the list in only two ways: it gets **done** (the thing itself changes — the questions answered, the track
 delivered — or the person ticks it), or it is **dismissed with a reason**. Reading a card changes nothing. Ticks and
 dismissals are kept in `<game>/work_orders/_ticked.json` with the card's *signature* (a letter's open count, the number
@@ -205,9 +209,14 @@ def gather(cfg: dict, gid: str, who: str | None, ui_state=None, now: datetime | 
         letters = mail.all_letters(root)
         open_by = mail.open_questions_by_letter(letters)
         mine = mail.folder_for(who)
+        from . import nowait                 # Don't wait for me: questions left to an assistant aren't waiting on the person
+        left = {}
+        for r in nowait.pending(root, None, letters):
+            if not who or mail.group_of(r["to"]) != mail.group_of(who) or " ".join(str(r["to"]).lower().split()) != " ".join(who.lower().split()):
+                left[r["letter"]] = left.get(r["letter"], 0) + len(r["questions"])
         for l in letters:
-            n = open_by.get(l.id, 0)
-            if not n or l.folder not in (mine, "archive") or (l.folder == "archive" and mail.group_of(l.to) != mail.group_of(who)):
+            n = open_by.get(l.id, 0) - left.get(l.id, 0)
+            if n <= 0 or l.folder not in (mine, "archive") or (l.folder == "archive" and mail.group_of(l.to) != mail.group_of(who)):
                 continue
             if l.id in folded_letters:
                 continue

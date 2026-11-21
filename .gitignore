@@ -110,3 +110,18 @@ venv-mac/
 
 # TRELLIS.2 trials (a session's own .bat files until a build makes them the forge's) - never pushed
 /trellis_*.bat
+
+# William's music test folder (2026-11-17): Suno downloads on their way to a game's score inbox. Large audio and
+# one game's own music: on this PC only, never pushed (push.bat runs `git add -A`).
+/music test/
+
+# BUILD 77: elevation cells are never committed, wherever they are put (the forge is public)
+*.dt0
+*.dt1
+*.dt2
+*.DT0
+*.DT1
+*.DT2
+*.hgt
+# BUILD 83: the connector's own small environment (mcp_setup.bat)
+venv_mcp/

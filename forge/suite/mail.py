@@ -17,6 +17,10 @@ text) and optionally applies_to {"file", "pointer"} — the data field a chosen 
 those through the safe-save path (validated, backed up, journalled) and records what happened in the reply.
 Free-text answers change nothing; they wait for whoever reads the mail. A question answered "talk to me" or "later"
 stays open on its thread, as does one nobody answered.
+
+An answer marked `stand_in` ("default" | "recommendation" | "deferred", with `for` = the person it stands in for) is a
+stand-in (nowait.py — Don't wait for me): it settles the question so nothing waits, it is not that person's ruling, and
+their own answer replaces it whenever it comes (the later answer wins, as always).
 """
 from __future__ import annotations
 import json, os, re
@@ -284,6 +288,8 @@ def thread_view(root: Path, letter_id: str, who: str) -> dict:
         for a in x.answers or []:
             if isinstance(a, dict) and (a.get("talk") or a.get("later")):
                 talk[f"{a.get('letter') or x.h('in_reply_to')}#{a.get('id')}"] = "talk" if a.get("talk") else "later"
+    from . import nowait                    # Don't wait for me: which open questions were left to an assistant
+    left = nowait.deferred(root)
     cards = []
     for x in th:
         d = x.as_dict()
@@ -292,6 +298,7 @@ def thread_view(root: Path, letter_id: str, who: str) -> dict:
             key = f"{x.id}#{q.get('id')}"
             q["answer"] = done.get(key)
             q["parked"] = talk.get(key) if key not in done else None
+            q["deferred"] = left.get(key) if key not in done else None
         cards.append(d)
     open_n = sum(1 for c in cards for q in c["questions"] if not q["answer"])
     return {"thread": l.thread, "subject": th[0].subject if th else l.subject, "letters": cards, "open_questions": open_n}

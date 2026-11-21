@@ -67,6 +67,16 @@ elif script == "join_head.py":                       # BUILD 39: a head joined o
     print("JOINED " + json.dumps({"collar_m": round(h * 0.86, 4), "collar_share": 0.86, "body_neck_m": 0.12, "head_neck_m": 0.14,
                                   "head_scale": 0.857, "height_before_m": h, "height_after_m": round(h * 0.98, 4), "materials": 2,
                                   "vertices": 8}), flush=True)
+elif script == "cloth_pin.py":          # BUILD 73: the cape pinned to a body
+    body, cloth, out = args[0], args[1], args[2]
+    if "NOSKELETON" in body:
+        print('CLOTH {"error": "RuntimeError: the body has no skeleton"}', flush=True)
+        sys.exit(0)
+    import shutil
+    shutil.copyfile(body, out)
+    print("CLOTH " + json.dumps({"mesh": opt("--name", "cloth"), "pinned": 120, "free": 880,
+                                 "pin_bones": ["clavicle_l", "clavicle_r", "neck_01"], "spine": "spine_03",
+                                 "size_m": {"width": 0.6, "height": 0.9}}), flush=True)
 else:
     print(f"fake_blender: no stand-in for {script}", flush=True)
     sys.exit(2)

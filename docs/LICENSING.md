@@ -54,3 +54,20 @@ Palettes on Lospec are shared by their authors for use in art; credit the author
 Public-domain geodata for the planned overworld job — Natural Earth, US Census TIGER/Line, USGS GNIS,
 USGS 3DEP, NLCD — carries no licence strings; OpenStreetMap (ODbL, share-alike on derived data) is
 deliberately not used.
+
+## Added 2026-11-17 (BUILDs 71, 74, 77)
+
+- **DTED Level 0** (NIMA, released to the public as a derivative set): products made with it carry the credit line
+  *"This product was developed using DTED Level 0, a product of the National Imagery and Mapping Agency."* and a
+  no-endorsement disclaimer (NOAA/NGDC GLOBE report, chapter 12, read 2026-11-17). The data itself is never committed.
+- **Natural Earth** (coast, rivers, lakes — when dropped in `local/natural_earth/`): public domain.
+- **FLUX.2 [klein] 4B** (distilled and base): Apache-2.0 (Black Forest Labs' model page, read 2026-11-17). The 9B models are
+  the FLUX Non-Commercial Licence and are never used.
+- **xinsir ControlNet union SDXL promax**: Apache-2.0 (its model page). **comfyui_controlnet_aux**: Apache-2.0 (LICENSE.txt
+  on the disk). **Impact Pack** (FaceDetailer): GPL-3.0, and its YOLOv8 face finder: AGPL-3.0 — tools run on this computer
+  to make pictures; none of their code or weights ships in a game.
+- **Voice tools** (BUILD 71): Rhubarb Lip Sync 1.14.0 — MIT; faster-whisper and the Whisper large-v3 weights — MIT;
+  engines named but not installed: Qwen3-TTS (Apache-2.0), Kokoro-82M (Apache-2.0), Chatterbox (MIT; every file it makes
+  carries an inaudible watermark). Shut out: XTTS-v2 (Coqui Public Model Licence, non-commercial), Fish Speech's open
+  weights (CC BY-NC-SA). The gate (`forge/voice/licences.py`) refuses an install until its code, weights and bundles are
+  each read.

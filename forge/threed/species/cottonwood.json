@@ -1,0 +1,11 @@
+{
+ "name": "cottonwood",
+ "about": "A cottonwood of the river bottoms: very tall, a thick pale trunk, a broad open crown of triangular leaves that turn and flash.",
+ "numbers": {
+  "height": 22.0, "trunk_radius": 0.8, "fork_height": 4.5, "limbs": 5, "limb_tilt": [30, 60],
+  "crown_centre_z": 13.0, "crown_radius": 9.0, "crown_half_height": 8.0, "crown_floor": 6.0, "masses": 22,
+  "mass_radius": [2.4, 3.4], "attractors": 6800, "step": 0.45, "reach": 5.0, "close": 0.68,
+  "twig_radius": 0.024, "pipe": 2.35, "leaf_card": [0.9, 1.35], "cards_per_twig": 4, "leaf": "delta",
+  "leaf_tint": [1.02, 1.02, 0.85], "bark": [0.42, 0.4, 0.34]
+ }
+}

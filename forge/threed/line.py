@@ -36,8 +36,9 @@ def estimate(spec: dict, done: dict | None = None) -> dict:
     models = spec.get("models", [MODEL])
     need_pic = [o for o in objs if not o.get("image") and not done.get(o["id"], {}).get("picture")]
     need_body = [o for o in objs if not done.get(o["id"], {}).get("body")]
-    need_rig = [o for o in objs if not done.get(o["id"], {}).get("skeleton")]
-    need_fit = [o for o in objs if not done.get(o["id"], {}).get("motions")]
+    people = [o for o in objs if str(o.get("kind") or "") != "animal"]          # BUILD 84: an animal gets neither, yet
+    need_rig = [o for o in people if not done.get(o["id"], {}).get("skeleton")]
+    need_fit = [o for o in people if not done.get(o["id"], {}).get("motions")]
     secs = {
         "pictures": len(need_pic) * TIMES["picture"],
         "bodies": sum(len(need_body) * TIMES.get(m, 270) for m in models),
@@ -111,11 +112,17 @@ def run(cfg: dict | None, spec: dict, out: Path | None = None, only: str | None 
 
     # ---- 2. skeletons, for the bodies that exist
     rspec = spec.get("rig") or {}
-    if "rig" not in skip and made:
+    # BUILD 84 part 3: an animal is never given a person's skeleton (the rigger's humanoid templates) nor fitted with the
+    # person's motion library; until the animal route exists it comes through as a body with no skeleton
+    animals = [o for o in made if str(o.get("kind") or "") == "animal"]
+    for o in animals:
+        log.info("%s: an animal — no person's skeleton and no person's motions (the animal route is not built yet)", o["id"])
+    made_people = [o for o in made if o not in animals]
+    if "rig" not in skip and made_people:
         bl = [{"id": o["id"], "glb": str(out / "models" / f"{o['id']}__{MODEL}.glb"), "kind": o.get("kind", "people"),
                "use_normal": bool(o.get("use_normal", rspec.get("use_normal", False))),
-               "no_fingers": bool(o.get("no_fingers", rspec.get("no_fingers", False)))} for o in made]
-        for b, o in zip(bl, made):
+               "no_fingers": bool(o.get("no_fingers", rspec.get("no_fingers", False)))} for o in made_people]
+        for b, o in zip(bl, made_people):
             if b["kind"] in ("animal", "thing"):
                 from . import tidy
                 w = out / "models" / f"{o['id']}__{MODEL}_welded.glb"
@@ -127,7 +134,7 @@ def run(cfg: dict | None, spec: dict, out: Path | None = None, only: str | None 
                     b["glb"] = str(w)
         rig.rig_bodies(cfg, bl, out / "rig", env=env, minutes_per_rig=int(rspec.get("minutes_per_rig", 30)),
                        lock_holder=f"3D line {batch}: skeletons", use_lock=use_lock, art_url=art_url)
-    rigged = [o for o in made if (out / "rig" / f"{o['id']}__{o.get('rigger') or rig.rigger_for(o)}.fbx").exists()]
+    rigged = [o for o in made_people if (out / "rig" / f"{o['id']}__{o.get('rigger') or rig.rigger_for(o)}.fbx").exists()]
     log.info("skeletons made: %d of %d", len(rigged), len(made))
 
     # ---- 3. the motion library, for the skeletons that exist
@@ -160,6 +167,8 @@ def run(cfg: dict | None, spec: dict, out: Path | None = None, only: str | None 
             why = "no picture was made"
         elif not s["body"]:
             why = "3D body: " + str(t_rows.get(i, {}).get("error", "not made"))[:160]
+        elif str(o.get("kind") or "") == "animal":
+            why = "an animal: no skeleton and no motions yet — never a person's (the animal route is not built yet)"
         elif not s["skeleton"]:
             why = "skeleton: " + " ".join(str(r_rows.get(i, {}).get("error", "not made")).splitlines()[:2])[:160]
         elif not s["motions"]:

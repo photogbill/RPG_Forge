@@ -22,11 +22,24 @@
     3d heads <body.glb> <head.glb> <out.glb> [--collar 0.86]             a head joined onto a shared body (Blender)
 
   BUILD 34 — towns as 3D stages:
-    3d place compile <place.json> [--game <id>] [--out <folder>]   the stage model (Blender, no card), the placed-things
-                                     list and the place's entries on the world list; starts no generation
+    3d place compile <place.json> [--game <id>] [--out <folder>] [--hold]   the stage model (Blender, no card), the
+                                     placed-things list and the place's entries on the world list (--hold: written held,
+                                     so the world queue makes none of them until a person releases them); starts no
+                                     generation. Into the game's <asset_root>/stages/<id>/ unless --out says otherwise
     3d place check <place.json>      what is wrong with a place plan, in words
     3d place from-town <plan set folder> [--sheet <sheet.json>] [--metres 1.0] [--out <place.json>]
                                      a town's floor-plan layout written out as a place plan
+
+  BUILD 63 — the look:
+    3d relief <folder or pictures…> [--force] [--strength 6] [--broad 0]   a normal map beside every library picture
+                                     (<name>_n.png; a Filter Forge Normal render or a Material Maker normal beside it wins);
+                                     what was decided goes in relief.json in the folder
+
+  BUILD 60 — the outdoors:
+    3d terrain <place.json> [--out <folder>]   a place's land (its `terrain` block: rules or a height picture) → a
+                                     16-bit height picture + its numbers beside the stage (compile_place does this too)
+    3d pack-terrain <pictures…> [--roughness 0.85] [--size 1024]   a surface as the terrain's two packed pictures
+                                     (<name>_t3d_albedo.png: colour + height; <name>_t3d_normal.png: normal + roughness)
 
   BUILD 40 — the picture gate:
     3d gate <picture.png> --words "…" [--expects-arms 1] [--age 9] [--seated] [--json]   the gate on one picture
@@ -111,6 +124,45 @@ def cmd_3d(cfg: dict, args: list[str]) -> int:
         return standin.main(rest)
     if sub == "place":                                   # BUILD 34
         return _cmd_place(cfg, rest)
+    if sub == "same-person":                             # BUILD 74: the same person, changed
+        return _cmd_same_person(cfg, rest)
+    if sub == "relief":                                  # BUILD 63
+        from .threed import relief
+        targets = [a for i, a in enumerate(rest) if not a.startswith("--") and (i == 0 or rest[i - 1] not in ("--strength", "--broad"))]
+        if not targets:
+            print("usage: 3d relief <folder or pictures…> [--force] [--strength 6] [--broad 0]")
+            return 2
+        r = relief.run(targets, force="--force" in rest, strength=float(_opt(rest, "--strength", 6.0)),
+                       broad=float(_opt(rest, "--broad", 0.0)))
+        for row in r["rows"]:
+            print(f"  {row['picture']} -> {row['relief']}  ({row['source']}{'' if row['written'] else ', unchanged'})")
+        print(f"relief: {r['pictures']} pictures, {r['written']} written, {r['kept']} kept")
+        return 0
+    if sub == "terrain":                                 # BUILD 60
+        from .threed import ground as land, place as placemod
+        if not rest or rest[0].startswith("--"):
+            print("usage: 3d terrain <place.json> [--out <folder>]")
+            return 2
+        pl = placemod.load(rest[0])
+        probs = land.check(pl)
+        if probs:
+            print("\n".join(probs))
+            return 1
+        out = _opt(rest, "--out", str(Path(rest[0]).parent))
+        b = land.make(pl, out, place_dir=Path(rest[0]).parent)
+        print(f"terrain: {b['height']} ({b['pixels'][0]}×{b['pixels'][1]}, {b['size_m'][0]:.0f} × {b['size_m'][1]:.0f} m, "
+              f"{b['range_m'][0]:.2f} to {b['range_m'][1]:.2f} m, levelled under {b['flat']}) in {out}")
+        return 0
+    if sub == "pack-terrain":                            # BUILD 60
+        from .threed import ground as land
+        pics = [a for i, a in enumerate(rest) if not a.startswith("--") and (i == 0 or rest[i - 1] not in ("--roughness", "--size"))]
+        if not pics:
+            print("usage: 3d pack-terrain <pictures…> [--roughness 0.85] [--size 1024]")
+            return 2
+        for p in pics:
+            r = land.pack_for_terrain(Path(p), roughness=float(_opt(rest, "--roughness", 0.85)), size=int(_opt(rest, "--size", 1024)))
+            print(f"  {Path(p).name} -> {Path(r['albedo']).name}, {Path(r['normal']).name} (normal from {r['normal_from']})")
+        return 0
     if sub == "gate":                                    # BUILD 40
         from .threed import gate
         if not rest:
@@ -243,8 +295,10 @@ def _cmd_place(cfg: dict, rest: list[str]) -> int:
         from .threed import world
         gid = _opt(rest, "--game") or _default_game(cfg)
         pl = place.load(files[0])
-        out = Path(_opt(rest, "--out") or (world.root_of(cfg) / "out" / "3d" / "places" / str(pl.get("id") or "place")))
-        rep = place.compile_place(cfg, gid, files[0], out, games_root=world.games_dir(cfg) if gid else None)
+        out = Path(_opt(rest, "--out") or place.stage_dir(cfg, gid, str(pl.get("id") or "place"))
+                   or (world.root_of(cfg) / "out" / "3d" / "places" / str(pl.get("id") or "place")))
+        rep = place.compile_place(cfg, gid, files[0], out, games_root=world.games_dir(cfg) if gid else None,
+                                  hold="--hold" in rest)
         if not rep["ok"]:
             print("not compiled: " + rep["error"])
             return 1
@@ -264,7 +318,7 @@ def _cmd_place(cfg: dict, rest: list[str]) -> int:
         for u in pl.get("unknowns") or []:
             print("  ask: " + u)
         return 0
-    print("usage: 3d place compile|check <place.json> [--game <id>] [--out <folder>] · 3d place from-town <layout> --sheet <s.json>")
+    print("usage: 3d place compile|check <place.json> [--game <id>] [--out <folder>] [--hold] · 3d place from-town <layout> --sheet <s.json>")
     return 2
 
 
@@ -274,6 +328,42 @@ def _default_game(cfg: dict) -> str:
         return cfgmod.default_game(cfg) or ""
     except Exception:  # noqa: BLE001
         return ""
+
+
+def _cmd_same_person(cfg: dict, rest: list[str]) -> int:
+    """3d same-person bakeoff [--game <id>] [--only <case>]   the bake-off (uses the card — the person's to start)
+       3d same-person check <from.png> <result.png> [--region mouth_brows|arms|face] [--method masked] [--out check.png]"""
+    import json
+    import time
+    from . import config as cfgmod
+    from .threed import same_person as sp
+    sub = rest[0] if rest else ""
+    opt = lambda f, d=None: rest[rest.index(f) + 1] if f in rest else d
+    if sub == "bakeoff":
+        gid = opt("--game") or cfgmod.default_game(cfg)
+        cases = json.loads((cfgmod.ROOT / "games" / gid / "same_person_bakeoff.json").read_text(encoding="utf-8"))["cases"]
+        if opt("--only"):
+            cases = [c for c in cases if c["id"] == opt("--only")]
+        try:
+            from .suite.games import game_root
+            groot = game_root(cfg, gid)
+        except Exception:  # noqa: BLE001
+            groot = None
+        out = cfgmod.ROOT / "out" / "same_person" / gid / time.strftime("%Y%m%d-%H%M")
+        r = sp.bakeoff(cfg, cases, out, cfgmod.ROOT, groot)
+        print(f"{r['rows']} results, {r['ok']} kept what they were told to keep — {Path(r['out']) / 'report.md'}")
+        return 0
+    if sub == "check":
+        from PIL import Image
+        a, b = Image.open(rest[1]).convert("RGB"), Image.open(rest[2]).convert("RGB")
+        region = sp.make_mask(a, opt("--region")) if opt("--region") else None
+        r = sp.moved(a, b, region, ["identity", "face", "clothes", "hair", "background"], opt("--method", "masked"))
+        if opt("--out"):
+            sp.check_picture(a, b, region, Path(opt("--out")))
+        print(json.dumps(r, indent=1))
+        return 0 if r["ok"] else 1
+    print(_cmd_same_person.__doc__)
+    return 2
 
 
 COMMANDS = {"3d": cmd_3d}

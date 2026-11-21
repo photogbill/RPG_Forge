@@ -526,6 +526,10 @@ def render(job: dict, ctx, out: Path, runner=None) -> dict:
         measured["tileable"] = tile_channels({ch: Path(p) for ch, p in got.items()}, float(job.get("tile_band") or 0.12),
                                              float(job.get("seam_limit") or 1.5))
         outputs += [v["file"] for v in measured["tileable"].values() if v.get("file")]
+        tn = measured["tileable"].get("normal") or {}
+        if tn.get("file") and (out / f"{slot}_n.png").exists():      # 2026-11-20: the game's own normal, from the healed normal
+            save_png(game_normal(load_png(Path(got["normal"]).with_name(tn["file"])), flip), out / f"{slot}_n_tile.png")
+            outputs.append(f"{slot}_n_tile.png")                     # (the same flip as <slot>_n.png, so it sits on <final>_tile)
     # contact: every channel, plus a 2×2 tiling of the final image when seamless was asked for
     tiles, labels = [], []
     for ch, p in got.items():

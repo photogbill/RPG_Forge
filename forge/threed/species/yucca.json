@@ -1,0 +1,8 @@
+{
+ "name": "yucca",
+ "about": "A soaptree yucca: a trunk in a skirt of last years' blades, two heads of stiff sword leaves, a tall flower stalk with a cream plume (the height an entry asks for is to the top of the stalk). Bare = no stalk.",
+ "numbers": {
+  "form": "rosette", "height": 3.2, "trunk_radius": 0.12, "heads": 2, "blades": 90, "blade": [0.45, 0.75],
+  "blade_width": 0.028, "skirt": 0.55, "stalk": 2.0
+ }
+}

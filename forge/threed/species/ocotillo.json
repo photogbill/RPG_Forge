@@ -1,0 +1,7 @@
+{
+ "name": "ocotillo",
+ "about": "An ocotillo: a spray of long thin canes from one foot, a red flower spike at each tip. Bare = the dry months: grey canes, no flowers.",
+ "numbers": {
+  "form": "canes", "height": 4.5, "canes": 18, "cane_radius": 0.03, "cane_lean": [6, 32], "bloom": 1.0
+ }
+}

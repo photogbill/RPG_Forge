@@ -50,9 +50,24 @@ def paint(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: dict | 
     g = flux2_graph.build(unet, words, negative, seed, size, size, filename_prefix=f"threed_{batch}_{obj['id']}", **kw)
     client = ComfyClient(url)
     client.timeout = 900
+    face = None
+    if obj.get("face_ref"):
+        # 2026-11-19 (Fable, Lane 5): a face to start from — the picture goes in as FLUX.2 klein's own reference latent
+        # (ComfyUI's core ReferenceLatent, as same_person.py does); the words still paint the whole figure
+        ref = Path(obj["face_ref"])
+        face = client.upload_image(ref, subfolder="forge", name=f"threed_{batch}_{obj['id']}_face{ref.suffix}")
+        g["40"] = {"class_type": "LoadImage", "inputs": {"image": face}}
+        # BUILD 84 (2i): this ComfyUI's ImageScaleToTotalPixels has a required `resolution_steps`; without it /prompt said
+        # "400 Bad Request" and every picture with a face to start from failed (two this morning)
+        g["41"] = {"class_type": "ImageScaleToTotalPixels", "inputs": {"image": ["40", 0], "upscale_method": "lanczos", "megapixels": 1.0,
+                                                                       "resolution_steps": 1}}
+        g["42"] = {"class_type": "VAEEncode", "inputs": {"pixels": ["41", 0], "vae": ["3", 0]}}
+        g["43"] = {"class_type": "ReferenceLatent", "inputs": {"conditioning": ["4", 0], "latent": ["42", 0]}}
+        g["10"]["inputs"]["positive"] = ["43", 0]
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(client.run(g)[0])
-    return {"prompt": words, "negative": negative, "seed": seed, "size": size, "model": unet}
+    return {"prompt": words, "negative": negative, "seed": seed, "size": size, "model": unet,
+            **({"face_ref": str(obj["face_ref"])} if face else {})}
 
 
 def _back_of(cfg: dict | None, o: dict, out: Path) -> Path | None:
@@ -64,14 +79,51 @@ def _back_of(cfg: dict | None, o: dict, out: Path) -> Path | None:
     return p if p.exists() else None
 
 
+def repair_pose(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: dict | None, out: Path, n: int) -> Path | None:
+    """BUILD 84 part 2: a picture whose only miss is its arms is made again from itself against the A-pose skeleton (the
+    `guided` route of the same-person job, BUILD 74) — the same person, the same clothes, the arms moved — before any new
+    picture is painted. Writes pictures/<id>__repair<n>.png and returns it, or None when the route can't run here (the
+    models are not on this computer, or ComfyUI said no)."""
+    from PIL import Image
+    from . import same_person as sp
+    from ..engines.comfy import ComfyClient
+    ckpt, cn = "RealVisXL_V5.0_fp16.safetensors", "xinsir-union-sdxl-promax.safetensors"
+    try:
+        info = comfyapi.object_info(url)
+        have = set(((info.get("CheckpointLoaderSimple") or {}).get("input", {}).get("required", {}).get("ckpt_name") or [[]])[0])
+        have_cn = set(((info.get("ControlNetLoader") or {}).get("input", {}).get("required", {}).get("control_net_name") or [[]])[0])
+        if (have and ckpt not in have) or (have_cn and cn not in have_cn):
+            log.info("picture %s: no pose repair here (%s or %s is not in ComfyUI)", obj["id"], ckpt, cn)
+            return None
+    except Exception:  # noqa: BLE001 — a stand-in or an old ComfyUI: try it and let ComfyUI say
+        pass
+    src = Image.open(target).convert("RGB")
+    pose = out / "pictures" / f"{obj['id']}__repair{n}_pose.png"
+    sp.pose_skeleton(*src.size, deg=50.0).save(pose)
+    client = ComfyClient(url)
+    client.timeout = 900
+    up = client.upload_image(target, subfolder="forge", name=f"threed_{batch}_{obj['id']}_repair{n}.png")
+    pu = client.upload_image(pose, subfolder="forge", name=pose.name)
+    words = sp.STYLE_START + sp.PRESETS["a_pose"] + ". " + str(obj.get("prompt", ""))
+    g = sp.graph_guided(up, pu, words, sp.NEGATIVE, int(obj.get("seed", pic.get("seed", 1001))) + 101 * n, ckpt=ckpt, controlnet=cn)
+    dst = out / "pictures" / f"{obj['id']}__repair{n}.png"
+    dst.write_bytes(client.run(g)[0])
+    return dst
+
+
 def gate_picture(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: dict | None, out: Path,
-                 made: dict | None = None, paint_fn=None) -> dict:
+                 made: dict | None = None, paint_fn=None, repair_fn=None) -> dict:
     """BUILD 40: the picture gate. A body's picture is measured (pose, limbs, proportions) before four minutes go into
     making the body; on a miss it is painted again with a new seed, up to `tries` times. Every try is kept beside the
     picture (pictures/<id>__try<n>.png) and the record goes to pictures/<id>.gate.json; when every try misses the thing
-    is held, with the tries side by side (pictures/<id>__gate.png). A picture from a file is measured, never repainted."""
+    is held, with the tries side by side (pictures/<id>__gate.png). A picture from a file is measured, never repainted.
+
+    BUILD 84: a picture whose only miss is its arms is first repaired (repair_pose: the same picture against the A-pose
+    skeleton) and judged again; only if the repair misses too is a new picture painted. A nudge goes near the front of the
+    words; a thing made again carries the nudge its last miss asked for (obj["gate_nudge"]) into its first new try."""
     from . import gate
     paint_fn = paint_fn or paint
+    repair_fn = repair_fn or repair_pose
     s = gate.settings(cfg)
     tries = max(1, int(obj.get("gate_tries") or s["tries"]))
     rec_path = out / "pictures" / f"{obj['id']}.gate.json"
@@ -80,12 +132,26 @@ def gate_picture(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: 
     seed0 = int(obj.get("seed", pic.get("seed", 1001)))
     start = len(record["tries"])
     ok, j = False, None
+    extra_words, said = "", None                 # BUILD 73: the words the last miss asks for, added to the next try's
+    if old.get("held") and record["tries"]:
+        said, extra_words = gate.nudge({"lines": record["tries"][-1].get("lines"), "measures": record["tries"][-1].get("measures"),
+                                        "expects": old.get("expects")})
+        extra_words = extra_words or ""
+    elif obj.get("gate_nudge"):                      # BUILD 84: made again — the last round's nudge comes with it
+        said, extra_words = obj.get("gate_nudge_said") or "carried", str(obj["gate_nudge"])
+    repaired = 0
     for n in range(start, start + tries):
+        used, used_said = "", None
         if n > start or old.get("held"):
             if obj.get("image"):
                 break
             seed = seed0 + 7919 * n
-            got = paint_fn(url, pic, dict(obj, seed=seed), target, batch, cfg)
+            o2 = dict(obj, seed=seed)
+            if extra_words:
+                used, used_said = extra_words, said
+                o2["prompt"] = gate.with_nudge(obj.get("prompt", ""), extra_words)
+                log.info("picture %s (try %d): the words gain “%s”, near their front, after the last miss", obj["id"], n + 1, extra_words)
+            got = paint_fn(url, pic, o2, target, batch, cfg)
             if made is not None:
                 made[obj["id"]] = got
             (out / "pictures" / f"{obj['id']}.json").write_text(json.dumps(got, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -95,12 +161,33 @@ def gate_picture(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: 
         keep = out / "pictures" / f"{obj['id']}__try{n + 1}.png"
         shutil.copyfile(target, keep)
         record["tries"].append({"try": n + 1, "seed": seed, "ok": j["ok"], "lines": j["lines"], "picture": keep.name,
-                                "measures": j["measures"]})
+                                "measures": j["measures"], **({"nudge": used_said, "nudge_words": used} if used else {})})
         for ln in j["lines"]:
             log.info("picture %s (try %d): %s", obj["id"], n + 1, ln)
         if j["ok"]:
             ok = True
             break
+        if gate.pose_miss_only(j) and not obj.get("image") and repaired < 1:
+            # BUILD 84 part 2: repair before reroll — the picture is good but for its arms, so its arms are moved
+            repaired += 1
+            try:
+                fixed = repair_fn(url, pic, obj, target, batch, cfg, out, n + 1)
+            except Exception as e:  # noqa: BLE001 — a repair that can't run leaves the reroll as before
+                log.warning("picture %s: the pose repair did not run (%s) — a new picture instead", obj["id"], e)
+                fixed = None
+            if fixed is not None and Path(fixed).exists():
+                j2 = gate.judge(fixed, obj, cfg)
+                record["tries"].append({"try": n + 1, "repair": True, "seed": seed, "ok": j2["ok"], "lines": j2["lines"],
+                                        "picture": Path(fixed).name, "measures": j2["measures"], "repaired_from": keep.name})
+                for ln in j2["lines"]:
+                    log.info("picture %s (try %d, its pose repaired): %s", obj["id"], n + 1, ln)
+                if j2["ok"]:
+                    shutil.copyfile(fixed, target)
+                    record["repaired"] = {"from": keep.name, "picture": Path(fixed).name}
+                    ok, j = True, j2
+                    break
+        said, extra_words = gate.nudge(j)
+        extra_words = extra_words or ""
     record["ok"], record["held"] = ok, not ok
     record["expects"] = (j or {}).get("expects")
     if not ok:
@@ -110,7 +197,8 @@ def gate_picture(url: str, pic: dict, obj: dict, target: Path, batch: str, cfg: 
         try:
             gate.side_by_side([out / "pictures" / t["picture"] for t in mine],
                               [f"try {t['try']}: " + "; ".join(x.replace("Picture gate — ", "").replace(" Made again.", "")
-                                                              for x in t["lines"] if "Made again" in x) for t in mine],
+                                                              for x in t["lines"] if "Made again" in x)
+                               + (f"  [words gained: {t['nudge_words']}]" if t.get("nudge_words") else "") for t in mine],
                               out / "pictures" / f"{obj['id']}__gate.png")
             record["side_by_side"] = f"{obj['id']}__gate.png"
         except Exception as e:  # noqa: BLE001

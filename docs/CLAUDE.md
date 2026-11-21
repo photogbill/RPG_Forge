@@ -4,6 +4,10 @@ This file is the hand-off for an assistant (Claude, or any agent) that can read 
 folder but cannot run the GPU itself. It is written so a fresh session can drive the forge from this
 page alone.
 
+## The rpg-forge connector (BUILD 83)
+
+If your tools include `forge_status`, `forge_call` and the rest (the rpg-forge connector), use them instead of writing files by hand: `forge_status` first, `forge_search` for an operation's input, `forge_call` with `who` = your own name ("Claude Fable" / "Claude Opus"), `dry_run` for anything big and an `idempotency_key` for anything you might retry. `docs/MCP.md` has the whole of it. Without the connector, what follows still holds.
+
 ## What you can and cannot do
 
 - You **can**: write job and batch files into `jobs/pending/`; read `jobs/done/`, `jobs/failed/` and
@@ -258,6 +262,29 @@ A `render` job (and therefore a bake-off suite) carries `"graph"`: `sdxl` (defau
 only when a choice maps to one data field — the person's Send then changes it through the safe-save path. Put what
 only they can do on their list: `orders add --for "<person>" --title "…" [--detail …] [--priority now|soon|someday]`.
 
+### Don't wait for me (2026-11-17) — when the person isn't waiting on your questions
+
+The person can set a standing instruction (Tasks, top of the page; `local/suite.json` → `nowait`; only a person sets
+it): **Wait for me** · **Take the defaults** · **Leave it to <an assistant they pick>**, after a wait of their choosing.
+`python -m forge nowait` shows it, what went ahead under it, and what is whose call.
+
+- **So always give a question a real `default`** — the thing you will actually do if nobody answers — and make it one of
+  the `choices` (word for word) when a choice sets a data field. Under *Take the defaults* the forge writes a stand-in
+  answer in your name from exactly those words (`default`, else `recommendation`); a default that is one of the choices
+  applies its `applies_to` through the safe-save path as you (so anything a person approved becomes a proposal, never an
+  overwrite); a default that is only words changes nothing. `mail send` carries the instruction out at once and prints
+  what was taken — you can go on working.
+- **A question left to you is a work order** ("Your call: …", priority now). `python -m forge nowait pending --who "<you>"`
+  lists them with their choices; decide with `python -m forge nowait decide <letter id> --answers a.json --body "why"`
+  (`a.json`: `[{"id", "choice" | "text", "note"}]`). Decide as the person would want, from the rulings book and the
+  canon first; say why; prefer the choice that is cheapest to undo. Only the assistant named decides.
+- **A stand-in answer is never the person's ruling.** It is marked `stand_in` in the letter and `provisional` in the
+  rulings book; it stops the question being asked again, and the person's own answer replaces it whenever it comes
+  (their inbox shows every one; Tasks lists them under "Went ahead without you"). Build on it as something that may
+  change, and never quote it as what the person said.
+- It covers questions in letters only. A file only the person has, pictures waiting for approval, a music brief and a
+  build the queue marks as waiting still wait — don't work around those.
+
 ## Sprite intake and the character registry in the suite (BUILD 04)
 
 - **A sheet's mapping is edited on the Sprite intake screen**, never by hand: `forge/suite/sprites.py` (open → save →
@@ -497,3 +524,263 @@ leaves a generated report out), and rulings written straight in (`<game_root>/ru
 - **Not yet (the game's half, next sessions):** the stage map kind in `project\` (the proof's loader, saves, cues,
   dialogue, fights), the one camera, doors that open (plan-built: roof and near walls give way; shells: question 1),
   dust, people at real size, Linden Mills court's place plan, 3D → Places, the frame rate.
+
+## What the third run taught (BUILD 73, 2026-11-17) — the face not the hair, matched not held, capes, cut-outs
+
+- **The head check** (`checks.head_check`, `face_split`, `face_verdict`): the head band is read from the **level front view**
+  in both the model and its picture (the aligned view was often 53° from above — through the hair), and the face (skin by
+  chromaticity and brightness near the face's own middle) and the hair are measured apart: two numbers. A picture whose
+  face is more than a third darker than its own neck (a hat's shadow) is said so and never holds the thing on its own.
+- **Matching a body** (`fix_colour(..., mode="auto")`): three ways in turn — one curve fitted on brightness through all three
+  channels alike (`luma`: the bake's own fault undone), one curve a colour (`rgb`, BUILD 40's), a brightness gain (`gain`) —
+  and the first is kept whose numbers pass, whose whites stay white (`neutral_drift`), whose skin does not move from the
+  picture's colour (`skin_shift`) and whose colours are no louder than the picture's (`loudness`). BUILD 40's per-colour curve
+  alone turned white shoes pink and a white coat mint. When the face alone is still wrong, **a curve for the head alone**,
+  feathered at the neck (`fix_head`, `head_weights`; head.png shows before / after / picture at twice the size); still wrong:
+  "the face did not come through — make the body again", and the queue spends one try (`face_redo`). A matched body is
+  **made** (`colour_matched: true`); a prop stays held with the match offered (William, 2026-11-17 11:50).
+- **Props** (`prop_check`): against the picture with its highlights out (the tail above the 90th percentile not counted), the
+  middle compared and the shadows not crushed; a dark thing (picture's middle under 70) is held only for lost detail.
+- **One button for what is left** (3D → World list): **Match and release** (rows of as made · matched · picture, ticked, one
+  button — props to Review, bodies back to the queue for their skeleton only, `reuse_body`), **Straighten and release**, and
+  **Which way is up?** (three small pictures, a click). All journalled with who pressed.
+- **Capes** (`worn_over` on a body → `cloth` entries, `world.worn_pieces`; the body's words lose the piece, `worn_words_out`;
+  `blender/cloth_pin.py` pins a made cape to the shoulder and collar bones into `<id>_worn.glb` with a `cloth` block for the
+  game's spring — `cloth.pin`, `world.pin_worn`). **Nudges** (`gate.nudge`): a pose miss sends new words to the next try.
+  **Mesh words** (`world.MESH_WORDS`) plan a cut-out from the start (`needs_panel`, held); `world.supersede` retires a solid
+  made another way. **Stale jobs**: `python -m forge housekeeping --stale-jobs` (`forge/stale_jobs.py`, never deletes).
+- Tests: `tests/test_build73.py`. Read-only validation: `out/3d/world/_b73_validation/`.
+
+## The ground is true (BUILD 77, 2026-11-17) — DTED Level 0, bakes, the line through a mountain
+
+- `forge/terrain/dted.py` (the reader; zips read in place), `bake.py` (window, shade, water, edits, profile), `proof.py`,
+  `forge/cli_terrain.py` (`python -m forge terrain status|check|proof|bake|profile`), 3D → **Terrain** (`suite/terrain.py`,
+  in `threed.js`), `terrain_bake.bat`, `terrain_profile.bat`. All in `docs/TERRAIN.md`. The data path is `forge.json` →
+  `dted_dir` (default `local/dted`, ignored). A game's windows are geography (`games/<id>/terrain/world.json`); its story's
+  edits and lines are in the game's own folder (`terrain/story.json`). Tests: `tests/test_terrain_build77.py`.
+
+## The same person, changed (BUILD 74, 2026-11-17)
+
+- `forge/threed/same_person.py`: the job's contract (`validate`), the region (`region_mask`, `grow_feather`), the check that
+  nothing else moved (`moved`, `check_picture`), the three graphs (`graph_masked` RealVisXL inpaint, `graph_guided` union
+  ControlNet openpose, `graph_instructed` FLUX.2 klein 4B + ReferenceLatent), the bake-off (`bakeoff`;
+  `same_person_bakeoff.bat` — William's to start; cases in `games/<id>/same_person_bakeoff.json`). What the disk can do:
+  `docs/EDITING_MODELS.md`. A body's **bearing** (`motions.add_bearing`; easy, proud, tired, wary, warm — from its words or
+  `"bearing"`), written into its motion sheet by the world queue. Tests: `tests/test_same_person_build74.py`.
+
+## The voice bench (BUILD 71, 2026-11-17)
+
+- Characters → **Voice bench** (`suite/voicebench.py` + `voicebench.js`): Face (a portrait set, or one picture with a
+  STAND-IN mouth from a dragged box), Script, Voice (cuts, samples, a file, or an engine), Test (two lanes — `loud` and
+  `rhubarb` — the words under the waveform, offset and blend), takes with verdicts, voice cards only a person locks.
+- `forge/suite/mouthrule.py` is the game's MouthModel in Python; `tests/fixtures/mouth/cases.json` is read by both.
+- `forge/voice/`: `loud`, `lipsync` (Rhubarb), `hear` (Whisper large-v3 in its own environment), `engines/` (the contract;
+  `pretend`, and Qwen3-TTS, Kokoro, Chatterbox as descriptions until installed), `bench` (takes, cards, verdicts, learned),
+  `tools` (homes inside `engines/voice/_home`, `logs/voice/`, the card asked for), `licences` (the gate). Job types
+  `lipsync`, `hear`, `speak` (`forge/plugins/voice.py`). `get_rhubarb.bat` / `.command`, `get_whisper.bat`,
+  `python -m forge voice …`. The adapter hook is `voice_paths()`. Tests: `tests/test_voicebench_build71.py`.
+
+## Approvals made easy (BUILD 78, 2026-11-18)
+
+- `forge/suite/approve_all.py` + `approve.js`: **Approve everything here** on 3D → World list and Art → Review & approve
+  (one plain line a group; the page's own functions), **Undo** a thing (`out/approvals/<game>.jsonl`), and the setting
+  **"Fable may approve for me"** (`games/<id>/approvals.json` default; the person's switch in `local/suite.json` wins).
+  An assistant approves only through `approve_all.signer()`, which writes "Claude Fable, for William" — use it (or
+  `threed._approver`) for any new approving action; `_person()` stays for what is never an assistant's (starting runs,
+  installs, deliveries, standing words). CLI: `python -m forge approvals …`, `python -m forge world-fix …`.
+- **A running world queue**: edit no existing forge file. Leave the edit as a package in `_xfer/waiting/<name>/`
+  (`manifest.json`: files with `base_md5`/`new_md5`, `tests`, `after` steps, `sign_as`, `says`, `then_tell`) for
+  `put_in_waiting_changes.bat`. Write every checks result through `checks.jsonable` — pixels are never written.
+- Docs: `docs/APPROVALS.md`. Tests: `tests/test_build78.py`.
+
+## What the first day around the clock taught (BUILD 84, 2026-11-19)
+
+- **A body's colours by brightness only** (`checks.fix_colour_body`, called by `fix_colour` for every body kind, whatever
+  `mode` is asked): one gain for the whole colour picture, worked out from the body **as made** — never a curve a colour,
+  never one curve through the channels, never one shaped like a gain; no head curve either (`head_fix` is off). The gain
+  is the least that brings the body inside the check (`choose_gain`: the face first, then the mean, then the contrast;
+  never past the point where more than `body_gain_clip_share` of the lit texels the unwrap uses go past white — on a
+  body that is the skin, which goes pale and yellow). Where one gain can't bring it inside, it is released at that gain
+  and the reason is written with it. `hue_moved` compares the result with the body as made, texel by texel; a release
+  whose hue moved is refused (it can't under one gain; the guard is tested). Files: `<id>__one_gain.glb`; the colour
+  sheet's left panel is always the body as made (`colour_picture(..., label="one gain ×1.14")`).
+- **Releases**: Match and release, Approve everything here and the daily redo all reach `world.release_body_one_gain`;
+  a released body is never matched again by the queue (`_put_right(colour=False)`), and a release made before this
+  build (a curve) is turned into one gain from the body as made when the queue takes it up. `world-fix one-gain <ids>`
+  (`approve_all.world_one_gain`) puts a body already released with a curve right: released again if it is not on its
+  skeleton yet, or the colour picture inside its moving copy swapped (same mesh, same unwrap — checked first), each in
+  the undo log with the moving copy as it was kept for Undo (`restore_files`).
+- **Metal out of the colour check**: a texel whose metalness (metallicRoughness blue × metallicFactor) is at least
+  `metal_from` (0.8) is left out of both the model and its picture; a thing more than `metal_skip_share` metal is not
+  colour-checked. The image-to-3D step leaves what it can't tell at about 0.5 — that is not metal.
+- **The picture gate's pose band is what the skeleton step needs**: 14–90° (was 32–76°), measured on 42 people rigged
+  from pictures with arms at 14–31° (every one took its skeleton and motions, no more arm/trunk webbing than at
+  40–50°). **The head is measured without its hair or hat** (`gate.face_height`: from the chin up to the hairline or a
+  brim, by the skin's own colour; `face_head` 0.65 scales it to a head); held only when the face alone is too big as
+  well. A seated figure's head isn't measured against its seated height. `world-fix regate` judges every body the gate
+  holds again, try by try, with the numbers as they are now (nothing painted again).
+- **Repair before reroll** (`bodies.repair_pose`): a picture whose only miss is its arms is made again from itself against
+  the A-pose skeleton (`same_person.graph_guided`, RealVisXL + the union ControlNet) once, before a new picture is
+  painted. **Nudges** go near the front of the words (`gate.with_nudge`, after the style start), and a low miss asks
+  for sixty degrees. **Make again** carries the last miss's nudge into its first new picture (`gate_carry`) and the seed
+  moves on with the tries. **The redo**: a thing held twice running for the same reason (`redo.reason_of`) goes straight
+  to NEEDS_BETTER_WORDS.md, named in the redo's report with why.
+- **Animals** (`"rig_kind": "animal"`, `world.is_animal`): never the picture gate, the person's checks (face, hair, head
+  match, smile), the person's skeleton or the person's motions (`line.run` skips them too). Tonight's floor: checked as
+  a thing, colours by one gain, sized, placed, made with `"moves": "none yet"`. `world-fix animal-again <ids>` remakes an
+  animal that was given a person's skeleton (the body kept, the try withdrawn, skeleton and motions set aside);
+  `world-fix unhold <ids>`. The animal route (UniRig's `articulationxl` template and keyed four-legged motions) is in
+  `docs/ANIMALS.md`, not built.
+- Tests: `tests/test_build84.py`, `tests/test_build84_gate.py`.
+
+### BUILD 84, the rest (2f and parts 4, 5, 6 — the second sitting, 2026-11-19 evening)
+
+- **Loose pieces the queue puts right by itself (2f)** — for a prop or a building, never a body (`checks.fix_loose`,
+  called first in `world._put_right`; the model as made is kept, the result is `<id>__loose_off.glb`). Three held models
+  all said "1 piece not joined to the rest (below the floor)" and were three different things, so **look before you
+  write a rule from a check's one line** (the check picture now paints the loose piece orange):
+  - a piece that lies **wholly under the floor** (a sheet of ground the image-to-3D step left) is taken off —
+    `Glb.drop_faces`, triangles and their vertices, so the thing's box and floor stop counting it — while what is taken
+    off is under `loose_fix_max_share` (a tenth) of the surface;
+  - a piece that **stands by itself a little through the floor** (a chair the step invented behind a building, its feet
+    4% of the height under) is stood on the floor — `Glb.move_faces`, up by what it was sunk; limits `loose_sink_max`
+    (6% of the model's height) and `loose_sink_own` (a third of its own);
+  - a thing that **hangs** has no floor (`world.is_hanging`: the entry's `"hangs": true|false`, else its words —
+    `HANG_WORDS`: chandelier, hanging lamp, ceiling fan …): its separate pieces are judged by how near they hang to the
+    rest (`loose_hang_gap`, 4% of its size). The "loose piece" on the chandelier was its own centre crystal.
+  A piece in the air, or deep through the floor, is held as before. `world-fix check-again <ids>` (`world.check_again`)
+  checks held props and buildings again with the forge as it is now — no card, nothing remade — and sends on what passes.
+  Not built: verdict 12's "settle" (lower a piece that hangs just above the floor); no model on the list shows it now.
+- **Proportions (part 6)** — `real_size_m` may say `"length"`: the longer side on the ground, whichever way the model
+  turned out (`meshio.SIZE_ORDER`: a thing is scaled by its height, else its length, else a named side). An entry that
+  gives **two** measures is checked after it is made (`checks.size_check`, in `world._check_and_place`): at the size its
+  first measure gives it, each other measure more than `size_max_off` (a third) from what was asked holds it, numbers
+  shown ("Proportions: at 8.1 m tall — asked 8 m deep, it is 12.1 m (151%)"). A named side is compared with whichever
+  ground side is nearer (a model may come out turned a quarter); width and depth both named: longer with longer. One
+  measure: nothing to compare, nothing said. Such a hold is not an approval and not a remake: change the words or the
+  size, or let it through. A place plan's grey box does not read `length` yet (`place._box`): give such a thing a footprint.
+- **Trees by species (part 5)** — `docs/TREES.md`. Twelve sheets in `forge/threed/species/`; a sheet may say `leaf`
+  (the sprig on the cards), `leaf_tint`, `bark`, `flare`, and `form`: `broadleaf` (the grower) or `column` (a saguaro),
+  `canes` (an ocotillo), `rosette` (a yucca) — plants built by their own rule, their colours on the mesh. A sheet that
+  says none of it grows the tree it grew before, to the vertex (checked). Pick a sheet **by name**, never by its place
+  in `trees.sheets()`.
+- **The connector's status (part 4)** — `docs/MCP.md`. `world.merged()` finds every Review entry in one walk
+  (`world.tries_index`); it used to ask the disk once a made thing a folder, every time anything read the list. The art
+  queue is counted from the folder listing (`ops.count_jobs`: only files small enough to be a tombstone are opened).
+  Status says how long each part took (`took_seconds`) and logs a warning past 5 s. **If you add something to status,
+  count what it reads**: `tests/test_build84_connector.py` fails when status opens the finished jobs or reads the list twice.
+- Tests: `tests/test_build84_loose_and_sizes.py`, `tests/test_build84_connector.py`, `tests/test_build84_trees.py`.
+
+## BUILD 87 — materials: every channel, Material Maker driven (`docs/MATERIALS.md`)
+
+`forge/materials/` and the plug-in `forge/plugins/materials.py`: job types `ff_channel_proof`, `ff_channels`,
+`mm_material`, `material_mix`, `material_decal`; commands `python -m forge.materials <command>` (the four
+`materials_*.bat`). Read `docs/MATERIALS.md` before touching any of it. What to remember:
+
+- **Filter Forge's channel is a preset, and only a preset inside the filter file.** Its command line skips presets a
+  person added to a library filter (its own help). `ffchannels.py` writes working copies of the filter into the
+  job's folder with every preset's `map_type` set, renders, and removes them. Which number is which channel is
+  **proved by rendering** (`probe` / `name_numbers`: what the picture is, checked against the menu's order) and kept
+  in `local/ff_channels.json`. Never hard-code a number; never trust the name `map_type` further than a proof.
+- **A set is one geometry.** `ffchannels.tile_together` heals every channel with the roll and cut of the final
+  picture. `night4.tileable.tile_channels` did not until 2026-11-20 (each channel got its own roll and its own cut, so a
+  `filter_forge` set with `tileable: true` came back shifted against itself; its test gave both channels the same
+  picture). It does now, the same way; and `filter_forge` writes `<slot>_n_tile.png` from the healed normal.
+  `tileable.make` / `blend` on ONE picture are as they were.
+- **Beside a picture: new names only, and only when the render is that picture** (`deliver_beside`, `matches`).
+  `<name>_ffnormal.png` is what `3d relief` promotes to `<name>_n.png`.
+- **Every channel says what it is** in `channels.json`: `true`, `worked out` (a legacy filter's roughness, from its
+  two specular channels) or `FALLBACK` / `MISSING`. Keep that honest when adding a channel.
+- **Material Maker's command line** was read from the installed program's own script (`mm.py`'s notes): the export
+  word must come first; it does not quit after a mistake, so every run has a time limit; it draws on the card, so
+  every export holds `CardLock`. `mm.lint` checks a graph against the installed `nodes/*.mmg` before it starts.
+- **Named parameters are the forge's**: a side file `<graph>.json` maps each name (0 to 1) onto node parameters;
+  `mm.patch` writes them into a copy. Settings `broken` / `mended` = one surface in two states; a game's
+  `materials.json` says which era wears which.
+- **The lamp pictures are previews** (`look.py`, numpy) and are stamped as such. They judge a channel set; they are
+  not the game's look, and a place drawn by `sheets.place_pictures` is its ground only.
+- **The commands run their own batch in their own window** (`__main__.submit_and_run`): they never start, stop or
+  feed the art worker and never touch another batch's waiting jobs.
+- A game's choices live in `games/<id>/materials/materials.json` (a proposal file). Nothing under `forge/materials`
+  names a game — `tests/test_build87_materials.py` checks.
+
+## BUILD 91 — icons and portraits from the models (`docs/MODEL_PICTURES.md`)
+
+`forge/threed/modelpics.py` + `forge/threed/blender/picture_model.py`, plug-in `forge/plugins/modelpics.py` (job types
+`model_icon`, `model_portrait`), `icons_from_models.bat`. What to remember:
+
+- **The pictures come from the made models**, found through the world queue's own record (`modelpics.made_model` →
+  `world.read_state`: a body's model is `<id>/moves/<id>_moves.glb`, a thing's is `<id>/<id>.glb`). Never guess a path.
+- **Processor only.** Blender's Cycles with `device = CPU`: no card, no ComfyUI, so it may run beside the queue. Keep
+  it that way; an engine that wants the card would have to take `CardLock`.
+- **One rule for every icon** (the script's `auto_view`): longer side across the frame, a long thing along the
+  diagonal, a flat-lying thing seen from above. A thing's own view goes in the game's table, not in the code.
+- **A portrait's traps**: the .glb importer leaves a hidden "Icosphere" (its bone shape) in the scene — it must be left
+  out of the bounds; an idle motion looks at the floor — the head is set upright in armature space after the pose is
+  held (`hold_pose`); bodies arrive faceted with split seams — weld and smooth for the picture only (`smooth`).
+- The script must run under the forge's Blender AND as a module in other Blenders. It was run for real under **4.2**
+  and **5.3** (2026-11-19; the same icon from both). Three things 4.2 does differently, each of which bit: it names an
+  imported motion `<motion>_<figure>`, so asking for `Idle_Loop` by "holds the words" took `Crouch_Idle_Loop_character`
+  — she crouched (`pose` now asks for the name, then `<name>_…`, then anything that holds it); its Python can fall
+  over while shutting down, so the script ends with `os._exit` and the job judges by the `PICTURE` line and the file,
+  never by the exit code; and actions are played through a slot only from 4.4 on. `World.use_nodes` is going away.
+  `tests/test_build91_modelpics.py` runs the real script wherever `bpy` can be imported, and a stand-in everywhere else.
+- A portrait's expressions are the files **its own note names** (`portraits/<name>.json`, `files`). Never glob
+  `<name>_*.png`: `hero_boy` is another portrait, not an expression of `hero` (the first sheet made that mistake).
+- A game's tables are `games/<id>/pictures/items_to_models.json` and `portraits.json` (proposals: `exact`, `near` = a
+  stand-in shown amber, `world: null` = no model, grouped). The code never writes a world list or a game's data.
+
+## BUILD 93 — portraits painted over the bodies (`docs/PAINTED_PORTRAITS.md`)
+
+`forge/threed/portraitpaint.py`, plug-in `forge/plugins/portraitpaint.py` (job type `portrait_paint`, **GPU**),
+`portraits_painted.bat`. What to remember:
+
+- **It is the same-person job's graph with more references.** `portraitpaint.graph([...])` = `same_person.graph_instructed`
+  for one reference (a test holds them equal); a second reference is a second `ReferenceLatent` node whose conditioning
+  is the first's output (ComfyUI 0.44's own node says "chain multiple"). FLUX.2 [klein] 4B, distilled, 4 steps. Do not
+  write a cousin of that graph: change `flux2_graph.build` or `graph_instructed` and this follows.
+- **Three ways** — `over` (the body portrait alone), `picture` (the picture the body was made from, alone), `both` (that
+  picture first, the body portrait second). A body's own picture is found through the world queue's record
+  (`world.read_state(...)["picture"]`), never by guessing a path. Every sentence starts with `same_person.STYLE_START`.
+- **The card.** A session never runs it (the rule for every GPU job). `portraits_painted.bat` takes `CardLock` **once for
+  the whole batch** (`run_batch`) and passes it to the job, which only keeps it alive (`lock.beat()`); a job run by
+  anything else takes its own. The world queue steps aside for either (the lock, and a GPU job in `jobs/running`).
+  It asks ComfyUI `is_up()` first and queues nothing if it is not.
+- **The two numbers are tripwires, not a judge** (`kept`): layout = the two pictures blurred to 32 x 32 and compared;
+  colour = the figure's colour patch by patch without its brightness. `layout_min` 0.5 and `colour_min` 0.6 are guesses
+  until a first real run is looked at — change them from what that run shows, not before. The first try at `layout`
+  (the forge's edge agreement) could not tell a whole figure from a portrait (0.24 to 0.53): too many edges, too wide a
+  net. `choose` proposes one candidate so the .bat ends with a set; `pick` (or the game's table) overrides it.
+- **A job left behind must never stall the world queue** (found while writing this; its own package, `b93_3`). A GPU
+  job's file in `jobs/running/` made `world.machine_busy` say "the art worker is on a GPU job" for as long as the file
+  lay there — so a .bat window closed while its job waited for the card (BUILD 87's `mm_material` claims first, then
+  waits) would have stopped the queue making models until someone noticed. Now `Queue.claim` writes who has the job
+  (`worker`: pid and host, taken off again by `finish`; `dedupe` already counts that key as a receipt), and
+  `world.claimer_gone` lets the queue pass a job whose process is known to be gone. Unknown is still "busy". A runner of
+  your own: take the card **before** you claim (`portraitpaint.run_batch`), and finish the job in hand on Ctrl+C.
+- **Stand-in pictures are not results.** The tests' stand-in hands the reference back as the "painting". Never leave a
+  sheet made that way in `out/pictures/` or send one to the person.
+- A game's settings are `games/<id>/pictures/portraits_painted.json` (`skip`, `who`, `ways`, `seeds`, `pick`), beside
+  BUILD 91's `portraits.json`. Moods and mouth shapes are not here: they are `same_person`'s `masked` way on a painted
+  portrait once one is approved.
+
+## Faults found on 2026-11-19 and fixed the next night (William: "When you find faults, if you can fix them please do")
+
+Fix what you find, in the forge, when you can; say what you could not. What these taught:
+
+- **A test that fails on the PC and nowhere else: look at the PC before the code.** One test in
+  `tests/test_suite_build27.py` failed there from 2026-11-18, before and after every package, and was called "not this
+  package's" each time. The code was right: the PC's `venv` had no `tzdata` (in `requirements.txt` for Windows, added
+  after the venv was made), and Windows has no list of time zones without it. `venv\Lib\site-packages\` is a folder
+  you can read: compare it with `requirements.txt` first. (`tzdata` was put there by hand, as new files, checked
+  against the package's own RECORD — a pure-data wheel is only a folder.)
+- **`put_in_waiting_changes.bat` names the tests that fail** now, before and after, in the window and in the package's
+  `APPLIED.txt`. It used to keep pytest's last line only, which is how a failure went nameless for two days.
+- **A file in `jobs/running` that is not a job** (a tombstone, a type from a plug-in that is gone, half a file) used to
+  stop `world.machine_busy` reading the rest of the folder, so a GPU job sorted after it was not seen. Each file is
+  judged by itself now.
+- **Ctrl+C in a runner of your own** (`forge.materials.__main__.submit_and_run`, `portraitpaint.run_batch`): finish
+  the job in hand before going. A closed window cannot be caught; `world.claimer_gone` is what covers that.
+- **A test that gives two channels the same picture proves nothing about register.** Use a picture whose pixels say
+  where they are (red = column, green = row): a healed copy then says where every pixel came from
+  (`tests/test_night4_tools.py`).

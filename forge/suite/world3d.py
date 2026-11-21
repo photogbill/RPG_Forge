@@ -2,8 +2,9 @@
 queue's card in 3D -> Runs (is it running, what it is on, hours left at today's speed, start and stop).
 
 Adding to the list, holding a thing, making it again and straightening a leaning one are anyone's (signed). The order of
-need when two things tie, letting a held thing through past its checks, and starting the launcher are the person's.
-Approving is never here: a made thing goes to Art -> Review & approve like any 3D model.
+need when two things tie and starting the launcher are the person's. Releasing a held thing (matched, as made, past its
+checks, past the picture gate) is the person's — or, with "<assistant> may approve for me" on, an assistant's for the
+person, signed "<assistant>, for <person>" (BUILD 78). Approving is never here: a made thing goes to Art -> Review & approve.
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ import time
 from .. import config as cfgmod
 from ..log import get
 from ..threed import world
-from .threed import ThreeDRefused, _need, _person, _sign, file_url
+from .threed import ThreeDRefused, _approver, _need, _person, _sign, file_url
 
 log = get("suite")
 _busy_cache: dict = {}
@@ -42,6 +43,16 @@ def view(cfg: dict, gid: str, with_machine: bool = True) -> dict:
                      "colour": _url(i.get("colour_picture")),
                      "gate": _url((i.get("gate") or {}).get("side_by_side")),
                      "gate_tries": [_url(t.get("picture")) for t in (i.get("gate") or {}).get("tries") or []]}
+    # BUILD 73: what one button would release (colours matched) or straighten, and the things whose up a person picks
+    try:
+        rel = world.release_lists(cfg, gid)
+        for k in ("match", "straighten", "unclear_up"):
+            for r in rel[k]:
+                r["urls"] = {"colour": _url(r.get("colour_picture")), "head": _url(r.get("head_picture")),
+                             "checks": _url(r.get("check_picture")), "picture": _url(r.get("picture"))}
+        s["release"] = rel
+    except Exception as e:  # noqa: BLE001
+        s["release"] = {"match": [], "straighten": [], "unclear_up": [], "error": str(e)}
     s["launcher_bat"] = (cfgmod.ROOT / "make_what_we_need.bat").exists()
     s["kinds"] = list(world.KINDS)
     s["tier_names"] = list(world.TIERS)
@@ -111,21 +122,71 @@ def act(cfg: dict, gid: str, action: str, body: dict, who: str | None) -> dict:
             _sign(cfg, gid, who, "edit", f"3d:world:{eid}", note=r["message"])
             return r
         if action == "threed_world_colours":        # BUILD 40: a person chooses the matched colours for a held thing
-            _person(who, "choosing the matched colours")
+            who = _approver(cfg, gid, who, "choosing the matched colours")
             from ..threed.env import from_cfg
-            r = world.use_colours(cfg, gid, eid, who or "", env=from_cfg(cfg))
+            r = world.use_colours(cfg, gid, eid, who, env=from_cfg(cfg))
             _sign(cfg, gid, who, "review", f"3d:world:{eid}", note=r["message"])
             return r
         if action == "threed_world_gate":           # BUILD 40: a person overrules the picture gate for one try's picture
-            _person(who, "overruling the picture gate")
-            r = world.gate_anyway(cfg, gid, eid, who or "", body.get("pick"))
+            who = _approver(cfg, gid, who, "overruling the picture gate")
+            r = world.gate_anyway(cfg, gid, eid, who, body.get("pick"))
             _sign(cfg, gid, who, "review", f"3d:world:{eid}", note=r["message"])
             return r
         if action == "threed_world_through":
-            _person(who, "letting a held thing past its checks")
+            who = _approver(cfg, gid, who, "letting a held thing past its checks")
             from ..threed.env import from_cfg
-            r = world.let_through(cfg, gid, eid, who or "", env=from_cfg(cfg))
+            r = world.let_through(cfg, gid, eid, who, env=from_cfg(cfg))
             _sign(cfg, gid, who, "review", f"3d:world:{eid}", note="let through past its checks")
+            return r
+        if action == "threed_world_match_release":   # BUILD 73: the person's — releases what only needs matching
+            who = _approver(cfg, gid, who, "releasing things with their colours matched")
+            from ..threed.env import from_cfg
+            ids = [world.slug(str(i)) for i in body.get("ids") or []]
+            r = world.match_and_release(cfg, gid, ids, who, env=from_cfg(cfg))
+            for d in r["released"]:
+                _sign(cfg, gid, who, "review", f"3d:world:{d['id']}", note=f"Match and release → {d['to']}")
+            return r
+        if action == "threed_world_as_made":          # BUILD 78: the match was worse than the thing as made
+            who = _approver(cfg, gid, who, "releasing things as made")
+            from ..threed.env import from_cfg
+            ids = [world.slug(str(i)) for i in body.get("ids") or [eid]]
+            r = world.release_as_made(cfg, gid, ids, who, env=from_cfg(cfg))
+            for d in r["released"]:
+                _sign(cfg, gid, who, "review", f"3d:world:{d['id']}", note=f"Release as made → {d['to']}")
+            return r
+        if action == "threed_world_try_again":        # BUILD 78: a failed thing back in line, keeping what it had
+            _need(who, "trying a thing again")
+            ids = [world.slug(str(i)) for i in body.get("ids") or [eid]]
+            r = world.try_again(cfg, gid, ids, who or "")
+            for i in r["again"]:
+                _sign(cfg, gid, who, "queue", f"3d:world:{i}", note="try again (keeping what it had)")
+            return r
+        if action == "threed_world_place_again":      # BUILD 78: placed again from the forge (tidied), nothing remade
+            _need(who, "placing a thing again")
+            from ..threed.env import from_cfg
+            ids = [world.slug(str(i)) for i in body.get("ids") or [eid]]
+            r = world.place_again(cfg, gid, ids, who or "", env=from_cfg(cfg))
+            for i in r["placed"]:
+                _sign(cfg, gid, who, "edit", f"3d:world:{i}", note="placed again from the forge (tidied)")
+            return r
+        if action == "threed_world_straighten_release":
+            _need(who, "straightening and releasing")
+            from ..threed.env import from_cfg
+            ids = [world.slug(str(i)) for i in body.get("ids") or []]
+            r = world.straighten_and_release(cfg, gid, ids, who or "", env=from_cfg(cfg))
+            for d in r["released"] + r["still_held"]:
+                _sign(cfg, gid, who, "edit", f"3d:world:{d['id']}", note="Straighten and release: " + d["message"])
+            return r
+        if action == "threed_world_up_choices":
+            r = world.up_choices(cfg, gid, eid)
+            for c in r["choices"]:
+                c["url"] = _url(c["picture"])
+            return {"ok": True, **r}
+        if action == "threed_world_up_pick":
+            _need(who, "saying which way is up")
+            from ..threed.env import from_cfg
+            r = world.pick_up(cfg, gid, eid, str(body.get("choice") or ""), who or "", env=from_cfg(cfg))
+            _sign(cfg, gid, who, "edit", f"3d:world:{eid}", note=r["message"])
             return r
         if action == "threed_world_start":
             return start(cfg, gid, who)

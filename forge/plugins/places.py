@@ -11,10 +11,10 @@ JOB_TYPES = {
         "doc": "A place plan (`place`: a path under the forge or the game, `<id>.place.json`) compiled into a walkable stage: "
                "<id>.stage.glb (the plan-built solids, modelled in Blender), <id>.things.json (what stands where, the grey "
                "boxes' sizes until each model is delivered) and, with `game`, games/<game>/wanted_3d/<id>.json (every "
-               "generated thing in story order; a thing nobody has described is held, no look guessed). Output folder: "
-               "the job's own. prov.json, report.json.",
+               "generated thing in story order; a thing nobody has described is held, no look guessed; with `hold`, every new "
+               "entry is held). Output folder: `out` (e.g. the game's assets/stages/<id>) or the job's own. prov.json, report.json.",
         "required": ["place"],
-        "optional": {"game": None, "minutes": 15},
+        "optional": {"game": None, "minutes": 15, "out": None, "hold": False},
     },
 }
 
@@ -31,9 +31,10 @@ def compile_place(job, ctx, out):
                 src = base / src
                 break
     python = ((ctx.cfg or {}).get("threed") or {}).get("blender_python") or None
-    rep = place.compile_place(ctx.cfg, job.get("game") or "", src, Path(out),
+    dest = Path(job["out"]) if job.get("out") else Path(out)
+    rep = place.compile_place(ctx.cfg, job.get("game") or "", src, dest,
                               games_root=(root / "games") if job.get("game") else None, python=python,
-                              minutes=float(job.get("minutes") or 15))
+                              minutes=float(job.get("minutes") or 15), hold=bool(job.get("hold")))
     if not rep.get("ok"):
         raise RuntimeError(rep.get("error") or "the place was not compiled")
     (Path(out) / "prov.json").write_text(json.dumps({"job": Path(out).name, "kind": "compile_place", "place": str(src),

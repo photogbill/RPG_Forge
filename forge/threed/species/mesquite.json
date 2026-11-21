@@ -1,0 +1,11 @@
+{
+ "name": "mesquite",
+ "about": "A honey mesquite: small, crooked, forking almost at the ground, a low airy crown of fine grey-green leaflets that lets the sky through.",
+ "numbers": {
+  "height": 5.0, "trunk_radius": 0.16, "fork_height": 0.6, "limbs": 5, "limb_tilt": [38, 70],
+  "crown_centre_z": 3.1, "crown_radius": 3.4, "crown_half_height": 1.9, "crown_floor": 1.5, "masses": 12,
+  "mass_radius": [0.9, 1.4], "attractors": 2600, "step": 0.26, "reach": 2.4, "close": 0.36, "twig_radius": 0.01,
+  "pipe": 2.35, "leaf_card": [0.5, 0.8], "cards_per_twig": 3, "leaf": "feather", "leaf_tint": [0.95, 1.0, 0.9],
+  "bark": [0.27, 0.22, 0.18]
+ }
+}

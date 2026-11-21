@@ -75,6 +75,17 @@ def _person(who: str | None, what: str) -> None:
         raise ThreeDRefused(f"{what} is the person's — an assistant can't do it")
 
 
+def _approver(cfg: dict, gid: str, who: str | None, what: str) -> str:
+    """BUILD 78: approving is the person's — or an assistant's on the person's behalf when the person has turned on
+    "<assistant> may approve for me"; then it is written as "<assistant>, for <person>", never as the person. Returns the name
+    to sign with."""
+    from . import approve_all
+    try:
+        return approve_all.signer(cfg, gid, who, what)
+    except approve_all.ApproveRefused as e:
+        raise ThreeDRefused(str(e))
+
+
 def _sign(cfg: dict, gid: str, who: str | None, kind: str, obj: str, note: str = "", link: str | None = None) -> None:
     from . import games, journal
     if not who or not gid:
@@ -455,6 +466,7 @@ def _licence_check(cfg: dict, t: dict) -> tuple[bool, list[str]]:
 def review_list(cfg: dict, gid: str) -> dict:
     base = tdir(cfg, gid) / "tries"
     waiting, decided = [], []
+    dest_of = dest_rule(cfg, gid)       # BUILD 84 part 4: the game's adapter is asked for once, not once a model
     for p in sorted(base.glob("*/*.json"), key=lambda p: p.name, reverse=True):
         t = _read(p, {})
         r = t.get("review")
@@ -464,33 +476,46 @@ def review_list(cfg: dict, gid: str) -> dict:
         ok, lines = _licence_check(cfg, t)
         item = {"id": t["id"], "who": t["who"], "who_name": t.get("who_name"), "kind": t["kind"], "look": t.get("look"),
                 "review": r, "urls": t["urls"], "licences": lines, "commercial_ok": ok, "files": _deliver_files(t),
-                "dest": dest_rel(cfg, gid, t), "from": t.get("from"), "checks": t.get("checks") or [],
+                "dest": dest_of(t), "from": t.get("from"), "checks": t.get("checks") or [],
                 "check_picture": file_url(t.get("check_picture")), "world_kind": t.get("world_kind")}
         (waiting if r.get("state") == "waiting" else decided).append(item)
     return {"waiting": waiting, "decided": decided[:30], "approved": _read(tdir(cfg, gid) / "approved.json", {})}
 
 
-def dest_rel(cfg: dict, gid: str, t: dict) -> str:
-    """Where a model goes in the game: the adapter's threed_dest(kind, name) when it has one, else
-    project/assets/models/<characters|props|buildings>/<name>.glb."""
+def dest_rule(cfg: dict, gid: str):
+    """Where a model goes in the game, as a function of its try: the adapter's threed_dest(kind, name) when it has one,
+    else project/assets/models/<characters|props|buildings>/<name>.glb. The adapter is looked up once, here — a list of
+    350 models used to read the game's two settings files 350 times over (BUILD 84 part 4)."""
     from . import games
+    fn = None
     try:
         if games.has_adapter(cfg, gid):
-            a = games.adapter(cfg, gid)
-            fn = getattr(a, "threed_dest", None)
-            if callable(fn):
-                return str(fn(t["kind"], t["who"]))
+            fn = getattr(games.adapter(cfg, gid), "threed_dest", None)
     except Exception as e:  # noqa: BLE001
-        log.warning("3d: the adapter's threed_dest failed (%s) — using the forge's default", e)
-    folder = {"body": "characters", "prop": "props", "building": "buildings"}.get(t["kind"], "models")
-    return f"project/assets/models/{folder}/{t['who']}.glb"
+        log.warning("3d: the game's adapter could not be asked where models go (%s) — using the forge's default", e)
+
+    def of(t: dict) -> str:
+        if callable(fn):
+            try:
+                return str(fn(t["kind"], t["who"]))
+            except Exception as e:  # noqa: BLE001
+                log.warning("3d: the adapter's threed_dest failed (%s) — using the forge's default", e)
+        folder = {"body": "characters", "prop": "props", "building": "buildings"}.get(t["kind"], "models")
+        return f"project/assets/models/{folder}/{t['who']}.glb"
+    return of
+
+
+def dest_rel(cfg: dict, gid: str, t: dict) -> str:
+    """Where one model goes in the game (see dest_rule)."""
+    return dest_rule(cfg, gid)(t)
 
 
 def decide(cfg: dict, gid: str, tid: str, verdict: str, who: str | None, note: str = "") -> dict:
-    """Approve (held for Deliver, after the licence check) or turn down a 3D model. The person's alone."""
+    """Approve (held for Deliver, after the licence check) or turn down a 3D model. The person's — or, with "<assistant> may
+    approve for me" on, an assistant's for the person (BUILD 78), signed so."""
     if verdict not in ("approve", "reject"):
         raise ThreeDRefused("approve or reject")
-    _person(who, "approving a model" if verdict == "approve" else "turning a model down")
+    who = _approver(cfg, gid, who, "approving a model" if verdict == "approve" else "turning a model down")
     t = refresh(cfg, gid, load_try(cfg, gid, tid))
     files = _deliver_files(t)
     if verdict == "approve":
@@ -501,8 +526,12 @@ def decide(cfg: dict, gid: str, tid: str, verdict: str, who: str | None, note: s
             motions.refuse_test_dances([cfgmod.ROOT / f for f in files])
         except ValueError as e:
             raise ThreeDRefused(str(e))
-        if not files or not all((cfgmod.ROOT / f).exists() for f in files):
-            raise ThreeDRefused("its files are not all there any more: " + ", ".join(files))
+        if not files:   # Fable 2026-11-20: was a blank "files are not all there" — a body with no motions yet has none to deliver
+            raise ThreeDRefused("nothing to deliver yet — " + ("a body waits for its skeleton and motions; it comes back here when they are made"
+                                if t.get("kind") == "body" else "it has no finished model file"))
+        missing = [f for f in files if not (cfgmod.ROOT / f).exists()]
+        if missing:
+            raise ThreeDRefused("its files are not all there any more: " + ", ".join(missing))
         appr = _read(tdir(cfg, gid) / "approved.json", {})
         key = f"{t['kind']}/{t['who']}"
         appr[key] = {"try": t["id"], "files": files, "dest": dest_rel(cfg, gid, t), "licences": lines, "by": who,
@@ -516,18 +545,32 @@ def decide(cfg: dict, gid: str, tid: str, verdict: str, who: str | None, note: s
     return {"ok": True, "message": ("Approved — held for Deliver." if verdict == "approve" else "Turned down — it stays in its try.")}
 
 
-def deliver(cfg: dict, gid: str, who: str | None, dry: bool = True) -> dict:
+def deliver(cfg: dict, gid: str, who: str | None, dry: bool = True, only: list | None = None,
+            limit: int | None = None) -> dict:
     """Copy every approved model (and its motion sheet and provenance) into the game; keep what it replaces in
-    out/_replaced/; record each in delivered.json (the same ledger as pictures) and the journal."""
+    out/_replaced/; record each in delivered.json (the same ledger as pictures) and the journal.
+
+    Fable 2026-11-20 (William 15:45-15:51: "deliver them using the same connector" ... "yes please"): delivering is the
+    person's — or an assistant's for the person while "<assistant> may approve for me" is on (BUILD 78), signed
+    "<assistant>, for <person>". `only` limits it to these (a key "prop/x", a bare id "x", or a try id); `limit` to the first
+    N, so the connector can deliver in batches that finish inside one call. approved.json is read again before it is
+    written, so an approval made while the files were copying is never lost."""
     from . import games
     from ..night4 import deliver as dl
     appr = _read(tdir(cfg, gid) / "approved.json", {})
     root = games.game_root(cfg, gid)
     todo = [(k, a) for k, a in appr.items() if not a.get("delivered")]
+    if only:
+        want = {str(x) for x in only}
+        todo = [(k, a) for k, a in todo if k in want or k.split("/", 1)[-1] in want or a.get("try") in want]
+    left_after = max(0, len(todo) - int(limit)) if limit else 0
+    if limit:
+        todo = todo[: max(0, int(limit))]
     plan = [{"what": k, "files": a["files"], "dest": a["dest"]} for k, a in todo]
     if dry:
-        return {"ok": True, "dry": True, "plan": plan, "game_reachable": bool(root and root.is_dir())}
-    _person(who, "a delivery")
+        return {"ok": True, "dry": True, "plan": plan, "left_after": left_after,
+                "game_reachable": bool(root and root.is_dir())}
+    who = _approver(cfg, gid, who, "a delivery")
     if not root or not root.is_dir():
         raise ThreeDRefused("the game's folder isn't reachable from this computer")
     moved = []
@@ -564,8 +607,13 @@ def deliver(cfg: dict, gid: str, who: str | None, dry: bool = True) -> dict:
         a["delivered"] = datetime.now().isoformat(timespec="seconds")
         moved.append({"what": k, "dest": a["dest"], "replaced": bool(replaced)})
         _sign(cfg, gid, who, "deliver", "models/" + k, note=f"delivered into the game at {a['dest']}", link=a["files"][0])
-    _write(tdir(cfg, gid) / "approved.json", appr)
-    return {"ok": True, "message": f"Delivered {len(moved)} model(s) into the game." if moved else "Nothing to deliver.", "moved": moved}
+    fresh = _read(tdir(cfg, gid) / "approved.json", {})   # read again: keep anything approved while the files copied
+    for k, a in todo:
+        if a.get("delivered") and k in fresh and fresh[k].get("try") == a.get("try"):
+            fresh[k]["delivered"] = a["delivered"]
+    _write(tdir(cfg, gid) / "approved.json", fresh)
+    return {"ok": True, "message": f"Delivered {len(moved)} model(s) into the game." if moved else "Nothing to deliver.",
+            "moved": moved, "left_after": left_after}
 
 
 def stage_of(cfg: dict, gid: str, sid: str) -> str:

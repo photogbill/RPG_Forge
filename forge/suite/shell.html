@@ -172,6 +172,9 @@ main.flush{padding:0;overflow:hidden}
 .qs{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
 .q{background:#16161c;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
 .q.answered{border-color:#2f5a3c;background:#151d18}.q.parked{border-color:#5a4a28}
+.q.standin{border-color:#4a4a7a;background:#17172299;border-style:dashed}.q .ans.si{color:#b9b6ff}.q .ans.left{color:#e6c074}.q details.chg{margin:8px 0 0 34px}.q details.chg summary{cursor:pointer;color:var(--dim);font-size:13px}.q details.chg .choices,.q details.chg .other,.q details.chg .opts,.q details.chg .applies{margin-left:0}
+.nw{background:#16161c;border:1px solid var(--line);border-left:3px solid #8f8bff;border-radius:12px;padding:12px 16px;margin:0 0 16px}.nw .nwr{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.nw .mchips{display:flex;gap:6px;flex-wrap:wrap}.nw .meta{margin-top:8px}.nw details{margin-top:10px}.nw details summary{cursor:pointer;color:#cdd6ea}.nw .nwd{display:flex;gap:10px;align-items:baseline;margin:6px 0 0 4px;font-size:13px}.nw .nwd .how{color:#b9b6ff;white-space:nowrap}.nw .nwd .qq{flex:1;color:var(--ink)}
+.nwbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-4px 0 14px}
 .qh{display:flex;gap:10px;align-items:flex-start}.qn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--dim)}
 .qh b{font-size:14.5px;font-weight:600;line-height:1.45}.why{color:var(--dim);font-size:13px;margin:6px 0 0 34px}
 .rec{font-size:13px;margin:6px 0 0 34px;color:#cdd6ea}.rec i{color:var(--faint)}
@@ -400,7 +403,7 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
   <main id="main">
     <section id="v-home" class="grid">
       <div class="card s12" id="c-stand"><h2>Where the game stands</h2><div id="h-stand" class="meta">…</div></div>
-      <div class="card s8" id="c-needs"><h2>What needs you</h2><div id="h-needs" class="meta">…</div></div>
+      <div class="card s8" id="c-needs"><h2>What needs you</h2><div id="h-needs" class="meta">…</div><div id="h-nw" style="margin-top:14px"></div></div>
       <div class="card s4" id="c-areas"><h2>Waiting in each area</h2><div id="h-areas" class="meta">…</div></div>
       <div class="card s12" id="c-away" style="display:none"><h2>Since you last looked</h2><div id="h-away"></div></div>
       <div class="card s8" id="c-worker">
@@ -447,6 +450,7 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
     </section>
     <section id="v-review" style="display:none">
       <div class="hero"><h1>Review &amp; approve</h1><span class="tag art">Art</span><span class="spacer" style="flex:1"></span><a href="#art/queue" class="meta">the old dashboard (Called out drafts live there)</a></div>
+      <div id="r-approve"></div>
       <div id="r-deliver"></div>
       <div id="r-called"></div>
       <div id="r-3d"></div>
@@ -524,6 +528,8 @@ table.mu tr.drop{outline:2px dashed var(--ok);outline-offset:-2px}table.mu tr.se
     <section id="v-floorplans" style="display:none"></section>
     <section id="v-threed" style="display:none"></section>
     <section id="v-profiles" style="display:none"></section>
+    <section id="v-voicebench" style="display:none"></section>
+    <section id="v-behaviours" style="display:none"></section>
     <section id="v-mocap" style="display:none"></section>
     <section id="v-playtest" style="display:none"></section>
     <section id="v-settings" style="display:none"></section>
@@ -572,7 +578,7 @@ $('#who').onclick=askWho;
 let A={areas:[],needs:{},old:{},area:null,tab:null,rest:[],badges:{},last:null,ready:false,needsAt:0};
 const SECTION={home:'v-home',queue:'v-queue',wanted:'v-wanted',make:'v-make',review:'v-review',library:'v-library',bakeoffs:'v-bakeoffs',
   models:'v-models',tools:'v-tools',intake:'v-intake',chars:'v-chars',mail:'v-mail',orders:'v-orders',overview:'v-story',read:'v-read',
-  music:'v-music',status:'v-status',tasks:'v-tasks',tasksdone:'v-tasksdone',notesopen:'v-notesopen',planned:'v-planned',rulings:'v-rulings',ideas:'v-ideas',provide:'v-provide',floorplans:'v-floorplans',threed:'v-threed',profiles:'v-profiles',mocap:'v-mocap',playtest:'v-playtest',settings:'v-settings',about:'v-about',
+  music:'v-music',status:'v-status',tasks:'v-tasks',tasksdone:'v-tasksdone',notesopen:'v-notesopen',planned:'v-planned',rulings:'v-rulings',ideas:'v-ideas',provide:'v-provide',floorplans:'v-floorplans',threed:'v-threed',profiles:'v-profiles',voicebench:'v-voicebench',behaviours:'v-behaviours',mocap:'v-mocap',playtest:'v-playtest',settings:'v-settings',about:'v-about',
   people:'v-people',quests:'v-quests',voices:'v-voices',find:'v-find'};
 const STORY_SCREENS=['mail','orders','overview','read','music'];
 function addrParts(h){return String(h||'').replace(/^#\/?/,'').split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch(e){return x}})}
@@ -620,7 +626,7 @@ function show(prev){const t=A.tab;if(!t)return;const sc=t.screen,r=A.rest;
   else if(sc==='status')loadStatus(t.id);else if(sc==='tasks')loadTasks();else if(sc==='tasksdone')loadTasksDone();
   else if(sc==='people')loadPeople(r[0]);else if(sc==='quests')loadQuests(r[0]);else if(sc==='voices')loadVoices(r[0],r[1]);else if(sc==='find')paintFind();
   else if(sc==='notesopen')loadNotesOpen(r[0]);else if(sc==='planned')paintPlanned();
-  else if(sc==='rulings')loadRulings(r[0]);else if(sc==='ideas')loadIdeas(r[0]);else if(sc==='provide')loadProvide();else if(sc==='floorplans')loadFloorplans(r);else if(sc==='threed'&&window.loadThreeD)loadThreeD(t.t3||'bodies',r);else if(sc==='profiles'&&window.loadProfiles)loadProfiles(r);else if(sc==='mocap'&&window.loadMocap)loadMocap(t.mc||'takes',r);else if(sc==='playtest')loadPlaytest();else if(sc==='settings')loadSettings();else if(sc==='about')loadAbout()}
+  else if(sc==='rulings')loadRulings(r[0]);else if(sc==='ideas')loadIdeas(r[0]);else if(sc==='provide')loadProvide();else if(sc==='floorplans')loadFloorplans(r);else if(sc==='threed'&&window.loadThreeD)loadThreeD(t.t3||'bodies',r);else if(sc==='profiles'&&window.loadProfiles)loadProfiles(r);else if(sc==='voicebench'&&window.loadVoiceBench)loadVoiceBench();else if(sc==='behaviours'&&window.loadBehaviours)loadBehaviours(r);else if(sc==='mocap'&&window.loadMocap)loadMocap(t.mc||'takes',r);else if(sc==='playtest')loadPlaytest();else if(sc==='settings')loadSettings();else if(sc==='about')loadAbout()}
 async function loadGames(keep){G=await api('/api/suite/games');const sel=$('#game');
   sel.innerHTML=G.games.map(g=>`<option value="${esc(g.id)}" ${g.id===G.current?'selected':''}>${esc(g.name)}${g.root_exists?'':' — folder not reachable'}</option>`).join('');
   paintPicker();$('#who-name').textContent=G.identity||'nobody yet';if(!G.identity&&!keep)askWho();return G}
@@ -686,22 +692,30 @@ async function openLetter(id){const l=M.letters.find(x=>x.id===id);if(l&&l.folde
   M.view=v;renderThread(v);
   let changed=false;for(const c of v.letters)if(c.unread){changed=true;await post('mail_read',{game:gid(),letter:c.id});const row=$(`#mlist .row[data-id="${CSS.escape(c.id)}"]`);if(row)row.classList.remove('unread');const x=M.letters.find(y=>y.id===c.id);if(x)x.unread=false}
   if(changed)badge(M.letters.filter(x=>x.unread).length)}
-function qBlock(c,q,i,mine){const key=c.id+'#'+q.id, a=q.answer;const choices=(q.choices||[]).map(x=>typeof x==='object'?x.label:x);
-  let h=`<div class="q ${a?'answered':q.parked?'parked':''}" data-letter="${esc(c.id)}" data-q="${esc(q.id)}"><div class="qh"><span class="qn">${i+1}</span><b>${esc(q.question)}</b></div>`;
+const SI_WORD={default:"'s default, taken",recommendation:"'s recommendation, taken",deferred:' decided it'};
+function qBlock(c,q,i,mine){const key=c.id+'#'+q.id, a=q.answer, si=a&&a.stand_in;const choices=(q.choices||[]).map(x=>typeof x==='object'?x.label:x);
+  let h=`<div class="q ${si?'standin':a?'answered':q.parked?'parked':''}" data-letter="${esc(c.id)}" data-q="${esc(q.id)}"><div class="qh"><span class="qn">${i+1}</span><b>${esc(q.question)}</b></div>`;
   if(q.why)h+=`<div class="why">${esc(q.why)}</div>`;
   if(q.recommendation||q.default)h+=`<div class="rec">${q.recommendation?esc(c.from.split(' ').slice(-1)[0])+' recommends: '+esc(q.recommendation):''}${q.default?` <i>· if you don't answer: ${esc(q.default)}</i>`:''}</div>`;
-  if(a){h+=`<div class="ans">✓ ${esc(a.by)} answered: <b>${esc(a.choice!=null?a.choice:a.text)}</b>${a.choice!=null&&a.text?` — “${esc(a.text)}”`:''}${a.applied?` <small>· ${esc(a.applied.message)}</small>`:''} <small>(${esc(when(a.date))})</small></div>`}
-  else if(mine){h+=`<div class="choices">${choices.map(x=>`<label class="pill"><input type="radio" name="${esc(key)}" value="${esc(x)}">${esc(x)}</label>`).join('')}</div>
+  const form=`<div class="choices">${choices.map(x=>`<label class="pill"><input type="radio" name="${esc(key)}" value="${esc(x)}">${esc(x)}</label>`).join('')}</div>
     <input class="other" placeholder="${choices.length?'Something else — in your own words':'Your answer'}">
-    <div class="opts"><label><input type="checkbox" class="talk"> Talk to me about this one</label><label><input type="checkbox" class="later"> Later</label>${q.parked?`<span style="color:var(--warn)">parked last time (${esc(q.parked)})</span>`:''}</div>`;
-    if(q.applies_to)h+=`<div class="applies">Picking an option changes <code>${esc(q.applies_to.file)}#${esc(q.applies_to.pointer)}</code> when you send — checked by the game's validator, backed up, logged. Your own words change nothing.</div>`}
-  else h+=`<div class="ans" style="color:var(--dim)">open${q.parked?' — parked ('+esc(q.parked)+')':''}</div>`;
+    <div class="opts"><label><input type="checkbox" class="talk"> Talk to me about this one</label><label><input type="checkbox" class="later"> Later</label>${q.parked?`<span style="color:var(--warn)">parked last time (${esc(q.parked)})</span>`:''}</div>`+
+    (q.applies_to?`<div class="applies">Picking an option changes <code>${esc(q.applies_to.file)}#${esc(q.applies_to.pointer)}</code> when you send — checked by the game's validator, backed up, logged. Your own words change nothing.</div>`:'');
+  if(si){h+=`<div class="ans si">↷ Went ahead without you: <b>${esc(a.choice!=null?a.choice:a.text)}</b>${a.note?` — “${esc(a.note)}”`:''} <small>· ${esc(a.by)}${SI_WORD[a.stand_in]||' stood in'}${a.applied?' · '+esc(a.applied.message):''} (${esc(when(a.date))}) · not your ruling</small></div>`;
+    if(mine)h+=`<details class="chg"><summary>Change it — your answer replaces this one</summary>${form}</details>`}
+  else if(a){h+=`<div class="ans">✓ ${esc(a.by)} answered: <b>${esc(a.choice!=null?a.choice:a.text)}</b>${a.choice!=null&&a.text?` — “${esc(a.text)}”`:''}${a.applied?` <small>· ${esc(a.applied.message)}</small>`:''} <small>(${esc(when(a.date))})</small></div>`}
+  else{if(q.deferred)h+=`<div class="ans left">⇢ Left to ${esc(q.deferred.to)} to decide (${esc(when(q.deferred.at))})${mine?' — answer it here and it is yours again':''}</div>`;
+    if(mine)h+=form;
+    else if(!q.deferred)h+=`<div class="ans" style="color:var(--dim)">open${q.parked?' — parked ('+esc(q.parked)+')':''}</div>`}
   h+=`<div style="margin:8px 0 0 34px"><button class="linkish" data-order="mail:${esc(c.id)}#${esc(q.id)}" data-title="${esc(q.question.slice(0,90))}">→ make it a work order</button></div></div>`;return h}
 function isMine(c){const me=G.identity||'';return c.from!==me&&(c.to===me||c.to.split(' ')[0].toLowerCase()===me.split(' ')[0].toLowerCase())}
 function renderThread(v){const me=G.identity||'';const arch=v.letters.some(c=>c.folder==='archive');
   let h=`<div class="thead"><h1>${esc(v.subject)}</h1><button class="ghost" data-order="mail:${esc(M.sel)}" data-title="${esc(v.subject)}">→ Work order</button>
   ${arch?`<button class="ghost" onclick="unarchive()">Back to the inbox</button>`:`<button class="ghost" onclick="archiveSel()">Archive</button>`}</div>`;
   if(v.open_questions)h+=`<div class="meta" style="margin:-6px 0 14px">${v.open_questions} question${v.open_questions>1?'s':''} open on this thread.</div>`;
+  const nwTo=(v.nowait&&v.nowait.defer_to)||'';const waitL=v.letters.filter(c=>isMine(c)&&/^claude/i.test(c.from)&&c.questions.some(q=>!q.answer));
+  if(waitL.length){const anyDef=waitL.some(c=>c.questions.some(q=>!q.answer&&(q.default||q.recommendation))),anyNew=!!nwTo&&waitL.some(c=>c.questions.some(q=>!q.answer&&!(q.deferred&&q.deferred.to===nwTo)));
+    if(anyDef||anyNew)h+=`<div class="nwbar"><span class="meta">Don't want these to wait on you?</span>${anyDef?`<button class="ghost" id="nw-def" title="Each question takes what its sender said they'd go with. ${nwTo?'Any with no default goes to '+esc(nwTo)+'.':'Any with no default keeps waiting for you.'} Your own answer replaces it whenever you give one.">Take the defaults</button>`:''}${anyNew?`<button class="ghost" id="nw-dfr" title="${esc(nwTo)} decides them and writes back what was decided and why. Your own answer replaces it whenever you give one.">Leave them to ${esc(nwTo)}</button>`:''}</div>`}
   for(const c of v.letters){const mine=isMine(c);
     h+=`<div class="lcard"><div class="lhead">${avatar(c.from)}<div><div class="lwho">${esc(c.from)}</div><div class="meta">to ${esc(c.to)}</div></div><div class="meta">${esc(String(c.date).replace('T',' ').slice(0,16))}</div></div>
     <div class="prose">${md(c.body)}</div>`;
@@ -717,11 +731,13 @@ function renderThread(v){const me=G.identity||'';const arch=v.letters.some(c=>c.
   $$('#mread .pill input').forEach(i=>i.onchange=()=>{$$(`#mread input[name="${CSS.escape(i.name)}"]`).forEach(x=>x.parentElement.classList.toggle('on',x.checked));tally()});
   $$('#mread .q input').forEach(i=>i.addEventListener('input',tally));
   $$('#mread [data-order]').forEach(b=>b.onclick=()=>openOrder(b.dataset.order,b.dataset.title));
+  const nwGo=how=>async()=>{if(!G.identity)return askWho();let msg='',ok=true;for(const c of waitL){const r=await post('nowait_letter',{game:gid(),letter:c.id,how});msg=r.message;ok=ok&&r.ok}toast(msg,ok);const sel=M.sel;await loadMail();openLetter(sel);loadBadges(true)};
+  if($('#nw-def'))$('#nw-def').onclick=nwGo('default');if($('#nw-dfr'))$('#nw-dfr').onclick=nwGo('defer');
   if(last){$('#r-send').onclick=()=>sendReply(last.id);tally()}}
-function collect(){const out=[];for(const q of $$('#mread .q:not(.answered)')){const o=q.querySelector('.other');if(!o)continue;const ch=q.querySelector('.pill input:checked'),tx=o.value.trim(),talk=q.querySelector('.talk').checked,later=q.querySelector('.later').checked;
+function collect(sel){const out=[];for(const q of $$(sel||'#mread .q:not(.answered)')){const o=q.querySelector('.other');if(!o)continue;const ch=q.querySelector('.pill input:checked'),tx=o.value.trim(),talk=q.querySelector('.talk').checked,later=q.querySelector('.later').checked;
   if(ch||tx||talk||later)out.push({letter:q.dataset.letter,id:q.dataset.q,choice:ch?ch.value:null,text:tx,talk,later})}return out}
-function tally(){const t=$('#r-tally');if(!t)return;const total=$$('#mread .q:not(.answered) .other').length,a=collect().filter(x=>(x.choice||x.text)&&!x.talk&&!x.later).length;
-  t.textContent=total?`${a} of ${total} answered${total-a?` — the other ${total-a} stay open on this thread`:''}`:''}
+function tally(){const t=$('#r-tally');if(!t)return;const OPEN='#mread .q:not(.answered):not(.standin)',total=$$(OPEN+' .other').length,a=collect(OPEN).filter(x=>(x.choice||x.text)&&!x.talk&&!x.later).length,chg=collect('#mread .q.standin').filter(x=>x.choice||x.text).length;
+  t.textContent=(total?`${a} of ${total} answered${total-a?` — the other ${total-a} stay open on this thread`:''}`:'')+(chg?`${total?' · ':''}${chg} stand-in answer${chg>1?'s':''} replaced with yours`:'')}
 async function sendReply(to){const answers=collect(),body=$('#r-body').value;if(!answers.length&&!body.trim())return toast('Nothing to send yet — answer a question or write a line.',false);
   $('#r-send').disabled=true;const r=await post('mail_reply',{game:gid(),letter:to,body,answers});toast(r.message,r.ok);$('#r-send').disabled=false;
   if(r.ok){const sel=M.sel;await loadMail();openLetter(sel)}}
@@ -1298,7 +1314,7 @@ $('#wbtn').onclick=async()=>{const st=(A.badges||{}).worker||'unknown';if(A.badg
 function paintHomeAreas(){const b=A.badges||{};const rows=Object.keys(AREA_WORD).filter(k=>b[k]).map(k=>{const a=A.areas.find(x=>x.id===k)||{};return `<div style="margin:5px 0"><a href="#${k}">${esc(a.icon||'')} ${esc(a.name||k)}</a> — <b style="color:var(--ink)">${fmt(b[k])}</b> ${esc(AREA_WORD[k])}${k==='tasks'&&b.overdue?` <span style="color:var(--warn)">(${b.overdue} overdue)</span>`:''}</div>`});
   $('#h-areas').innerHTML=rows.length?rows.join(''):'Nothing waiting anywhere.'}
 async function homeExtras(){paintHomeAreas();const g=encodeURIComponent(gid());loadStanding();
-  api('/api/suite/tasks?id='+g).then(d=>{$('#h-needs').innerHTML=d.next.length?d.next.slice(0,5).map(c=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:baseline"><span style="color:${c.unblocks?'var(--no)':c.overdue?'var(--warn)':'#ff8a4c'}">●</span><span style="flex:1;color:var(--ink)">${esc(c.title)} <span class="meta">· ${esc(c.effort)}</span></span>${c.go?`<a href="#${esc(c.go)}">Go →</a>`:''}</div>`).join('')+(d.count>5?`<div style="margin-top:8px"><a href="#tasks/for-you">All ${d.count} on Tasks →</a></div>`:''):'Nothing is waiting on you. 🎉'}).catch(e=>{$('#h-needs').textContent=String(e)});
+  api('/api/suite/tasks?id='+g).then(d=>{$('#h-needs').innerHTML=d.next.length?d.next.slice(0,5).map(c=>`<div style="margin:6px 0;display:flex;gap:10px;align-items:baseline"><span style="color:${c.unblocks?'var(--no)':c.overdue?'var(--warn)':'#ff8a4c'}">●</span><span style="flex:1;color:var(--ink)">${esc(c.title)} <span class="meta">· ${esc(c.effort)}</span></span>${c.go?`<a href="#${esc(c.go)}">Go →</a>`:''}</div>`).join('')+(d.count>5?`<div style="margin-top:8px"><a href="#tasks/for-you">All ${d.count} on Tasks →</a></div>`:''):'Nothing is waiting on you. 🎉';const hb=$('#h-nw');if(hb&&d.nowait){hb.innerHTML=nwStrip(d.nowait);nwWire(hb,d.nowait,()=>nwMount(hb))}}).catch(e=>{$('#h-needs').textContent=String(e)});
   api('/api/suite/away?id='+g).then(a=>{$('#c-away').style.display=a.count?'':'none';if(a.count)$('#h-away').innerHTML=awayCard(a)}).catch(()=>{})}
 // ---------- Status — met or not met, at a glance
 function tileHtml(t){return `<div class="tile2 ${esc(t.state)}" onclick="${t.go?`go('${esc(t.go)}')`:''}" title="${esc(t.detail)}"><div class="tl">${esc(t.label)}</div><div class="tv">${esc(t.value)}</div><div class="td">${esc(t.detail)}</div></div>`}
@@ -1328,13 +1344,30 @@ async function loadTasks(){const v=$('#v-tasks');TK.view='v-tasks';TK.reload=()=
   if(!d.who){v.innerHTML='<div class="empty">Say who you are first (bottom left) — Tasks gathers what is waiting on you.</div>';return}
   const AN=Object.fromEntries(A.areas.map(a=>[a.id,a]));
   let h=`<div class="tk-top"><b class="big">${d.count}</b><span>thing${d.count===1?'':'s'} waiting on you${d.overdue?` · <span style="color:var(--warn)">${d.overdue} over a week old</span>`:''}</span><span class="spacer" style="flex:1"></span><span class="meta">Gathered from the whole game. A card leaves only when it's done or you dismiss it with a reason — reading it changes nothing.</span></div>`;
+  h+=nwStrip(d.nowait);
   if(!d.count)h+='<div class="empty">Nothing is waiting on you. 🎉</div>';
   if(d.next.length)h+=`<div class="tk-h">Next</div>`+d.next.map(cardHtml).join('');
   for(const g of d.groups){const a=AN[g.area]||{name:g.area,icon:''};h+=`<details class="tg"><summary>${esc(a.icon)} ${esc(a.name)} · ${g.cards.length} more</summary>${g.cards.map(cardHtml).join('')}</details>`}
-  v.innerHTML=h;
+  v.innerHTML=h;nwWire();
   $$('#'+TK.view+' .tdrop').forEach(z=>{z.ondragover=e=>{e.preventDefault();z.classList.add('over')};z.ondragleave=()=>z.classList.remove('over');
     z.ondrop=e=>{e.preventDefault();z.classList.remove('over');tkUpload(z.dataset.drop,[...e.dataTransfer.files])}});
   $$('#'+TK.view+' input[data-file]').forEach(i=>i.onchange=()=>tkUpload(i.dataset.file,[...i.files]))}
+// Don't wait for me (nowait.py) — the owner's standing instruction for questions nobody has answered
+const NW_HOW={default:'default taken',recommendation:'recommendation taken',deferred:'decided for you'};
+function nwStrip(n){if(!n)return'';const s=n.setting,to=s.defer_to,hrs=x=>x?(x>=24&&x%24===0?`after ${x/24} day${x>24?'s':''}`:`after ${x} hours`):'right away';
+  const modes=[['wait','Wait for me'],['default','Take the defaults'],['defer',to?'Leave it to '+to:'Leave it to…']];
+  let h=`<div class="nw"><div class="nwr"><b>Don't wait for me</b><div class="mchips">${modes.map(([k,w])=>`<button data-nw="${k}" class="${s.mode===k?'on':''}" ${n.mine?'':'disabled'}>${esc(w)}</button>`).join('')}</div>
+    <select class="fsel nw-h" ${n.mine?'':'disabled'} title="How long a letter waits for you first">${[...new Set([...n.hours,s.after_hours])].sort((a,b)=>a-b).map(x=>`<option value="${x}" ${x===s.after_hours?'selected':''}>${hrs(x)}</option>`).join('')}</select>
+    <select class="fsel nw-to" ${n.mine?'':'disabled'} title="Who decides a question that has no default, or all of them under “Leave it to”"><option value="" ${to?'':'selected'}>— leave them to… —</option>${n.assistants.map(x=>`<option ${x===to?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
+    <div class="meta">${s.mode==='wait'?'Off — a question in a letter waits until you answer it.':s.mode==='default'?`On — a question an assistant asks takes the answer they said they'd go with (their default, else their recommendation); one with neither ${to?'goes to '+esc(to):'still waits for you (pick who to leave those to, in the list above)'}.`:`On — ${esc(to||'')} decides the questions assistants ask you, and writes back what was decided and why.`} ${s.mode==='wait'?'':'Nothing is locked in: each one is listed below, and your own answer replaces it whenever you give one. '}Covers questions in letters — a file only you have, pictures to approve and music briefs still wait for you.</div>`;
+  if(n.decided.length)h+=`<details ${n.decided.length<=4?'open':''}><summary>Went ahead without you · ${n.decided.length}</summary>${n.decided.map(d=>`<div class="nwd"><span class="how">${esc(NW_HOW[d.how]||d.how)}</span><span class="qq">${esc(d.question)} → <b>${esc(d.answer)}</b> <span class="meta">· ${esc(d.by||'')} · ${esc(when(d.date))}${d.applied?' · '+esc(d.applied):''}</span></span><a href="#${esc(d.go)}">Look / change →</a></div>`).join('')}</details>`;
+  if(n.left.length)h+=`<details><summary>Left to an assistant, not decided yet · ${n.left.reduce((a,x)=>a+x.count,0)}</summary>${n.left.map(l=>`<div class="nwd"><span class="how">${esc(l.to)}</span><span class="qq">${l.count} question${l.count>1?'s':''} in “${esc(l.subject)}”</span><a href="#${esc(l.go)}">Open →</a></div>`).join('')}</details>`;
+  return h+'</div>'}
+function nwWire(box,n,reload){box=box||$('#'+TK.view);n=n||(TK.data||{}).nowait;reload=reload||(()=>TK.reload());if(!box||!n)return;
+  const save=async mode=>{if(!G.identity)return askWho();const r=await post('nowait_set',{game:gid(),mode:mode||n.setting.mode||'wait',after_hours:box.querySelector('.nw-h').value,defer_to:box.querySelector('.nw-to').value});toast(r.message,r.ok);reload();loadBadges(true)};
+  box.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>save(b.dataset.nw));for(const c of ['.nw-h','.nw-to']){const e=box.querySelector(c);if(e)e.onchange=()=>save()}}
+// the same switch on Home and in Settings, so it is found wherever it is looked for
+async function nwMount(box,reload){if(!box)return;try{const d=await api('/api/suite/tasks?id='+encodeURIComponent(gid()));if(!d.nowait){box.innerHTML='';return}box.innerHTML=nwStrip(d.nowait);nwWire(box,d.nowait,reload||(()=>nwMount(box,reload)))}catch(e){box.innerHTML=''}}
 function tkCard(id){const d=TK.data;return d?[...d.next,...d.groups.flatMap(g=>g.cards)].find(c=>c.id===id):null}
 function tkEl(id){return document.querySelector(`#${TK.view} .tcard[data-id="${CSS.escape(id)}"]`)}
 function tkChoose(id){const i=document.querySelector(`#${TK.view} input[data-file="${CSS.escape(id)}"]`);if(i)i.click()}
@@ -1402,8 +1435,9 @@ function paintPlanned(){const a=A.area,t=A.tab,n=A.needs[a.id+'/'+t.id]||{};
   <p class="meta">Until then, the nearest thing that exists today: ${a.id==='story'?'<a href="#story/read">Read-through</a> (every line, place by place) and <a href="#story/overview">Overview</a>':'<a href="#notes/open">Open notes</a> and <a href="#messages/inbox">Messages</a>'}.</p></div>`}
 // ---------- Settings
 async function loadSettings(){const v=$('#v-settings');let d;try{d=await api('/api/suite/about')}catch(e){v.innerHTML=`<div class="err">${esc(e)}</div>`;return}
+  setTimeout(()=>nwMount($('#st-nw')),0);
   const st=d.settings||{},tz=st.timezone||'';
-  v.innerHTML=`<div class="note" style="max-width:900px">Everything on this page is <b>this computer's</b> answer, kept in <code>${esc(d.settings_file)}</code> — never pushed, so another computer (a Mac, too) keeps its own.</div>
+  v.innerHTML=`<div id="st-nw" style="max-width:900px"></div><div class="note" style="max-width:900px">Everything on this page is <b>this computer's</b> answer, kept in <code>${esc(d.settings_file)}</code> — never pushed, so another computer (a Mac, too) keeps its own.</div>
    <div class="card" style="max-width:900px"><h2>Where each game is on this computer</h2>${d.games.map(g=>`<div class="gr" data-g="${esc(g.id)}" style="margin:12px 0 18px">
      <div><b>${esc(g.name)}</b> <span class="meta">${esc(g.id)}</span> · <span style="color:${g.reachable?'var(--ok)':'var(--no)'}">${g.reachable?'found here':'not on this computer'}</span></div>
      <div class="meta" style="margin:3px 0 6px">Read from <code>${esc(g.root||'—')}</code>${g.overridden?' (set on this computer)':' (the game\'s own setting: <code>'+esc(g.from_game||'—')+'</code>)'}</div>
@@ -1626,7 +1660,7 @@ const KWORD={answer:'answered in the Mail',marked:'✦ in the notes',recorded:'w
 function hl(text,words){let t=esc(text);for(const w of (words||[]).filter(x=>x.length>2).sort((a,b)=>b.length-a.length)){try{t=t.replace(new RegExp('\\b('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[a-z]*)','gi'),'<mark>$1</mark>')}catch(e){}}return t}
 function rulWhere(r){if(r.kind==='answer')return `<a href="#messages/inbox/${encodeURIComponent(r.reply||r.letter)}">${esc(r.where)}</a>`;
   if(r.kind==='marked')return `<a href="/suite/gamefile?id=${encodeURIComponent(gid())}&rel=${encodeURIComponent(r.file)}" target="_blank" title="${esc(r.heading||'')}">${esc(r.where)}</a>`;return esc(r.where)}
-function rulCard(r){return `<div class="rul ${r.retired?'retired':''}"><div class="rh"><span class="kchip ${esc(r.kind)}">${esc(KWORD[r.kind]||r.kind)}</span><b style="color:var(--dim)">${esc(r.when||'undated')}</b>${r.when_basis==='file'?'<span title="no date on the line — the file\'s date">≈</span>':''}<span>${rulWhere(r)}</span>${r.by?`<span>by ${esc(r.by)}</span>`:''}${r.recorded_by&&r.recorded_by!==r.by?`<span>written down by ${esc(r.recorded_by)}</span>`:''}${r.applies_to?`<span title="pinned: the book warns when this field says anything else">📌 ${esc(r.applies_to.file)}#${esc(r.applies_to.pointer)} = ${esc(JSON.stringify(r.value))}</span>`:''}<span style="flex:1"></span>${r.retired?`<span>no longer holds — ${esc(r.retired.why)}</span>`:`<button class="linkish" onclick="retireRuling('${esc(r.id)}')">no longer holds…</button>`}</div>
+function rulCard(r){return `<div class="rul ${r.retired?'retired':''}"><div class="rh"><span class="kchip ${esc(r.kind)}">${esc(KWORD[r.kind]||r.kind)}</span>${r.provisional?'<span class="kchip" style="border-color:#4a4a7a;color:#b9b6ff" title="A stand-in answer (Don\'t wait for me): it went ahead without the owner and is not their ruling — their own answer replaces it">provisional</span>':''}<b style="color:var(--dim)">${esc(r.when||'undated')}</b>${r.when_basis==='file'?'<span title="no date on the line — the file\'s date">≈</span>':''}<span>${rulWhere(r)}</span>${r.by?`<span>by ${esc(r.by)}</span>`:''}${r.recorded_by&&r.recorded_by!==r.by?`<span>written down by ${esc(r.recorded_by)}</span>`:''}${r.applies_to?`<span title="pinned: the book warns when this field says anything else">📌 ${esc(r.applies_to.file)}#${esc(r.applies_to.pointer)} = ${esc(JSON.stringify(r.value))}</span>`:''}<span style="flex:1"></span>${r.retired?`<span>no longer holds — ${esc(r.retired.why)}</span>`:`<button class="linkish" onclick="retireRuling('${esc(r.id)}')">no longer holds…</button>`}</div>
   ${r.heading&&r.kind==='marked'?`<div class="meta" style="font-size:12px">${esc(r.heading)}</div>`:''}<div class="rt">${hl(r.text,RB.q?r.matched:[])}</div></div>`}
 async function loadRulings(want){const v=$('#v-rulings');if(want!==undefined&&want!==RB.q){RB.q=want}
   if(!v.querySelector('#rb-q'))v.innerHTML=`<div class="mem"><div class="note">Every ruling in one book: questions answered in the Mail, every line marked ✦ in the game's notes, and rulings written straight in (one given in a chat, say). <b>Search it before asking anything</b> — a session's letter is turned back when the book already answers one of its questions.</div>
@@ -1733,11 +1767,13 @@ function fpCard(c){const bad=c.problems.length+c.game_problems.length;const a=(F
   return `<div class="fp-card"><img src="${fpImg(c,480)}" onclick="go('art/floorplans/open/${c.folder.split('/').map(encodeURIComponent).join('/')}')" title="open it">
    <div class="t"><b>${esc(a)} · seed ${c.seed}</b>${c.approved_by?`<span class="fp-b ap">approved by ${esc(c.approved_by)}</span>`:''}${c.edited?'<span class="fp-b ed">edited</span>':''}<span class="fp-b ${bad?'no':''}">${bad?bad+' problem'+(bad>1?'s':''):'clean'}</span></div>
    <div class="meta">${c.maps} maps (the town and the rooms behind its doors)${c.unknowns.length?' · '+c.unknowns.length+' unknown'+(c.unknowns.length>1?'s':''):''}</div>
-   <div class="t"><button class="go" onclick="go('art/floorplans/open/${c.folder.split('/').map(encodeURIComponent).join('/')}')">Open</button>${c.approved_by?'':`<button onclick="fpApprove('${esc(c.folder)}')">Approve</button>`}<button class="ghost" onclick="fpSend('${esc(c.folder)}')">Send to ${esc((FP.d&&FP.d.owner)||'the owner')}</button></div></div>`}
+   <div class="t"><button class="go" onclick="go('art/floorplans/open/${c.folder.split('/').map(encodeURIComponent).join('/')}')">Open</button>${c.approved_by?'':`<button onclick="fpApprove('${esc(c.folder)}')">Approve</button><button onclick="fpApproveStage('${esc(c.folder)}')" title="write it out as a place plan, add a draft stage map to the game and compile it (BUILD 34) — the painted or tile maps stay as they are">Approve as a stage</button>`}<button class="ghost" onclick="fpSend('${esc(c.folder)}')">Send to ${esc((FP.d&&FP.d.owner)||'the owner')}</button></div></div>`}
 async function fpGenerate(n){if(!G.identity)return askWho();toast('Laying out '+n+' candidate'+(n>1?'s':'')+' …');
   const r=await post('floorplan_generate',{game:gid(),place:FP.place,era:FP.era,archetype:FP.aid,count:n,size:FP.size||($('#fp-size')||{}).value||''});toast(r.message,r.ok);if(r.ok)loadFloorplans([])}
 async function fpApprove(f){if(!G.identity)return askWho();if(!confirm('Approve this floor plan? Its maps go into the game (never over a map it already has), its paint guide becomes what the scene kit paints over, and the production plan is remade.'))return;
   const r=await post('floorplan_approve',{game:gid(),folder:f});toast(r.message,r.ok);if(r.ok&&r.result&&(r.result.after||[]).length)setTimeout(()=>toast(r.result.after.join(' · ')),6500);if(r.ok)FP.open?fpOpen(FP.open,FP.map):loadFloorplans([])}
+async function fpApproveStage(f){if(!G.identity)return askWho();if(!confirm('Approve this floor plan as a stage? It is written out as a place plan, the game gets a draft stage map for it, and it is compiled — anything it needs goes on the World list held. The town\'s painted or tile maps stay as they are.'))return;
+  const r=await post('floorplan_approve_stage',{game:gid(),folder:f});toast(r.message,r.ok);if(r.ok&&r.result&&(r.result.after||[]).length)setTimeout(()=>toast(r.result.after.join(' · ')),6500);if(r.ok&&r.place)go('3d/places/'+encodeURIComponent(r.place))}
 async function fpSend(f){if(!G.identity)return askWho();const q=prompt('Your question with it (blank: "is this the right layout?")','');if(q===null)return;
   const r=await post('floorplan_send',{game:gid(),folder:f,question:q});toast(r.message,r.ok)}
 async function fpOpen(rel,map){const v=$('#v-floorplans');let d;
@@ -1784,5 +1820,5 @@ function fpLive(){clearTimeout(FP.chkT);FP.chkT=setTimeout(async()=>{const r=awa
   FP.probs={problems:r.problems||[],game:[]};fpProbs()},300);fpProbs()}
 async function fpSave(){if(!G.identity)return askWho();if(!FP.edits.length)return toast('Nothing painted yet.');
   const r=await post('floorplan_save',{game:gid(),folder:FP.open,map:FP.map,edits:FP.edits});toast(r.message,r.ok);if(r.ok)fpOpen(FP.open,FP.map)}
-</script><script src="/suite/threed.js"></script><script src="/suite/profiles.js"></script><script src="/suite/mocap.js"></script>
+</script><script src="/suite/threed.js"></script><script src="/suite/profiles.js"></script><script src="/suite/voicebench.js"></script><script src="/suite/behaviours.js"></script><script src="/suite/mocap.js"></script><script src="/suite/approve.js"></script>
 </body></html>

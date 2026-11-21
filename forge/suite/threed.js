@@ -129,6 +129,8 @@ async function loadThreeD(tab, rest) {
   if (T.tab === 'trees') return treesTab(rest, strip);
   if (T.tab === 'viewer') return viewerTab(rest, strip);
   if (T.tab === 'world') return worldTab(rest, strip);
+  if (T.tab === 'places') return placesTab(rest, strip);
+  if (T.tab === 'terrain') return terrainTab(rest, strip);          // BUILD 77
   if (T.tab === 'runs') return runsTab(rest, strip);
 }
 window.loadThreeD = loadThreeD;
@@ -532,6 +534,8 @@ async function worldTab(rest, strip) {
     <div class="wq-counts" style="margin:0 0 12px"><button data-f="" class="${T.wqF ? '' : 'on'}"><span class="wq-st wanted">all ${esc((d.items || []).length)}</span></button>
       ${counts.map(([k, n]) => `<button data-f="${esc(k)}" class="${T.wqF === k ? 'on' : ''}">${wqState(k).replace('</span>', ` ${n}</span>`)}</button>`).join('')}
       <input id="wq-q" placeholder="find…" style="margin-left:8px;font:inherit;background:#121217;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:3px 9px;width:160px"></div>
+    <div id="wq-approve"></div>
+    ${wqRelease(d.release || {})}
     ${(d.problems || []).length ? `<div class="t3-card" style="border-color:#7a6230"><h2>Problems in the list</h2>${d.problems.map(p => `<div class="t3-warn">${esc(p)}</div>`).join('')}</div>` : ''}
     <div class="wq-lay"><div class="t3-card"><h2>What the world needs — in the order it first appears</h2>
       <div class="wq-list" id="wq-list">${(d.items || []).length ? '' : `<div class="empty">The list is empty. Add a thing below, or drop a file into ${esc(d.list_dir)}.</div>`}</div></div>
@@ -576,7 +580,48 @@ async function worldTab(rest, strip) {
     if (val('wq-m')) entry.real_size_m = { [val('wq-dim')]: parseFloat(val('wq-m')) };
     if (val('wq-order')) entry.first.order = parseFloat(val('wq-order'));
     const r = await post('threed_world_add', { game: gid(), entry }); toast(r.message, r.ok); if (r.ok) { T.wqSel = r.id; worldTab([], strip); } };
+  wqReleaseWire(d.release || {}, strip);
+  if (window.approveCard) window.approveCard('world', document.getElementById('wq-approve'), () => worldTab([], stripHtml()));   // BUILD 78
   if (L.running) pollIfBusy(() => worldTab([], stripHtml()));
+}
+/* BUILD 73 — one button for what is left: Match and release, Straighten and release, and which way is up */
+function wqRelease(R) {
+  const m = R.match || [], s = R.straighten || [], u = R.unclear_up || [];
+  if (!m.length && !s.length && !u.length) return '';
+  const pic = (url, t) => url ? `<a href="${esc(url)}" target="_blank"><img src="${esc(url)}&w=520" title="${esc(t)}" style="max-width:100%;border-radius:6px"></a>` : `<div class="t3-from">${esc(t)}: no picture</div>`;
+  return `<details class="t3-card" open style="border-color:#3f6a52"><summary><b>What is left — one button each</b> <span class="t3-from">nothing here is remade; every release is written down with who pressed it</span></summary>
+    ${m.length ? `<h3>Match and release <span class="t3-from">${m.length} held for their colours alone — as made · matched · the picture; untick any you don't want</span></h3>
+      ${m.map(r => `<div class="wq-rel" style="display:grid;grid-template-columns:22px 1fr;gap:8px;margin:6px 0"><input type="checkbox" class="wq-m" data-i="${esc(r.id)}" ${r.release === 'as made' ? '' : 'checked'}>
+        <div><b>${esc(r.id)}</b> <span class="wq-badge">${esc(r.kind)}</span>${r.release === 'as made' ? ' <span class="wq-badge" style="border-color:#7a6230;color:#ffd58a" title="the match is worse than the thing as made — Approve everything here releases it as made; so does Release as made on its own card">as made</span>' : ''}<span class="t3-from"> ${esc((r.why || [])[0] || '')}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${pic(r.urls.colour, 'as made · matched · the picture')}${r.urls.head ? pic(r.urls.head, 'the head: as made · matched · the picture') : ''}</div></div></div>`).join('')}
+      <div class="t3-acts"><button class="go" id="wq-mrel">Match and release the ticked</button></div>` : ''}
+    ${s.length ? `<h3>Straighten and release <span class="t3-from">${s.length} that lean as a whole ("If the buildings can be straightened, no need to waste them")</span></h3>
+      ${s.map(r => `<div style="margin:4px 0"><label><input type="checkbox" class="wq-s" data-i="${esc(r.id)}" checked> <b>${esc(r.id)}</b> — leans ${esc(r.tilt_deg)}°${(r.others || []).length ? ` <span class="t3-from">(also held for: ${esc(r.others.join(', '))} — it stays held for those)</span>` : ''}</label></div>`).join('')}
+      <div class="t3-acts"><button class="go" id="wq-srel">Straighten and release the ticked</button></div>` : ''}
+    ${u.length ? `<h3>Which way is up? <span class="t3-from">its resting plane and its own walls disagree — click the one standing up</span></h3>
+      ${u.map(r => `<div style="margin:6px 0"><b>${esc(r.id)}</b> <button class="ghost wq-up" data-i="${esc(r.id)}">Show the three</button><div class="wq-upbox" id="wq-up-${esc(r.id)}"></div></div>`).join('')}` : ''}
+  </details>`;
+}
+function wqReleaseWire(R, strip) {
+  const mb = document.getElementById('wq-mrel');
+  if (mb) mb.onclick = () => { if (!G.identity) return askWho();
+    const ids = [...document.querySelectorAll('.wq-m:checked')].map(x => x.dataset.i);
+    if (!ids.length) return toast('Nothing is ticked.', false);
+    confirmAct(`Match and release ${ids.length}?`, 'Each takes its colours matched to its picture. Props and buildings go to Review & approve; bodies go back to the queue for their skeleton and motions only (no new picture, no new body). Nothing is approved.', 'Release', async () => {
+      const r = await post('threed_world_match_release', { game: gid(), ids }); toast(r.message, r.ok); worldTab([], stripHtml()); }); };
+  const sb = document.getElementById('wq-srel');
+  if (sb) sb.onclick = async () => { if (!G.identity) return askWho();
+    const ids = [...document.querySelectorAll('.wq-s:checked')].map(x => x.dataset.i);
+    if (!ids.length) return toast('Nothing is ticked.', false);
+    const r = await post('threed_world_straighten_release', { game: gid(), ids }); toast(r.message, r.ok); worldTab([], stripHtml()); };
+  document.querySelectorAll('.wq-up').forEach(b => b.onclick = async () => {
+    const box = document.getElementById('wq-up-' + b.dataset.i); box.innerHTML = '<div class="t3-from">drawing…</div>';
+    const r = await post('threed_world_up_choices', { game: gid(), id: b.dataset.i });
+    if (!r.ok) { box.innerHTML = `<div class="err">${esc(r.message)}</div>`; return; }
+    box.innerHTML = `<div style="display:flex;gap:8px">${r.choices.map(c => `<figure style="margin:0;cursor:pointer" class="wq-upc" data-c="${esc(c.choice)}"><img src="${esc(c.url)}" style="width:160px;border-radius:6px;border:2px solid transparent"><figcaption class="t3-from">${esc(c.name)}</figcaption></figure>`).join('')}</div>`;
+    box.querySelectorAll('.wq-upc').forEach(f => f.onclick = async () => { if (!G.identity) return askWho();
+      const r2 = await post('threed_world_up_pick', { game: gid(), id: b.dataset.i, choice: f.dataset.c }); toast(r2.message, r2.ok); worldTab([], stripHtml()); });
+  });
 }
 function wqDetail() {
   const box = document.getElementById('wq-detail'); if (!box) return;
@@ -600,7 +645,9 @@ function wqDetail() {
       ${i.straighten ? `<button class="go" data-w="straighten">Straighten</button>` : ''}
       ${i.colour_offer && i.state === 'held' ? `<button class="go" data-w="colours" title="yours: use the version matched to the picture (the model as made is kept)">Use the matched colours</button>` : ''}
       ${i.state === 'held' && i.held_by === 'picture gate' ? `<span class="t3-from" style="align-self:center">try</span><select id="wq-gtry" style="font:inherit;background:#121217;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:3px 7px">${((i.gate || {}).tries || []).map(t => `<option value="${esc(t.try)}" ${t.try === ((i.gate || {}).tries || []).slice(-1)[0].try ? 'selected' : ''}>${esc(t.try)}</option>`).join('')}</select><button class="go" data-w="gate" title="yours: make the body from this try's picture as it is">Make the body from this picture anyway</button>` : ''}
+      ${i.state === 'held' && i.only_colour ? `<button class="${i.release === 'as made' ? 'go' : 'ghost'}" data-w="asmade" title="the colours as they were made — for when the match is worse than the thing as made">Release as made</button>` : ''}
       ${i.state === 'held' && i.held_by !== 'picture gate' ? `<button class="ghost" data-w="through" title="the person's: overrule the checks">Let it through anyway</button>` : ''}
+      ${i.state === 'failed' ? `<button class="go" data-w="tryagain" title="back in line keeping what it had — the folder, a body kept by a release; no fresh picture">Try again</button>` : ''}
       ${['made', 'held', 'failed'].includes(i.state) || i.shown === 'turned down' ? `<button class="ghost" data-w="again">Make again</button>` : ''}
       <button class="ghost" data-w="hold">${i.hold ? 'Take off hold' : 'Hold'}</button>
       <span class="t3-from" style="align-self:center">rank</span><input id="wq-rank" value="${esc(i.rank || '')}" placeholder="0" style="width:56px;font:inherit;background:#121217;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:3px 7px" title="the order of need when things first appear together (lower first) — yours">
@@ -608,11 +655,12 @@ function wqDetail() {
     ${U.model ? viewer(U.model, { label: i.id, small: true, light: i.flame || i.glow ? 'night' : '' }) : ''}</div>`;
   box.querySelectorAll('button[data-w]').forEach(b => b.onclick = async () => { if (!G.identity) return askWho();
     const w = b.dataset.w;
-    const act = { straighten: 'threed_world_straighten', colours: 'threed_world_colours', through: 'threed_world_through', again: 'threed_world_again', hold: 'threed_world_hold', gate: 'threed_world_gate' }[w];
+    const act = { straighten: 'threed_world_straighten', colours: 'threed_world_colours', through: 'threed_world_through', again: 'threed_world_again', hold: 'threed_world_hold', gate: 'threed_world_gate', asmade: 'threed_world_as_made', tryagain: 'threed_world_try_again' }[w];
     const gsel = document.getElementById('wq-gtry');
     const run = async () => { const r = await post(act, { game: gid(), id: i.id, hold: !i.hold, pick: gsel ? +gsel.value : null }); toast(r.message, r.ok); worldTab([], stripHtml()); };
     if (w === 'gate') return confirmAct(`Make ${i.id}'s body from try ${gsel ? gsel.value : ''}?`, 'The picture gate found something wrong with every try (see the pictures above). The body is made from the try you picked, as it is; about four minutes on the card.', 'Make it anyway', run);
     if (w === 'through') return confirmAct(`Let ${i.id} through?`, 'Its checks failed. It goes to Review & approve as it is, with the failed checks shown beside it.', 'Let it through', run);
+    if (w === 'asmade') return confirmAct(`Release ${i.id} as made?`, i.kind === 'body' ? 'Its colours stay as they were made — nothing is matched. It goes back in the queue for its skeleton and motions only; nothing is remade.' : 'Its colours stay as they were made. It is sized and goes to Review & approve as it is.', 'Release as made', run);
     if (w === 'again') return confirmAct(`Make ${i.id} again?`, 'What was made is kept (renamed); the thing goes back into the queue and gets a fresh picture.', 'Make again', run);
     run(); });
   const rk = document.getElementById('wq-rank');
@@ -680,4 +728,125 @@ wrap('paintChar', async () => {
   el.innerHTML = `<b>3D body:</b> ${order.map(s => s === d.stage ? `<b style="color:#5fc4e8">${esc(s)}</b>` : `<span class="t3-from">${esc(s)}</span>`).join(' · ')}
     <a href="#3d/bodies/${enc(cid)}" style="margin-left:10px">open in 3D →</a>`;
 });
+
+// ------------------------------------------------------------------ Places (BUILD 34): a game's places as stages
+const PL_WORD = { made: 'made', held: 'held', waiting: 'waiting' };
+async function placesTab(rest, strip) {
+  const v = v3();
+  let d; try { d = await api('/api/suite/threed/places?id=' + enc(gid())); } catch (e) { v.innerHTML = strip + `<div class="err">${esc(e)}</div>`; return; }
+  T.pl = d;
+  const list = d.places || [];
+  T.plSel = rest[0] ? decodeURIComponent(rest[0]) : (T.plSel && list.find(p => p.id === T.plSel) ? T.plSel : (list[0] || {}).id);
+  const p = list.find(x => x.id === T.plSel);
+  const busy = p && (p.jobs || []).some(j => j.state === 'pending' || j.state === 'running');
+  v.innerHTML = strip + `<div class="wq-head"><span class="t3-chip">${esc(list.length)} place${list.length === 1 ? '' : 's'} in ${esc(d.folder)}</span>
+      <span class="t3-from">A place plan is compiled into the game's own stage folder; what it still needs goes on the World list held — nothing is made until someone releases it there.</span></div>
+    <div class="wq-lay"><div class="t3-card"><h2>Places</h2><div class="wq-list">${list.length ? list.map(x => `<div class="wq-row ${x.id === T.plSel ? 'sel' : ''}" data-p="${esc(x.id)}">
+        <span class="n">${x.compiled && x.compiled.at ? '◆' : '◇'}</span><div><b>${esc(x.name || x.id)}</b>${(x.problems || []).length ? `<span class="wq-badge" style="color:#ff9a8f">${x.problems.length} problem${x.problems.length > 1 ? 's' : ''}</span>` : ''}${x.compiled && x.compiled.stale ? '<span class="wq-badge" style="color:#f0d08a">plan changed since compiled</span>' : ''}
+          <div class="w">${x.size ? esc(x.size[0]) + ' × ' + esc(x.size[1]) + ' m · ' : ''}${esc(x.things || 0)} things · ${x.counts ? `${x.counts.made} made, ${x.counts.held} held, ${x.counts.waiting} waiting` : ''}</div></div></div>`).join('')
+        : `<div class="empty">No place plans yet. A plan is <code>${esc(d.folder)}/&lt;id&gt;.place.json</code> — or approve a floor plan "as a stage" in Art → Floor plans.</div>`}</div></div>
+      <div id="pl-detail">${p ? placeHtml(p, d, busy) : ''}</div></div>`;
+  document.querySelectorAll('.wq-row[data-p]').forEach(r => r.onclick = () => { T.plSel = r.dataset.p; if (typeof setAddr === 'function') setAddr('3d/places/' + enc(T.plSel)); placesTab([enc(T.plSel)], strip); });
+  wirePlace(p, strip);
+  if (busy) pollIfBusy(() => placesTab([enc(T.plSel)], stripHtml()));
+}
+function placeHtml(p, d, busy) {
+  const c = p.compiled || {};
+  const ents = p.entries || [];
+  return `<div class="t3-card"><h2>${esc(p.name || p.id)}</h2>
+      <div class="t3-from">${esc(p.file)} · ${p.size ? esc(p.size[0]) + ' × ' + esc(p.size[1]) + ' m' : ''} · ${esc(p.solids)} plan-built solids · ${esc(p.lights)} lamps · anchors: ${esc((p.anchors || []).join(', ') || 'none')}</div>
+      ${(p.problems || []).map(x => `<div class="t3-warn">${esc(x)}</div>`).join('')}
+      ${(p.asked || []).length ? `<div class="t3-from" style="margin-top:6px">Asked of William, grey meanwhile: ${esc(p.asked.join(' · '))}</div>` : ''}
+      <div class="t3-acts">
+        <button class="go" id="pl-compile" ${busy || (p.problems || []).length ? 'disabled' : ''}>${busy ? 'Compiling…' : 'Compile again'}</button>
+        <button id="pl-day" ${d.can_play && (p.maps || []).length ? '' : 'disabled'} title="${(p.maps || []).length ? 'tools\\play_at.bat ' + esc(p.maps[0]) : 'no map in the game shows this place yet'}">Open in the game here — day</button>
+        <button id="pl-night" ${d.can_play && (p.maps || []).length ? '' : 'disabled'}>— night</button>
+        <button class="ghost" id="pl-draw">Draw the plan again</button></div>
+      ${(d.looks || []).length ? `<div class="t3-acts"><span class="t3-from">The look (BUILD 63):</span>
+        <select id="pl-look">${d.looks.map(l => `<option value="${esc(l)}">${esc(l.replace(/_/g, ' '))}</option>`).join('')}</select>
+        <button id="pl-look-play" ${d.can_play && (p.maps || []).length ? '' : 'disabled'}>Open in the game under this look</button>
+        <button id="pl-pictures" ${d.can_take && (p.maps || []).length && !(p.taking && p.taking.left) ? '' : 'disabled'} title="the game's still mode: one picture a look, at the film tier — keep the graphics card free">${p.taking && p.taking.left ? 'Taking the pictures… ' + esc(p.taking.left) + ' left' : 'Take the pictures'}</button></div>` : ''}
+      <div class="t3-from">${c.at ? `Compiled ${esc(c.at)} into ${esc(c.folder || '')} — ${esc(c.things)} placed things${c.model ? ', the stage model' : ''}${c.stale ? ' · <b style="color:#f0d08a">the plan has changed since</b>' : ''}.` : 'Not compiled yet.'}
+        ${(p.maps || []).length ? ` In the game as: <b>${esc(p.maps.join(', '))}</b>.` : ' No map in the game shows it yet.'}</div>
+      ${(p.jobs || []).length ? `<div class="t3-from">Compiles: ${p.jobs.map(j => `${esc(j.state)}${j.error ? ' — ' + esc(j.error) : ''}`).join(' · ')}</div>` : ''}
+    </div>
+    ${(p.look_pictures || []).length ? `<div class="t3-card"><h2>The game's own pictures — one a look</h2><div class="t3-from">Taken by the game's still mode at the film tier: how the stage looks, not greybox.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:6px">${p.look_pictures.map(lp => `<a href="${esc(lp.picture)}" target="_blank" title="${esc(lp.at || '')}"><img src="${esc(lp.picture)}&t=${Date.now()}" style="width:100%;border-radius:6px" alt="${esc(lp.look)}"><div class="t3-from">${esc(lp.look.replace(/_/g, ' '))}</div></a>`).join('')}</div></div>` : ''}
+    ${p.picture ? `<div class="t3-card"><h2>The plan from above</h2><div class="t3-from">${esc(d.stamp)} — the game's own pictures of a stage come from the game (play it).</div>
+      <a href="${esc(p.picture)}" target="_blank"><img src="${esc(p.picture)}&t=${Date.now()}" style="max-width:100%;border-radius:8px;margin-top:6px" alt="${esc(p.id)} from above"></a></div>` : ''}
+    <div class="t3-card"><h2>What it still needs — on the World list</h2>
+      ${ents.length ? `<div class="wq-list">${ents.map(e => `<div class="wq-row" onclick="go('3d/world/${enc(e.id)}')"><span class="n">${e.state === 'made' ? '✓' : e.state === 'held' ? '❚❚' : '…'}</span>
+        <div><b>${esc(e.id)}</b><span class="wq-badge">${esc(e.kind || '')}</span><span class="wq-badge">${esc(e.tier || '')}</span>${e.words ? '' : '<span class="wq-badge" style="color:#f0d08a">no words yet</span>'}
+        <div class="w">${esc((e.why || [])[0] || e.shown || '')}</div></div><span class="wq-st ${esc(e.state)}">${esc(PL_WORD[e.state] || e.state)}</span></div>`).join('')}</div>`
+      : '<div class="empty">Nothing on the World list for this place yet — compile it.</div>'}
+    </div>`;
+}
+function wirePlace(p, strip) {
+  if (!p) return;
+  const b = id => document.getElementById(id);
+  if (b('pl-compile')) b('pl-compile').onclick = async () => { if (!G.identity) return askWho(); const r = await post('threed_places_compile', { game: gid(), place: p.id }); toast(r.message, r.ok); placesTab([enc(p.id)], strip); };
+  const play = async (time) => { const r = await post('threed_places_play', { game: gid(), place: p.id, time: time }); toast(r.message, r.ok); };
+  if (b('pl-day')) b('pl-day').onclick = () => play('day');
+  if (b('pl-night')) b('pl-night').onclick = () => play('night');
+  if (b('pl-draw')) b('pl-draw').onclick = async () => { const r = await post('threed_places_draw', { game: gid(), place: p.id }); toast(r.message, r.ok); placesTab([enc(p.id)], strip); };
+  if (b('pl-look-play')) b('pl-look-play').onclick = () => play(b('pl-look').value);                       // BUILD 63
+  if (b('pl-pictures')) b('pl-pictures').onclick = async () => { if (!G.identity) return askWho(); const r = await post('threed_places_pictures', { game: gid(), place: p.id }); toast(r.message, r.ok); placesTab([enc(p.id)], strip); };
+  if (p.taking && p.taking.left) setTimeout(() => { if (T.plSel === p.id) placesTab([enc(p.id)], stripHtml()); }, 15000);
+}
+
+// ------------------------------------------------------------------ BUILD 77 — 3D → Terrain: real ground from DTED Level 0
+async function terrainTab(rest, strip) {
+  const v = v3();
+  let d; try { d = await api('/api/suite/threed/terrain?id=' + enc(gid())); } catch (e) { v.innerHTML = strip + `<div class="err">${esc(e)}</div>`; return; }
+  T.tr = d;
+  const W = d.windows || [];
+  const sel = T.trSel || (W[0] || {}).id || '';
+  const w = W.find(x => x.id === sel) || W[0] || { south: 38.4, west: -79.42, north: 38.62, east: -78.95, dials: {} };
+  const dl = Object.assign({ exaggerate: 1, relief_x: 6, sun_az: 315, sun_el: 35, detail_m: 0, smooth: 0 }, w.dials || {});
+  const slider = (k, name, min, max, step) => `<div class="t3-f"><label>${esc(name)} <b id="tr-v-${k}">${esc(dl[k])}</b></label><input type="range" class="tr-dial" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${esc(dl[k])}"></div>`;
+  const C = d.colours || {};
+  v.innerHTML = strip + `<div class="t3-card"><h2>Terrain <span class="t3-from">DTED Level 0 — 30 arc-second posts, about 900 m; the processor only</span></h2>
+      ${d.found ? `<div class="wq-chk pass">✓ ${esc(d.cells)} cells found in ${esc(d.dted_dir)}${(d.zips || []).length ? ` (read straight from ${esc(d.zips.length)} zip${d.zips.length > 1 ? 's' : ''})` : ''}${d.skipped_count ? ` · ${esc(d.skipped_count)} skipped (not Level 0)` : ''}${(d.bad || []).length ? ` · ${esc(d.bad.length)} bad cell(s) skipped` : ''}</div>`
+        : `<div class="t3-warn">${esc(d.say)}</div>`}
+      <div class="t3-from">Colours by how a height was produced: <span style="color:${C.measured}">■ measured</span> (the data) · <span style="color:${C.invented}">■ invented</span> (detail added below the data's scale) · <span style="color:${C.edited}">■ edited</span> (a crater, a pad). Level 0 gives ranges, basins and the fall line — not a street or a hill behind a farm; a town's pad is the place plan's.</div></div>
+    <div class="wq-lay"><div class="t3-card"><h2>A window</h2>
+      <div class="t3-row"><div class="t3-f"><label>the game's windows</label><select id="tr-win">${W.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc(x.id)} — ${esc(x.name || '')}${x.edits ? ` (${x.edits} edit${x.edits > 1 ? 's' : ''})` : ''}</option>`).join('')}<option value="">(my own)</option></select></div></div>
+      <div class="t3-row">${['south', 'west', 'north', 'east'].map(k => `<div class="t3-f"><label>${k}</label><input id="tr-${k}" value="${esc(w[k])}" style="width:90px"></div>`).join('')}</div>
+      ${slider('exaggerate', 'exaggerate (vertical)', 0.5, 8, 0.25)}${slider('relief_x', 'relief in the light', 1, 20, 0.5)}
+      ${slider('sun_az', 'sun from (°)', 0, 359, 5)}${slider('sun_el', 'sun height (°)', 5, 80, 1)}
+      ${slider('detail_m', 'detail added (m, invented)', 0, 30, 1)}${slider('smooth', 'smooth (passes)', 0, 6, 1)}
+      <div class="t3-acts"><button class="go" id="tr-draw">Draw</button><button class="ghost" id="tr-bake" ${d.found ? '' : 'disabled'}>Bake ${esc(sel || 'the game\'s windows')}</button><button class="ghost" id="tr-bakeall" ${d.found ? '' : 'disabled'}>Bake every window</button><button class="ghost" id="tr-proof" ${d.found ? '' : 'disabled'}>Prove the reader</button></div>
+      <div class="t3-from" id="tr-info"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><img id="tr-shade" style="max-width:49%;border-radius:6px"><img id="tr-how" style="max-width:49%;border-radius:6px" title="how each height was produced"></div></div>
+    <div><div class="t3-card"><h2>Check a point</h2><div class="t3-row"><div class="t3-f"><label>latitude</label><input id="tr-lat" value="38.50" style="width:90px"></div><div class="t3-f"><label>longitude</label><input id="tr-lon" value="-79.28" style="width:90px"></div><button class="go" id="tr-check" style="align-self:end">Check</button></div><div id="tr-pt" class="t3-from"></div></div>
+      <div class="t3-card"><h2>Baked</h2>${d.bake && d.bake.running ? `<div class="t3-state">baking…</div>` : ''}${(d.bake && d.bake.lines || []).map(l => `<div class="t3-from">${esc(l)}</div>`).join('')}
+        ${(d.baked || []).length ? `<div class="t3-from">${esc(d.out)}</div>${d.baked.map(n => `<div class="t3-from">${esc(n)}</div>`).join('')}` : `<div class="t3-from">nothing baked yet</div>`}
+        ${(d.profiles || []).length ? `<h3>Lines the story asks for</h3>${d.profiles.map(p => `<div class="t3-from">${esc(p.id)} — ${esc(p.title || '')}</div>`).join('')}<div class="t3-from">terrain_profile.bat draws them.</div>` : ''}</div>
+      <div class="t3-card" id="tr-prooft" style="display:none"></div></div></div>`;
+  const val = id => parseFloat(document.getElementById(id).value);
+  const dials = () => { const o = {}; document.querySelectorAll('.tr-dial').forEach(x => o[x.dataset.k] = parseFloat(x.value)); return o; };
+  let pending = null;
+  const draw = async () => {
+    const info = document.getElementById('tr-info'); info.textContent = 'drawing…';
+    const r = await post('threed_terrain_preview', { game: gid(), south: val('tr-south'), west: val('tr-west'), north: val('tr-north'), east: val('tr-east'), dials: dials() });
+    if (!r.ok) { info.textContent = r.message || 'not drawn'; return; }
+    document.getElementById('tr-shade').src = r.shade; document.getElementById('tr-how').src = r.how;
+    info.textContent = `${Math.round(r.size_m.width / 1000)} × ${Math.round(r.size_m.height / 1000)} km · ${r.m_per_post} m a post · ${r.min_m} to ${r.max_m} m · ${r.cells} cell(s)${r.missing ? ` · ${r.missing} without data (sea)` : ''}`;
+  };
+  document.querySelectorAll('.tr-dial').forEach(x => x.oninput = () => { document.getElementById('tr-v-' + x.dataset.k).textContent = x.value; clearTimeout(pending); pending = setTimeout(draw, 350); });
+  document.getElementById('tr-win').onchange = e => { T.trSel = e.target.value; terrainTab([], strip); };
+  document.getElementById('tr-draw').onclick = draw;
+  document.getElementById('tr-check').onclick = async () => { const r = await post('threed_terrain_check', { game: gid(), lat: val('tr-lat'), lon: val('tr-lon') }); document.getElementById('tr-pt').textContent = r.message; };
+  const bake = only => async () => { if (!G.identity) return askWho(); const r = await post('threed_terrain_bake', { game: gid(), only }); toast(r.message, r.ok); setTimeout(() => terrainTab([], stripHtml()), 4000); };
+  const b1 = document.getElementById('tr-bake'); if (b1) b1.onclick = bake(sel || null);
+  const b2 = document.getElementById('tr-bakeall'); if (b2) b2.onclick = bake(null);
+  const pr = document.getElementById('tr-proof'); if (pr) pr.onclick = async () => { const box = document.getElementById('tr-prooft'); box.style.display = ''; box.innerHTML = '<div class="t3-from">reading…</div>';
+    const r = await post('threed_terrain_proof', { game: gid() }); const t = r.table || { rows: [] };
+    box.innerHTML = `<h2>The reader against known ground</h2><table class="wq-tiers">${t.rows.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.published_m)} m</td><td>${x.reads_m == null ? 'no data' : esc(x.reads_m) + ' m'}</td><td class="${x.diff_m != null && Math.abs(x.diff_m) < 60 ? 'm' : 'g'}">${x.diff_m == null ? '' : (x.diff_m > 0 ? '+' : '') + esc(x.diff_m)}</td></tr>`).join('')}</table><div class="t3-from">Summits read low: Level 0's posts are about 900 m apart.${t.stop && t.stop.length ? ' STOP — a low point reads high.' : ''}</div>`; };
+  if (d.found && W.length) draw();
+  if (d.bake && d.bake.running) setTimeout(() => terrainTab([], stripHtml()), 5000);
+}
+
 })();
+
+

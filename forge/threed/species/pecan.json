@@ -1,0 +1,11 @@
+{
+ "name": "pecan",
+ "about": "A pecan: tall and upright, a long clean trunk, an oval open crown, long leaves of paired narrow leaflets.",
+ "numbers": {
+  "height": 20.0, "trunk_radius": 0.45, "fork_height": 5.5, "limbs": 5, "limb_tilt": [28, 52],
+  "crown_centre_z": 12.5, "crown_radius": 6.5, "crown_half_height": 7.2, "crown_floor": 6.0, "masses": 24,
+  "mass_radius": [2.0, 3.0], "attractors": 7000, "step": 0.42, "reach": 4.6, "close": 0.62,
+  "twig_radius": 0.022, "pipe": 2.35, "leaf_card": [1.0, 1.5], "cards_per_twig": 4, "leaf": "lance",
+  "bark": [0.38, 0.34, 0.29]
+ }
+}

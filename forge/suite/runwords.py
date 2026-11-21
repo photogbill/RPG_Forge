@@ -46,6 +46,37 @@ TABLE: dict[str, tuple[str, str]] = {
     "finale_needs": ("pc", "the opera finale's overnight run"), "opera_finale": ("pc", "the opera finale in Blender"),
     "opera_house": ("pc", "the opera house in Blender"), "ff_picks_third_look": ("pc", "Filter Forge"),
     "opera_ceiling": ("pc", "the opera house's painted dome (ComfyUI on the Windows PC)"),
+    # (BUILD 73 session: the dome's touch-up tools of 2026-11-17 were missing here, which turned the BUILD 27 check red)
+    "opera_ceiling_touch": ("pc", "the opera dome's touch-up (ComfyUI on the Windows PC)"),
+    "opera_ceiling_touch_choose": ("pc", "choosing the opera dome's touch-up"),
+    "opera_ceiling_touch_look": ("pc", "looking at the opera dome's touch-up"), "ff_picks_last_four": ("pc", "Filter Forge"),
+    # BUILD 77 — the ground (CPU only; runs on a Mac too)
+    "terrain_bake": ("cli", "terrain bake"), "terrain_profile": ("cli", "terrain profile"),
+    # BUILD 74 — the same person, changed (a bake-off: the card)
+    "same_person_bakeoff": ("pc", "the same-person bake-off"),
+    # BUILD 71 — the voice bench's tools (each in its own folder; a Mac fetches its own build)
+    "get_rhubarb": ("cli", "voice get rhubarb"), "get_whisper": ("cli", "voice get whisper"),
+    # BUILD 78 — changes a session left waiting for the world queue to be idle (the world queue runs on the Windows PC)
+    "put_in_waiting_changes": ("pc", "putting in the changes that waited for the world queue"),
+    # BUILD 82 / 83 — new .bat files written while the queue ran (their rows waited for a session that could edit this file)
+    "art_around_the_clock": ("pc", "art around the clock (the never-stop launcher)"),
+    "art_around_the_clock_at_logon": ("pc", "starting art around the clock when Windows starts"),
+    "art_around_the_clock_not_at_logon": ("pc", "no longer starting art around the clock when Windows starts"),
+    "make_enemies_and_redo": ("pc", "the enemies' run and the redo"),
+    "mcp_check": ("pc", "checking the forge's connector"),
+    "mcp_extension": ("pc", "making the forge's connector as an extension file for the Claude app"),
+    "mcp_setup": ("pc", "setting up the forge's connector for the Claude app"),
+    "review_songs": ("text", "venv-mac/bin/python -m forge.song_review (in Terminal, in the forge's folder)"),
+    # BUILD 87 — materials (Filter Forge and Material Maker are on the Windows PC; the sheets are numpy and run anywhere)
+    "materials_1_filter_forge": ("pc", "the materials' Filter Forge channels (Filter Forge is on the Windows PC)"),
+    "materials_2_all_picks": ("pc", "the Filter Forge channels of every kept pick"),
+    "materials_3_material_maker": ("pc", "the Material Maker graphs (Material Maker and the graphics card are on the Windows PC)"),
+    "materials_sheets": ("text", "venv-mac/bin/python -m forge.materials sheets (in Terminal, in the forge's folder)"),
+    # BUILD 91 — icons and portraits from the made models (Blender on the processor; runs where the forge's Blender is)
+    "icons_from_models": ("pc", "the icons and portraits taken from the made 3D models (Blender on the Windows PC)"),
+    "portraits_painted": ("pc", "painting the portraits over the bodies (the graphics card in the Windows PC)"),
+    # BUILD 43 — the opera, filmed (Blender renders on the Windows PC; the checks and beat maps run anywhere) — merged in by Lane 3
+    "opera_film": ("pc", "the opera film in Blender"),
 }
 BAT = re.compile(r"\b([A-Za-z0-9_]+)\.bat\b")
 DEFAULT_PC = "the Windows PC with the art worker"

@@ -1,0 +1,5 @@
+# The film tools (BUILD 43): beat maps from the songs. librosa (ISC) and its own needs (numba BSD, soundfile BSD,
+# audioread MIT, scipy BSD, scikit-learn BSD). No model with a non-commercial licence is used.
+librosa>=0.10
+soundfile>=0.12
+scipy>=1.10

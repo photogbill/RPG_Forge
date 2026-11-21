@@ -1,0 +1,90 @@
+{
+ "name": "whitewash_brick",
+ "label": "Whitewash over brick",
+ "what": "Whitewash over brick: limewash on a red brick wall — whole where it is kept up, flaking back to brick where it is not.",
+ "made_by": "forge/materials/mmgraph.py - written from the node library, tuned after the first export",
+ "licence": "the graph is part of the forge (its licence); Material Maker itself is MIT",
+ "needs": [
+  "albedo",
+  "roughness",
+  "normal",
+  "ao",
+  "depth"
+ ],
+ "parameters": {
+  "coverage": {
+   "doc": "how much of the wall the whitewash still covers",
+   "default": 0.75,
+   "sets": [
+    {
+     "node": "paint_mask",
+     "param": "gradient",
+     "point": 0,
+     "key": "pos",
+     "to": [
+      0.62,
+      0.02
+     ]
+    },
+    {
+     "node": "paint_mask",
+     "param": "gradient",
+     "point": 1,
+     "key": "pos",
+     "to": [
+      0.72,
+      0.12
+     ]
+    }
+   ]
+  },
+  "cracks": {
+   "doc": "cracks through paint and mortar",
+   "default": 0.3,
+   "sets": [
+    {
+     "node": "crack_height",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.8
+     ]
+    },
+    {
+     "node": "crack_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.6
+     ]
+    }
+   ]
+  },
+  "ash": {
+   "doc": "soot climbing the wall",
+   "default": 0.0,
+   "sets": [
+    {
+     "node": "ash_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.7
+     ]
+    }
+   ]
+  }
+ },
+ "settings": {
+  "broken": {
+   "coverage": 0.45,
+   "cracks": 0.8,
+   "ash": 0.55
+  },
+  "mended": {
+   "coverage": 0.97,
+   "cracks": 0.05,
+   "ash": 0.0
+  }
+ }
+}

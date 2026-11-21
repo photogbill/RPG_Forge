@@ -1,0 +1,173 @@
+{
+ "_comment": "Blender add-on profiles (BUILD 98 Part 1a, Claude Opus 2026-11-21). The forge's background Blender runs --factory-startup with NO add-ons; a job that names a profile gets exactly that profile's add-ons enabled for that run, by module name (read from William's Blender 5.3 on 2026-11-21 02:55). Nothing else changes: no preferences are saved. The add-ons are listed with names and licences in docs\\BLENDER_ADDONS.md.",
+ "blender_program": "C:\\Program Files\\Blender Foundation\\Blender 5.3\\blender.exe",
+ "blender_version": "5.3.0",
+ "profiles": {
+  "buildings": {
+   "modules": [
+    "bl_ext.blender_org.archimesh",
+    "bl_ext.blender_org.arch_generator",
+    "bl_ext.blender_org.hifi_builder",
+    "bl_ext.blender_org.gorani",
+    "bl_ext.blender_org.trzx_megacity",
+    "bl_ext.blender_org.Bagapie",
+    "bl_ext.blender_org.bool_tool",
+    "bl_ext.blender_org.extra_mesh_objects",
+    "bl_ext.blender_org.edit_mesh_tools",
+    "bl_ext.blender_org.looptools",
+    "bl_ext.blender_org.nd"
+   ]
+  },
+  "interiors": {
+   "modules": [
+    "bl_ext.blender_org.home_builder_5",
+    "bl_ext.blender_org.archimesh",
+    "bl_ext.blender_org.Bagapie"
+   ]
+  },
+  "trees": {
+   "modules": [
+    "bl_ext.blender_org.sapling_tree_gen",
+    "bl_ext.blender_org.modular_tree",
+    "bl_ext.blender_org.easy_tree",
+    "bl_ext.blender_org.space_colonization_tree_generator",
+    "bl_ext.blender_org.ivygen",
+    "bl_ext.blender_org.tree_wind_paint"
+   ]
+  },
+  "scatter": {
+   "modules": [
+    "bl_ext.blender_org.PlaceHelper",
+    "bl_ext.blender_org.scatter_objects",
+    "bl_ext.blender_org.Bagapie"
+   ]
+  },
+  "ruins": {
+   "modules": [
+    "bl_ext.blender_org.cell_fracture",
+    "bl_ext.blender_org.h_style_rbd_nodes",
+    "bl_ext.blender_org.bool_tool"
+   ]
+  },
+  "materials": {
+   "modules": [
+    "bl_ext.blender_org.BAM",
+    "bl_ext.blender_org.BAM_Decalit",
+    "bl_ext.blender_org.mat_baker",
+    "bl_ext.blender_org.thebetterbaker",
+    "bl_ext.blender_org.texture_mixer",
+    "bl_ext.blender_org.randomizer",
+    "bl_ext.blender_org.propgon_uv_trim",
+    "bl_ext.blender_org.texel_kit",
+    "bl_ext.blender_org.ucupaint",
+    "node_wrangler"
+   ]
+  },
+  "retopo_bake": {
+   "modules": [
+    "bl_ext.blender_org.curiomesh",
+    "bl_ext.blender_org.relief_rebake",
+    "bl_ext.blender_org.lod_gen",
+    "bl_ext.blender_org.bake_to_single_material",
+    "bl_ext.blender_org.nk_combine_bake",
+    "bl_ext.blender_org.thebetterbaker",
+    "bl_ext.blender_org.print3d_toolbox",
+    "bl_ext.blender_org.PolyQuilt_Fork",
+    "bl_ext.blender_org.cut_plane",
+    "bl_ext.blender_org.EdgeFlow",
+    "bl_ext.blender_org.looptools"
+   ]
+  },
+  "terrain": {
+   "modules": [
+    "bl_ext.blender_org.erosion_terrain_extension",
+    "bl_ext.blender_org.pterrain",
+    "bl_ext.blender_org.srtm_terrain_importer",
+    "bl_ext.blender_org.antlandscape",
+    "BlenderGIS-master"
+   ]
+  },
+  "osm": {
+   "modules": [
+    "bl_ext.user_default.blosm",
+    "BlenderGIS-master"
+   ]
+  },
+  "godot_export": {
+   "modules": [
+    "bl_ext.blender_org.goblend",
+    "bl_ext.blender_org.omi_physics_body_gltf_extension",
+    "bl_ext.blender_org.godot_path3d_export",
+    "io_scene_gltf2"
+   ]
+  },
+  "animals": {
+   "modules": [
+    "bl_ext.blender_org.animal_animator",
+    "bl_ext.blender_org.openvat",
+    "bl_ext.blender_org.dynamic_skinning",
+    "bl_ext.blender_org.wiggle_bones",
+    "rigify",
+    "bl_ext.blender_org.SMEAR"
+   ]
+  },
+  "cloth": {
+   "modules": [
+    "bl_ext.blender_org.clothdrop_reborn",
+    "bl_ext.blender_org.openvat"
+   ]
+  },
+  "hard_surface": {
+   "modules": [
+    "bl_ext.blender_org.CAD_Sketcher",
+    "bl_ext.blender_org.bool_tool",
+    "bl_ext.blender_org.extra_mesh_objects",
+    "bl_ext.blender_org.edit_mesh_tools",
+    "bl_ext.blender_org.f2",
+    "bl_ext.blender_org.snap_utilities_line",
+    "bl_ext.blender_org.tissue",
+    "node_arrange",
+    "bl_ext.blender_org.nd",
+    "bl_ext.blender_org.looptools",
+    "bl_ext.blender_org.EdgeFlow",
+    "bl_ext.blender_org.extra_curve_objectes",
+    "bl_ext.blender_org.cut_plane"
+   ]
+  },
+  "sky": {
+   "modules": [
+    "bl_ext.blender_org.dynamic_sky",
+    "bl_ext.blender_org.sun_position"
+   ]
+  },
+  "people": {
+   "modules": [
+    "bl_ext.blender_org.mpfb",
+    "bl_ext.blender_org.cloudrig",
+    "bl_ext.blender_org.mixamo_rig",
+    "bl_ext.blender_org.wiggle_bones",
+    "rigify",
+    "bl_ext.blender_org.SMEAR"
+   ]
+  },
+  "painterly": {
+   "modules": [
+    "bl_ext.blender_org.brushstroke_tools"
+   ]
+  },
+  "uv": {
+   "modules": [
+    "bl_ext.blender_org.mio3_uv",
+    "bl_ext.blender_org.univ",
+    "bl_ext.blender_org.texel_density_checker"
+   ]
+  }
+ },
+ "licences": {
+  "_default": "GPL-3.0-or-later (Blender extension: the add-on's code; what it makes is ours)",
+  "bl_ext.user_default.blenderkit": "GPL-3.0 (code); assets CC0 or BlenderKit Royalty-Free \u2014 keep each asset's line",
+  "bl_ext.user_default.blosm": "GPL-3.0; OpenStreetMap data ODbL (credit in the game); never Google 3D Tiles",
+  "BlenderGIS-master": "GPL-3.0"
+ },
+ "_checked": "2026-11-21 02:40: every one of the 92 modules in William's Blender read live; each enabled add-on is in at least one profile except the connector (MCP) and the built-ins."
+}

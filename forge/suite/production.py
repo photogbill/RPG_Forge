@@ -308,26 +308,31 @@ def review(cfg: dict, game: str, state, limit: int = 40) -> dict:
     live = dl.live(cfg, game)
     done = sorted(state.folder("done"), key=lambda j: j["_mtime"], reverse=True)
     waiting, other, decided = [], [], []
+
+    def rec_of(j, ws):
+        # the picture, its licence and its kit check each read the job's out/ folder — worked out only for a job that
+        # is kept on the page (2026-11-17: with ~17,000 finished jobs, doing it for every one took Tasks, Status and
+        # this page about 100 seconds)
+        return {"id": j["id"], "type": j.get("type"), "name": j.get("name"), "batch": j.get("batch"),
+                "image": state.image_for(j), "licence": state.licence_of(j), "check": state.check_of(j),
+                "finished": j.get("finished_at"), "wanted": ws[0] if ws else None,
+                "set": bool((j.get("result") or {}).get("slots"))}
+
     for j in done:
         if j.get("game") and j.get("game") != game:
             continue
         ws = [w for w in _wanted_of(j) if w in items]
-        rec = {"id": j["id"], "type": j.get("type"), "name": j.get("name"), "batch": j.get("batch"),
-               "image": state.image_for(j), "licence": state.licence_of(j), "check": state.check_of(j),
-               "finished": j.get("finished_at"), "wanted": ws[0] if ws else None,
-               "set": bool((j.get("result") or {}).get("slots"))}
         if ws:
             w = ws[0]
             verdict = ("delivered" if (live.get(w) or {}).get("job_id") == j["id"] else
                        "approved" if (approved.get(w) or {}).get("job_id") == j["id"] or (held.get(w) or {}).get("job_id") == j["id"]
                        else None)
-            rec["verdict"] = verdict
             if not verdict and len(waiting) < limit:
-                waiting.append(rec)
+                waiting.append({**rec_of(j, ws), "verdict": verdict})
             elif verdict and len(decided) < 24:
-                decided.append(rec)                   # approved or in the game — still open to a mark-up
+                decided.append({**rec_of(j, ws), "verdict": verdict})     # approved or in the game — still open to a mark-up
         elif len(other) < 24:
-            other.append(rec)
+            other.append(rec_of(j, ws))
     return {"waiting": waiting, "decided": decided, "recent": other, "deliver": deliver_list(cfg, game)}
 
 
@@ -398,9 +403,12 @@ def approve(cfg: dict, game: str, jid: str, wanted: str, who: str | None, as_set
         raise ProductionRefused("choose which wanted item this picture is for")
     if not dry:
         _need(who, "an approval")
-    from . import settings
-    if who and settings.is_assistant(who) and not dry:
-        raise ProductionRefused("an assistant can't approve a picture — approved means the person's")
+    if who and not dry:                      # BUILD 78: an assistant approves only under "<assistant> may approve for me", signed so
+        from . import approve_all
+        try:
+            who = approve_all.signer(cfg, game, who, "approving a picture")
+        except approve_all.ApproveRefused as e:
+            raise ProductionRefused(str(e))
     try:
         if as_set:
             from .. import kitcheck

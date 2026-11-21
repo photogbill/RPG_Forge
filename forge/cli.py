@@ -761,6 +761,26 @@ try:                                          # BUILD 36: the 3D workshop (forge
     COMMANDS.update(_THREED)
 except Exception as _e:  # noqa: BLE001
     print(f"(the 3D commands did not load: {_e})", file=sys.stderr)
+try:                                          # BUILD 71: the voice bench's tools (forge/cli_voice.py)
+    from .cli_voice import COMMANDS as _VOICE
+    COMMANDS.update(_VOICE)
+except Exception as _e:  # noqa: BLE001
+    print(f"(the voice commands did not load: {_e})", file=sys.stderr)
+try:                                          # BUILD 77: real ground from DTED Level 0 (forge/cli_terrain.py)
+    from .cli_terrain import COMMANDS as _TERRAIN
+    COMMANDS.update(_TERRAIN)
+except Exception as _e:  # noqa: BLE001
+    print(f"(the terrain commands did not load: {_e})", file=sys.stderr)
+try:                                          # BUILD 78: approvals made easy (forge/cli_approve.py: approvals, world-fix)
+    from .cli_approve import COMMANDS as _APPROVE
+    COMMANDS.update(_APPROVE)
+except Exception as _e:  # noqa: BLE001
+    print(f"(the approval commands did not load: {_e})", file=sys.stderr)
+try:                                          # BUILD 43: filming a set piece to its music (forge/cli_film.py) — merged in by Lane 3
+    from .cli_film import COMMANDS as _FILM
+    COMMANDS.update(_FILM)
+except Exception as _e:  # noqa: BLE001
+    print(f"(the film commands did not load: {_e})", file=sys.stderr)
 
 
 def main(argv: list[str] | None = None) -> int:

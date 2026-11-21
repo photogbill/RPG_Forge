@@ -47,13 +47,73 @@ def test_handler_writes_outputs_and_refuses_inpaint_without_gpu(tmp_path):
         t.run({**job, "id": "t2", "heal": "inpaint"}, ctx, out2)
 
 
-def test_tile_channels_keeps_channels_in_register(tmp_path):
-    a, n = tmp_path / "tex_final.png", tmp_path / "tex_normal.png"
-    _texture(1).save(a); _texture(1).save(n)
-    rep = t.tile_channels({"final": a, "normal": n}, 0.2)
-    fa = np.asarray(Image.open(tmp_path / "tex_final_tile.png"))
-    fn = np.asarray(Image.open(tmp_path / "tex_normal_tile.png"))
-    assert np.array_equal(fa, fn) and rep["final"]["after"]                            # same geometry for every channel
+def _set(tmp_path, w=256, h=192):
+    """A set that does not tile: a colour picture (the lead), a 16-bit height of other content, a true normal map, and a
+    picture whose every pixel says where it is (red = its column, green = its row) - so a healed copy says where each
+    of its pixels came from."""
+    rng = np.random.default_rng(7)
+    yy, xx = np.mgrid[0:h, 0:w]
+    paths = {k: tmp_path / f"tex_{k}.png" for k in ("final", "height", "normal", "where")}
+    _texture(1, w, h).save(paths["final"])
+    hgt = np.clip((np.hypot(xx - 40, yy - 150) * 180 + rng.normal(0, 300, (h, w))), 0, 65535).astype(np.uint16)
+    Image.fromarray(hgt).save(paths["height"])
+    nx, ny = np.sin(xx / 9.0) * 0.5, np.cos(yy / 7.0) * 0.5 + xx / w * 0.3
+    nz = np.sqrt(np.clip(1 - nx * nx - ny * ny, 0.05, 1))
+    v = np.stack([nx, ny, nz], -1)
+    v /= np.sqrt((v * v).sum(-1, keepdims=True))
+    Image.fromarray(np.clip((v + 1) * 127.5 + 0.5, 0, 255).astype(np.uint8)).save(paths["normal"])
+    Image.fromarray(np.stack([xx, yy, np.zeros_like(xx)], -1).astype(np.uint8)).save(paths["where"])
+    return paths, hgt
+
+
+def test_tile_channels_heals_a_whole_set_with_one_geometry(tmp_path):
+    """Found 2026-11-19, fixed 2026-11-20: each channel used to be healed by itself (its own quietest column, its own
+    cut, its own yes or no), so a set came back out of register. The old test gave both channels the same picture."""
+    paths, hgt = _set(tmp_path)
+    rep = t.tile_channels(paths, 0.2)
+    assert all(r["lead"] == "final" and r["shift"] == rep["final"]["shift"] and r["file"].endswith("_tile.png") for r in rep.values())
+    dx, dy = rep["final"]["shift"]
+    assert t.worst(rep["final"]["after"]) < 1.5 < t.worst(rep["final"]["before"])
+    F = np.asarray(Image.open(tmp_path / "tex_final_tile.png")).astype(int)
+    Wh = np.asarray(Image.open(tmp_path / "tex_where_tile.png")).astype(int)
+    Hh = Image.open(tmp_path / "tex_height_tile.png")
+    assert Hh.mode.startswith("I") and np.asarray(Hh).max() > 255                    # the height is still 16-bit, not crushed to 8
+    H = np.asarray(Hh).astype(int)
+    f0 = np.asarray(Image.open(paths["final"])).astype(int)
+    h, w = f0.shape[:2]
+    yy, xx = np.mgrid[0:h, 0:w]
+    sx, sy = Wh[..., 0], Wh[..., 1]                                                  # where this pixel says it came from
+    whole = np.zeros((h, w), bool)                                                   # ... a whole source pixel, not a mix of two
+    for ddx in (0, dx):
+        for ddy in (0, dy):
+            whole |= (sx == (xx - ddx) % w) & (sy == (yy - ddy) % h)
+    assert whole.mean() > 0.75 and len({(int(a), int(b)) for a, b in zip((xx - sx)[whole] % w, (yy - sy)[whole] % h)}) >= 3
+    # every channel took that same pixel from its own source: the set is in register
+    assert np.abs(F[whole] - f0[sy[whole], sx[whole]]).max() <= 1
+    assert np.abs(H[whole] - hgt.astype(int)[sy[whole], sx[whole]]).max() <= 2
+    # a normal map is unit length again after the blend, in the mixed band too
+    n = np.asarray(Image.open(tmp_path / "tex_normal_tile.png")).astype(float) / 127.5 - 1.0
+    assert np.abs(np.sqrt((n * n).sum(-1)) - 1.0).max() < 0.03
+
+
+def test_a_set_is_one_decision_and_a_channel_of_another_size_is_left(tmp_path):
+    # the lead already tiles: nothing is healed, every channel is copied as it is (a channel is never healed alone)
+    w, h = 128, 96
+    yy, xx = np.mgrid[0:h, 0:w]
+    lead = np.stack([np.sin(xx / w * 2 * np.pi) * 100 + 128, np.cos(yy / h * 2 * np.pi) * 100 + 128, np.full_like(xx, 90.0)], -1)
+    a, b = tmp_path / "a_final.png", tmp_path / "a_height.png"
+    Image.fromarray(lead.astype(np.uint8)).save(a)
+    _texture(3, w, h).convert("L").save(b)                                           # this one does not tile by itself
+    rep = t.tile_channels({"final": a, "height": b}, 0.2)
+    assert "already tiles" in rep["final"]["skipped"] and "already tiles" in rep["height"]["skipped"]
+    assert (tmp_path / "a_height_tile.png").read_bytes() == b.read_bytes() and (tmp_path / "a_final_tile.png").read_bytes() == a.read_bytes()
+    # a channel of another size cannot share the geometry: it says so and is left; the rest are healed
+    paths, _ = _set(tmp_path)
+    small = tmp_path / "tex_ao.png"
+    _texture(5, 64, 64).save(small)
+    rep = t.tile_channels({**paths, "ao": small}, 0.2)
+    assert "is not the lead's" in rep["ao"]["refused"] and not (tmp_path / "tex_ao_tile.png").exists() and rep["height"]["file"]
+    assert t.tile_channels({}) == {}
 
 
 # ------------------------------------------------------------------ F4 icon_batch, F6 photo_plate (fake ComfyUI)

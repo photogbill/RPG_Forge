@@ -4,6 +4,9 @@ What stops the same question being asked twice. Three kinds of entry, all read l
 
 * **answer** — a question in the Mail that someone answered (a choice, or words). The question, the answer in the
   answerer's words, the date, the letter, and what it changed (`applies_to` → the value it set), if anything.
+  A stand-in answer (nowait.py — a default taken, or a question left to an assistant while the owner wasn't waited
+  for) is in the book too, marked `provisional`: it stops the question being asked again, and it is not the owner's
+  ruling — build on it as something that may change.
 * **marked** — a line in the game's notes marked with ✦ (the owner's ruling mark). Which files are read is the game
   adapter's `ruling_files()` (default: the game folder's top-level `*.md`; a pattern starting with "!" leaves files out —
   a generated report that only repeats status marks). A line that only *explains* the mark
@@ -228,6 +231,13 @@ def _answers(root: Path) -> list[dict]:
              "where": f"mail {a.get('in') or lid}", "qid": qid, "why": str(q.get("why") or "")}
         if at and value is not None:
             e["applies_to"], e["value"] = at, value
+        if a.get("stand_in"):               # nowait.py — it went ahead without the person; theirs replaces it
+            e["provisional"] = True
+            e["stand_in"], e["for"] = a["stand_in"], a.get("for")
+            how = {"default": f"{a.get('by')}'s default, taken", "recommendation": f"{a.get('by')}'s recommendation, taken",
+                   "deferred": f"decided by {a.get('by')}"}.get(a["stand_in"], "a stand-in answer")
+            e["text"] += f" [provisional — {how} while {a.get('for') or 'the owner'} wasn't waited for; not their ruling, " \
+                         f"and their own answer replaces it]"
         out.append(e)
     return out
 

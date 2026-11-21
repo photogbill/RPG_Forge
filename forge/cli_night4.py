@@ -398,6 +398,18 @@ def cmd_deliver(cfg: dict, args: list[str]) -> int:
 
 def cmd_housekeeping(cfg: dict, args: list[str]) -> int:
     from .night4 import housekeeping
+    if "--stale-jobs" in args:                 # BUILD 73 part 9: job files left in running/ by a worker that stopped
+        from . import config as cfgmod
+        from . import stale_jobs
+        from .suite import worker
+        try:
+            procs = worker.state(cfg).get("processes")
+            alive = None if procs is None else bool(procs)       # None: can't tell — then nothing is moved
+        except Exception:  # noqa: BLE001
+            alive = None
+        r = stale_jobs.move_stale(cfgmod.path_of(cfg, "jobs"), alive, float(_opt(args, "--older-h", "24")), "--dry-run" in args)
+        print(r["message"])
+        return 0
     if "--prune-comfy" in args or "--dedupe" in args:
         if "--prune-comfy" in args:
             n, b = housekeeping.prune_comfy(cfg, float(_opt(args, "--older-min", "20")))

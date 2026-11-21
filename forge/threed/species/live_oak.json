@@ -1,0 +1,11 @@
+{
+ "name": "live_oak",
+ "about": "A southern live oak: a short thick trunk, heavy limbs that go out almost level, a low dark crown far wider than it is tall, small leathery leaves kept all year.",
+ "numbers": {
+  "height": 9.5, "trunk_radius": 0.6, "fork_height": 1.8, "limbs": 7, "limb_tilt": [62, 86],
+  "crown_centre_z": 5.4, "crown_radius": 8.2, "crown_half_height": 3.9, "crown_floor": 2.6, "masses": 30,
+  "mass_radius": [1.7, 2.6], "attractors": 8200, "step": 0.38, "reach": 4.5, "close": 0.58, "twig_radius": 0.02,
+  "pipe": 2.35, "leaf_card": [0.6, 0.95], "cards_per_twig": 4, "leaf": "oval", "leaf_tint": [0.8, 0.88, 0.82],
+  "bark": [0.3, 0.27, 0.23]
+ }
+}

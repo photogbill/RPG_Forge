@@ -81,7 +81,7 @@ def test_the_3d_area_has_its_tabs_each_with_a_screen_and_what_it_needs(w):
     cfg, a, _ = w
     a3 = next(x for x in areas.AREAS if x["id"] == "3d")
     assert [t["name"] for t in a3["tabs"]] == ["Bodies", "Skeleton & motions", "Props & buildings", "Trees", "World list",   # BUILD 39
-                                               "Viewer", "Runs"]
+                                               "Places", "Terrain", "Viewer", "Runs"]                                          # BUILD 34, 77
     assert all(t["screen"] == "threed" and t["t3"] and t["holds"] for t in a3["tabs"])
     nd = areas.needs(cfg, "_example")
     assert "rigging ComfyUI" in nd["3d/skeleton"]["line"] or nd["3d/skeleton"]["met"] in (True, None)

@@ -232,20 +232,77 @@ def run(job: dict, ctx: Context, out: Path) -> dict:
             "heal": heal, "skipped": info.get("skipped")}
 
 
-def tile_channels(paths: dict[str, Path], band: float = 0.12, limit: float = 1.5) -> dict:
-    """For filter_forge `tileable: true`: blend EVERY channel with the same geometry so final, normal and height stay in
-    register (an inpaint of the final alone would not match its normal map). Writes <file>_tile.png beside each."""
-    rep = {}
-    for ch, p in paths.items():
-        im = Image.open(p)
-        im.load()
-        if im.mode.startswith("I") or im.mode == "F":          # 16-bit grey (height): scale, don't clip
-            a = np.asarray(im, dtype=np.float64)
-            im = Image.fromarray(np.clip(a / max(1.0, 65535.0 / 255.0 if a.max() > 255 else 1.0), 0, 255).astype(np.uint8), "L")
-        res, info = make(im, "blend", band, limit=limit)            # the cut is computed per channel; see note
-        if res is not None:
+def _channel(p: Path) -> tuple[np.ndarray, str, float]:
+    """A channel file as floats 0..255 (h, w, c), with the mode to write it back in and its top value (255, or 65535
+    for a 16-bit grey height map — kept whole, not crushed to 8 bits)."""
+    im = Image.open(p)
+    im.load()
+    if im.mode.startswith("I") or im.mode == "F":
+        a = np.asarray(im, dtype=np.float64)
+        top = 65535.0 if a.max() > 255 else 255.0
+        return (a * (255.0 / top))[..., None], ("I;16" if top > 255 else "L"), top
+    src = im if im.mode in ("RGB", "RGBA", "L") else im.convert("RGBA" if im.mode in ("LA", "PA") or "transparency" in im.info else "RGB")
+    a = np.asarray(src, dtype=np.float64)
+    return (a if a.ndim == 3 else a[..., None]), src.mode, 255.0
+
+
+def _as_image(a: np.ndarray, mode: str, top: float) -> Image.Image:
+    if mode == "I;16":
+        return Image.fromarray(np.clip(a[..., 0] * (top / 255.0) + 0.5, 0, top).astype(np.uint16))
+    b = np.clip(a + 0.5, 0, 255).astype(np.uint8)
+    return Image.fromarray(b[..., 0] if mode == "L" else b, mode)
+
+
+def tile_channels(paths: dict[str, Path], band: float = 0.12, limit: float = 1.5, lead: str | None = None) -> dict:
+    """For filter_forge `tileable: true`: heal EVERY channel with ONE geometry — the roll and the two cut paths found
+    on the lead picture (`final`, else the first) — so final, normal and height stay on each other. Writes
+    <file>_tile.png beside each; a 16-bit height stays 16-bit; a normal map is made unit length again after the blend.
+
+    Until 2026-11-20 this healed each channel by itself (`make` once a channel): each found its own quietest column and
+    its own cut, and each decided by itself whether it needed healing at all — so a set came back out of register.
+    Its test passed because it gave both channels the same picture. One set, one decision: if the lead already tiles
+    every channel is copied as it is; if healing made the lead worse, nothing is written and the set stays as it was."""
+    if not paths:
+        return {}
+    lead = lead if lead in paths else ("final" if "final" in paths else next(iter(paths)))
+    chans = {ch: _channel(Path(p)) for ch, p in paths.items()}
+    a = chans[lead][0]
+    size = a.shape[:2]
+    before = {ch: score(_as_image(*c).convert("RGB")) for ch, c in chans.items()}
+    rep = {ch: {"before": before[ch], "heal": "blend", "band": band, "lead": lead} for ch in paths}
+    if worst(before[lead]) <= limit:
+        for ch, p in paths.items():
             dest = Path(p).with_name(Path(p).stem + "_tile.png")
-            save_png(res, dest)
-            info["file"] = dest.name
-        rep[ch] = info
+            dest.write_bytes(Path(p).read_bytes())
+            rep[ch].update(after=before[ch], file=dest.name,
+                           skipped=f"the set already tiles (the lead, {lead}: worst {worst(before[lead]):.2f} <= {limit})")
+        return rep
+    dx, dy = quiet_shift(a)
+    m1 = _seam_weight(a, np.roll(a, dx, axis=1), dx, band, "cut")
+    r = m1[..., None] * a + (1.0 - m1[..., None]) * np.roll(a, dx, axis=1)
+    rs = np.swapaxes(r, 0, 1)
+    m2 = _seam_weight(rs, np.roll(rs, dy, axis=1), dy, band, "cut")
+    healed = {}
+    for ch, (c, mode, top) in chans.items():
+        if c.shape[:2] != size:
+            rep[ch]["refused"] = f"its size ({c.shape[1]}x{c.shape[0]}) is not the lead's ({size[1]}x{size[0]}) - left as it was"
+            continue
+        s1 = m1[..., None] * c + (1.0 - m1[..., None]) * np.roll(c, dx, axis=1)
+        t = np.swapaxes(s1, 0, 1)
+        s2 = np.swapaxes(m2[..., None] * t + (1.0 - m2[..., None]) * np.roll(t, dy, axis=1), 0, 1)
+        if "normal" in ch.lower() and s2.shape[2] >= 3:          # a blend of two unit vectors is shorter than one
+            v = s2[..., :3] / 127.5 - 1.0
+            v = v / np.maximum(np.sqrt((v * v).sum(axis=-1, keepdims=True)), 1e-9)
+            s2 = np.concatenate([(v + 1.0) * 127.5, s2[..., 3:]], axis=-1)
+        healed[ch] = _as_image(s2, mode, top)
+    after_lead = score(healed[lead].convert("RGB"))
+    if worst(after_lead) > worst(before[lead]):
+        for ch in paths:
+            rep[ch].update(after=after_lead if ch == lead else None,
+                           refused=f"worse: the lead's seam {worst(before[lead]):.2f} -> {worst(after_lead):.2f} - the set is kept as it was")
+        return rep
+    for ch, img in healed.items():
+        dest = Path(paths[ch]).with_name(Path(paths[ch]).stem + "_tile.png")
+        save_png(img, dest)
+        rep[ch].update(after=score(img.convert("RGB")), file=dest.name, shift=[int(dx), int(dy)])
     return rep

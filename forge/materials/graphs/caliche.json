@@ -1,0 +1,86 @@
+{
+ "name": "caliche",
+ "label": "Caliche (lime hardpan)",
+ "what": "Caliche: the pale, hard lime crust of dry country — cream and tan, knobbly, cracked into plates.",
+ "made_by": "forge/materials/mmgraph.py - written from the node library, tuned after the first export",
+ "licence": "the graph is part of the forge (its licence); Material Maker itself is MIT",
+ "needs": [
+  "albedo",
+  "roughness",
+  "normal",
+  "ao",
+  "depth"
+ ],
+ "parameters": {
+  "cracks": {
+   "doc": "how deep and dark the plate cracks are",
+   "default": 0.5,
+   "sets": [
+    {
+     "node": "crack_height",
+     "param": "amount",
+     "to": [
+      0.05,
+      0.9
+     ]
+    },
+    {
+     "node": "crack_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.75
+     ]
+    }
+   ]
+  },
+  "ash": {
+   "doc": "ash and soot lying in patches",
+   "default": 0.0,
+   "sets": [
+    {
+     "node": "ash_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.8
+     ]
+    },
+    {
+     "node": "ash_rough",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.9
+     ]
+    }
+   ]
+  },
+  "mend": {
+   "doc": "the cracks filled with pale new lime",
+   "default": 0.0,
+   "sets": [
+    {
+     "node": "mend_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.85
+     ]
+    }
+   ]
+  }
+ },
+ "settings": {
+  "broken": {
+   "cracks": 0.9,
+   "ash": 0.55,
+   "mend": 0.0
+  },
+  "mended": {
+   "cracks": 0.25,
+   "ash": 0.0,
+   "mend": 0.7
+  }
+ }
+}

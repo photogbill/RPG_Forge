@@ -1,0 +1,64 @@
+{
+ "_about": "Moves no motion library has, keyed by rule (BUILD 43 part 3b). Each key gives where the hands go (metres, the body's own space: x to its right, y forward, z up, from the point between its shoulders, written for an arm of 0.58 m and scaled to the body), how far the spine bends ([forward, to the side] degrees), where the head looks ([turn, nod] degrees, + nod is up), and how far the hips sink (metres; the feet stay planted). null keeps the standing pose for that part. Solved on each body by bake_keyed_moves.py, so one description fits every rig. Times in seconds; between keys the pose eases.",
+ "fps": 30,
+ "moves": {
+  "Bow_Stage": {"why": "a stage bow from the waist, right hand to the waist, left behind the back (the Count's bows, the curtain call)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null},
+   {"t": 0.5, "spine": [8, 0], "head": [0, -5], "right": [0.06, 0.20, -0.38], "left": [-0.12, -0.22, -0.42]},
+   {"t": 1.2, "spine": [42, 0], "head": [0, -25], "right": [0.04, 0.22, -0.40], "left": [-0.10, -0.24, -0.40]},
+   {"t": 1.8, "spine": [42, 0], "head": [0, -25], "right": [0.04, 0.22, -0.40], "left": [-0.10, -0.24, -0.40]},
+   {"t": 2.4, "spine": [0, 0], "head": [0, 0], "right": null, "left": null}]},
+  "Curtsey": {"why": "a deep curtsey, the skirt held out at both sides (the keeper's curtain call)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null, "sink": 0.0},
+   {"t": 0.6, "spine": [6, 0], "head": [0, -6], "right": [0.36, 0.10, -0.42], "left": [-0.36, 0.10, -0.42], "sink": 0.06},
+   {"t": 1.3, "spine": [18, 0], "head": [0, -20], "right": [0.40, 0.14, -0.50], "left": [-0.40, 0.14, -0.50], "sink": 0.26},
+   {"t": 1.9, "spine": [18, 0], "head": [0, -20], "right": [0.40, 0.14, -0.50], "left": [-0.40, 0.14, -0.50], "sink": 0.26},
+   {"t": 2.6, "spine": [0, 0], "head": [0, 0], "right": null, "left": null, "sink": 0.0}]},
+  "Sing_Open_Arms": {"why": "the arms open from the chest to the house on a held note; holds open at the end", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": [0.10, 0.22, -0.20], "left": [-0.10, 0.22, -0.20]},
+   {"t": 0.4, "spine": [-2, 0], "head": [0, 4], "right": [0.12, 0.28, -0.10], "left": [-0.12, 0.28, -0.10]},
+   {"t": 1.4, "spine": [-6, 0], "head": [0, 10], "right": [0.62, 0.22, 0.02], "left": [-0.62, 0.22, 0.02]},
+   {"t": 2.0, "spine": [-6, 0], "head": [0, 10], "right": [0.64, 0.20, 0.04], "left": [-0.64, 0.20, 0.04]}]},
+  "Sing_Hand_To_Heart": {"why": "a hand to the heart, the head bows a little and lifts", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null},
+   {"t": 0.6, "spine": [4, 0], "head": [0, -8], "right": [-0.06, 0.16, -0.16], "left": null},
+   {"t": 1.1, "spine": [2, 0], "head": [0, 4], "right": [-0.07, 0.15, -0.15], "left": null},
+   {"t": 1.6, "spine": [0, 0], "head": [0, 6], "right": [-0.07, 0.15, -0.15], "left": null}]},
+  "Sing_Reach_To_House": {"why": "the right arm reaches out and up to the house, the left hand at the heart", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null},
+   {"t": 0.5, "spine": [-2, 0], "head": [0, 4], "right": [0.16, 0.30, -0.12], "left": [0.06, 0.16, -0.16]},
+   {"t": 1.4, "spine": [-5, 4], "head": [10, 14], "right": [0.36, 0.50, 0.18], "left": [0.06, 0.16, -0.16]},
+   {"t": 2.0, "spine": [-5, 4], "head": [10, 14], "right": [0.37, 0.51, 0.20], "left": [0.06, 0.16, -0.16]}]},
+  "Whisper_Lean": {"why": "he leans in to whisper at her ear, a hand by his mouth (the wings, after the prologue)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null},
+   {"t": 0.7, "spine": [10, 12], "head": [25, -12], "right": [0.10, 0.20, 0.22], "left": null},
+   {"t": 1.8, "spine": [10, 12], "head": [25, -12], "right": [0.10, 0.20, 0.22], "left": null}]},
+  "Climb_Rope_Loop": {"why": "hand over hand up a rope or a curtain, in place (the path up is the cue sheet's climb)", "loop": true, "keys": [
+   {"t": 0.0, "spine": [4, 0], "head": [0, 20], "right": [0.04, 0.24, 0.52], "left": [-0.04, 0.24, 0.30], "sink": 0.12},
+   {"t": 0.6, "spine": [4, 0], "head": [0, 20], "right": [0.04, 0.24, 0.30], "left": [-0.04, 0.24, 0.52], "sink": 0.04},
+   {"t": 1.2, "spine": [4, 0], "head": [0, 20], "right": [0.04, 0.24, 0.52], "left": [-0.04, 0.24, 0.30], "sink": 0.12}]},
+  "Rope_Swing_Hold": {"why": "hanging from a rope with both hands, swinging (the Count over the house)", "loop": true, "keys": [
+   {"t": 0.0, "spine": [-6, 0], "head": [0, 10], "right": [0.03, 0.10, 0.56], "left": [-0.03, 0.10, 0.56]},
+   {"t": 0.5, "spine": [8, 0], "head": [0, 0], "right": [0.03, 0.14, 0.54], "left": [-0.03, 0.14, 0.54]},
+   {"t": 1.0, "spine": [-6, 0], "head": [0, 10], "right": [0.03, 0.10, 0.56], "left": [-0.03, 0.10, 0.56]}]},
+  "Skirt_Tear": {"why": "she tears away the breakaway skirt as she takes down the sword (✦ b43-duel-costume)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": null, "left": null},
+   {"t": 0.35, "spine": [12, -10], "head": [-10, -20], "right": [-0.18, 0.12, -0.62], "left": [-0.24, 0.06, -0.58]},
+   {"t": 0.6, "spine": [4, 8], "head": [10, -5], "right": [0.58, 0.18, -0.46], "left": [-0.24, 0.06, -0.58]},
+   {"t": 1.0, "spine": [0, 0], "head": [0, 0], "right": [0.52, 0.10, -0.50], "left": null}]},
+  "Catch_High": {"why": "a hand thrown up to catch a blade coming down (the disarms)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 30], "right": [0.20, 0.30, 0.10], "left": null},
+   {"t": 0.3, "spine": [-6, 0], "head": [0, 40], "right": [0.14, 0.22, 0.58], "left": null},
+   {"t": 0.55, "spine": [-2, 0], "head": [0, 20], "right": [0.18, 0.26, 0.40], "left": null},
+   {"t": 0.8, "spine": [0, 0], "head": [0, 0], "right": [0.30, 0.34, -0.10], "left": null}]},
+  "Toss_Back": {"why": "an underhand toss of a blade back to its owner", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": [0.30, 0.20, -0.30], "left": null},
+   {"t": 0.3, "spine": [8, 0], "head": [0, -4], "right": [0.26, -0.10, -0.50], "left": null},
+   {"t": 0.6, "spine": [-4, 0], "head": [0, 10], "right": [0.24, 0.50, 0.10], "left": null},
+   {"t": 0.8, "spine": [0, 0], "head": [0, 6], "right": [0.26, 0.44, 0.02], "left": null}]},
+  "Blade_At_Throat": {"why": "her blade held level at his throat, still (the held string note)", "loop": false, "keys": [
+   {"t": 0.0, "spine": [0, 0], "head": [0, 0], "right": [0.30, 0.40, -0.06], "left": null},
+   {"t": 0.4, "spine": [4, 0], "head": [0, -6], "right": [0.12, 0.58, 0.00], "left": [-0.30, -0.02, -0.30]},
+   {"t": 2.0, "spine": [4, 0], "head": [0, -6], "right": [0.12, 0.58, 0.00], "left": [-0.30, -0.02, -0.30]}]}
+ }
+}

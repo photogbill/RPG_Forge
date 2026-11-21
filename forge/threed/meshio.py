@@ -103,7 +103,9 @@ class Glb:
         return cls({"asset": {"version": "2.0", "generator": generator}, "scene": 0, "scenes": [{"nodes": []}], "nodes": [],
                     "meshes": [], "accessors": [], "bufferViews": [], "buffers": []})
 
-    def accessor(self, i: int) -> np.ndarray:
+    def accessor(self, i: int, raw: bool = False) -> np.ndarray:
+        """The numbers behind accessor `i`. `raw=True` gives them exactly as stored (a normalised list is not turned into
+        fractions) — what a list must be read as when it is going to be written back."""
         a = self.j["accessors"][i]
         dt = np.dtype(COMPONENT[a["componentType"]])
         n = WIDTH[a["type"]]
@@ -119,7 +121,7 @@ class Glb:
             raw = np.frombuffer(self.bin, dtype=np.uint8, count=stride * (count - 1) + dt.itemsize * n, offset=start)
             arr = np.lib.stride_tricks.as_strided(raw, shape=(count, dt.itemsize * n), strides=(stride, 1)).copy()
             arr = arr.view(dt).reshape(count, n)
-        if a.get("normalized") and dt.kind in "iu":
+        if a.get("normalized") and dt.kind in "iu" and not raw:
             arr = arr.astype(np.float64) / float(np.iinfo(dt).max)
         return arr
 
@@ -304,6 +306,141 @@ class Glb:
         scene["nodes"] = [ni]
         return ni
 
+    def drop_faces(self, drop) -> dict:
+        """Take triangles out of the file (BUILD 84, 2f: a slab of ground left under a model). `drop` is a mask over the
+        triangles in the order `mesh()` gives them. A primitive that loses triangles gets a new index list, and its vertex
+        lists are written again without the vertices nothing uses any more — so the thing's box, and the floor it is stood
+        on, stop counting what was taken off. A primitive that loses every triangle leaves its mesh; a mesh left with
+        nothing leaves its node. A mesh used by more than one node loses a triangle only where every use of it would.
+        The old numbers stay in the buffer, unreferenced (harmless, as with `replace_image`). Refuses what it cannot
+        rewrite safely — morph targets, a sparse list — with ValueError, and then nothing has been changed."""
+        drop = np.asarray(drop, dtype=bool)
+        nodes, meshes = self.j.get("nodes", []), self.j.get("meshes", [])
+        plan: dict[tuple[int, int], np.ndarray] = {}
+        at = 0
+        for n in nodes:
+            if "mesh" not in n or n["mesh"] >= len(meshes):
+                continue
+            for pi, prim in enumerate(meshes[n["mesh"]].get("primitives", [])):
+                if prim.get("mode", 4) != 4 or "POSITION" not in prim.get("attributes", {}):
+                    continue
+                if "indices" in prim:
+                    nf = int(self.j["accessors"][prim["indices"]]["count"]) // 3
+                else:
+                    nf = int(self.j["accessors"][prim["attributes"]["POSITION"]]["count"]) // 3
+                seg = drop[at: at + nf]
+                if len(seg) != nf:
+                    raise ValueError("the mask does not cover the file's triangles")
+                key = (int(n["mesh"]), pi)
+                plan[key] = seg.copy() if key not in plan else (plan[key] & seg)
+                at += nf
+        if at != len(drop):
+            raise ValueError(f"the mask is for {len(drop)} triangles; the file has {at}")
+        todo = {k: v for k, v in plan.items() if v.any()}
+        for (mi, pi), seg in todo.items():                   # look before anything is changed
+            prim = meshes[mi]["primitives"][pi]
+            if prim.get("targets"):
+                raise ValueError("a mesh with morph targets is not rewritten")
+            for ai in list(prim["attributes"].values()) + ([prim["indices"]] if "indices" in prim else []):
+                if "sparse" in self.j["accessors"][ai] or "bufferView" not in self.j["accessors"][ai]:
+                    raise ValueError("a mesh with a sparse list is not rewritten")
+        taken, emptied = 0, []
+        for (mi, pi), seg in todo.items():
+            prim = meshes[mi]["primitives"][pi]
+            attrs = prim["attributes"]
+            nv = int(self.j["accessors"][attrs["POSITION"]]["count"])
+            f = (self.accessor(prim["indices"], raw=True).reshape(-1, 3).astype(np.int64) if "indices" in prim
+                 else np.arange(nv - nv % 3, dtype=np.int64).reshape(-1, 3))
+            taken += int(seg.sum())
+            keep = f[~seg]
+            if not len(keep):
+                emptied.append((mi, pi))
+                continue
+            used = np.unique(keep)
+            remap = np.full(nv, -1, dtype=np.int64)
+            remap[used] = np.arange(len(used))
+            for name, ai in list(attrs.items()):
+                a = self.j["accessors"][ai]
+                arr = np.ascontiguousarray(self.accessor(ai, raw=True)[used])
+                ni = self.add_accessor(arr, a["type"], 34962, minmax=(name == "POSITION"))
+                if a.get("normalized"):
+                    self.j["accessors"][ni]["normalized"] = True
+                attrs[name] = ni
+            prim["indices"] = self.add_accessor(remap[keep].astype(np.uint32).reshape(-1, 1), "SCALAR", 34963)
+        if emptied:
+            gone = set(emptied)
+            for mi in {m for m, _ in gone}:
+                meshes[mi]["primitives"] = [p for pi, p in enumerate(meshes[mi]["primitives"]) if (mi, pi) not in gone]
+            dead = [mi for mi, me in enumerate(meshes) if not me.get("primitives")]
+            if dead:
+                new_index, k = {}, 0
+                for mi in range(len(meshes)):
+                    if mi in dead:
+                        continue
+                    new_index[mi] = k
+                    k += 1
+                self.j["meshes"] = [me for mi, me in enumerate(meshes) if mi not in dead]
+                for n in nodes:
+                    if "mesh" in n:
+                        if n["mesh"] in new_index:
+                            n["mesh"] = new_index[n["mesh"]]
+                        else:
+                            n.pop("mesh")
+                            n.pop("skin", None)
+        return {"faces": taken, "primitives_out": len(emptied)}
+
+    def move_faces(self, sel, offset) -> dict:
+        """Move the vertices of the triangles `sel` (a mask in `mesh()`'s order) by `offset`, given in world space (BUILD 84,
+        2f: a piece that stands a little through the floor, stood on it). The piece must be a piece: a vertex it shares
+        with a triangle that is not moving is refused, and so is a mesh more than one node uses, a skinned mesh or a
+        position list that is not plain floats (ValueError; nothing has been changed then). The triangles keep their
+        order, so a mask made before still fits afterwards."""
+        sel = np.asarray(sel, dtype=bool)
+        off = np.asarray(offset, dtype=np.float64).reshape(3)
+        nodes, meshes = self.j.get("nodes", []), self.j.get("meshes", [])
+        skinned = {n.get("mesh") for n in nodes if "skin" in n}
+        uses: dict[int, int] = {}
+        for n in nodes:
+            if "mesh" in n:
+                uses[n["mesh"]] = uses.get(n["mesh"], 0) + 1
+        world = self.world_matrices()
+        jobs, at = [], 0
+        for i, n in enumerate(nodes):
+            if "mesh" not in n or n["mesh"] >= len(meshes):
+                continue
+            for prim in meshes[n["mesh"]].get("primitives", []):
+                if prim.get("mode", 4) != 4 or "POSITION" not in prim.get("attributes", {}):
+                    continue
+                pa = self.j["accessors"][prim["attributes"]["POSITION"]]
+                nv = int(pa["count"])
+                nf = int(self.j["accessors"][prim["indices"]]["count"]) // 3 if "indices" in prim else nv // 3
+                seg = sel[at: at + nf]
+                at += nf
+                if len(seg) != nf:
+                    raise ValueError("the mask does not cover the file's triangles")
+                if not seg.any():
+                    continue
+                if uses.get(n["mesh"], 0) > 1 or n["mesh"] in skinned:
+                    raise ValueError("a mesh used by more than one node, or a skinned one, is not moved")
+                if pa.get("componentType") != 5126 or "sparse" in pa or "bufferView" not in pa or prim.get("targets"):
+                    raise ValueError("these positions cannot be rewritten")
+                f = (self.accessor(prim["indices"], raw=True).reshape(-1, 3).astype(np.int64) if "indices" in prim
+                     else np.arange(nv - nv % 3, dtype=np.int64).reshape(-1, 3))
+                moving = np.zeros(nv, dtype=bool)
+                moving[f[seg].ravel()] = True
+                if moving[f[~seg].ravel()].any():
+                    raise ValueError("the piece shares a vertex with a part that is not moving")
+                jobs.append((prim, moving, np.linalg.solve(world[i][:3, :3], off)))
+        if at != len(sel):
+            raise ValueError(f"the mask is for {len(sel)} triangles; the file has {at}")
+        moved = 0
+        for prim, moving, local in jobs:
+            pos = np.array(self.accessor(prim["attributes"]["POSITION"], raw=True), dtype=np.float32)
+            pos[moving] += local.astype(np.float32)
+            prim["attributes"]["POSITION"] = self.add_accessor(pos, "VEC3", 34962, minmax=True)
+            moved += int(moving.sum())
+        return {"vertices": moved}
+
     def use_extension(self, name: str) -> None:
         used = self.j.setdefault("extensionsUsed", [])
         if name not in used:
@@ -329,12 +466,19 @@ class Glb:
 
 
 # ------------------------------------------------------------------------------------------------ on the way out
+SIZE_ORDER = ("height", "length", "width", "depth")     # which of an entry's measures a thing is scaled by: the first it gives
+
+
 def size_factor(lo: np.ndarray, hi: np.ndarray, size: dict | None) -> tuple[float, str | None]:
-    """The scale that gives a thing its real size: `size` is {"height"| "width" | "depth": metres} — height first."""
+    """The scale that gives a thing its real size: `size` is {"height" | "length" | "width" | "depth": metres}. Height
+    first (the measure the eye judges against a person); then length — the LONGER side on the ground, whichever way the
+    model turned out (BUILD 84 part 6: a streetcar asked "depth 14" came out lying along the other axis and was made six
+    times too big); then a named side."""
     if not size:
         return 1.0, None
     ext = {"width": hi[0] - lo[0], "height": hi[1] - lo[1], "depth": hi[2] - lo[2]}
-    for k in ("height", "width", "depth"):
+    ext["length"] = max(ext["width"], ext["depth"])
+    for k in SIZE_ORDER:
         v = size.get(k)
         if v not in (None, "", 0) and ext[k] > 1e-9:
             return float(v) / float(ext[k]), k

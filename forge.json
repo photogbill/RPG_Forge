@@ -87,5 +87,6 @@
       "exe": "C:\\Program Files\\Filter Forge 15\\Bin\\FFXCmdRenderer-x64.exe",
       "library_dirs": []
     }
-  }
+  },
+  "dted_dir": "local/dted"
 }

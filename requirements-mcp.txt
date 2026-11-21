@@ -1,0 +1,6 @@
+# The connector for Claude (BUILD 83): its own small environment, venv_mcp, made by mcp_setup.bat.
+# Not the art worker's environment (requirements.txt) — nothing here is installed there.
+# mcp: the Model Context Protocol library (MIT). Pinned: its 2.x renamed the server class; forge/mcpserver also runs on 1.x.
+mcp==2.3.0
+# Pillow: to show Claude the pictures the forge made, downsized.
+Pillow>=10.0

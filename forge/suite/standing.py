@@ -80,6 +80,13 @@ def data(cfg: dict, gid: str, ui_state=None) -> dict:
     ords.sort(key=lambda o: (PRI.get(o.get("priority"), 3), o.get("created", "")))
     for o in ords[:2]:
         nxt_ai.append({"title": o["title"], "why": f"work order from {o['by']} ({o['priority']})", "go": "tasks/for-claude"})
+    def _left():
+        from . import nowait
+        return nowait.pending(root)
+    for r in (_safe("nowait", _left, []) or [])[:2]:
+        if not any(o.get("nowait") == r["letter"] for o in ords[:2]):
+            nxt_ai.append({"title": f"{r['to']}'s call: {len(r['questions'])} question(s) in “{r['subject']}”",
+                           "why": f"{r['for'] or 'the owner'} isn't waiting on these", "go": f"messages/inbox/{r['letter']}"})
     pt = _safe("playtest", lambda: playtest.inbox(root, adp), {}) or {}
     if pt.get("new"):
         nxt_ai.append({"title": f"Take in {pt['new']} playtest note(s)", "why": "notes from playing, not routed yet", "go": "notes/playtest"})

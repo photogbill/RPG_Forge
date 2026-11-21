@@ -97,6 +97,11 @@ class RigEnv:
         })
         for k in ("PYTHONHOME", "PYTHONPATH", "VIRTUAL_ENV", "CONDA_PREFIX", "CONDA_DEFAULT_ENV"):
             e.pop(k, None)                                     # nothing of the forge's own environment leaks in
+        # BUILD 78: nor a Blender's that started the forge — the night of 2026-11-17 the forge was run from inside Blender
+        # 5.3 and its own Blender (4.2) would not start: "an OpenColorIO config error", exit 3221226505. A colour config
+        # or a scripts folder meant for another Blender is never passed on.
+        for k in [k for k in e if k.upper() == "OCIO" or k.upper().startswith(("BLENDER_", "OCIO_"))]:
+            e.pop(k, None)
         # 'python' and 'pip' by name must mean the rigging ComfyUI's, never the forge's or the art ComfyUI's
         own = str(self.rig_python.parent)
         others = {str((self.root / "venv" / ("Scripts" if WIN else "bin")).resolve()).lower(),
@@ -127,7 +132,8 @@ class RigEnv:
         if self.env_python.exists():
             return [str(self.env_python), str(script)] + [str(a) for a in args], self.blender_env()
         if self.blender_exe and Path(self.blender_exe).exists():
-            env = dict(os.environ)
+            env = {k: v for k, v in os.environ.items()
+                   if not (k.upper() == "OCIO" or k.upper().startswith(("BLENDER_", "OCIO_")))}   # BUILD 78, as above
             env["PYTHONIOENCODING"] = "utf-8"
             return [self.blender_exe, "--background", "--factory-startup", "--python", str(script), "--"] + [str(a) for a in args], env
         return None

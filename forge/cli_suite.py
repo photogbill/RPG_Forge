@@ -10,6 +10,12 @@
     python -m forge mail read <id>                           the whole thread, open questions marked; marks it read
     python -m forge mail send --to "<name>" --subject "…" (--body "…" | --body-file f.md) [--questions q.json] [--attach path]
     python -m forge mail reply <id> (--body "…" | --body-file f.md) [--answers a.json]
+    python -m forge nowait [show]                            Don't wait for me: the owner's standing instruction, what went ahead, what is whose call
+    python -m forge nowait sweep                             carry it out now (the suite does when Tasks opens) — defaults taken, the rest handed on
+    python -m forge nowait pending [--who "<name>"]          the open questions left to an assistant, with their choices
+    python -m forge nowait decide <letter id> --answers a.json [--body "why" | --body-file f.md]   (the assistant they were left to)
+                                                             a.json: [{"id": "<question id>", "choice": "<a label>" | "text": "…", "note": "why"}]
+    python -m forge nowait set wait|default|defer [--after <hours>] [--to "<assistant>"]           (a person only)
     python -m forge orders add --for "<name>" --title "…" [--detail "…"] [--priority now|soon|someday] [--object <ref>]
     python -m forge orders list [--for "<name>"] [--all]      the work orders a session starts from
     python -m forge orders done <id> [--note "…"] [--drop]
@@ -251,6 +257,21 @@ def cmd_mail(cfg: dict, args: list[str]) -> int:
         l = mail.send(root, frm, opts["to"], opts["subject"], _body(opts), questions=_json_file(opts, "questions"),
                       attachments=opts.get("attach"), adp=adp)
         print(f"sent: mail/{l.folder}/{l.id}.md")
+        if l.questions:
+            from .suite import nowait
+            st = nowait.get()
+            if st["mode"] != "wait" and st["person"] and mail.group_of(st["person"]) == mail.group_of(l.to):
+                r = nowait.sweep(root, adp)
+                mine = [t for t in r["taken"] if t["letter"] == l.id]
+                theirs = [d for d in r["deferred"] if d["letter"] == l.id]
+                if mine or theirs:
+                    print(f"{st['person']} has “don't wait for me” on — nothing here waits:")
+                    for t in mine:
+                        print(f"  {t['id']}: took the {t['how']} → {t['answer']}" + (f"  [{t['applied']}]" if t.get("applied") else ""))
+                    for d in theirs:
+                        print(f"  {d['id']}: left to {d['to']} (python -m forge nowait pending)")
+                else:
+                    print(f"{st['person']} has “don't wait for me” on ({nowait.describe(st)}) — run `python -m forge nowait sweep` once the wait is over")
         return 0
     if len(pos) < 2:
         print("usage: mail reply <id> (--body … | --body-file …) [--answers a.json]")
@@ -262,6 +283,76 @@ def cmd_mail(cfg: dict, args: list[str]) -> int:
         if a.get("applied"):
             print(f"  {a['id']}: {a['applied']['message']}")
     return 0
+
+
+def cmd_nowait(cfg: dict, args: list[str]) -> int:
+    """Don't wait for me (nowait.py)."""
+    from .suite import nowait
+    pos, opts = _args(args)
+    what = pos[0] if pos else "show"
+    if what not in ("show", "sweep", "pending", "decide", "set"):
+        print(__doc__)
+        return 2
+    try:
+        if what == "set":
+            if len(pos) < 2:
+                print("usage: nowait set wait|default|defer [--after <hours>] [--to \"<assistant>\"]")
+                return 2
+            st = nowait.set_mode(_who(opts, "who"), pos[1], opts.get("after") if isinstance(opts.get("after"), str) else None,
+                                 opts.get("to") if isinstance(opts.get("to"), str) else None)
+            print("saved — " + nowait.describe(st))
+            return 0
+        gid, root, adp = _game(cfg, opts)
+        st = nowait.get()
+        if what == "sweep":
+            r = nowait.sweep(root, adp)
+            print(f"{gid} — {nowait.describe(st)} (for {st['person'] or 'nobody yet'})")
+            for t in r["taken"]:
+                print(f"  took {t['how']}: {t['letter']}#{t['id']} → {t['answer']}" + (f"  [{t['applied']}]" if t.get("applied") else ""))
+            for d in r["deferred"]:
+                print(f"  left to {d['to']}: {d['letter']}#{d['id']}")
+            if not r["taken"] and not r["deferred"]:
+                print("  nothing new to do")
+            return 0
+        if what == "decide":
+            if len(pos) < 2 or not isinstance(opts.get("answers"), str):
+                print("usage: nowait decide <letter id> --answers a.json [--body … | --body-file …]")
+                return 2
+            l = nowait.decide(root, adp, pos[1], _who(opts, "who", "from"), _json_file(opts, "answers") or [], _body(opts))
+            print(f"sent: mail/{l.folder}/{l.id}.md")
+            for a in l.answers:
+                print(f"  {a['id']}: {a.get('choice') if a.get('choice') is not None else a.get('text')}" +
+                      (f"  [{a['applied']['message']}]" if a.get("applied") else ""))
+            return 0
+        who = opts.get("who") if isinstance(opts.get("who"), str) else None
+        rows = nowait.pending(root, who)
+        if what == "show":
+            print(f"{gid} — don't wait for me: {nowait.describe(st)}" + (f" (set by {st['person']}, {str(st['set_at'])[:16].replace('T', ' ')})" if st["person"] else ""))
+            dd = nowait.decided(root, st["person"])
+            print(f"went ahead without the owner, still standing: {len(dd)}")
+            for d in dd[:20]:
+                print(f"  {str(d['date'])[:16].replace('T', ' ')}  {d['how']:<14} {d['question']} → {d['answer']}   [{d['letter']}#{d['id']}]")
+        print(f"left to {who or 'an assistant'} and still open: {sum(len(r['questions']) for r in rows)} question(s) on {len(rows)} letter(s)")
+        for r in rows:
+            print(f"\n  “{r['subject']}” — from {r['from']}, left to {r['to']} by {r['for']} {str(r['at'])[:16].replace('T', ' ')}\n    letter: {r['letter']}")
+            for q in r["questions"]:
+                print(f"    ? {q.get('id')}: {q.get('question')}")
+                if what == "pending":
+                    for k in ("why", "recommendation", "default"):
+                        if q.get(k):
+                            print(f"        {k}: {q[k]}")
+                    labels = [(c.get("label") if isinstance(c, dict) else c) for c in q.get("choices") or []]
+                    if labels:
+                        print("        choices: " + " | ".join(str(x) for x in labels))
+                    if q.get("applies_to"):
+                        print(f"        a choice sets {q['applies_to'].get('file')}#{q['applies_to'].get('pointer')}")
+        return 0
+    except nowait.NoWaitRefused as e:
+        print(f"refused: {e}")
+        return 1
+    except FileNotFoundError as e:
+        print(f"no such letter: {e}")
+        return 1
 
 
 def cmd_orders(cfg: dict, args: list[str]) -> int:
@@ -588,5 +679,5 @@ def cmd_profiles(cfg: dict, args: list[str]) -> int:
 
 
 COMMANDS = {"suite": cmd_suite, "identity": cmd_identity, "journal": cmd_journal, "suite-check": cmd_suite_check,
-            "mail": cmd_mail, "orders": cmd_orders, "provide": cmd_provide, "away": cmd_away, "music": cmd_music,
+            "mail": cmd_mail, "nowait": cmd_nowait, "orders": cmd_orders, "provide": cmd_provide, "away": cmd_away, "music": cmd_music,
             "rulings": cmd_rulings, "idea": cmd_idea, "playtest": cmd_playtest, "profiles": cmd_profiles}

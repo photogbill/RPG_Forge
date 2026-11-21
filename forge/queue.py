@@ -10,7 +10,7 @@ Ids are `YYYYMMDD-HHMMSS-<name>-<4 hex>` so a folder listing is already a timeli
 folders are `os.replace` (atomic on one filesystem), so two workers never run the same job.
 """
 from __future__ import annotations
-import json, os, secrets, time, traceback
+import json, os, secrets, socket, time, traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
@@ -87,6 +87,10 @@ class Queue:
             except FileNotFoundError:
                 continue  # another worker got it first
             job["started_at"] = datetime.now().isoformat(timespec="seconds")
+            # BUILD 93: who has it, while it is in running/ (finish takes it off again; dedupe already counts "worker" as a
+            # receipt field). A window closed in the middle of a job leaves its file in running/ for good; with this the
+            # world queue can tell such a file from work in progress (threed/world.py machine_busy) and is not stalled.
+            job["worker"] = {"pid": os.getpid(), "host": socket.gethostname()}
             self._write_atomic(target, job)
             log.info("claimed %s", job["id"])
             return job["id"], job
@@ -100,6 +104,7 @@ class Queue:
     def finish(self, job_id: str, result: dict | None = None, error: str | None = None, tb: str | None = None) -> None:
         src = self.jobs / "running" / f"{job_id}.json"
         job = self._read(src) if src.exists() else {"id": job_id}
+        job.pop("worker", None)                    # BUILD 93: only a running job says who has it
         job["finished_at"] = datetime.now().isoformat(timespec="seconds")
         if error is None:
             job["result"] = result or {}

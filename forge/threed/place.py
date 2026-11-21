@@ -7,14 +7,18 @@ floor plans' own axes); up is z.
     road        {"type": "dirt" | "gravel" | "street"}   dirt raises a puff of dust at the feet; the others do not
     ground      [{mat, rect [x, y, w, d] | ellipse [cx, cy, rx, ry] | poly [[x, y], ...], walk}]
     solids      [...]   plan-built: modelled whole by the compiler (forge/threed/blender/build_stage.py) — walls,
-                        chimneys, furniture, fences — in the proof's format (rect or circle, h, z, mat, face)
-    things      [{id, kind building|prop|vehicle|tree|panel|body, at [x, y], turn, footprint [x, y, w, d],
-                  size_m {height|width|depth}, tier, words, species, seed, enter plan-built|shell|closed,
+                        chimneys, furniture, fences — in the proof's format (rect or circle, h, z, mat, face); a round
+                        hall's curved bands are an `arc` [cx, cy, r_in, r_out, a0, a1] and its rows of seats `seats`
+                        (BUILD 44); a solid may stand below the ground (negative z) where the place sets `base_z`
+    things      [{id, kind building|prop|vehicle|tree|panel|body, at [x, y], z, turn, footprint [x, y, w, d],
+                  size_m {height|width|depth}, tier, words, species, seed, enter plan-built|shell|closed, listed_in,
                   door [x, y], closed_line, first {where, order}}]
                         generated things: each goes on the game's world list and stands in the stage as a labelled grey
                         box of its real size until its model is delivered
     lighting    {ambient, zones, lights [{id, at, z, colour, power, radius}]}   the plan's lamps are real lights
     anchors     {name: [x, y]}                                                   spawns, doors, where a cue stands
+    floors      [{rect | arc | poly, z}]   where the floor is not at 0 (a stage, a pit, a tier): the game stands people
+                                           and things there (BUILD 44); `base_z` is the lowest of them
 
 Compiling a place (`compile_place`):
     (a) `<id>.stage.glb` — the ground's kerbs and the plan-built solids, modelled (Blender, no graphics card);
@@ -87,8 +91,20 @@ def check(place: dict) -> list[str]:
         if t.get("kind") == "building" and t.get("enter", "closed") == "closed" and t.get("door") and not t.get("closed_line"):
             out.append(f"{tid}: a door that doesn't open says why, in the town's own words (closed_line)")
     for s in place.get("solids") or []:
-        if not s.get("mat") or not (s.get("rect") or s.get("circle")):
-            out.append(f"solid {s.get('id', '?')}: a solid needs a material and a rect or circle")
+        if not s.get("mat") or not (s.get("rect") or s.get("circle") or s.get("cyl") or s.get("roof") or s.get("arc")):
+            out.append(f"solid {s.get('id', '?')}: a solid needs a material and a rect, a circle (or the proof's cyl), an arc or a roof")
+        if s.get("arc") and (len(s["arc"]) < 6 or float(s["arc"][3]) < float(s["arc"][2]) or float(s["arc"][5]) <= float(s["arc"][4])):
+            out.append(f"solid {s.get('id', '?')}: an arc is [cx, cy, r_in, r_out, a0, a1] with r_out ≥ r_in and a1 > a0")
+        if s.get("show") and s.get("show") not in ("outside", "inside"):
+            out.append(f"solid {s.get('id', '?')}: show is outside or inside (not {s.get('show')!r})")
+        if s.get("show") and not s.get("building"):
+            out.append(f"solid {s.get('id', '?')}: a solid shown only from {s.get('show')} names its building")
+        if s.get("roof") and not (s["roof"].get("rect") and len(s["roof"]["rect"]) == 4):
+            out.append(f"solid {s.get('id', '?')}: a roof needs its rect [x, y, w, d]")
+    built = {t.get("id") for t in place.get("things") or [] if t.get("enter") == "plan-built"}
+    for s in place.get("solids") or []:
+        if s.get("building") and s["building"] not in built:
+            out.append(f"solid {s.get('id', '?')}: building {s['building']!r} is not a plan-built thing of this place")
     return out
 
 
@@ -137,6 +153,8 @@ def wanted_entries(place: dict, start_order: float = 0.0) -> list[dict]:
     for k, t in enumerate(place.get("things") or []):
         if t.get("enter") == "plan-built" or t.get("plan_built"):
             continue
+        if t.get("listed_in"):              # BUILD 44: its model is already on another world list (a set of its own)
+            continue
         wid = world_id(place, t)
         if wid in seen:
             continue
@@ -177,15 +195,19 @@ def things_list(place: dict) -> dict:
         rows.append({"id": t["id"], "kind": t["kind"], "model": None if t.get("enter") == "plan-built" else world_id(place, t),
                      "label": t.get("label") or t["id"].replace("_", " "), "at": _at(t), "turn": round(_turn(t), 2),
                      "box_m": _box(t), "enter": t.get("enter") or ("closed" if t["kind"] == "building" else None),
-                     "door": t.get("door"), "closed_line": t.get("closed_line"), "plan_built": t.get("enter") == "plan-built"})
+                     "door": t.get("door"), "closed_line": t.get("closed_line"), "plan_built": t.get("enter") == "plan-built",
+                     **({"rooms": t["rooms"]} if t.get("rooms") else {}),
+                     **({"z": float(t["z"])} if t.get("z") is not None else {})})
     return {"place": place["id"], "name": place.get("name") or place["id"], "size": place.get("size"),
             "road": (place.get("road") or {}).get("type"), "dust": DUST.get((place.get("road") or {}).get("type") or "", False),
             "things": rows, "anchors": place.get("anchors") or {}, "lights": (place.get("lighting") or {}).get("lights") or []}
 
 
-def write_wanted(games_root: Path, gid: str, place: dict, start_order: float = 0.0) -> Path:
+def write_wanted(games_root: Path, gid: str, place: dict, start_order: float = 0.0, hold: bool = False) -> Path:
     """`games/<game>/wanted_3d/<place>.json`. What a person changed on an entry that is already there (rank, hold, words
-    written in, a tier) is kept: the compiler only adds what is new and refreshes where and how big."""
+    written in, a tier) is kept: the compiler only adds what is new and refreshes where and how big. With `hold`, every
+    NEW entry is written held (the world queue never makes it until a person releases it) — for a compile made while the
+    queue is running and nothing is to be made yet (William, 2026-11-17: "Start no generation")."""
     p = Path(games_root) / gid / "wanted_3d" / f"{place['id']}.json"
     old = {}
     if p.exists():
@@ -196,6 +218,8 @@ def write_wanted(games_root: Path, gid: str, place: dict, start_order: float = 0
     fresh = wanted_entries(place, start_order)
     out = []
     for e in fresh:
+        if hold and not e.get("hold"):
+            e = dict(e, hold=True, held_by="compiled with nothing to be made yet — release it in 3D → World list")
         o = old.pop(e["id"], None)
         if o:
             keep = dict(o)
@@ -216,6 +240,30 @@ def write_wanted(games_root: Path, gid: str, place: dict, start_order: float = 0
     return p
 
 
+# ------------------------------------------------------------------------------------------------ where a game's stages go
+def stage_dir(cfg: dict | None, gid: str, place_id: str) -> Path | None:
+    """Where a game keeps a compiled place: `<asset_root>/stages/<id>/` from its forge.game.json (the game reads it from
+    there; the forge may write nowhere else in a game). None when the game names no asset folder."""
+    if not gid:
+        return None
+    try:
+        from ..suite import games
+        gcfg = games.game_cfg(cfg or {}, gid)
+    except Exception:  # noqa: BLE001 — a forge without the suite still compiles into its own out/
+        return None
+    root = gcfg.get("asset_root")
+    if not root:
+        return None
+    try:                                         # a computer that keeps the game somewhere else (Settings → the game folder)
+        here = games.game_root(cfg or {}, gid)
+        there = str(gcfg.get("game_root") or "")
+        if here is not None and there and str(root).lower().startswith(there.lower()) and str(here) != there:
+            root = str(here) + str(root)[len(there):]
+    except Exception:  # noqa: BLE001
+        pass
+    return Path(root) / "stages" / place_id
+
+
 # ------------------------------------------------------------------------------------------------ compiling
 def run_build_stage(env, plan_path: Path, out: Path, minutes: float = 15, python=None) -> dict:
     """The plan-built solids, modelled by forge/threed/blender/build_stage.py in the rigging tools' Blender."""
@@ -229,9 +277,55 @@ def run_build_stage(env, plan_path: Path, out: Path, minutes: float = 15, python
     return {"ok": False, "error": (f"exit {code}: " if code not in (-2,) else "") + " / ".join(tail)[:600]}
 
 
+# BUILD 63 — the look's switches a place plan may set for the compiler (forge/threed/blender/build_stage.py, "LOOK"):
+#   "windows": "open" (real openings with glass and curtains) · "trim": true (crown, wainscot) · "bevel": 1.6 (bevel scale)
+#   · "pictures": "engine" (the game hangs the pictures) · "dressing": "<file>" (the small things, beside the plan)
+LOOK_SWITCHES = ("windows", "trim", "bevel", "pictures")
+DRESSING_KINDS = ("mug", "book_stack", "book_row", "newspaper", "clock", "candlestick", "photo", "plant", "coffee_maker", "kettle",
+                  "jars", "fruit_bowl", "cushion", "toolbox", "parts", "desk_lamp", "cable", "rope", "logs", "box")
+
+
+def dressing_of(place: dict, place_path) -> dict | None:
+    """A place's dressing list: "dressing" names a file beside the plan (or <id>.dressing.json is there). None if it has
+    none. A kind the compiler doesn't know is kept (it is skipped there) and reported by check_dressing."""
+    name = place.get("dressing")
+    base = Path(place_path).parent
+    cand = [base / str(name)] if name else []
+    cand.append(base / f"{place.get('id', '')}.dressing.json")
+    for c in cand:
+        if c.is_file():
+            try:
+                d = json.loads(c.read_text(encoding="utf-8"))
+            except Exception:  # noqa: BLE001
+                return None
+            return d if isinstance(d, dict) else None
+    return None
+
+
+def check_dressing(d: dict) -> list[str]:
+    """What is wrong with a dressing list: an unknown kind, an item with no place, a cable with fewer than two points."""
+    out = []
+    for i, it in enumerate(d.get("items") or []):
+        if not isinstance(it, dict):
+            out.append(f"item {i}: not a table")
+            continue
+        k = it.get("kind")
+        if k not in DRESSING_KINDS:
+            out.append(f"item {i}: kind '{k}' is not one the compiler makes ({', '.join(DRESSING_KINDS)})")
+        if k == "cable":
+            if len(it.get("pts") or []) < 2:
+                out.append(f"item {i}: a cable needs two or more points")
+        elif not (isinstance(it.get("at"), list) and len(it["at"]) >= 2):
+            out.append(f"item {i}: no 'at' [x, y]")
+        if k == "box" and not all(key in it for key in ("w", "d", "h", "mat")):
+            out.append(f"item {i}: a box needs w, d, h and mat")
+    return out
+
+
 def compile_place(cfg: dict | None, gid: str, place_path, out_dir, env=None, python=None, games_root=None,
-                  minutes: float = 15) -> dict:
-    """(a) the stage model, (b) the world-list entries, (c) the placed-things list. Returns a report."""
+                  minutes: float = 15, hold: bool = False) -> dict:
+    """(a) the stage model, (b) the world-list entries, (c) the placed-things list, and (d) a copy of the plan beside
+    them (`<id>.place.json` — the game reads its floor, its walls and its doors from the plan). Returns a report."""
     place = load(place_path)
     if env is None:
         from .env import from_cfg
@@ -246,9 +340,41 @@ def compile_place(cfg: dict | None, gid: str, place_path, out_dir, env=None, pyt
     # the compiler reads the proof's format: solids, plus the ground's kerbs and the plan-built things' own solids
     plan = {k: place.get(k) for k in ("id", "size", "ground", "solids", "lighting", "anchors")}
     plan["solids"] = list(place.get("solids") or [])
+    # BUILD 63: the look's compiler switches pass through (windows open, trim, bevel, pictures left to the engine), and a
+    # place's dressing list (its small things) is copied beside the stage — the game lights its lit candles and lamps.
+    for k in LOOK_SWITCHES:
+        if k in place:
+            plan[k] = place[k]
+    dressing = dressing_of(place, place_path)
+    dress_copy = out / f"{place['id']}.dressing.json"
+    if dressing is not None:
+        dress_copy.write_text(json.dumps(dressing, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        plan["dressing"] = str(dress_copy)
+    # BUILD 60: a place with land (`terrain`) gets its height picture beside the stage, and the compiler draws no flat
+    # ground slabs (the terrain draws the ground and is painted with the plan's ground words; the plan copy keeps them
+    # for the floor's footsteps). The copy beside the stage carries the game's `terrain` block (the picture, its range).
+    land = None
+    if place.get("terrain") is not None:
+        from . import ground as landmod
+        lp = landmod.check(place)
+        if lp:
+            return {"ok": False, "error": "; ".join(lp), "problems": lp}
+        land = landmod.make(place, out, place_dir=Path(place_path).parent)
+        plan["ground"] = []
+        plan["terrain"] = True
     plan_path = out / f"{place['id']}.compile_plan.json"
     plan_path.write_text(json.dumps(plan, indent=1), encoding="utf-8")
     rep = {"ok": True, "place": place["id"], "lines": []}
+    if land is not None:
+        rep["terrain"] = land
+        rep["lines"].append(f"Land: {land['pixels'][0]}×{land['pixels'][1]} heights over {land['size_m'][0]:.0f} × "
+                            f"{land['size_m'][1]:.0f} m, {land['range_m'][0]:.1f} to {land['range_m'][1]:.1f} m, levelled "
+                            f"under {land['flat']} footprints ({land['height']}).")
+    if dressing is not None:
+        rep["dressing"] = str(dress_copy)
+        rep["lines"].append(f"Dressing: {len(dressing.get('items') or [])} small things ({dress_copy.name}).")
+    if any(k in place for k in LOOK_SWITCHES):
+        rep["lines"].append("The look's compiler switches: " + ", ".join(f"{k} {place[k]}" for k in LOOK_SWITCHES if k in place) + ".")
     if plan["solids"]:
         r = run_build_stage(env, plan_path, model, minutes=minutes, python=python)
         if not r["ok"]:
@@ -260,11 +386,19 @@ def compile_place(cfg: dict | None, gid: str, place_path, out_dir, env=None, pyt
         rep["lines"].append("No plan-built solids: the stage is its ground and its generated things.")
     tl = things_list(place)
     things.write_text(json.dumps(tl, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    plan_copy = out / f"{place['id']}.place.json"
+    if land is not None:
+        copy = dict(place)
+        copy["terrain"] = dict(place["terrain"], **{k: land[k] for k in ("height", "size_m", "range_m", "pixels", "origin_m")})
+        plan_copy.write_text(json.dumps(copy, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    elif Path(place_path).resolve() != plan_copy.resolve():
+        plan_copy.write_text(json.dumps(place, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    rep["plan"] = str(plan_copy)
     rep["things"] = str(things)
     rep["lines"].append(f"Placed things: {len(tl['things'])} ({sum(1 for t in tl['things'] if t['plan_built'])} plan-built, "
                         f"the rest grey boxes until their models are delivered).")
     if games_root is not None:
-        w = write_wanted(Path(games_root), gid, place, start_order=float(place.get("story_order") or 0.0))
+        w = write_wanted(Path(games_root), gid, place, start_order=float(place.get("story_order") or 0.0), hold=hold)
         n = len(json.loads(w.read_text(encoding="utf-8"))["entries"])
         held = sum(1 for e in json.loads(w.read_text(encoding="utf-8"))["entries"] if e.get("needs_words"))
         rep["wanted"] = str(w)

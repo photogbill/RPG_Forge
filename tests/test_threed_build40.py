@@ -239,7 +239,10 @@ def test_the_colour_check_catches_a_dark_bake_and_the_fix_matches_the_picture(tm
     r = res["results"][0]
     assert not r["ok"] and r["mean_ratio"] < 0.8 and "held back" in r["line"]
     fixed = checks.fix_colour(glbp, tmp_path / "body__colour.glb", Image.open(pic), None, "body")
-    assert fixed["ok"] and 0.9 < fixed["after"]["mean_ratio"] < 1.1, fixed["after"]["line"]
+    # BUILD 84: a body is put right by one gain for its whole colour picture, never a curve — brighter, no hue moved; a bake
+    # this far off (a 2.2 curve) is not brought inside the check by one gain, and is said so (its release goes at that gain)
+    assert fixed["mode"] == "one_gain" and fixed["hue_ok"] and fixed["after"]["mean_ratio"] > r["mean_ratio"], fixed["after"]["line"]
+    assert fixed["refused"] in (None, "one gain cannot bring it inside the check") and "one gain ×" in fixed["said"]
     assert Glb.load(glbp).texture_image(Glb.load(glbp).mesh()["materials"][0], "baseColorTexture") is not None   # as made, kept
     same, pic2 = _coloured_body(tmp_path, "fine", 1.0)
     assert checks.run(same, pic2, "body", only=("colour",))["ok"]

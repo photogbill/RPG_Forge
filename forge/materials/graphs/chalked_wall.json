@@ -1,0 +1,102 @@
+{
+ "name": "chalked_wall",
+ "label": "Chalked wall",
+ "what": "A chalked wall: grey lime plaster that people have written on — strokes, tallies and the smears of wiping them off.",
+ "made_by": "forge/materials/mmgraph.py - written from the node library, tuned after the first export",
+ "licence": "the graph is part of the forge (its licence); Material Maker itself is MIT",
+ "needs": [
+  "albedo",
+  "roughness",
+  "normal",
+  "ao",
+  "depth"
+ ],
+ "parameters": {
+  "chalk": {
+   "doc": "how much chalk is on the wall: fresh marks, or their ghosts",
+   "default": 0.5,
+   "sets": [
+    {
+     "node": "chalk_colour",
+     "param": "amount",
+     "to": [
+      0.05,
+      0.95
+     ]
+    },
+    {
+     "node": "chalk_rough",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.8
+     ]
+    }
+   ]
+  },
+  "cracks": {
+   "doc": "cracks in the plaster",
+   "default": 0.3,
+   "sets": [
+    {
+     "node": "crack_height",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.85
+     ]
+    },
+    {
+     "node": "crack_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.7
+     ]
+    }
+   ]
+  },
+  "ash": {
+   "doc": "soot",
+   "default": 0.0,
+   "sets": [
+    {
+     "node": "ash_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.65
+     ]
+    }
+   ]
+  },
+  "mend": {
+   "doc": "the cracks filled with new plaster",
+   "default": 0.0,
+   "sets": [
+    {
+     "node": "mend_colour",
+     "param": "amount",
+     "to": [
+      0.0,
+      0.9
+     ]
+    }
+   ]
+  }
+ },
+ "settings": {
+  "broken": {
+   "chalk": 0.9,
+   "cracks": 0.8,
+   "ash": 0.5,
+   "mend": 0.0
+  },
+  "mended": {
+   "chalk": 0.18,
+   "cracks": 0.2,
+   "ash": 0.0,
+   "mend": 0.8
+  }
+ }
+}

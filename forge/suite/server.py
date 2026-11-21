@@ -27,12 +27,15 @@ from .. import ui
 from ..log import get
 from . import approval, areas, away, osopen, runwords, cast, finishing, games, home, journal, mail, music, notes, orders, picture, production, readthrough, settings, sprites, status, tasks, worker, workbench
 from . import ideas, playtest, rulings, standing   # BUILD 17: team memory
+from . import nowait   # Don't wait for me (2026-11-17)
 from . import floorplans   # BUILD 29b: Art → Floor plans (the generator in the suite)
 from . import provide   # User Needs To Provide Image (2026-11-11): the forge pool of pictures the forge can't make
 from . import threed   # BUILD 36: the 3D area (picture -> body -> skeleton -> motions)
 from . import world3d  # BUILD 39: the world list and its queue
+from . import places3d  # BUILD 34: 3D -> Places
 from . import profiles  # BUILD 42: Characters -> Profiles (the cast as editable pages, a board of what's missing)
 from . import mocap  # 2026-11-15: Motion capture (what has to be filmed, and how)
+from . import behaviours  # BUILD 31: Characters -> Behaviours (the party off duty: cards, a preview, coverage)
 
 log = get("suite")
 HOST, PORT = "127.0.0.1", 8770
@@ -103,6 +106,12 @@ def act_floorplan(cfg: dict, action: str, body: dict, who) -> dict:
         if action == "floorplan_approve":
             r = floorplans.approve(cfg, gid, f, who)
             return {"ok": True, "message": f"Approved: {len(r['installed'])} maps are in the game. {r['plan']}", "result": r}
+        if action == "floorplan_approve_stage":            # BUILD 34: Approve "as a stage"
+            try:
+                r = places3d.approve_as_stage(cfg, gid, floorplans._folder(cfg, gid, f), who)
+            except places3d.ThreeDRefused as e:
+                return {"ok": False, "message": str(e)}
+            return {"ok": True, "message": r["message"], "result": {"after": r["lines"][3:]}, "place": r["place"]}
         if action == "floorplan_send":
             r = floorplans.send(cfg, gid, f, str(body.get("question") or ""), who)
             return {"ok": True, "message": f"Sent to {r['to']} — it's in the Mail.", **r}
@@ -117,6 +126,11 @@ def act_threed(cfg: dict, action: str, body: dict, who) -> dict:
     tid = str(body.get("try") or "")
     if action.startswith("threed_world_"):
         return world3d.act(cfg, gid, action, body, who)
+    if action.startswith("threed_places_"):
+        return places3d.act(cfg, gid, action, body, who)
+    if action.startswith("threed_terrain_"):                                # BUILD 77: 3D -> Terrain
+        from . import terrain as terrain_page
+        return terrain_page.act(cfg, gid, action, body, who)
     try:
         if action == "threed_pictures":
             return threed.new_try(cfg, gid, body, who)
@@ -253,6 +267,8 @@ def act(cfg: dict, action: str, body: dict) -> dict:
             return {"ok": False, "message": str(e)}
         areas._badge_cache.pop(gid, None)
         return r
+    if action.startswith("nowait_"):
+        return act_nowait(cfg, action, body, who)
     if action.startswith(("mail_", "order_", "away_")):
         return act_story(cfg, action, body, who)
     if action.startswith(("intake_", "tool_", "char_", "wanted_", "review_", "deliver_", "make_", "fin_")):
@@ -271,8 +287,17 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         return act_threed(cfg, action, body, who)
     if action.startswith("profile_"):
         return act_profiles(cfg, action, body, who)
+    if action.startswith("behaviour_"):
+        return act_behaviours(cfg, action, body, who)
     if action.startswith("mocap_"):
         return act_mocap(cfg, action, body, who)
+    if action.startswith("approve_"):                                       # BUILD 78: Approve everything here; Undo; the setting
+        from . import approve_all
+        return approve_all.act(cfg, str(body.get("game") or current_game(cfg)), action, body, who,
+                               state=getattr(SuiteHandler, "state", None))
+    if action.startswith("voice_"):                                         # BUILD 71: Characters -> Voice bench
+        from . import voicebench
+        return voicebench.act(cfg, str(body.get("game") or current_game(cfg)), action, body, who)
     if action == "open":
         what = str(body.get("what") or "")
         paths = {"log": cfgmod.path_of(cfg, "logs"), "jobs": cfgmod.path_of(cfg, "jobs"), "out": cfgmod.path_of(cfg, "out")}
@@ -290,6 +315,44 @@ def act(cfg: dict, action: str, body: dict) -> dict:
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "message": f"couldn't open it ({e}); it is at {p}"}
         return {"ok": True, "message": f"opened {p}"}
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def behaviours_view(cfg: dict, what: str, q: dict) -> dict:
+    """Characters -> Behaviours (BUILD 31): the decks as cards with coverage, and a preview for a place in an era. Read-only."""
+    gid = q.get("id", [current_game(cfg)])[0]
+    if not games.has_adapter(cfg, gid):
+        return {"error": f"{gid} has no Story adapter yet, so the suite can't find its behaviours"}
+    adp = games.adapter(cfg, gid)
+    if not behaviours.has_decks(adp):
+        return {"error": f"this game has no behaviours yet — {behaviours.rel_dir(adp)}/ holds one deck a character", "missing": True}
+    try:
+        if what == "behaviourpreview":
+            party = [x for x in q.get("party", [""])[0].split(",") if x]
+            return behaviours.preview(adp, q.get("place", [""])[0], q.get("era", ["any"])[0], party or None)
+        return behaviours.board(adp)
+    except behaviours.BehaviourRefused as e:
+        return {"error": str(e)}
+
+
+def act_behaviours(cfg: dict, action: str, body: dict, who: str | None) -> dict:
+    """Approving a behaviour is the owner's: signed, safely saved, journalled."""
+    from . import safesave
+    gid = str(body.get("game") or current_game(cfg))
+    if not games.has_adapter(cfg, gid):
+        return {"ok": False, "message": f"{gid} has no Story adapter"}
+    adp = games.adapter(cfg, gid)
+    try:
+        if action in ("behaviour_approve", "behaviour_unapprove"):
+            r = behaviours.approve(adp, str(body.get("deck") or ""), str(body.get("behaviour") or ""), who or "",
+                                   approve_it=action == "behaviour_approve")
+            return {**r, "message": ("approved" if r["status"] == "approved" else "back to a draft") if r.get("changed") else "unchanged"}
+    except behaviours.BehaviourRefused as e:
+        return {"ok": False, "message": str(e)}
+    except safesave.SaveConflict:
+        return {"ok": False, "message": "the file changed since you opened it — reload and try again"}
+    except safesave.SaveRefused as e:
+        return {"ok": False, "message": "; ".join(e.problems) if hasattr(e, "problems") else str(e)}
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -359,6 +422,65 @@ def act_profiles(cfg: dict, action: str, body: dict, who: str | None) -> dict:
         return {"ok": False, "message": f"not found: {e}"}
     finally:
         areas._badge_cache.pop(gid, None)
+    return {"ok": False, "message": f"unknown action {action}"}
+
+
+def _nowait_sweep(cfg: dict, gid: str) -> dict:
+    """Carry out the standing instruction for one game (nowait.sweep) — never lets a failure stop the page."""
+    try:
+        root = games.game_root(cfg, gid)
+        if not root or not root.is_dir():
+            return {}
+        adp = games.adapter(cfg, gid) if games.has_adapter(cfg, gid) else None
+        r = nowait.sweep(root, adp)
+        if r.get("taken") or r.get("deferred"):
+            _summary_cache.pop(gid, None)
+            areas._badge_cache.pop(gid, None)
+        return r
+    except Exception as e:  # noqa: BLE001
+        log.warning("nowait: sweep for %s failed: %s", gid, e)
+        return {}
+
+
+def act_nowait(cfg: dict, action: str, body: dict, who: str | None) -> dict:
+    """Don't wait for me (nowait.py): the person's standing instruction, and the two buttons on a letter."""
+    if not who:
+        return {"ok": False, "message": "set who you are first (bottom left) — this is signed"}
+    gid = str(body.get("game") or current_game(cfg))
+    root = games.game_root(cfg, gid)
+    try:
+        if action == "nowait_set":
+            st = nowait.set_mode(who, str(body.get("mode") or ""), body.get("after_hours"), body.get("defer_to") or None)
+            _journal(cfg, "setting", "nowait", f"{who}: don't wait for me — {nowait.describe(st)}")
+            r = _nowait_sweep(cfg, gid) if st["mode"] != "wait" else {}
+            n, m = len(r.get("taken") or []), len(r.get("deferred") or [])
+            msg = "Saved — " + nowait.describe(st) + "."
+            if n or m:
+                msg += f" Just now: {n} took their default, {m} left to {st['defer_to'] or 'an assistant'}."
+            return {"ok": True, "message": msg, "setting": st, "swept": r}
+        if action == "nowait_letter":
+            if settings.is_assistant(who):
+                return {"ok": False, "message": "that button is the person's — an assistant decides with nowait decide"}
+            if not root or not root.is_dir():
+                return {"ok": False, "message": f"the game folder for {gid} isn't reachable"}
+            adp = games.adapter(cfg, gid) if games.has_adapter(cfg, gid) else None
+            st = nowait.get()
+            if body.get("defer_to"):
+                st = dict(st, defer_to=str(body["defer_to"]))
+            r = nowait.settle(root, adp, str(body.get("letter") or ""), who, str(body.get("how") or ""), how="letter", st=st)
+            _summary_cache.pop(gid, None)
+            areas._badge_cache.pop(gid, None)
+            n, m = len(r["taken"]), len(r["deferred"])
+            if not n and not m:
+                return {"ok": True, "message": "Nothing on that letter has a default to take — pick who to leave questions to on Tasks, or answer it."
+                        if r.get("waiting") else "Nothing on that letter was still waiting."}
+            bits = ([f"{n} took the default"] if n else []) + ([f"{m} left to {st['defer_to']}"] if m else []) + \
+                   ([f"{r['waiting']} with no default still wait{'s' if r['waiting'] == 1 else ''} for you"] if r.get("waiting") else [])
+            return {"ok": True, "message": " · ".join(bits) + ". Your own answer replaces any of them whenever you give it.", **r}
+    except nowait.NoWaitRefused as e:
+        return {"ok": False, "message": str(e)}
+    except FileNotFoundError:
+        return {"ok": False, "message": "that letter isn't in the mailbox"}
     return {"ok": False, "message": f"unknown action {action}"}
 
 
@@ -801,7 +923,15 @@ class SuiteHandler(ui.Handler):
                     provide.sync(self.cfg, gid)      # a new picture request shows up on Tasks without anyone running anything
                 except Exception as e:  # noqa: BLE001 — the pool never stops Tasks from opening
                     log.warning("provide: sync before Tasks failed: %s", e)
-                self._json(tasks.board(self.cfg, gid, settings.identity(), self.state))
+                _nowait_sweep(self.cfg, gid)         # Don't wait for me: defaults taken / questions handed on before the list is gathered
+                d = tasks.board(self.cfg, gid, settings.identity(), self.state)
+                try:
+                    r = games.game_root(self.cfg, gid)
+                    d["nowait"] = nowait.view(r, settings.identity()) if r and r.is_dir() else None
+                except Exception as e:  # noqa: BLE001
+                    log.warning("nowait: view failed: %s", e)
+                    d["nowait"] = None
+                self._json(d)
             elif u.path == "/api/suite/floorplans":
                 gid = q.get("id", [current_game(self.cfg)])[0]
                 try:
@@ -887,7 +1017,7 @@ class SuiteHandler(ui.Handler):
                             "correspondents": [n for n in mail.correspondents(root, who) if n != who]})
             elif u.path == "/api/suite/letter":
                 root = self._game_root(q)
-                self._json(mail.thread_view(root, q.get("letter", [""])[0], settings.identity() or ""))
+                self._json({**mail.thread_view(root, q.get("letter", [""])[0], settings.identity() or ""), "nowait": nowait.get()})
             elif u.path == "/api/suite/orders":
                 root, who = self._game_root(q), settings.identity() or ""
                 names = mail.correspondents(root, who)
@@ -1008,10 +1138,33 @@ class SuiteHandler(ui.Handler):
                 self._send(200, body.encode("utf-8"), "text/plain; charset=utf-8")
             elif u.path in ("/api/suite/profiles", "/api/suite/profile", "/api/suite/profilesongs"):
                 self._json(profiles_view(self.cfg, u.path.rsplit("/", 1)[-1], q))
+            elif u.path in ("/api/suite/behaviours", "/api/suite/behaviourpreview"):
+                self._json(behaviours_view(self.cfg, u.path.rsplit("/", 1)[-1], q))
+            elif u.path == "/suite/behaviours.js":
+                self._send(200, (Path(__file__).parent / "behaviours.js").read_bytes(), "text/javascript; charset=utf-8")
             elif u.path == "/suite/profiles.js":
                 self._send(200, (Path(__file__).parent / "profiles.js").read_bytes(), "text/javascript; charset=utf-8")
             elif u.path == "/api/suite/mocap":
                 self._json(mocap.view(self.cfg, q.get("id", [current_game(self.cfg)])[0]))
+            elif u.path == "/api/suite/voicebench":                         # BUILD 71: Characters -> Voice bench
+                from . import voicebench
+                self._json(voicebench.view(self.cfg, q.get("id", [current_game(self.cfg)])[0]))
+            elif u.path == "/suite/approve.js":                              # BUILD 78
+                self._send(200, (Path(__file__).parent / "approve.js").read_bytes(), "text/javascript; charset=utf-8")
+            elif u.path == "/api/suite/approve":                             # BUILD 78: what Approve everything here would do
+                from . import approve_all
+                self._json(approve_all.plan(self.cfg, q.get("id", [current_game(self.cfg)])[0], q.get("page", ["world"])[0],
+                                            self.state))
+            elif u.path == "/suite/voicebench.js":
+                self._send(200, (Path(__file__).parent / "voicebench.js").read_bytes(), "text/javascript; charset=utf-8")
+            elif u.path == "/suite/voicefile":
+                from . import voicebench
+                try:
+                    f = voicebench.safe_take_file(self.cfg, q.get("id", [current_game(self.cfg)])[0], q.get("p", [""])[0])
+                    self._send(200, f.read_bytes(), {".wav": "audio/wav", ".ogg": "audio/ogg", ".mp3": "audio/mpeg",
+                                                     ".flac": "audio/flac", ".json": "application/json"}[f.suffix.lower()])
+                except FileNotFoundError:
+                    self._json({"error": "not a take's file"}, 404)
             elif u.path == "/suite/mocap.js":
                 self._send(200, (Path(__file__).parent / "mocap.js").read_bytes(), "text/javascript; charset=utf-8")
             elif u.path.startswith("/api/suite/threed") or u.path in ("/suite/3dfile", "/suite/viewer", "/suite/threed.js") \
@@ -1041,6 +1194,11 @@ class SuiteHandler(ui.Handler):
                 self._json(threed.runs(self.cfg, gid))
             elif u.path == "/api/suite/threed/world":
                 self._json(world3d.view(self.cfg, gid))
+            elif u.path == "/api/suite/threed/places":
+                self._json(places3d.view(self.cfg, gid))
+            elif u.path == "/api/suite/threed/terrain":                      # BUILD 77: 3D -> Terrain
+                from . import terrain as terrain_page
+                self._json(terrain_page.view(self.cfg, gid))
             elif u.path == "/api/suite/threed/models":
                 self._json({"models": threed.models(self.cfg, gid)})
             elif u.path == "/api/suite/threed/review":

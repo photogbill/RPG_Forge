@@ -27,6 +27,11 @@ RPG_Forge is a development suite for every RPG you make, not one game's tool. **
   whether it has it (a tab that isn't built yet says which build brings it). The art worker's button sits under the game
   picker in every area (▶ Start / ■ Stop, which pauses the queue safely). **Home** is the day at a glance: what needs
   you, what's waiting in each area, what changed since you last looked, the worker, the queue and the disk.
+  **Don't wait for me** (top of Tasks): one switch for when your schedule shouldn't hold the work up — *Wait for me*,
+  *Take the defaults* (a question an assistant asked takes the answer they said they'd go with) or *Leave it to* an
+  assistant you pick, right away or after a few hours. Nothing is locked in: every answer that went ahead is listed
+  there and in your inbox, marked as not yours, and your own answer replaces it whenever you give one. A letter has
+  the same two buttons for a one-off.
   **Tasks** is a checklist, not an inbox: every thing in the game waiting on you (work orders, letters with open
   questions, music briefs, songs waiting for their track, profiles with open spots, pictures to review, builds waiting on
   you, notes addressed to you), one card each, the ones that unblock work first; a card leaves only when it's done or
@@ -398,15 +403,66 @@ skeleton and no walk motions. **Flames**: crossed flame cards where a model's ow
 viewer at night. `python -m forge 3d gate <picture.png> --words "…"`. Code: `forge/threed/gate.py`, `checks.py`,
 `rules.py`, `damage.py`.
 
-## Places (BUILD 34, started 2026-11-14) — a town plan becomes a 3D stage
+## Places (BUILD 34, 2026-11-14 → 11-17) — a town plan becomes a 3D stage
 
 A **place plan** (`<id>.place.json`: ground, road type, the walls and furniture the forge models, every generated thing
 with a footprint, facing and real size, lamps, anchors) compiles into the stage model (Blender, no graphics card), the
 list of what stands where (grey boxes of the right size until each model is delivered) and the place's entries on the
 world list — anything nobody has described waits, held, with no look guessed. A town from the floor-plan generator is
 written out as a place plan with `3d place from-town`. `python -m forge 3d place compile | check`, or the queue's
-`compile_place` job. The game's half (walking a stage, the door rule, dust) is the next session's. Code:
+`compile_place` job. Code:
 `forge/threed/place.py`, `forge/threed/blender/build_stage.py`.
+
+In the suite, **3D → Places** (BUILD 34's game half, 2026-11-17) lists a game's place plans: the plan from above (stamped
+as greybox), when it was compiled and whether the plan has changed since, what it still needs on the World list (made /
+held / waiting), **Compile again** (queued; every new world-list entry is held — compiling never starts generation) and
+**Open in the game here** by day or by night (the game's adapter: `stage_maps()`, `play_command(place, era, time)`).
+Art → Floor plans has **Approve as a stage**: the layout written out as a place plan (never over one that exists), a
+draft stage map in the game (`stage_install()`), and a compile queued. The game walks a stage (Linden Mills court is the
+first). Code: `forge/suite/places3d.py`.
+
+## The look (BUILD 63, 2026-11-17) — a stage lit, surfaced and dressed from one description
+
+A place plan can ask the compiler for the look: real **window openings** with glass and curtains, a **crown and a
+wainscot**, a **bevel scale** that catches light at a stage's distance, **pictures left to the game**, and a **dressing
+list** of small things made by rule (`docs/DRESSING_KINDS.md` — twenty kinds, a picture of each). A plan that asks for
+none compiles as before. `python -m forge 3d relief <folder>` writes a normal map beside every texture-library picture
+(a Filter Forge Normal render or a Material Maker normal wins; `relief.json` says which). **3D → Places** has a look
+picker (open the game under any of its look profiles) and **Take the pictures** — the game's own still mode, one
+picture a look, at its finest setting. Code: `forge/threed/blender/build_stage.py` ("LOOK"), `forge/threed/place.py`,
+`forge/threed/relief.py`, `forge/suite/places3d.py`, `forge/threed/blender/dressing_sheet.py`.
+
+## The outdoors (BUILD 60, 2026-11-17) — land under a place
+
+A place plan's `terrain` block says what the land does — farmland swell, a valley along a line, a ridge, a tilt, a
+pond — or names a height picture (a DTED bake, a grey picture). Compiling the place writes a 16-bit height picture
+beside the stage (square cells, levelled under every building's footprint and every road, easing back) and the game's
+terrain draws it; walls, doors and exits stay the plan's. `python -m forge 3d terrain <place.json>` does the land alone;
+`python -m forge 3d pack-terrain <pictures…>` packs a texture-library picture as a terrain surface (colour with height,
+normal with roughness). Code: `forge/threed/ground.py` (numpy only), `forge/threed/place.py` (`compile_place`).
+
+## Approvals made easy (BUILD 78, 2026-11-18) — one button, an undo a thing
+
+- **Approve everything here** at the top of 3D → World list and Art → Review & approve: the count on the button and one
+  plain line a group saying what will happen ("2 bodies go back for their skeleton and motions with the colours matched
+  to the picture; nothing is remade"). It uses each page's own buttons, one after another; real faults are left and named.
+- **Undo** any one thing it touched, while it is still where it was left. Nothing is ever deleted.
+- **Settings → Approvals: "Fable may approve for me"** — with it on, an assistant's approval is accepted and written as
+  "Claude Fable, for William", never as the person. Only a person switches it. Made things only; words stay the person's.
+- `put_in_waiting_changes.bat` puts in changes a session had to leave waiting while the world queue ran — it asks before
+  stopping the queue, never overwrites a file someone changed, and starts the queue again. Details: `docs/APPROVALS.md`.
+
+## Art around the clock (BUILD 82, 2026-11-19) — the never-stop launcher
+
+**`art_around_the_clock.bat`** keeps ComfyUI and the world queue running day and night: ComfyUI is started again when it stops answering (never while another step has the card), the world queue runs without `--until-empty` (an empty list means wait, not stop) and is started again if it stops by itself, the daily redo puts back in line what did not pass (05:00), and every hour it says how many hours of work are on the list. It keeps Windows awake while it runs. Close its window or choose Stop in 3D → Runs to stop it; `art_around_the_clock_at_logon.bat` has Windows start it at log-on. `--look` shows what it sees. The whole of it: `docs/AROUND_THE_CLOCK.md` (`forge/around_the_clock.py`, `forge/threed/redo.py`).
+
+## The forge as a connector for Claude (BUILD 83, 2026-11-19) — MCP
+
+RPG_Forge is an MCP server: Claude Fable and Claude Opus can check the queues, queue art jobs, add to the world list, look at what was made, approve (Fable only, while allowed) and write through the Mail, from a chat. Set it up once with **`mcp_setup.bat`** (its own environment `venv_mcp`, the self-test, and — if you say yes — the entry in Claude's settings), then quit Claude fully and open it again. `mcp_check.bat` re-runs the self-test. Every change goes through the Workbench's own functions, is signed by a Claude, has a dry run and safe retries; nothing deletes, starts or stops the world queue, or touches canon. The whole of it: `docs/MCP.md` (`forge/mcpserver/`).
+
+## Song review (2026-11-19) — every Suno sheet checked before it is made
+
+**`review_songs.bat`** reviews every sheet the game lists (style box, lyrics box or an instrumental's tags) against William's Suno rules, the singers' voice locks, "not generic" and "complex enough" — the bar measured from his own finished songs — and opens a report: ready / needs work / fails, with what to change. It never changes a word. From a chat: the connector's `music.review` checks a draft before it goes in a sheet. The whole of it: `docs/SONG_REVIEW.md` (`forge/song_review.py`).
 
 ## Licence
 

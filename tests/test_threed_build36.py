@@ -253,7 +253,8 @@ def test_motions_tidy_and_trees_through_a_stand_in_blender(tmp_path):
     src = glb.box(tmp_path / "prop.glb", (0.7, 1.0, 0.4))
     t = tidy.tidy(env, src, tmp_path / "prop_tidy.glb", size={"width": 1.4}, python=FAKE_BLENDER)
     assert t["ok"] and abs(glb.info(tmp_path / "prop_tidy.glb")["size_m"]["width"] - 1.4) < 1e-3
-    g = trees.grow(env, tmp_path / "trees", trees.sheets()[0], 5, python=FAKE_BLENDER)
+    broadleaf = next(s for s in trees.sheets() if s["name"] == "broadleaf")     # BUILD 84: by name — there are more species now
+    g = trees.grow(env, tmp_path / "trees", broadleaf, 5, python=FAKE_BLENDER)
     assert g["ok"] and g["glb"].endswith("broadleaf_seed5.glb") and len(g["views"]) == 1
     nob = RigEnv(root=tmp_path, rig=tmp_path / "rig")
     assert "no Blender" in motions.fit(nob, lib, fbx, tmp_path / "y.glb")["error"]
@@ -263,7 +264,9 @@ def test_species_sheets_come_from_the_forge_and_the_game_wins():
     names = {s["name"]: s for s in trees.sheets()}
     assert {"broadleaf", "young_broadleaf"} <= set(names) and all(s["where"] == "forge" for s in names.values())
     for s in names.values():
-        assert set(s["numbers"]) >= {"height", "trunk_radius", "crown_radius"}
+        if s["numbers"].get("form", "broadleaf") == "broadleaf":     # BUILD 84: a saguaro, an ocotillo and a yucca have no crown
+            assert set(s["numbers"]) >= {"height", "trunk_radius", "crown_radius"}
+        assert s["numbers"]["height"] > 0
     assert set(trees.SLIDERS) <= set(names["broadleaf"]["numbers"])
 
 
@@ -281,14 +284,16 @@ def test_the_whole_line_against_the_stand_ins_with_one_report(tmp_path, art):
                         {"id": "cat", "prompt": "a cat", "kind": "animal"},
                         {"id": "d", "prompt": "never dances", "skip_motions": ["Dance_Loop"]}]}
     est = line.estimate(spec)
-    assert est["to_make"] == {"pictures": 3, "bodies": 4, "skeletons": 4, "motions": 4} and est["total_seconds"] > 0
+    # BUILD 84 part 3: an animal is never given a person's skeleton or the person's motions (the animal route is not built)
+    assert est["to_make"] == {"pictures": 3, "bodies": 4, "skeletons": 3, "motions": 3} and est["total_seconds"] > 0
     rows = line.run(cfg, spec, env=env, blender_python=FAKE_BLENDER)
     by = {r["id"]: r for r in rows}
-    assert by["a"]["motions"] and by["cat"]["motions"] and by["d"]["motions"]
+    assert by["a"]["motions"] and by["d"]["motions"]
+    assert by["cat"]["body"] and not by["cat"]["skeleton"] and not by["cat"]["motions"] and "an animal" in by["cat"]["why"]
     assert not by["b_PLANT_FAIL"]["body"] and by["b_PLANT_FAIL"]["why"].startswith("3D body")
     out = tmp_path / "out3d" / "line1"
-    assert "3 of 4 bodies came through" in (out / "REPORT.txt").read_text()
-    assert (out / "models" / "cat__trellis2_welded.glb").exists() and (out / "rig" / "cat__unirig.fbx").exists()
+    assert "2 of 4 bodies came through" in (out / "REPORT.txt").read_text()
+    assert not (out / "rig" / "cat__unirig.fbx").exists()
     assert "Dance_Loop" not in json.loads((out / "moves" / "d_moves.json").read_text())["motions"]
     assert json.loads((out / "moves" / "a_moves.json").read_text())["height_m"] == 1.7
     assert line.estimate(spec, line.status(cfg, spec, out))["to_make"]["motions"] == 1         # only the failed one is left
@@ -405,6 +410,7 @@ def test_the_blender_scripts_for_real(tmp_path):
     assert t["ok"], t
     i = glb.info(tmp_path / "tidy.glb")
     assert abs(i["size_m"]["height"] - 2.0) < 1e-3 and abs(i["floor_y"]) < 1e-4
-    g = trees.grow(env, tmp_path / "trees", trees.sheets()[1], 7, python=BPY, views=1, size=96, samples=2)
+    young = next(s for s in trees.sheets() if s["name"] == "young_broadleaf")
+    g = trees.grow(env, tmp_path / "trees", young, 7, python=BPY, views=1, size=96, samples=2)
     assert g["ok"], g
     assert glb.info(Path(g["glb"]))["triangles"] > 1000

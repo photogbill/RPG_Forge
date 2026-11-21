@@ -1,0 +1,11 @@
+{
+ "name": "linden",
+ "about": "An American basswood (the linden) as a young street tree: a broad rounded crown, dense, heart-shaped leaves, grey furrowed bark, branching low. Six to seven metres.",
+ "numbers": {
+  "height": 6.5, "trunk_radius": 0.15, "fork_height": 1.7, "limbs": 5, "limb_tilt": [35, 62],
+  "crown_centre_z": 4.0, "crown_radius": 2.7, "crown_half_height": 2.5, "crown_floor": 1.8, "masses": 14,
+  "mass_radius": [1.0, 1.5], "attractors": 4200, "step": 0.28, "reach": 2.6, "close": 0.36,
+  "twig_radius": 0.011, "pipe": 2.35, "leaf_card": [0.42, 0.66], "cards_per_twig": 4, "leaf": "heart",
+  "bark": [0.4, 0.39, 0.36]
+ }
+}

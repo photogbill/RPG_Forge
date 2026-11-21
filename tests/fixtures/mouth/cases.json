@@ -1,0 +1,231 @@
+{
+ "_about": "BUILD 71: one file of cases for the mouth rule, read by the forge's suite test (forge/suite/mouthrule.py) and the game's unit test (MouthModel) \u2014 the two cannot drift. A mouth file, times, the shape and blend expected; the fallbacks for a three-mouth face.",
+ "blend_sec": 0.06,
+ "mouth": {
+  "metadata": {
+   "duration": 1.0
+  },
+  "mouthCues": [
+   {
+    "start": 0.0,
+    "end": 0.1,
+    "value": "X"
+   },
+   {
+    "start": 0.1,
+    "end": 0.25,
+    "value": "B"
+   },
+   {
+    "start": 0.25,
+    "end": 0.5,
+    "value": "D"
+   },
+   {
+    "start": 0.5,
+    "end": 0.62,
+    "value": "G"
+   },
+   {
+    "start": 0.62,
+    "end": 0.9,
+    "value": "A"
+   }
+  ]
+ },
+ "at": [
+  {
+   "t": 0.0,
+   "shape": "X",
+   "from": "X",
+   "to": "X",
+   "w": 1.0
+  },
+  {
+   "t": 0.05,
+   "shape": "X",
+   "from": "X",
+   "to": "X",
+   "w": 1.0
+  },
+  {
+   "t": 0.11,
+   "shape": "B",
+   "from": "X",
+   "to": "B",
+   "w": 0.1667
+  },
+  {
+   "t": 0.13,
+   "shape": "B",
+   "from": "X",
+   "to": "B",
+   "w": 0.5
+  },
+  {
+   "t": 0.2,
+   "shape": "B",
+   "from": "B",
+   "to": "B",
+   "w": 1.0
+  },
+  {
+   "t": 0.26,
+   "shape": "D",
+   "from": "B",
+   "to": "D",
+   "w": 0.1667
+  },
+  {
+   "t": 0.4,
+   "shape": "D",
+   "from": "D",
+   "to": "D",
+   "w": 1.0
+  },
+  {
+   "t": 0.51,
+   "shape": "G",
+   "from": "D",
+   "to": "G",
+   "w": 0.1667
+  },
+  {
+   "t": 0.6,
+   "shape": "G",
+   "from": "G",
+   "to": "G",
+   "w": 1.0
+  },
+  {
+   "t": 0.63,
+   "shape": "A",
+   "from": "G",
+   "to": "A",
+   "w": 0.1667
+  },
+  {
+   "t": 0.89,
+   "shape": "A",
+   "from": "A",
+   "to": "A",
+   "w": 1.0
+  },
+  {
+   "t": 0.9,
+   "shape": "X",
+   "from": "A",
+   "to": "X",
+   "w": 0.0
+  },
+  {
+   "t": 0.93,
+   "shape": "X",
+   "from": "A",
+   "to": "X",
+   "w": 0.5
+  },
+  {
+   "t": 1.5,
+   "shape": "X",
+   "from": "X",
+   "to": "X",
+   "w": 1.0
+  }
+ ],
+ "frames": [
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "A",
+   "frame": "A"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "B",
+   "frame": "B"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "C",
+   "frame": "C"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "D",
+   "frame": "C"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "E",
+   "frame": "C"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "F",
+   "frame": "B"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "G",
+   "frame": "B"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "H",
+   "frame": "C"
+  },
+  {
+   "available": [
+    "A",
+    "B",
+    "C"
+   ],
+   "shape": "X",
+   "frame": "A"
+  },
+  {
+   "available": [
+    "A"
+   ],
+   "shape": "D",
+   "frame": "A"
+  },
+  {
+   "available": [],
+   "shape": "B",
+   "frame": ""
+  }
+ ]
+}

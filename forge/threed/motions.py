@@ -97,3 +97,70 @@ def refuse_test_dances(paths) -> None:
     if bad:
         raise ValueError("these carry the rigging pack's Mixamo test dances, which never go into a game: "
                          + "; ".join(f"{Path(k).name} ({', '.join(v)})" for k, v in bad.items()))
+
+
+# ------------------------------------------------------------------------------------------------ BUILD 74 part 6: a bearing
+# Expressions live in the animation and the portrait; the small figure does not carry a face. What it carries is how it
+# stands. A bearing is a few degrees of standing offset on spine, chest, neck, head and shoulders, laid over every idle —
+# data, not new animation. (x = bend forward +, y = turn, z = lean to the side; degrees.) Hips and legs are never touched,
+# so the feet stay where the motion puts them.
+BEARINGS = {
+    "easy":  {"spine": (1.0, 0, 0), "chest": (1.0, 0, 0), "neck": (2.0, 0, 0), "head": (-1.0, 0, 1.5),
+              "shoulder.L": (0, 0, -2.0), "shoulder.R": (0, 0, 2.0)},
+    "proud": {"spine": (-3.0, 0, 0), "chest": (-4.0, 0, 0), "neck": (-2.0, 0, 0), "head": (-3.0, 0, 0),
+              "shoulder.L": (-3.0, 0, 1.0), "shoulder.R": (-3.0, 0, -1.0)},
+    "tired": {"spine": (5.0, 0, 0), "chest": (6.0, 0, 0), "neck": (6.0, 0, 0), "head": (5.0, 0, 0),
+              "shoulder.L": (4.0, 0, -4.0), "shoulder.R": (4.0, 0, 4.0)},
+    "wary":  {"spine": (2.0, 0, 0), "chest": (2.0, 4.0, 0), "neck": (-1.0, -3.0, 0), "head": (-2.0, -6.0, 0),
+              "shoulder.L": (2.0, 0, 3.0), "shoulder.R": (2.0, 0, -3.0)},
+    "warm":  {"spine": (1.5, 0, 0), "chest": (0.5, 0, 0), "neck": (2.0, 0, 0), "head": (2.5, 0, 3.0),
+              "shoulder.L": (0, 0, -1.5), "shoulder.R": (0, 0, 1.5)},
+}
+JOINT_LIMIT_DEG = {"spine": 8.0, "chest": 8.0, "neck": 10.0, "head": 12.0, "shoulder.L": 8.0, "shoulder.R": 8.0}
+NEVER = ("hips", "pelvis", "root", "thigh", "leg", "knee", "calf", "foot", "toe", "ankle")
+BEARING_WORDS = [  # the first that matches a body's words wins; else none (the motion as fitted)
+    ("tired", ("exhausted", "weary", "tired", "worn out", "refugee", "stooped", "bent with age", "elderly", "ninety")),
+    ("proud", ("proud", "imperious", "commanding", "regal", "haughty", "colonel", "general", "aristocrat", "count")),
+    ("wary", ("wary", "watchful", "nervous", "guarded", "suspicious", "on edge", "skittish", "hunted")),
+    ("warm", ("warm", "kind", "gentle", "friendly", "motherly", "sentry", "smiling eyes", "open face")),
+    ("easy", ("relaxed", "easygoing", "laid-back", "casual", "at ease")),
+]
+
+
+def bearing_from_words(words: str, given: str | None = None) -> str | None:
+    """A body's bearing: the entry's own `bearing` when it has one, else read from its words, else none."""
+    if given:
+        if given not in BEARINGS:
+            raise ValueError(f"a bearing is one of {', '.join(BEARINGS)} (not {given!r})")
+        return given
+    low = (words or "").lower()
+    for name, cues in BEARING_WORDS:
+        if any(c in low for c in cues):
+            return name
+    return None
+
+
+def bearing_offsets(name: str, limits: dict | None = None) -> dict:
+    """The offsets a bearing lays over the idles, each axis clamped to the joint's limit; nothing below the waist."""
+    lim = {**JOINT_LIMIT_DEG, **(limits or {})}
+    out = {}
+    for joint, (x, y, z) in BEARINGS[name].items():
+        if any(n in joint.lower() for n in NEVER):
+            continue
+        m = float(lim.get(joint, 6.0))
+        out[joint] = [max(-m, min(m, float(v))) for v in (x, y, z)]
+    return out
+
+
+def add_bearing(sheet_path: Path, name: str | None, limits: dict | None = None) -> dict | None:
+    """Write the bearing into a fitted body's motion sheet (`bearing: {name, offsets, over}`) for the game to lay over
+    every idle. Returns what was written, or None when there is no bearing."""
+    if not name:
+        return None
+    p = Path(sheet_path)
+    sheet = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    idles = [m for m in (sheet.get("motions") or {}) if "idle" in m.lower()] or [STAND]
+    sheet["bearing"] = {"name": name, "offsets_deg": bearing_offsets(name, limits), "over": idles,
+                        "axes": "x bend forward +, y turn, z lean to the side", "note": "standing offsets, data — not animation"}
+    p.write_text(json.dumps(sheet, indent=1, ensure_ascii=False), encoding="utf-8")
+    return sheet["bearing"]

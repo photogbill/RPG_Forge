@@ -26,7 +26,15 @@ import numpy as np
 from . import raster
 
 DEFAULTS = {
-    "a_pose_deg": [32.0, 76.0],      # an A-pose: the hand this far out from straight below the shoulder (37-64 on 30 good pictures)
+    "a_pose_deg": [14.0, 90.0],      # an A-pose: the hand this far out from straight below the shoulder. BUILD 84 (2026-11-19):
+                                     # the band is what the skeleton step needs, measured, not what the picture was asked for.
+                                     # Before the gate (the 2026-11-13 cast test) 42 people were rigged from pictures with arms
+                                     # at 14-31 degrees: every one took its skeleton and its motions, and the skin bound to arm
+                                     # and trunk at once below the armpit (what webs when an arm moves) was no worse than at
+                                     # 40-50 degrees (median 0.03% of the band's vertices at 14-20, 1.2% at 40-50; the worst
+                                     # are the bulky bodies at any angle). No person's skeleton has failed at any angle measured
+                                     # (306 rigged). Below 14 the arms are against the body (hanging: 0) and that is still held;
+                                     # up to level is a T-pose, which the rigger takes as well. Was 32-76 (BUILD 40).
     "t_pose_deg": [66.0, 115.0],     # a T-pose: level, or near it (the good T-pose measured 69, the A-pose drawn for one 57)
     "arm_min_share": 0.02,           # an arm held out: at least this share of the figure's area stands out beside the body
     "hang_px": 0.035,                # an arm hanging against the body: one side of the trunk this much wider (of the height)
@@ -39,6 +47,9 @@ DEFAULTS = {
         "adult": [0.10, 0.165],      # eighteen and over (a helmet or a cap makes the head a little taller)
     },
     "tries": 3,                      # pictures made again with a new seed before the thing is held
+    "face_head": 0.65,               # BUILD 84 (2e): the face, from the neck up to the hairline (or a hat's brim), over the head's
+                                     # height chin to skull — so a head can be measured without its hair or its hat. Set on a body
+                                     # whose hair lies flat (its outline and its face agree, 11.3% and 11.7%)
 }
 
 NUMBERS = {w: i for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen "
@@ -109,7 +120,7 @@ def expectations(entry: dict) -> dict:
     if "arms" not in exp:
         exp["arms"] = 1 if re.search(r"\b(one arm|only one arm|an amputee|arm is missing|arm ends|missing (?:his|her|their) "
                                      r"(?:left|right) arm|no (?:left|right) arm)\b", low) else 2
-    seated = bool(entry.get("seated")) or bool(re.search(r"\b(wheelchair|sitting|seated)\b", low))
+    seated = bool(entry.get("seated")) or bool(re.search(r"\b(wheelchair|sitting|seated|sits)\b", low))
     carried = entry.get("carried_object") or (re.search(r"\b(cane|crutch|walking stick|walker)\b", low) or [None])[0]
     exp.setdefault("seated", seated)
     exp.setdefault("carried_object", carried)
@@ -250,9 +261,88 @@ def measure(picture, size: int = 512) -> dict:
         arms[side] = {"share": round(share, 4), "angle": None if tip_angle is None else round(tip_angle, 1),
                       "axis": None if angle is None else round(angle, 1),
                       "hanging": round(hanging, 2), "reach": round(reach, 3)}
+    try:
+        face_h = face_height(picture, m, top, top + neck, c, H, size)
+    except Exception:  # noqa: BLE001 — no face measure: the outline alone decides, as before
+        face_h = None
     return {"found": True, "height_px": H, "head_px": head_h, "head_ratio": round(head_h / H, 3),
+            "face_px": face_h, "face_ratio": None if face_h is None else round(face_h / H, 3),
             "head_width_ratio": round(hw / H, 3), "head_to_trunk": round(hw / max(2 * half, 1), 3),
             "shoulder_ratio": round(sh / H, 3), "trunk_px": round(2 * half, 1), "arms": arms}
+
+
+def face_height(picture, m: np.ndarray, top: int, neck: int, cx: int, H: int, size: int) -> int | None:
+    """BUILD 84 (2e): the face's height in pixels, from the neck up to where the skin stops — the hairline, or a hat's brim —
+    measured without the hair or the hat. The skin's own colour is taken from the lower middle of the head (the mouth and
+    cheeks, whatever the hair does); from there up, each row's run of skin through the face's middle is followed until
+    the skin stops (a few rows' gap ends it) or the run suddenly widens (a brim, or hair of the skin's colour). None when
+    no face can be read. Numpy only."""
+    from PIL import Image
+    from .checks import _chroma, _luma
+    if not hasattr(picture, "convert"):
+        picture = Image.open(picture)
+        picture.load()
+    img = np.asarray(picture.convert("RGB").resize((size, size), Image.LANCZOS), dtype=np.float64)
+    hh = neck - top + 1
+    if hh < 12:
+        return None
+    rows = np.arange(size)[:, None]
+    cols = np.arange(size)[None, :]
+    hz = m & (rows >= top) & (rows <= neck)
+    seed = hz & (rows >= neck - 0.45 * hh) & (rows <= neck - 0.1 * hh) & (np.abs(cols - cx) <= 0.06 * H)
+    if seed.sum() < 12:
+        return None
+    Y, C = _luma(img), _chroma(img)
+    sy = Y[seed]
+    keep = (sy >= np.percentile(sy, 25)) & (sy <= np.percentile(sy, 95))
+    ref, refy = np.median(C[seed][keep], axis=0), float(np.median(sy[keep]))
+    skin = hz & (np.linalg.norm(C - ref, axis=-1) <= 0.035) & (Y >= 0.45 * refy) & (Y <= 1.9 * refy)
+    g_run, g_row = max(2, int(0.01 * H)), max(2, int(0.015 * H))
+
+    def run(row):
+        if not row[max(0, cx - 3): cx + 4].any():
+            return None
+        ends = []
+        for step in (-1, 1):
+            x, miss = cx, 0
+            while 0 < x < size - 1:
+                if row[x + step]:
+                    miss = 0
+                else:
+                    miss += 1
+                    if miss > g_run:
+                        break
+                x += step
+            ends.append(x - step * miss)
+        return ends[1] - ends[0] + 1
+    widths, last, miss = [], None, 0
+    for r in range(int(neck - 0.3 * hh), top - 1, -1):          # from the middle of the face, upward
+        w = run(skin[r])
+        if w is None:
+            miss += 1
+            if last is not None and miss > g_row:
+                break
+            continue
+        if len(widths) >= 5 and w > 1.6 * float(np.median(widths)):
+            break
+        widths.append(w)
+        last, miss = r, 0
+    if last is None or len(widths) < 4:
+        return None
+    # and from the middle of the face, downward, to the chin: where the run of skin narrows to the neck's width. Taken from
+    # the skin, not the outline, so hair that falls beside the jaw (an afro, long curls) does not move the chin.
+    face_w = float(np.median(widths))
+    chin, narrow = neck, 0
+    for r in range(int(neck - 0.3 * hh) + 1, min(size, neck + int(0.08 * H))):
+        w = run(skin[r])
+        if w is not None and w <= 0.72 * face_w:
+            narrow += 1
+            if narrow >= 2:
+                chin = r - 1
+                break
+        else:
+            narrow = 0
+    return int(chin - last + 1)
 
 
 def judge(picture, entry: dict, cfg: dict | None = None) -> dict:
@@ -303,17 +393,77 @@ def judge(picture, entry: dict, cfg: dict | None = None) -> dict:
         else:
             lines.append("Picture gate — pose: the arms are " + (said or "not to be measured") + f", {name} as asked.")
     # proportions
-    if exp["band"]:
+    if exp["band"] and exp["seated"]:
+        # BUILD 84 (2e): a seated figure's height is not the person's (the legs fold; a chair may stand under it), so its head
+        # is not measured against it
+        lines.append("Picture gate — proportions: seated — the head isn't measured against a seated figure's height.")
+    elif exp["band"]:
         lo, hi = s["head_ratio"][exp["band"]]
         r = mz["head_ratio"]
         who = {"child": f"a child of {exp['age']}", "teen": f"a teenager of {exp['age']}", "adult": "an adult"}[exp["band"]]
-        if not lo <= r <= hi:
+        rf = (mz["face_ratio"] / float(s["face_head"])) if mz.get("face_ratio") else None
+        if r > hi and rf is not None and lo <= rf <= hi:
+            # BUILD 84 (2e): the outline's head counts the hair (an afro, a high puff, a bun) and a hat; the face says the head
+            # itself is right. Held only when the face alone is too big as well (a cartoon's head is all face).
+            lines.append(f"Picture gate — proportions: the head with its hair or hat is {r * 100:.0f}% of the figure, but the face "
+                         f"says the head itself is 1 in {1 / rf:.1f} — right for {who} (hair and hats are not counted).")
+        elif not lo <= r <= hi:
             ok = False
             lines.append(f"Picture gate — proportions: the head is {r * 100:.0f}% of the figure's height (1 in {1 / r:.1f}); for "
                          f"{who} it is {lo * 100:.0f}–{hi * 100:.0f}%" + (" — cartoon proportions" if r > hi else "") + ". Made again.")
         else:
             lines.append(f"Picture gate — proportions: the head is 1 in {1 / r:.1f} of the figure, right for {who}.")
     return {"ok": ok, "lines": lines, "measures": mz, "expects": exp}
+
+
+# ------------------------------------------------------------------------------------------------ BUILD 73: help before refusing
+NUDGES = {
+    # BUILD 84: the picture model undershoots the angle it is given, so a miss low asks for sixty degrees (it was "hands at hip
+    # height and a hand's width from the thighs", which came back the same three times running on 2026-11-19)
+    "arms_low": "arms held out from the body at sixty degrees, the hands well away from the hips",
+    "arms_high": "arms lowered, forty-five degrees from the body",
+    "proportions": "adult proportions, the head one eighth of the height, a full-length photograph",
+}
+
+
+def nudge(j: dict) -> tuple[str | None, str | None]:
+    """After a pose or proportions miss, the words the next try gains (the same words are never sent again): arms too
+    low → held away, hands at hip height; arms too high → lowered to forty-five degrees; a head too big → adult
+    proportions. Returns (which, words), or (None, None) when the miss was something else (limbs: two arms for one)."""
+    lines = " ".join(j.get("lines") or [])
+    exp = j.get("expects") or {}
+    mz = j.get("measures") or {}
+    if "proportions:" in lines and "Made again" in lines.split("proportions:", 1)[1].split("Picture gate")[0] and exp.get("band") == "adult":
+        return "proportions", NUDGES["proportions"]
+    if ("pose:" in lines and "Made again" in lines.split("pose:", 1)[1].split("Picture gate")[0]) or \
+            "no arm stands clear" in lines or "only one arm stands clear" in lines:
+        angles = [a.get("angle") for a in (mz.get("arms") or {}).values() if a.get("angle") is not None]
+        hi = (DEFAULTS["t_pose_deg"] if exp.get("pose") == "t" else DEFAULTS["a_pose_deg"])[1]
+        if angles and max(angles) > hi:
+            return "arms_high", NUDGES["arms_high"]
+        return "arms_low", NUDGES["arms_low"]
+    return None, None
+
+
+def with_nudge(prompt: str, words: str) -> str:
+    """BUILD 84: the nudge goes near the front of the words — after the first sentence (the style start, which stays first,
+    William 2026-11-16) and before the long description — not at the end, where three tries in a row showed it did nothing."""
+    prompt = str(prompt or "").strip()
+    w = str(words or "").strip().rstrip(".")
+    if not w:
+        return prompt
+    w = w[0].upper() + w[1:] + "."
+    head, dot, rest = prompt.partition(". ")
+    if dot and len(head) <= 60:
+        return f"{head}. {w} {rest}".strip()
+    return f"{w} {prompt}".strip()
+
+
+def pose_miss_only(j: dict) -> bool:
+    """The picture missed on its arms' angle (or its arms against the body) and on nothing else: the one miss a repair of the
+    pose can mend."""
+    bad = [ln for ln in j.get("lines") or [] if "Made again" in ln]
+    return bool(bad) and all(("pose:" in ln) or ("no arm stands clear" in ln) for ln in bad)
 
 
 def side_by_side(pictures: list, notes: list[str], out, size: int = 320):

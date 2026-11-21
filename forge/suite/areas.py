@@ -42,8 +42,15 @@ NEEDS: dict[str, tuple[str, str]] = {
     "profiles": ("the game's character profiles (profiles/_schema.json in the game folder)",
                  "Characters → Profiles → Make the first pages (the game's adapter fills them from its own sources), or copy the "
                  "example game's profiles/_schema.json"),
+    "behaviours": ("the game's behaviour decks (one a character)",
+                   "the game's builds write them (the folder the adapter names in behaviours_dir())"),
     "blender": ("Blender (inside the rigging ComfyUI's environment, or forge.json threed.blender_exe)",
                 "Settings → This computer → 3D tools → Install"),
+    "dted": ("DTED Level 0 cells (forge.json → dted_dir, default local/dted — a folder or its zip)",       # BUILD 77
+             "put the DTED Level 0 folder or its zip in local/dted (it is never committed)"),
+    "rhubarb": ("Rhubarb Lip Sync (tools/rhubarb)", "get_rhubarb.bat (or .command on a Mac) — Settings → This computer → Voice tools"),
+    "whisper": ("Whisper large-v3 (engines/voice/whisper)", "get_whisper.bat — Settings → This computer → Voice tools"),
+    "voice_engine": ("a voice engine (engines/voice/<name>)", "Settings → This computer → Voice tools; the bench works without one"),
 }
 
 
@@ -99,7 +106,13 @@ AREAS: list[dict] = [
            holds="every character on one page you edit in place — arms up close, at range and other, coloured by how each is known; "
                  "a board of what's missing; find it in the songs"),
         _t("characters", "Characters", "chars", ("characters",)),
-        _t("intake", "Sprite intake", "intake", ("characters",))]},
+        _t("behaviours", "Behaviours", "behaviours", ("adapter", "behaviours"),   # BUILD 31: the party off duty
+           holds="what each character does off duty, as cards; which could happen in a place, in an era; where somebody has "
+                 "nothing to do; approving is yours"),
+        _t("intake", "Sprite intake", "intake", ("characters",)),
+        _t("voicebench", "Voice bench", "voicebench", ("game", "rhubarb", "whisper"),   # BUILD 71: a face, a line, a voice
+           holds="a face, a line and a voice put together — two ways of timing the mouth side by side, Whisper checking the "
+                 "words, the offset that reads best; takes kept with your verdict; voice cards only you can lock")]},
     {"id": "3d", "icon": "◈", "name": "3D", "color": "#5fc4e8", "tabs": [            # BUILD 36: the 3D workshop
         _t("bodies", "Bodies", "threed", ("worker",), t3="bodies",
            holds="a character in words → four pictures → pick one → the 3D body; try again with changes, side by side"),
@@ -111,6 +124,12 @@ AREAS: list[dict] = [
            holds="trees grown by rule from a species sheet and a seed — never guessed from a picture"),
         _t("world", "World list", "threed", ("worker",), t3="world",          # BUILD 39: the world queue
            holds="everything the world still needs, in the order it first appears; made whenever the machine is free, checked, held back with the reason"),
+        _t("places", "Places", "threed", ("blender",), t3="places",          # BUILD 34: places as stages
+           holds="a game's places as walkable stages: the plan from above, what each still needs (made / held / waiting), "
+                 "Compile again, Open in the game here by day or by night"),
+        _t("terrain", "Terrain", "threed", ("dted",), t3="terrain",          # BUILD 77: real ground from DTED Level 0
+           holds="the world's real ground from DTED Level 0: the folder and what is in it, a window, the dials with the relief "
+                 "redrawn as they move, check a point, Bake — heights coloured by how they were made (measured, invented, edited)"),
         _t("viewer", "Viewer", "threed", ("out",), t3="viewer",
            holds="any model the forge has made, on a floor with a figure for scale, in day or night light"),
         _t("runs", "Runs", "threed", (), t3="runs",
@@ -211,6 +230,9 @@ def _check(cfg: dict, gid: str, need: str, cache: dict) -> tuple[bool | None, st
         elif need == "profiles":
             from . import profiles as _pr
             r = (bool(adp) and _pr.has_schema(adp), f"{_pr.rel_dir(adp)}/_schema.json" if adp else "")
+        elif need == "behaviours":
+            from . import behaviours as _bh
+            r = (bool(adp) and _bh.has_decks(adp), f"{_bh.rel_dir(adp)}/" if adp else "")
         elif need == "notes":
             r = (has_root and notes.path(root).is_file(), "")
         elif need == "builds_hook":
@@ -225,6 +247,13 @@ def _check(cfg: dict, gid: str, need: str, cache: dict) -> tuple[bool | None, st
             r = (has_root and (playtest.folder(root, adp) / "notes.jsonl").is_file(), playtest._dir_rel(adp) + "/notes.jsonl")
         elif need == "settings":
             r = (settings.PATH.is_file(), str(settings.PATH))
+        elif need == "dted":                                                    # BUILD 77
+            from .. import cli_terrain
+            d = cli_terrain.dted_dir(cfg)
+            r = (d.exists() and (any(d.glob("*.zip")) or any(d.rglob("*.dt0"))), str(d))
+        elif need in ("rhubarb", "whisper", "voice_engine"):                     # BUILD 71
+            from ..voice import tools as _vt
+            r = _vt.need(cfg, need)
         elif need in ("threed_rig", "blender"):
             from ..threed.env import from_cfg
             e = from_cfg(cfg)
