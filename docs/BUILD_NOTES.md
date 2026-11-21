@@ -420,8 +420,7 @@ as greybox), when it was compiled and whether the plan has changed since, what i
 held / waiting), **Compile again** (queued; every new world-list entry is held — compiling never starts generation) and
 **Open in the game here** by day or by night (the game's adapter: `stage_maps()`, `play_command(place, era, time)`).
 Art → Floor plans has **Approve as a stage**: the layout written out as a place plan (never over one that exists), a
-draft stage map in the game (`stage_install()`), and a compile queued. The game walks a stage (Linden Mills court is the
-first). Code: `forge/suite/places3d.py`.
+draft stage map in the game (`stage_install()`), and a compile queued. The game walks a stage. Code: `forge/suite/places3d.py`.
 
 ## The look (BUILD 63, 2026-11-17) — a stage lit, surfaced and dressed from one description
 

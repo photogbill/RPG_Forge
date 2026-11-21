@@ -301,8 +301,8 @@ in shipped art) · `housekeeping.bat` (what in `out\` could be archived; deletes
   dressing). Compiling never starts generation; new world-list entries arrive held.
 - **Approving:** *Approve everything here* on 3D → World list and Art → Review & approve, with an **Undo** for each
   thing. *Deliver* copies the .glb, its motion sheet and provenance into the game and records it in `delivered.json`.
-- **Focus:** `focus_linden_mills.bat`-style focus holds everything except one place so the art finishes one area first;
-  `resume_all_art.bat` releases exactly what the focus held.
+- **Focus:** `python -m forge.focus <place>` (or the connector's `focus.set`) holds everything except one place, so
+  the art finishes one area first. `resume_all_art.bat` releases exactly what the focus held.
 
 Details: `docs/TREES.md`, `docs/TERRAIN.md`, `docs/DRESSING_KINDS.md`, `docs/EDITING_MODELS.md`, `docs/APPROVALS.md`,
 `docs/AROUND_THE_CLOCK.md`.
@@ -518,8 +518,8 @@ Or ask Claude to do all three. The registry and plug-ins are written to be exten
 
 ## Everyday .bat files
 
-There are many .bat files; these are the ones you'll actually use. (One-off run scripts for a particular night's work —
-`opera_*`, `trellis_*`, `silo_mission_*` and the like — are kept for record and can be ignored.)
+There are many .bat files; these are the ones you'll actually use. (One-off run scripts for a particular night's work,
+such as the `trellis_*` trials, are kept for record and can be ignored.)
 
 | Setup | Daily | Art & review | Story, music, game |
 |---|---|---|---|
@@ -559,8 +559,15 @@ The suite's tests run on Windows, macOS and Linux at every push:
 ## Pushing changes (git)
 
 **`push.bat`** commits and pushes. Whoever changed the files (a person, a script, Claude) writes what changed in
-`COMMIT_MESSAGE.txt` at the repository root; `push.bat` uses it, records it in `CHANGELOG.md`, and otherwise asks you for
-one line. Model collections, outputs, logs, the queue state, `local\` and every game's own folder are git-ignored — a push
+`COMMIT_MESSAGE.txt` at the repository root. `push.bat` uses it and records it in `CHANGELOG.md`; with no file, it asks
+you for one line.
+
+**Commit messages never name a game.** RPG_Forge is a tool for every game, and its history is public. A message
+describes what changed in the forge (the code, the tools, the docs). The game's own notes stay in the game's folder.
+`push.bat` checks the message first (`forge/commit_check.py`). The words it looks for come from the games on your PC:
+each game's id and folder paths, its adapter's name, places and people, and anything listed in
+`games/<id>/private_words.txt`. If the message names any of them, Notepad opens so you can fix it, and nothing is
+committed until it's clean. Model collections, outputs, logs, the queue state, `local\` and every game's own folder are git-ignored — a push
 never uploads your weights, your photos or your game.
 
 ---

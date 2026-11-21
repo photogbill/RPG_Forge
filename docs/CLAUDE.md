@@ -50,6 +50,16 @@ it rather than overwrite it — **and rewrite its first line so the title covers
 uses the first line as the commit title; on 2026-11-10 Night 3, 3B and the sprite run were all pushed under the old
 title "Krea 2 cut…", which made `git log --oneline` look as if they had never been committed).
 
+**A commit message never names a game** (William, 2026-11-21: "RPG Forge is a tool to help make games, not the game
+itself"). The forge's history is public and other people's games will use it. Write what changed in the *forge*: code,
+tools, docs, behaviour. Don't name the game, its places, its people or its story, and don't name `games/<id>/` or
+`local/<id>/` files. Work that only touched a game's own folder ("no forge code changed") gets **no** entry at all;
+note it with the game, e.g. in the game's own build notes. Tell the forge change through a generic example ("a
+town's street", "a character's third variant"). `push.bat` runs `forge/commit_check.py` on the message and stops if a
+game's id, adapter name, places, people or `games/<id>/private_words.txt` words appear. Run
+`python -m forge.commit_check COMMIT_MESSAGE.txt` yourself before handing over. The same goes for anything else the
+forge pushes (README, docs, templates, code defaults): a game's own names belong in `games/<id>/`.
+
 ## Running a bake-off (choosing models)
 
 The person's model collection is in the folders listed by `forge.json → model_dirs`. Before proposing a
@@ -523,7 +533,7 @@ leaves a generated report out), and rulings written straight in (`<game_root>/ru
   gives Blender 5.3 as a module in the session's container).
 - **Not yet (the game's half, next sessions):** the stage map kind in `project\` (the proof's loader, saves, cues,
   dialogue, fights), the one camera, doors that open (plan-built: roof and near walls give way; shells: question 1),
-  dust, people at real size, Linden Mills court's place plan, 3D → Places, the frame rate.
+  dust, people at real size, the first place plan, 3D → Places, the frame rate.
 
 ## What the third run taught (BUILD 73, 2026-11-17) — the face not the hair, matched not held, capes, cut-outs
 

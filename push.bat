@@ -8,6 +8,8 @@ rem  Message: COMMIT_MESSAGE.txt if present (written by whoever changed the file
 rem  else the first argument, else you are asked for one line. The message is
 rem  appended to CHANGELOG.md in the same commit; the inbox file is git-ignored
 rem  and removed after a successful push.
+rem  The message may not name a game (forge\commit_check.py): RPG_Forge is a tool
+rem  for every game, and its history is public. If it does, Notepad opens on it.
 rem ============================================================================
 where git >nul 2>nul
 if errorlevel 1 goto nogit
@@ -20,16 +22,35 @@ echo.
 set "MSGFILE=COMMIT_MESSAGE.txt"
 set "USEFILE="
 set "MSG=%~1"
-if not "%MSG%"=="" goto commit
+if not "%MSG%"=="" goto checktyped
 if not exist "%MSGFILE%" goto ask
 for %%A in ("%MSGFILE%") do if %%~zA GTR 0 set "USEFILE=1"
 if defined USEFILE goto fromfile
 :ask
 set /p "MSG=Commit message (Enter = 'update'): "
 if "!MSG!"=="" set "MSG=update"
-goto commit
+goto checktyped
+
+:checktyped
+if not exist venv\Scripts\python.exe goto commit
+>"%TEMP%\rpgforge_msg.txt" echo !MSG!
+venv\Scripts\python.exe -m forge.commit_check "%TEMP%\rpgforge_msg.txt"
+if not errorlevel 1 goto commit
+echo.
+set "MSG="
+goto ask
 
 :fromfile
+if not exist venv\Scripts\python.exe goto fileok
+venv\Scripts\python.exe -m forge.commit_check "%MSGFILE%"
+if not errorlevel 1 goto fileok
+echo.
+echo Notepad opens with the message. Take those names out ^(say what changed in the forge^), save, close Notepad.
+echo Nothing has been committed. To stop instead, close this window.
+pause
+start "" /wait notepad "%MSGFILE%"
+goto fromfile
+:fileok
 echo -- committing with %MSGFILE%:
 type "%MSGFILE%"
 echo.
