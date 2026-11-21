@@ -42,7 +42,7 @@ If your tools include `forge_status`, `forge_call` and the rest (the rpg-forge c
 
 You cannot push (git credentials live on the person's machine). Whenever you change files in the repo,
 write **`COMMIT_MESSAGE.txt`** at the repo root — a one-line title, a blank line, then what changed and
-why, ending with your `Co-Authored-By` line — and tell the person to run `push.bat`. The script commits
+why (no `Co-Authored-By` or session lines — see below) — and tell the person to run `push.bat`. The script commits
 with that file as the message, pushes, appends it to `CHANGELOG.md` and keeps it as
 `COMMIT_MESSAGE.last.txt`, so the next session can read what the last push said. If a
 `COMMIT_MESSAGE.txt` already exists when you start, the last change has not been pushed yet: append to
@@ -50,15 +50,18 @@ it rather than overwrite it — **and rewrite its first line so the title covers
 uses the first line as the commit title; on 2026-11-10 Night 3, 3B and the sprite run were all pushed under the old
 title "Krea 2 cut…", which made `git log --oneline` look as if they had never been committed).
 
-**A commit message never names a game** (William, 2026-11-21: "RPG Forge is a tool to help make games, not the game
-itself"). The forge's history is public and other people's games will use it. Write what changed in the *forge*: code,
-tools, docs, behaviour. Don't name the game, its places, its people or its story, and don't name `games/<id>/` or
-`local/<id>/` files. Work that only touched a game's own folder ("no forge code changed") gets **no** entry at all;
-note it with the game, e.g. in the game's own build notes. Tell the forge change through a generic example ("a
-town's street", "a character's third variant"). `push.bat` runs `forge/commit_check.py` on the message and stops if a
-game's id, adapter name, places, people or `games/<id>/private_words.txt` words appear. Run
-`python -m forge.commit_check COMMIT_MESSAGE.txt` yourself before handing over. The same goes for anything else the
-forge pushes (README, docs, templates, code defaults): a game's own names belong in `games/<id>/`.
+**A commit message says only what the forge can do.** The forge's history is public, and other people's games
+will use it. So a message never names:
+- **a game**: its title, places, people or story, or `games/<id>/` and `local/<id>/` files;
+- **a person**: not the owner, not who asked, not who wrote it. No assistant names, no quotes, no "X asked for…", no
+  `Co-Authored-By` or `Claude-Session` lines.
+
+Write what changed in the forge (code, tools, docs, behaviour), telling it through a generic example ("a town's street",
+"a character's third variant", "an assistant may approve with the person's concurrence"). Work that only touched a game's
+own folder gets **no** forge entry; note it with the game instead. `push.bat` runs `forge/commit_check.py` on the message
+and stops if it finds a game's names, the owner's or this PC's identity, git's name or email, the GitHub account,
+`local/private_words.txt` or the assistant names. Run `python -m forge.commit_check COMMIT_MESSAGE.txt` yourself before
+handing over. The same goes for anything else the forge pushes (README, docs, templates, code defaults).
 
 ## Running a bake-off (choosing models)
 

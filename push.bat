@@ -8,7 +8,7 @@ rem  Message: COMMIT_MESSAGE.txt if present (written by whoever changed the file
 rem  else the first argument, else you are asked for one line. The message is
 rem  appended to CHANGELOG.md in the same commit; the inbox file is git-ignored
 rem  and removed after a successful push.
-rem  The message may not name a game (forge\commit_check.py): RPG_Forge is a tool
+rem  The message may not name a game or a person (forge\commit_check.py): RPG_Forge is a tool
 rem  for every game, and its history is public. If it does, Notepad opens on it.
 rem ============================================================================
 where git >nul 2>nul

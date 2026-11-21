@@ -562,12 +562,22 @@ The suite's tests run on Windows, macOS and Linux at every push:
 `COMMIT_MESSAGE.txt` at the repository root. `push.bat` uses it and records it in `CHANGELOG.md`; with no file, it asks
 you for one line.
 
-**Commit messages never name a game.** RPG_Forge is a tool for every game, and its history is public. A message
-describes what changed in the forge (the code, the tools, the docs). The game's own notes stay in the game's folder.
-`push.bat` checks the message first (`forge/commit_check.py`). The words it looks for come from the games on your PC:
-each game's id and folder paths, its adapter's name, places and people, and anything listed in
-`games/<id>/private_words.txt`. If the message names any of them, Notepad opens so you can fix it, and nothing is
-committed until it's clean. Model collections, outputs, logs, the queue state, `local\` and every game's own folder are git-ignored — a push
+**Commit messages say only what the forge can do.** RPG_Forge is a tool for every game, and its history is public.
+So a message never names a game, and never names a person: not the author, not who asked, no quotes, no
+`Co-Authored-By` lines. The game's own notes stay in the game's folder.
+
+`push.bat` checks the message first (`forge/commit_check.py`). The words it looks for come from your PC:
+- each game's id, folder paths, adapter name, places and people, and `games/<id>/private_words.txt`;
+- the owner and identity, git's name and email, the GitHub account, the assistant names, and
+  `local/private_words.txt` (your personal words; never pushed).
+
+If the message names any of them, Notepad opens so you can fix it, and nothing is committed until it's clean.
+`python -m forge.commit_check --words` lists every word it looks for. A line `!word` in a private-words file lets a
+false alarm through.
+
+**Keep your email private.** Git puts the committer's email on every commit. In GitHub → Settings → Emails, turn on
+*Keep my email addresses private*, then set the address GitHub shows (`<id>+<name>@users.noreply.github.com`) with
+`git config user.email "<that address>"` in this folder. Model collections, outputs, logs, the queue state, `local\` and every game's own folder are git-ignored — a push
 never uploads your weights, your photos or your game.
 
 ---
